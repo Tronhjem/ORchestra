@@ -148,6 +148,11 @@ void Compiler::MakeOperation(TokenType tokenType, std::vector<Instruction> &inst
             break;
         case TokenType::EQUAL_EQUAL:
             code = OpCode::EQUAL;
+            break;
+        case TokenType::BANG_EQUAL:
+            code = OpCode::NOT_EQUAL;
+            break;
+
         default:
             break;
     }
@@ -376,7 +381,8 @@ bool Compiler::CompileExpression(std::vector<Instruction>& instructions)
             t == TokenType::GREATER_EQUAL ||
             t == TokenType::LESS ||
             t == TokenType::LESS_EQUAL ||
-            t == TokenType::EQUAL_EQUAL;
+            t == TokenType::EQUAL_EQUAL ||
+            t == TokenType::BANG_EQUAL;
     };
     
     auto precedence = [&](const TokenType t) -> int

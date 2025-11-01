@@ -12,6 +12,7 @@ enum class TokenType
     LEFT_BRACKET,
     RIGHT_BRACKET,
     COMMA,
+    BANG,
     
     // MATH
     DOT,

@@ -1,5 +1,6 @@
 #include "MidiScheduler.h"
 #include <algorithm>
+using juce::MidiMessage;
 
 #define CLAMP_TO_UCHAR(x, min, max) \
     static_cast<unsigned char>(std::clamp(static_cast<int>(x), min, max))
@@ -38,14 +39,26 @@ void MidiScheduler::ProcessMidiPosts(juce::MidiBuffer& midiMessages,
             switch (message.mMessageType)
             {
                 case MidiType::NoteOn:
+                {
                     midiMessages.addEvent(juce::MidiMessage::noteOn(message.mChannel, message.mFirstByte, message.mSecondByte), relativePositionInBuffer);
+                    
                     break;
+                }
+
                 case MidiType::NoteOff:
+                {
                     midiMessages.addEvent(juce::MidiMessage::noteOff(message.mChannel, message.mFirstByte, message.mSecondByte), relativePositionInBuffer);
+                    
                     break;
+                }
+
                 case MidiType::CC:
+                {
                     midiMessages.addEvent(juce::MidiMessage::controllerEvent(message.mChannel, message.mFirstByte, message.mSecondByte), relativePositionInBuffer);
+                    
                     break;
+                }
+                    
                 default:
                     break;
             }

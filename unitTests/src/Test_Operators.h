@@ -341,5 +341,27 @@ public:
             StepData result = vm.GetTopStackValue();
             expect (result.GetValue(0) == 0);
         }
+        {
+            beginTest ("Test != operator with 1 and 0");
+            
+            // Global index when not running is 0
+            std::string file {"a = 1 != 0 \n test a"};
+            VM vm;
+            expect(vm.Prepare(&file[0]));
+            
+            StepData result = vm.GetTopStackValue();
+            expect (result.GetValue(0) == 1);
+        }
+        {
+            beginTest ("Test != operator with 1 and 1");
+            
+            // Global index when not running is 0
+            std::string file {"a = 1 != 1 \n test a"};
+            VM vm;
+            expect(vm.Prepare(&file[0]));
+            
+            StepData result = vm.GetTopStackValue();
+            expect (result.GetValue(0) == 0);
+        }
     }
 };

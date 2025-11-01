@@ -28,6 +28,7 @@ enum class OpCode : uChar
     LESS,
     LESS_EQUAL,
     EQUAL,
+    NOT_EQUAL,
 
     // Specific
     // TRACK,

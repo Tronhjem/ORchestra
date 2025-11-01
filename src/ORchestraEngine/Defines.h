@@ -9,6 +9,7 @@ const auto GreaterEqual = OPERATION_LAMBDA(>=);
 const auto Lesser = OPERATION_LAMBDA(<);
 const auto LesserEqual = OPERATION_LAMBDA(<=);
 const auto Equal = OPERATION_LAMBDA(==);
+const auto NotEqual = OPERATION_LAMBDA(!=);
 
 const auto BinaryAND = OPERATION_BINARY_LAMBDA(&);
 const auto BinaryOR = OPERATION_BINARY_LAMBDA(|);

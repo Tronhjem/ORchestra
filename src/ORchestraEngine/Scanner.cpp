@@ -136,6 +136,8 @@ Token Scanner::ScanToken()
         case ',':
             return MakeToken(TokenType::COMMA);
             
+        case '!':
+            return MakeToken(Match('=') ? TokenType::BANG_EQUAL : TokenType::BANG);
         case '=':
             return MakeToken(Match('=') ? TokenType::EQUAL_EQUAL : TokenType::EQUAL);
         case '<':

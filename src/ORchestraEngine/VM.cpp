@@ -335,6 +335,12 @@ bool VM::ProcessInstruction(const Instruction& instruction, const int stepCount)
             break;
         }
             
+        case(OpCode::NOT_EQUAL):
+        {
+            PopDoOperationAndPush(NotEqual);
+            break;
+        }
+
         case(OpCode::GET_RANDOM_IN_RANGE):
         {
             const uChar high = mStack.Pop().GetValue(0);
