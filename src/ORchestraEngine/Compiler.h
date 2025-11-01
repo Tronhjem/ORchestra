@@ -29,6 +29,7 @@ private:
     
     inline bool MakeIdentifierGetter(Token& token, std::vector<Instruction>& instructions);
     inline void MakeConstant(Token& token, std::vector<Instruction>& instructions);
+    bool MakeNoteIntoConstant(Token& token, std::vector<Instruction>& instructions);
     inline void MakeOperation(TokenType tokenType, std::vector<Instruction>& instructions);
 
     bool CompileExpression(std::vector<Instruction>& instructions);

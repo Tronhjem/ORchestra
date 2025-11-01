@@ -67,6 +67,8 @@
             file="src/test_LogicSequence.h"/>
       <FILE id="jOiBoc" name="test_LogicSequenceCombiner.h" compile="0" resource="0"
             file="src/test_LogicSequenceCombiner.h"/>
+      <FILE id="OsbQKA" name="Test_NoteNumbers.h" compile="0" resource="0"
+            file="src/Test_NoteNumbers.h"/>
       <FILE id="fTAjsE" name="Test_Operators.h" compile="0" resource="0"
             file="src/Test_Operators.h"/>
     </GROUP>

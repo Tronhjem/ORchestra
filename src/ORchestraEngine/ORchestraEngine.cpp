@@ -72,7 +72,7 @@ void ORchestraEngine::PreProcessSteps()
         return;
     
     const int readySteps = mReadySteps.load();
-    const int stepsToProcess = STEP_BUFFER_SIZE - 1 - readySteps; // leave the last step unprocessed.
+    const int stepsToProcess = STEP_BUFFER_SIZE - 2 - readySteps; // leave the last step unprocessed.
     
     if(stepsToProcess < HALF_STEP_BUFFER_SIZE)
         return;
