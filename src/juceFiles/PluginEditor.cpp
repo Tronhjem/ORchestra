@@ -23,7 +23,6 @@ constexpr int buttonHeight = 20;
 constexpr int codeEditorWidth = 400;
 constexpr int codeEditorHeight = 300;
 
-
 //==============================================================================
 ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor (ORchestraAudioProcessor& p)
     : AudioProcessorEditor (&p), audioProcessor (p)

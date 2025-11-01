@@ -1,20 +1,14 @@
 #pragma once
 #include "Types.h"
 
-enum class StepType : uChar
-{
-    NOTE = 0,
-    CC = 1
-};
-
 class SequenceStep
 {
 public:
-    SequenceStep(StepType type, StepData shouldTrigger, const StepData firstData, const StepData secondData, const StepData channel, const int duration) :
+    SequenceStep(MidiType type, StepData shouldTrigger, const StepData firstData, const StepData secondData, const StepData channel, const int duration) :
         mType(type),
         mShouldTrigger(shouldTrigger),
-        mFirstData(firstData),
-        mSecondData(secondData),
+        mFirst(firstData),
+        mSecond(secondData),
         mChannel(channel),
         mDuration(duration)
     {
@@ -22,10 +16,10 @@ public:
     
     ~SequenceStep() {}
     
-    StepType mType;
+    MidiType mType;
     StepData mShouldTrigger;
-    StepData mFirstData;
-    StepData mSecondData;
+    StepData mFirst;
+    StepData mSecond;
     StepData mChannel;
     int mDuration;
     

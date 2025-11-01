@@ -72,7 +72,7 @@ bool VM::ProcessOpCodes(std::vector<Instruction>& instructions)
             {
                 const int arrayLength = std::clamp(static_cast<int>(mStack.Pop().GetValue(0)), 0, 32);
                 StepData data[32];
-                for (int i = arrayLength - 1; i >=0; --i)
+                for (int i = arrayLength - 1; i >= 0; --i)
                 {
                     data[i] = mStack.Pop();
                 }
@@ -120,7 +120,7 @@ bool VM::Tick(std::vector<SequenceStep>& stepQueue, const int globalCount)
                 const StepData note = mStack.Pop();
                 const StepData shouldTrigger = mStack.Pop();
                 
-                stepQueue.emplace_back(SequenceStep{StepType::NOTE, shouldTrigger, note, vel, channel, DEFAULT_NOTE_DURATION});
+                stepQueue.emplace_back(SequenceStep{MidiType::NoteOn, shouldTrigger, note, vel, channel, DEFAULT_NOTE_DURATION});
                 
                 break;
             }
@@ -132,7 +132,7 @@ bool VM::Tick(std::vector<SequenceStep>& stepQueue, const int globalCount)
                 const StepData ccNumber = mStack.Pop();
                 const StepData shouldTrigger = mStack.Pop();
                 
-                stepQueue.emplace_back(SequenceStep{StepType::CC, shouldTrigger, ccNumber, ccValue, channel, DEFAULT_NOTE_DURATION});
+                stepQueue.emplace_back(SequenceStep{MidiType::CC, shouldTrigger, ccNumber, ccValue, channel, DEFAULT_NOTE_DURATION});
                 
                 break;
             }

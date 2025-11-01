@@ -120,7 +120,7 @@ void ORchestraEngine::Tick(const TransportData& transportData,
         if (stepDifference > 1 || stepDifference < 0)
         {
             mReadySteps.store(1, std::memory_order_release);
-            // should it be 1 or 0?
+            // TODO: should it be 1 or 0?
             // Do we want to move it entirely down to 0 or still keep the current step we might trigger?
         }
         
@@ -138,27 +138,24 @@ void ORchestraEngine::Tick(const TransportData& transportData,
             for(const SequenceStep& step : currentData)
             {
                 const int triggerLength = static_cast<int>(step.mShouldTrigger.GetLength());
+                
                 for(int i = 0; i < triggerLength; ++i)
                 {
                     const uChar shouldTrigger = step.mShouldTrigger.GetValue(i);
+                    
                     if(!shouldTrigger)
                         continue;
                     
-                    const int timeStamp = nextStepInSamples + i * (samplesPerStep / triggerLength);
+                    const uChar firstByte = step.mFirst.GetEquivalentValueAtIndex(i, triggerLength);
+                    const uChar secondByte = step.mSecond.GetEquivalentValueAtIndex(i, triggerLength);
                     const uChar channel = step.mChannel.GetEquivalentValueAtIndex(i, triggerLength);
+                    const int timeStamp = nextStepInSamples + i * (samplesPerStep / triggerLength);
+
+                    // TODO: Change to use step.mDuration
+                    ScheduledMidiMessage message {step.mType, firstByte, secondByte, channel, timeStamp, transportData.noteLengthInSamples};
+//                    ScheduledMidiMessage message {step.mType, firstByte, secondByte, channel, timeStamp, step.mDuration};
                     
-                    if(step.mType == StepType::NOTE)
-                    {
-                        const uChar noteNumber = step.mFirstData.GetEquivalentValueAtIndex(i, triggerLength);
-                        const uChar velocity = step.mSecondData.GetEquivalentValueAtIndex(i, triggerLength);
-                        mMidiScheduler.PostMidiNote(channel, noteNumber, velocity, step.mDuration, timeStamp);
-                    }
-                    else if(step.mType == StepType::CC)
-                    {
-                        const uChar ccNumber = step.mFirstData.GetEquivalentValueAtIndex(i, triggerLength);
-                        const uChar ccValue = step.mSecondData.GetEquivalentValueAtIndex(i, triggerLength);
-                        mMidiScheduler.PostMidiCC(channel, ccNumber, ccValue, timeStamp);
-                    }
+                    mMidiScheduler.PostMidi(message);
                 }
             }
             

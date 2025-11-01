@@ -6,30 +6,24 @@
 #include "Types.h"
 #include "StepData.h"
 
-enum class MidiType : uChar
+struct ScheduledMidiMessage
 {
-    Note = 0,
-    CC = 1
-};
-
-struct ScheduledMidi
-{
-    juce::MidiMessage midiData;
-    int schuledTime;
+    MidiType mMessageType;
+    uChar mFirstByte;
+    uChar mSecondByte;
+    uChar mChannel;
+    int mScheduledTime;
+    int mDuration;
 };
 
 class MidiScheduler
 {
 public:
     MidiScheduler();
-    
-    void PostMidiNote(const uChar channel, const uChar noteNumber, const uChar velocity, const int durationInSamples, const int timeStamp);
-    void PostMidiCC(const uChar channel, const uChar cc, const uChar value, const int timeStamp);
-    void PostStepData(const SequenceStep& data, const int nextTickTime, const int currentNoteLength);
-    void PostStepData(const SequenceStep& data, const int nextTickTime);
-    void ProcessMidiPosts(juce::MidiBuffer& midiMessages, int bufferLength, int64_t endOfBufferPosition);
+    void PostMidi(ScheduledMidiMessage& message);
+    void ProcessMidiPosts(juce::MidiBuffer& midiMessages, const int bufferLength, const int64_t endOfBufferPosition);
     void ClearAllData(juce::MidiBuffer& midiMessages);
     
 private:
-    std::vector<ScheduledMidi> mScheduledMidiMessages;
+    std::vector<ScheduledMidiMessage> mScheduledMidiMessages;
 };

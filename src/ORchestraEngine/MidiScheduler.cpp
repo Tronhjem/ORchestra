@@ -1,95 +1,68 @@
 #include "MidiScheduler.h"
 #include <algorithm>
 
+#define CLAMP_TO_UCHAR(x, min, max) \
+    static_cast<unsigned char>(std::clamp(static_cast<int>(x), min, max))
+
 MidiScheduler::MidiScheduler()
 {
 }
 
-void MidiScheduler::PostMidiNote(const uChar channel,
-                                 const uChar noteNumber,
-                                 const uChar velocity,
-                                 const int durationInSamples,
-                                 const int timeStamp)
+void MidiScheduler::PostMidi(ScheduledMidiMessage& message)
 {
-    const int timeStampOff = timeStamp + durationInSamples;
-    const int clampedChannel = std::clamp(static_cast<int>(channel), 0, 16);
-    const int clampedNote = std::clamp(static_cast<int>(noteNumber), 0, 127);
-    const unsigned char clampedVelocity = static_cast<unsigned char>(std::clamp(static_cast<int>(velocity), 0, 127));
-
-    mScheduledMidiMessages.emplace_back(ScheduledMidi{juce::MidiMessage::noteOn(clampedChannel, clampedNote, clampedVelocity), timeStamp});
-    mScheduledMidiMessages.emplace_back(ScheduledMidi{juce::MidiMessage::noteOff(clampedChannel, clampedNote), timeStampOff});
-}
-
-void MidiScheduler::PostMidiCC(const uChar channel,
-                               const uChar cc,
-                               const uChar value,
-                               const int timeStamp)
-{
-    const int clampedChannel = std::clamp(static_cast<int>(channel), 0, 16);
-    const int clampedCC = std::clamp(static_cast<int>(cc), 0, 127);
-    const unsigned char clampedValue = static_cast<unsigned char>(std::clamp(static_cast<int>(value), 0, 127));
-
-    mScheduledMidiMessages.emplace_back(ScheduledMidi{juce::MidiMessage::controllerEvent(clampedChannel, clampedCC, clampedValue), timeStamp});
-}
-
-void MidiScheduler::PostStepData(const SequenceStep& data, const int nextTickTime, const int currentNoteLength)
-{
-    if (data.mShouldTrigger.GetValue(0) < 1)
-        return;
+    message.mFirstByte = CLAMP_TO_UCHAR(message.mFirstByte, 0, 127);
+    message.mSecondByte = CLAMP_TO_UCHAR(message.mSecondByte, 0, 127);
+    message.mChannel = CLAMP_TO_UCHAR(message.mChannel, 0, 16);
+    mScheduledMidiMessages.emplace_back(message);
     
-    if(data.mType == StepType::NOTE)
+    if(message.mMessageType == MidiType::NoteOn)
     {
-        PostMidiNote(data.mChannel.GetValue(0), data.mFirstData.GetValue(0), data.mSecondData.GetValue(0), currentNoteLength, nextTickTime);
-    }
-    else if(data.mType == StepType::CC)
-    {
-        PostMidiCC(data.mChannel.GetValue(0), data.mFirstData.GetValue(0), data.mSecondData.GetValue(0), nextTickTime);
-    }
-}
-
-void MidiScheduler::PostStepData(const SequenceStep& data, const int nextTickTime)
-{
-    if (data.mShouldTrigger.GetValue(0) < 1)
-        return;
-    
-    if(data.mType == StepType::NOTE)
-    {
-        PostMidiNote(data.mChannel.GetValue(0), data.mFirstData.GetValue(0), data.mSecondData.GetValue(0), data.mDuration, nextTickTime);
-    }
-    else if(data.mType == StepType::CC)
-    {
-        PostMidiCC(data.mChannel.GetValue(0), data.mFirstData.GetValue(0), data.mSecondData.GetValue(0), nextTickTime);
+        const int timeStampOff = message.mScheduledTime + message.mDuration;
+        ScheduledMidiMessage messageOff  {MidiType::NoteOff, message.mFirstByte, 0, message.mChannel, timeStampOff, 0};
+        mScheduledMidiMessages.emplace_back(messageOff);
     }
 }
 
 void MidiScheduler::ProcessMidiPosts(juce::MidiBuffer& midiMessages,
-                                     int bufferLength,
-                                     int64_t endOfBufferPosition)
+                                     const int bufferLength,
+                                     const int64_t endOfBufferPosition)
 {
     for(int i = (int)mScheduledMidiMessages.size() - 1; i >= 0; --i)
     {
-        const ScheduledMidi& message = mScheduledMidiMessages[i];
-        if (message.schuledTime <= endOfBufferPosition)
+        const ScheduledMidiMessage& message = mScheduledMidiMessages[i];
+
+        if (message.mScheduledTime <= endOfBufferPosition)
         {
-            const int relativePositionInBuffer = static_cast<int>(message.schuledTime - (endOfBufferPosition - bufferLength));
-            midiMessages.addEvent(message.midiData, relativePositionInBuffer);
+            const int relativePositionInBuffer = static_cast<int>(message.mScheduledTime - (endOfBufferPosition - bufferLength));
             
-            mScheduledMidiMessages.erase(mScheduledMidiMessages.begin() + i);
+            switch (message.mMessageType)
+            {
+                case MidiType::NoteOn:
+                    midiMessages.addEvent(juce::MidiMessage::noteOn(message.mChannel, message.mFirstByte, message.mSecondByte), relativePositionInBuffer);
+                    break;
+                case MidiType::NoteOff:
+                    midiMessages.addEvent(juce::MidiMessage::noteOff(message.mChannel, message.mFirstByte, message.mSecondByte), relativePositionInBuffer);
+                    break;
+                case MidiType::CC:
+                    midiMessages.addEvent(juce::MidiMessage::controllerEvent(message.mChannel, message.mFirstByte, message.mSecondByte), relativePositionInBuffer);
+                    break;
+                default:
+                    break;
+            }
+
+            mScheduledMidiMessages[i] = mScheduledMidiMessages.back();
+            mScheduledMidiMessages.pop_back();
         }
     }
 }
 
 void MidiScheduler::ClearAllData(juce::MidiBuffer& midiMessages)
 {
-    for(int i = (int)mScheduledMidiMessages.size() - 1; i >= 0; --i)
+    for(const ScheduledMidiMessage& message : mScheduledMidiMessages)
     {
-        const ScheduledMidi& message = mScheduledMidiMessages[i];
-        if (message.midiData.isNoteOff())
-            midiMessages.addEvent(message.midiData, 0);
-        if (message.midiData.isNoteOn())
-            midiMessages.addEvent(juce::MidiMessage::noteOff(message.midiData.getChannel(),
-                                                             message.midiData.getNoteNumber()), 0);
-        
-        mScheduledMidiMessages.erase(mScheduledMidiMessages.begin() + i);
+        if (message.mMessageType == MidiType::NoteOn || message.mMessageType == MidiType::NoteOff)
+            midiMessages.addEvent(juce::MidiMessage::noteOff(message.mChannel, message.mFirstByte, static_cast<uint8_t>(0)), 0);
     }
+
+    mScheduledMidiMessages.clear();
 }
