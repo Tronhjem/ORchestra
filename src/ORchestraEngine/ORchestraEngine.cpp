@@ -61,7 +61,8 @@ void ORchestraEngine::WorkerThreadLoop()
     while (!shouldExit.load())
     {
         PreProcessSteps();
-        std::this_thread::sleep_for(std::chrono::milliseconds(20));
+        // TODO: Do math for sleep based on BPM
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
 }
 
@@ -78,20 +79,22 @@ void ORchestraEngine::PreProcessSteps()
     
     ScopedTimer timer {"PreProcess"};
     
-    int currentGlobalStep = mCurrentGlobalStep.load();
-    for(int i = 0; i < stepsToProcess; ++i)
+    //TODO: Make sure this doesn't skip a beat
+    const int globalStep = mCurrentGlobalStep.load() + readySteps;
+    const int endGlobalStep = stepsToProcess + globalStep;
+    for (int i = globalStep; i < endGlobalStep; ++i)
     {
-        const int step = currentGlobalStep + readySteps + i;
-        const int stepWrapped = step % STEP_BUFFER_SIZE;
+        const int stepWrapped = i % STEP_BUFFER_SIZE;
         // tick needs global step and StepData needs it wrapped for ring buffer.
         
         std::vector<SequenceStep>& currentData = mStepRingBuffer[stepWrapped];
         currentData.clear();
         
-        mVM->Tick(currentData, step);
-        
-        mReadySteps.fetch_add(1, std::memory_order_acq_rel);
+        mVM->Tick(currentData, i);
+        std::cout << i << " " << (int)currentData[0].mFirst.GetValue(0) << std::endl;
     }
+    
+    mReadySteps.fetch_add(stepsToProcess, std::memory_order_acq_rel);
 }
 
 char* ORchestraEngine::GetLoadedFileData()
@@ -134,6 +137,8 @@ void ORchestraEngine::Tick(const TransportData& transportData,
             samplesSinceLastStep = transportData.timeInSamples;
             const int wrappedGlobalStep = currentStep % STEP_BUFFER_SIZE;
             const std::vector<SequenceStep>& currentData = mStepRingBuffer[wrappedGlobalStep];
+            
+            std::cout << "play: " << currentStep << " " << (int)currentData[0].mFirst.GetValue(0) << std::endl;
             
             for(const SequenceStep& step : currentData)
             {
