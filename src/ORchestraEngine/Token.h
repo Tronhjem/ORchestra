@@ -44,6 +44,7 @@ enum class TokenType
     RANDOM,
     EUCLIDEAN,
     ERROR,
+    NOTE_IDENTIFIER,
     
     // Specific
     //TRACK,

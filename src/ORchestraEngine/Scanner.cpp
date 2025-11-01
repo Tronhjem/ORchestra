@@ -157,14 +157,6 @@ Token Scanner::ScanToken()
             
         default:
             return MakeErrorToken(ERROR_UNEXPECTED_CHAR, c);
-            
-        // UNUSED
-//        case ';':
-//            return MakeToken(TokenType::SEMICOLON);
-//        case '!':
-//            return MakeToken(Match('=') ? TokenType::BANG_EQUAL : TokenType::BANG);
-//        case '"':
-//            return BuildString();
     }
 }
 
@@ -256,6 +248,17 @@ TokenType Scanner::IdentifierToken()
     case 'c':
         return checkKeyword(1, 1, "c", TokenType::CC);
             
+    case 'C':
+    case 'D':
+    case 'E':
+    case 'F':
+    case 'G':
+    case 'A':
+    case 'B':
+    {
+        return TokenType::NOTE_IDENTIFIER;
+    }
+
     default:
         return TokenType::IDENTIFIER;
             
@@ -284,7 +287,8 @@ TokenType Scanner::IdentifierToken()
 
 Token Scanner::BuildIdentifier()
 {
-    while (IsAlpha(PeekCurrent()) || IsDigit(PeekCurrent()))
+    char c = PeekCurrent();
+    while (IsAlpha(PeekCurrent()) || IsDigit(PeekCurrent()) || PeekCurrent() == '#')
         AdvanceCurrent();
 
     return MakeToken(IdentifierToken());

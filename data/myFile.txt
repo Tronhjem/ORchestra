@@ -1,4 +1,5 @@
 
-a = [1,92,0]
-trig = a != 1
-note(trig, 64, ran(90,120), 1)
+a = [34,50,90]
+vel = [90,100,100]
+trig = a
+note(trig, a, vel, 1)

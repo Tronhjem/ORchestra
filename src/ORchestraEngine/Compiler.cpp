@@ -108,6 +108,83 @@ void Compiler::MakeConstant(Token& token, std::vector<Instruction>& instructions
     instructions.emplace_back(Instruction{OpCode::CONSTANT, static_cast<StepData>(value)});
 }
 
+bool Compiler::MakeNoteIntoConstant(Token& token, std::vector<Instruction>& instructions)
+{
+    auto noteToValue = [](char letter) -> uChar
+    {
+        switch(letter)
+        {
+            case 'C':
+                return 12;
+            case 'D':
+                return 14;
+            case 'E':
+                return 16;
+            case 'F':
+                return 17;
+            case 'G':
+                return 19;
+            case 'A':
+                return 21;
+            case 'B':
+                return 23;
+            default:
+                return 255;
+        }
+    };
+    
+    uChar baseNote = noteToValue(*token.mStart);
+    if (baseNote == 255 || token.mLength < 2)
+    {
+        std::string message = std::string("Notes need at least a capital letter for the note name, and an octave from 0-10. Optional is # or b");
+        mErrorReporting.LogError(message);
+        return false;
+    }
+    
+    int octaveIndex = 1;
+    if (token.mStart[1] == '#')
+    {
+        baseNote += 1;
+        octaveIndex = 2;
+    }
+    else if (token.mStart[1] == 'b')
+    {
+        baseNote -= 1;
+        octaveIndex = 2;
+    }
+    
+    int value = -1;
+    std::string numAsString;
+    try
+    {
+        numAsString = std::string(token.mStart + octaveIndex, token.mLength - octaveIndex);
+        value = std::stoi(numAsString) * 12 + baseNote;
+    }
+    catch (std::exception &err)
+    {
+        std::string message = std::string("Note Letters are rerved for notes, couldn't convert this to note: ") + numAsString;
+        mErrorReporting.LogError(message);
+        return false;
+    }
+    
+    if (value > 127)
+    {
+        value = 127;
+        std::string message = std::string("Value can't be greater than 127, correcting to 127");
+        mErrorReporting.LogWarning(message);
+    }
+    if (value < 0)
+    {
+        value = 0;
+        std::string message = std::string("Value can't be smaller than 0, correcting to 0");
+        mErrorReporting.LogWarning(message);
+    }
+    
+    instructions.emplace_back(Instruction{OpCode::CONSTANT, static_cast<StepData>(value)});
+    
+    return true;
+}
+
 void Compiler::MakeOperation(TokenType tokenType, std::vector<Instruction> &instructions)
 {
     OpCode code = OpCode::END;
@@ -240,6 +317,7 @@ bool Compiler::CompileArray(std::vector<Instruction>& instructions,
     }
     
     if(Peek().mTokenType != TokenType::NUMBER &&
+       Peek().mTokenType != TokenType::NOTE_IDENTIFIER &&
        Peek().mTokenType != TokenType::IDENTIFIER &&
        Peek().mTokenType != TokenType::RANDOM &&
        Peek().mTokenType != TokenType::LEFT_BRACKET)
@@ -300,6 +378,7 @@ bool Compiler::CompileArray(std::vector<Instruction>& instructions,
             }
                 
             case TokenType::NUMBER:
+            case TokenType::NOTE_IDENTIFIER:
             case TokenType::IDENTIFIER:
             case TokenType::LEFT_PAREN:
             {
@@ -370,19 +449,19 @@ bool Compiler::CompileExpression(std::vector<Instruction>& instructions)
 {
     auto isOperator = [&](const TokenType t) -> bool
     {
-        return  t == TokenType::PLUS ||
-            t == TokenType::MINUS ||
-            t == TokenType::STAR  ||
-            t == TokenType::SLASH ||
-            t == TokenType::AND   ||
-            t == TokenType::OR    ||
-            t == TokenType::XOR   ||
-            t == TokenType::GREATER ||
-            t == TokenType::GREATER_EQUAL ||
-            t == TokenType::LESS ||
-            t == TokenType::LESS_EQUAL ||
-            t == TokenType::EQUAL_EQUAL ||
-            t == TokenType::BANG_EQUAL;
+        return  t == TokenType::PLUS            ||
+                t == TokenType::MINUS           ||
+                t == TokenType::STAR            ||
+                t == TokenType::SLASH           ||
+                t == TokenType::AND             ||
+                t == TokenType::OR              ||
+                t == TokenType::XOR             ||
+                t == TokenType::GREATER         ||
+                t == TokenType::GREATER_EQUAL   ||
+                t == TokenType::LESS            ||
+                t == TokenType::LESS_EQUAL      ||
+                t == TokenType::EQUAL_EQUAL     ||
+                t == TokenType::BANG_EQUAL;
     };
     
     auto precedence = [&](const TokenType t) -> int
@@ -444,7 +523,23 @@ bool Compiler::CompileExpression(std::vector<Instruction>& instructions)
             MakeConstant(currentToken, instructions);
             expectsValue = false;
         }
-        
+        else if(tType == TokenType::NOTE_IDENTIFIER)
+        {
+            if(!expectsValue)
+            {
+                ThrowUnexpectedTokenError(currentToken);
+                return false;
+            }
+            
+            if(!MakeNoteIntoConstant(currentToken, instructions))
+            {
+                ThrowUnexpectedTokenError(currentToken);
+                return false;
+            }
+            
+            expectsValue = false;
+        }
+
         else if(tType == TokenType::RANDOM)
         {
             CompileFunctionCall(instructions, ranFunctionName);
@@ -587,6 +682,7 @@ bool Compiler::Compile(std::vector<Instruction>& instructions)
                             break;
                         }
                         case TokenType::NUMBER:
+                        case TokenType::NOTE_IDENTIFIER:
                         case TokenType::IDENTIFIER:
                         case TokenType::LEFT_PAREN:
                         case TokenType::RANDOM:
@@ -688,10 +784,10 @@ void Compiler::ThrowMissingExpectedToken(std::string& missingToken)
 
 void Compiler::ThrowMissingParamCount(int expected, int received)
 {
-    std::string message =   std::string("Expected ") +
-                            std::to_string(expected) +
-                            std::string(" but received ") +
-                            std::to_string(received);
+    std::string message = std::string("Expected ") +
+                          std::to_string(expected) +
+                          std::string(" but received ") +
+                          std::to_string(received);
     
     mErrorReporting.LogError(Peek().mLine, message);
 }
