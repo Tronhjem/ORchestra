@@ -7,6 +7,8 @@ ORchestraEngine::ORchestraEngine() :
     mIsVMInit(false)
 {
     mCurrentGlobalStep.store(0, std::memory_order_release);
+    mCurrentProcessingStep.store(0, std::memory_order_release);
+    
     mVM = std::make_unique<VM>();
     mFileLoader = std::make_unique<FileLoader>();
     
@@ -28,6 +30,8 @@ void ORchestraEngine::SaveFile(std::string& data)
     {
         mIsVMInit.store(false, std::memory_order_release);
         mReadySteps.store(0, std::memory_order_release);
+        mCurrentProcessingStep.store(mCurrentGlobalStep.load(), std::memory_order_release);
+        
         mVM->Reset();
         
         mIsVMInit.store(mVM->Prepare(mFileLoader->GetFileStart()));
@@ -61,8 +65,7 @@ void ORchestraEngine::WorkerThreadLoop()
     while (!shouldExit.load())
     {
         PreProcessSteps();
-        // TODO: Do math for sleep based on BPM
-        std::this_thread::sleep_for(std::chrono::milliseconds(20));
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
 }
 
@@ -72,7 +75,7 @@ void ORchestraEngine::PreProcessSteps()
         return;
     
     const int readySteps = mReadySteps.load();
-    const int stepsToProcess = STEP_BUFFER_SIZE - 2 - readySteps; // leave the last step unprocessed.
+    const int stepsToProcess = STEP_BUFFER_SIZE - 1 - readySteps; // leave the last step unprocessed.
     
     if(stepsToProcess < HALF_STEP_BUFFER_SIZE)
         return;
@@ -80,9 +83,9 @@ void ORchestraEngine::PreProcessSteps()
     ScopedTimer timer {"PreProcess"};
     
     //TODO: Make sure this doesn't skip a beat
-    const int globalStep = mCurrentGlobalStep.load() + readySteps;
-    const int endGlobalStep = stepsToProcess + globalStep;
-    for (int i = globalStep; i < endGlobalStep; ++i)
+    const int currentStep = mCurrentProcessingStep.load();
+    const int endGlobalStep = stepsToProcess + currentStep;
+    for (int i = currentStep; i < endGlobalStep; ++i)
     {
         const int stepWrapped = i % STEP_BUFFER_SIZE;
         // tick needs global step and StepData needs it wrapped for ring buffer.
@@ -91,10 +94,10 @@ void ORchestraEngine::PreProcessSteps()
         currentData.clear();
         
         mVM->Tick(currentData, i);
-        std::cout << i << " " << (int)currentData[0].mFirst.GetValue(0) << std::endl;
     }
     
     mReadySteps.fetch_add(stepsToProcess, std::memory_order_acq_rel);
+    mCurrentProcessingStep.fetch_add(stepsToProcess, std::memory_order_acq_rel);
 }
 
 char* ORchestraEngine::GetLoadedFileData()
@@ -122,9 +125,10 @@ void ORchestraEngine::Tick(const TransportData& transportData,
         
         if (stepDifference > 1 || stepDifference < 0)
         {
-            mReadySteps.store(1, std::memory_order_release);
             // TODO: should it be 1 or 0?
             // Do we want to move it entirely down to 0 or still keep the current step we might trigger?
+            mReadySteps.store(1, std::memory_order_release);
+            mCurrentProcessingStep.store(currentStep, std::memory_order_release);
         }
         
         const int nextStepInSamples = static_cast<int>(samplesPerStep * currentStep);
@@ -137,8 +141,6 @@ void ORchestraEngine::Tick(const TransportData& transportData,
             samplesSinceLastStep = transportData.timeInSamples;
             const int wrappedGlobalStep = currentStep % STEP_BUFFER_SIZE;
             const std::vector<SequenceStep>& currentData = mStepRingBuffer[wrappedGlobalStep];
-            
-            std::cout << "play: " << currentStep << " " << (int)currentData[0].mFirst.GetValue(0) << std::endl;
             
             for(const SequenceStep& step : currentData)
             {

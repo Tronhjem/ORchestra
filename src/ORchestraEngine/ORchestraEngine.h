@@ -33,6 +33,7 @@ private:
     int64_t samplesSinceLastStep = 0;
     std::atomic<int> mReadySteps;
     std::atomic<int> mCurrentGlobalStep;
+    std::atomic<int> mCurrentProcessingStep;
     std::atomic<bool> mIsVMInit { false };
     std::atomic<bool> shouldExit { false };
     
