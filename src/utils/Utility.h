@@ -23,27 +23,23 @@ inline float smoothstep(float edge0, float edge1, float x)
     return x * x * (3 - 2 * x);
 }
 
+inline float smootherstep(float edge0, float edge1, float x)
+{
+    x = (x - edge0) / (edge1 - edge0);
+    return x * x * x * (x * (x * 6 - 15) + 10);
+}
+
 inline juce::Colour smoothstepColour(const juce::Colour& a, const juce::Colour& b, float t)
 {
-    // Clamp t to [0, 1]
     t = juce::jlimit(0.0f, 1.0f, t);
-
-    // Apply smoothstep formula
     float s = t * t * (3.0f - 2.0f * t);
 
-    // Interpolate each channel
     float r = juce::jmap(s, a.getFloatRed(),   b.getFloatRed());
     float g = juce::jmap(s, a.getFloatGreen(), b.getFloatGreen());
     float b_ = juce::jmap(s, a.getFloatBlue(),  b.getFloatBlue());
     float a_ = juce::jmap(s, a.getFloatAlpha(), b.getFloatAlpha());
 
     return juce::Colour::fromFloatRGBA(r, g, b_, a_);
-}
-
-inline float smootherstep(float edge0, float edge1, float x)
-{
-    x = (x - edge0) / (edge1 - edge0);
-    return x * x * x * (x * (x * 6 - 15) + 10);
 }
 
 unsigned int WriteArrayToBytes(unsigned int* start, unsigned int length)

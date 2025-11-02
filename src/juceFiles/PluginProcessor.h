@@ -67,8 +67,11 @@ public:
     std::vector<LogEntry>& GetErrors();
     std::array<std::vector<SequenceStep>, STEP_BUFFER_SIZE>& GetStepData() { return mORchestraEngine->GetStepData(); }
     int GetGlobalStepCount() { return mORchestraEngine->GetGlobalStepCount(); }
+    
     char* LoadFile(std::string& filePath);
     void SaveFile(std::string& data);
+    void Compile(std::string& data);
+    
     void SetTempoDivision(NoteDivision division) { mTempoDivision = division; }
     void SetNoteLength(NoteDivision division) { mNoteLength = division; }
     void SetBpm(double bpm) { mBpm = bpm; }

@@ -48,29 +48,26 @@ private:
     std::unique_ptr<ButtonLookAndFeel> mButtonLookAndFeel;
     std::unique_ptr<TextEditorLookAndFeel> mTextEditorLookAndFeel;
     
-    //juce::Label isPlayingLabel;
-    //juce::Label barCountLabel;
-    //juce::Label beatCountLabel;
-    //juce::Label ppqLabel;
-    juce::TextButton togglePlay {"Play"};
-    
-    juce::FileChooser chooser {"Select a file to load...", juce::File{}, "*.txt"};
-    int folderChooserFlags = juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles;
-    
+    juce::TextButton mTogglePlayButton {"Play"};
+    juce::TextButton mLoadFileButton {"Load"};
+    juce::TextButton mSaveFileButton {"Save"};
+    juce::TextButton mCompileButton {"Compile"};
+
     juce::Label mTempoDivLabel{"tempo", "Tempo Division"};
     juce::Label mBpmLabel {"bpm","BPM"};
     juce::Label mNoteLengthLabel {"noteLength", "Note Length"};
     
-    juce::TextButton loadFile {"Load"};
-    juce::TextButton saveFile {"Save"};
     juce::ComboBox mNoteDivisonBox;
     juce::ComboBox mNoteLengthSelector;
     juce::Slider mBpmBox;
     juce::StringArray mNoteDivisions{ "1n", "2n","4n", "8n", "16n", "32n", "64n"};
     
+    juce::FileChooser mFileChooser {"Select a file to load...", juce::File{}, "*.txt"};
+    int mFileChooserFlags = juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles;
+
     Timeline timeline;
-    juce::TextEditor codeEditor;
-    juce::TextEditor errorBox;
+    juce::TextEditor mCodeEditorTextBox;
+    juce::TextEditor mErrorTextBox;
 
 //    juce::CodeDocument codeDocument;
 //       juce::CodeTokeniser tokeniser; // You can subclass this or use CppTokeniser, LuaTokeniser, etc.

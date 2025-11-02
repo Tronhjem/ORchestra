@@ -56,6 +56,11 @@ void ORchestraAudioProcessor::SaveFile(std::string& data)
     mORchestraEngine->SaveFile(data);
 }
 
+void ORchestraAudioProcessor::Compile(std::string &data)
+{
+    mORchestraEngine->Compile(data);
+}
+
 std::vector<LogEntry>& ORchestraAudioProcessor::GetErrors()
 {
     return mORchestraEngine->GetErrors();

@@ -4,22 +4,23 @@
 #include "ScopedTimer.h"
 
 ORchestraEngine::ORchestraEngine() :
-    mIsVMInit(false)
-{
-    mCurrentGlobalStep.store(0, std::memory_order_release);
-    mCurrentProcessingStep.store(0, std::memory_order_release);
+    mIsVMInit(false),
+    mReadySteps(0),
+    mCurrentGlobalStep(0),
+    mCurrentProcessingStep(0)
     
+{
     mVM = std::make_unique<VM>();
     mFileLoader = std::make_unique<FileLoader>();
     
-    workerThread = std::thread([this]() { WorkerThreadLoop(); });
+    mWorkerThread = std::thread([this]() { WorkerThreadLoop(); });
 }
 
 ORchestraEngine::~ORchestraEngine()
 {
     shouldExit.store(true);
-    if (workerThread.joinable())
-        workerThread.join();
+    if (mWorkerThread.joinable())
+        mWorkerThread.join();
 }
 
 void ORchestraEngine::SaveFile(std::string& data)
@@ -28,13 +29,7 @@ void ORchestraEngine::SaveFile(std::string& data)
     
     if(fileSaved)
     {
-        mIsVMInit.store(false, std::memory_order_release);
-        mReadySteps.store(0, std::memory_order_release);
-        mCurrentProcessingStep.store(mCurrentGlobalStep.load(), std::memory_order_release);
-        
-        mVM->Reset();
-        
-        mIsVMInit.store(mVM->Prepare(mFileLoader->GetFileStart()));
+        Compile(mFileLoader->GetData());
     }
 }
 
@@ -44,15 +39,27 @@ char* ORchestraEngine::LoadFile(std::string& filePath)
     
     if (loaded)
     {
-        mIsVMInit.store(false, std::memory_order_release);
-        mReadySteps.store(0, std::memory_order_release);
-        mVM->Reset();
-        
-        mIsVMInit.store(mVM->Prepare(mFileLoader->GetFileStart()));
+        Compile(mFileLoader->GetData());
         return mFileLoader->GetFileStart();
     }
     
     return nullptr;
+}
+
+void ORchestraEngine::Compile(std::string& data)
+{
+    Initialize(&data[0]);
+}
+
+void ORchestraEngine::Initialize(char* data)
+{
+    mIsVMInit.store(false, std::memory_order_release);
+    
+    mReadySteps.store(0, std::memory_order_release);
+    mCurrentProcessingStep.store(mCurrentGlobalStep.load(), std::memory_order_release);
+    mVM->Reset();
+    
+    mIsVMInit.store(mVM->Prepare(data));
 }
 
 std::vector<LogEntry>& ORchestraEngine::GetErrors()
@@ -138,15 +145,16 @@ void ORchestraEngine::Tick(const TransportData& transportData,
         // Check if we should tick in this buffer.
         if (mIsVMInit && endOfBufferInSamples >= nextStepInSamples)
         {
-            samplesSinceLastStep = transportData.timeInSamples;
+            ScopedTimer timer {"Process Beat"};
+            mSamplesSinceLastStep = transportData.timeInSamples;
             const int wrappedGlobalStep = currentStep % STEP_BUFFER_SIZE;
             const std::vector<SequenceStep>& currentData = mStepRingBuffer[wrappedGlobalStep];
             
-            for(const SequenceStep& step : currentData)
+            for (const SequenceStep& step : currentData)
             {
                 const int triggerLength = static_cast<int>(step.mShouldTrigger.GetLength());
                 
-                for(int i = 0; i < triggerLength; ++i)
+                for (int i = 0; i < triggerLength; ++i)
                 {
                     const uChar shouldTrigger = step.mShouldTrigger.GetValue(i);
                     
@@ -159,8 +167,8 @@ void ORchestraEngine::Tick(const TransportData& transportData,
                     const int timeStamp = nextStepInSamples + i * (samplesPerStep / triggerLength);
 
                     // TODO: Change to use step.mDuration
+                    // ScheduledMidiMessage message {step.mType, firstByte, secondByte, channel, timeStamp, step.mDuration};
                     ScheduledMidiMessage message {step.mType, firstByte, secondByte, channel, timeStamp, transportData.noteLengthInSamples};
-//                    ScheduledMidiMessage message {step.mType, firstByte, secondByte, channel, timeStamp, step.mDuration};
                     
                     mMidiScheduler.PostMidi(message);
                 }

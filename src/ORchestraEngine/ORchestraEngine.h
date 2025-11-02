@@ -24,22 +24,26 @@ public:
     std::vector<LogEntry>& GetErrors();
     char* LoadFile(std::string& filePath);
     void SaveFile(std::string& data);
+    void Compile(std::string& data);
     std::array<std::vector<SequenceStep>, STEP_BUFFER_SIZE>& GetStepData() { return mStepRingBuffer; }
     int GetGlobalStepCount() { return mCurrentGlobalStep.load(); }
     void WorkerThreadLoop();
     
 private:
     void PreProcessSteps();
-    int64_t samplesSinceLastStep = 0;
+    inline void Initialize(char* data);
+    
+    int64_t mSamplesSinceLastStep = 0;
     std::atomic<int> mReadySteps;
     std::atomic<int> mCurrentGlobalStep;
     std::atomic<int> mCurrentProcessingStep;
     std::atomic<bool> mIsVMInit { false };
     std::atomic<bool> shouldExit { false };
     
-    std::thread workerThread;
+    std::thread mWorkerThread;
     std::unique_ptr<VM> mVM;
     std::unique_ptr<FileLoader> mFileLoader;
     std::array<std::vector<SequenceStep>, STEP_BUFFER_SIZE> mStepRingBuffer;
+    
     MidiScheduler mMidiScheduler;
 };

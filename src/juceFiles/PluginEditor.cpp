@@ -40,10 +40,10 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor (ORchestraAudioProc
 //    codeEditor->setLineNumbersShown(true);
 //    codeEditor->loadContent("print(\"Hello, world!\")");
     
-    int buttonXStart = OUTER_MARGIN + buttonWidth * 3 + COMPONENT_MARGIN * 2.5f;
+    int buttonXStart = OUTER_MARGIN + buttonWidth * 4.8f + COMPONENT_MARGIN * 2.5f;
     int nextLineY = 20;
     
-    mTempoDivLabel.setBounds(buttonXStart, nextLineY, buttonWidth * 2, buttonHeight);
+    mTempoDivLabel.setBounds(buttonXStart, nextLineY, buttonWidth * 2.f, buttonHeight);
     
     buttonXStart += buttonWidth * 1.8f + COMPONENT_MARGIN;
     mBpmLabel.setBounds(buttonXStart, nextLineY, buttonWidth * 1.5f, buttonHeight);
@@ -54,15 +54,18 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor (ORchestraAudioProc
     // ======== NEW LINE ============
     nextLineY += buttonHeight;
     buttonXStart = OUTER_MARGIN;
-    togglePlay.setBounds(buttonXStart, nextLineY, buttonWidth, buttonHeight);
+    mTogglePlayButton.setBounds(buttonXStart, nextLineY, buttonWidth, buttonHeight);
     
     buttonXStart += buttonWidth + COMPONENT_MARGIN;
-    saveFile.setBounds(buttonXStart, nextLineY, buttonWidth, buttonHeight);
+    mSaveFileButton.setBounds(buttonXStart, nextLineY, buttonWidth, buttonHeight);
     
     buttonXStart += buttonWidth + COMPONENT_MARGIN;
-    loadFile.setBounds(buttonXStart, nextLineY, buttonWidth, buttonHeight);
+    mLoadFileButton.setBounds(buttonXStart, nextLineY, buttonWidth, buttonHeight);
+    
+    buttonXStart += buttonWidth + COMPONENT_MARGIN;
+    mCompileButton.setBounds(buttonXStart, nextLineY, buttonWidth * 1.5f, buttonHeight);
 
-    buttonXStart += buttonWidth + COMPONENT_MARGIN;
+    buttonXStart += buttonWidth * 1.5f + COMPONENT_MARGIN;
     mNoteDivisonBox.setBounds(buttonXStart, nextLineY, buttonWidth * 1.5f, buttonHeight);
 
     buttonXStart += buttonWidth * 1.5f + COMPONENT_MARGIN;
@@ -73,9 +76,9 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor (ORchestraAudioProc
     
     // ======== NEW LINE ============
     nextLineY += buttonHeight + COMPONENT_MARGIN;
-    codeEditor.setBounds(OUTER_MARGIN, nextLineY, codeEditorWidth, codeEditorHeight);
+    mCodeEditorTextBox.setBounds(OUTER_MARGIN, nextLineY, codeEditorWidth, codeEditorHeight);
     
-    errorBox.setBounds(OUTER_MARGIN + codeEditorWidth,
+    mErrorTextBox.setBounds(OUTER_MARGIN + codeEditorWidth,
                        nextLineY, WINDOW_WIDTH - codeEditorWidth - OUTER_MARGIN - OUTER_MARGIN,
                        codeEditorHeight);
     
@@ -106,35 +109,37 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor (ORchestraAudioProc
     mNoteLengthSelector.addItemList(mNoteDivisions, 3);
     mNoteLengthSelector.setSelectedItemIndex(3);
 
-    saveFile.addListener(this);
-    codeEditor.addListener(this);
-    togglePlay.addListener(this);
-    loadFile.addListener(this);
+    mSaveFileButton.addListener(this);
+    mLoadFileButton.addListener(this);
+    mCompileButton.addListener(this);
+    mCodeEditorTextBox.addListener(this);
+    mTogglePlayButton.addListener(this);
     mNoteDivisonBox.addListener(this);
     mNoteLengthSelector.addListener(this);
     mBpmBox.addListener(this);
     
     juce::LookAndFeel::setDefaultLookAndFeel(mGeneralLookAndFeel.get());
     
-    togglePlay.setLookAndFeel(mButtonLookAndFeel.get());
-    saveFile.setLookAndFeel(mButtonLookAndFeel.get());
-    loadFile.setLookAndFeel(mButtonLookAndFeel.get());
-    codeEditor.setLookAndFeel(mTextEditorLookAndFeel.get());
-    errorBox.setLookAndFeel(mTextEditorLookAndFeel.get());
+    mTogglePlayButton.setLookAndFeel(mButtonLookAndFeel.get());
+    mSaveFileButton.setLookAndFeel(mButtonLookAndFeel.get());
+    mLoadFileButton.setLookAndFeel(mButtonLookAndFeel.get());
+    mCompileButton.setLookAndFeel(mButtonLookAndFeel.get());
+    mCodeEditorTextBox.setLookAndFeel(mTextEditorLookAndFeel.get());
+    mErrorTextBox.setLookAndFeel(mTextEditorLookAndFeel.get());
     mNoteDivisonBox.setLookAndFeel(mGeneralLookAndFeel.get());
     mNoteLengthSelector.setLookAndFeel(mGeneralLookAndFeel.get());
     mBpmBox.setLookAndFeel(mGeneralLookAndFeel.get());
 
-    codeEditor.setReturnKeyStartsNewLine(true);
-    codeEditor.setMultiLine(true);
-    codeEditor.setScrollbarsShown(true);
-    codeEditor.setCaretVisible(true);
-    codeEditor.setFont(MONOSPACE_FONT_OPTIONS);
-    codeEditor.setColour(juce::TextEditor::textColourId, ORchestraColours::TextColor);
+    mCodeEditorTextBox.setReturnKeyStartsNewLine(true);
+    mCodeEditorTextBox.setMultiLine(true);
+    mCodeEditorTextBox.setScrollbarsShown(true);
+    mCodeEditorTextBox.setCaretVisible(true);
+    mCodeEditorTextBox.setFont(MONOSPACE_FONT_OPTIONS);
+    mCodeEditorTextBox.setColour(juce::TextEditor::textColourId, ORchestraColours::TextColor);
     
-    errorBox.setFont(MONOSPACE_FONT_OPTIONS);
-    errorBox.setColour(juce::TextEditor::textColourId, ORchestraColours::TextColor);
-    errorBox.setMultiLine(true);
+    mErrorTextBox.setFont(MONOSPACE_FONT_OPTIONS);
+    mErrorTextBox.setColour(juce::TextEditor::textColourId, ORchestraColours::TextColor);
+    mErrorTextBox.setMultiLine(true);
     
     timeline.SetProcessor(&audioProcessor);
 //    codeEditor.setPopupMenuEnabled(true);
@@ -142,13 +147,14 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor (ORchestraAudioProc
     addAndMakeVisible(mTempoDivLabel);
     addAndMakeVisible(mBpmLabel);
     addAndMakeVisible(mNoteLengthLabel);
-    addAndMakeVisible(togglePlay);
-    addAndMakeVisible(saveFile);
-    addAndMakeVisible(loadFile);
+    addAndMakeVisible(mTogglePlayButton);
+    addAndMakeVisible(mSaveFileButton);
+    addAndMakeVisible(mLoadFileButton);
+    addAndMakeVisible(mCompileButton);
     addAndMakeVisible(mNoteDivisonBox);
     addAndMakeVisible(mNoteLengthSelector);
-    addAndMakeVisible(codeEditor);
-    addAndMakeVisible(errorBox);
+    addAndMakeVisible(mCodeEditorTextBox);
+    addAndMakeVisible(mErrorTextBox);
     addAndMakeVisible(timeline);
     addAndMakeVisible(mBpmBox);
     
@@ -156,16 +162,16 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor (ORchestraAudioProc
     if(data != nullptr)
     {
         juce::String dataAsString {data};
-        codeEditor.setText(dataAsString);
+        mCodeEditorTextBox.setText(dataAsString);
     }
 }
 
 ORchestraAudioProcessorEditor::~ORchestraAudioProcessorEditor()
 {
-    togglePlay.setLookAndFeel(nullptr);
-    saveFile.setLookAndFeel(nullptr);
-    loadFile.setLookAndFeel(nullptr);
-    codeEditor.setLookAndFeel(nullptr);
+    mTogglePlayButton.setLookAndFeel(nullptr);
+    mSaveFileButton.setLookAndFeel(nullptr);
+    mLoadFileButton.setLookAndFeel(nullptr);
+    mCodeEditorTextBox.setLookAndFeel(nullptr);
     
     audioProcessor.removeChangeListener(this);
 }
@@ -176,7 +182,7 @@ void ORchestraAudioProcessorEditor::changeListenerCallback(juce::ChangeBroadcast
     if(data != nullptr)
     {
         juce::String dataAsString {data};
-        codeEditor.setText(dataAsString);
+        mCodeEditorTextBox.setText(dataAsString);
     }
 }
 
@@ -186,44 +192,48 @@ void ORchestraAudioProcessorEditor::textEditorTextChanged(juce::TextEditor& edit
 
 void ORchestraAudioProcessorEditor::buttonClicked(juce::Button* button)
 {
-//    std::string filePath {"/Users/christiantronhjem/dev/EuclidsCombiPlugin/data/myFile.e"};
-    
-    if(button == &togglePlay)
+    if(button == &mTogglePlayButton)
     {
         audioProcessor.IsRunning = !audioProcessor.IsRunning;
-        togglePlay.setButtonText(audioProcessor.IsRunning ? "Stop" : "Play");
+        mTogglePlayButton.setButtonText(audioProcessor.IsRunning ? "Stop" : "Play");
     }
-    else if(button == &saveFile)
+    else if(button == &mSaveFileButton)
     {
-        juce::String text = codeEditor.getText();
+        juce::String text = mCodeEditorTextBox.getText();
         std::string utf8Text = text.toRawUTF8();
         audioProcessor.SaveFile(utf8Text);
         
         std::vector<LogEntry>& errors = audioProcessor.GetErrors();
         if(errors.size() > 0)
-            errorBox.setText(errors[0].mMessage);
+            mErrorTextBox.setText(errors[0].mMessage);
         else
-            errorBox.setText("");
+            mErrorTextBox.setText("");
 
     }
-    else if(button == &loadFile)
+    else if (button == &mCompileButton)
     {
-        chooser.launchAsync(folderChooserFlags, [this] (const juce::FileChooser& fc)
+        juce::String text = mCodeEditorTextBox.getText();
+        std::string utf8Text = text.toRawUTF8();
+        audioProcessor.Compile(utf8Text);
+    }
+    else if(button == &mLoadFileButton)
+    {
+        mFileChooser.launchAsync(mFileChooserFlags, [this] (const juce::FileChooser& fc)
         {
-            juce::File file = chooser.getResult();
+            juce::File file = mFileChooser.getResult();
             std::string filePath {file.getFullPathName().toRawUTF8()};
             char* data = audioProcessor.LoadFile(filePath);
             if(data != nullptr)
             {
                 juce::String dataAsString {data};
-                codeEditor.setText(dataAsString);
+                mCodeEditorTextBox.setText(dataAsString);
             }
             
             std::vector<LogEntry>& errors = audioProcessor.GetErrors();
             if(errors.size() > 0)
-                errorBox.setText(errors[0].mMessage);
+                mErrorTextBox.setText(errors[0].mMessage);
             else
-                errorBox.setText("");
+                mErrorTextBox.setText("");
         });
     }
 }
