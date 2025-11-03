@@ -12,12 +12,12 @@ ____
 Starting work on the plugin version of the prototype Euclids Combinator.
 Prototype can be found here: <https://github.com/Tronhjem/EuclidsCombinator>
 
-## Tests
+### Unit Tests
 
 Tests are provided with a seperate jucer and project for a console app that imports select code and runs
 the tests with the juce framework unit testing code.
 
-## Syntax and rules for code
+# Syntax and rules for ORChestra code
 
 It's the program is evaluated from top to bottom.
 You will have to declare anything first that you will use later.
@@ -28,12 +28,6 @@ Usually this means sequences are created first, then tracks, the sequences trigg
 - All white space is ignored in a line
 - Use `//` for comments until the end of the line
 
-### Data sequences
-
-Data is designed to be used anywhere in any way, it is always just the number.
-For triggers, the first argument of `note` or `cc` data, they will evaluate if it's above 0 and be a boolean for trigger.
-For cc's and notes and velocity, values will be sent directly as defined.
-
 ### Operators
 
 `+` `-` `*` `/` operates on numbers as you would expect them to in normal math.
@@ -41,7 +35,7 @@ Normal math precedence is implemented, and parentheses can create precedence jus
 
 `|` `^` `&` can be used to evaluate logic operations. This will always use the number as a trigger, meaning check if it's above 0 or not, and combine two numbers and return a 0 or a 1.
 
-`>` `<` `>=` `<=` `==`  compares two values and return a 0 if false and 1 if true.
+`>` `<` `>=` `<=` `==` `!=` compares two values and return a 0 if false and 1 if true.
 
 ### Variables
 
@@ -90,6 +84,28 @@ Following words are reserved and can't be used as variable names.
 - test
 - ran
 - euc
+
+### Data sequences
+
+Data is designed to be used anywhere in any way, it is always just the number.
+For triggers, the first argument of `note` or `cc` data, they will evaluate if it's above 0 and be a boolean for trigger.
+For cc's and notes and velocity, values will be sent directly as defined.
+A data sequence is defined like a c style array with `[]` around them, separated by comma.
+One index in the array represent a value to be used in a step, see variables earlier on how to save a data sequence in a variable.
+
+Example of a simple data sequence with 3 values, assigned to a variable a. 
+```cpp
+a = [64,64,65]
+```
+
+### Note values
+
+Notes can be represented as raw midi values from 0 to 127 or can be used with the notation: capital letter for the Note, a `#` or a `b` after for sharp or flat, and a octave from 0 to 10.
+When compiled, these are turned into numbers, which means they can be combined and used with every other value. It's purely for easilier defining note sequences.
+Example of a data sequence using note names instead of numbers
+```cpp
+a = [C4, C#4, Db2]
+```
 
 ### Tracks
 
