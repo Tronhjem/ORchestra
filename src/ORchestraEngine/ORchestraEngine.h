@@ -22,16 +22,16 @@ public:
     char* GetLoadedFileData();
     std::string GetSavedFilePath();
     std::vector<LogEntry>& GetErrors();
-    char* LoadFile(std::string& filePath);
-    void SaveFile(std::string& data);
-    void Compile(std::string& data);
+    char* LoadFile(const std::string& filePath);
+    void SaveFile(const std::string& data);
+    void Compile(const std::string& data);
     std::array<std::vector<SequenceStep>, STEP_BUFFER_SIZE>& GetStepData() { return mStepRingBuffer; }
     int GetGlobalStepCount() { return mCurrentGlobalStep.load(); }
     void WorkerThreadLoop();
     
 private:
     void PreProcessSteps();
-    inline void Initialize(char* data);
+    inline void Initialize(const char* data);
     
     int64_t mSamplesSinceLastStep = 0;
     std::atomic<int> mReadySteps;

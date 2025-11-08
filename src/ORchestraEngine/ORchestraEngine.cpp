@@ -23,7 +23,7 @@ ORchestraEngine::~ORchestraEngine()
         mWorkerThread.join();
 }
 
-void ORchestraEngine::SaveFile(std::string& data)
+void ORchestraEngine::SaveFile(const std::string& data)
 {
     const bool fileSaved = mFileLoader->SaveFile(data);
     
@@ -33,7 +33,7 @@ void ORchestraEngine::SaveFile(std::string& data)
     }
 }
 
-char* ORchestraEngine::LoadFile(std::string& filePath)
+char* ORchestraEngine::LoadFile(const std::string& filePath)
 {
     const bool loaded = mFileLoader->LoadFile(filePath);
     
@@ -46,12 +46,12 @@ char* ORchestraEngine::LoadFile(std::string& filePath)
     return nullptr;
 }
 
-void ORchestraEngine::Compile(std::string& data)
+void ORchestraEngine::Compile(const std::string& data)
 {
     Initialize(&data[0]);
 }
 
-void ORchestraEngine::Initialize(char* data)
+void ORchestraEngine::Initialize(const char* data)
 {
     mIsVMInit.store(false, std::memory_order_release);
     

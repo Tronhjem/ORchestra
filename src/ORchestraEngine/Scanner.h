@@ -13,7 +13,7 @@ public:
     Scanner(ErrorReporting& logger);
     ~Scanner();
     
-    bool ScanFile(char *data);
+    bool ScanFile(const char *data);
     std::vector<Token>& GetTokens() { return mTokens; }
 
 private:
@@ -39,8 +39,8 @@ private:
     ErrorReporting& mErrorReporting;
     std::vector<Token> mTokens;
 
-    char* mStart;
-    char* mCurrent;
+    const char* mStart;
+    const char* mCurrent;
     int mCurrentLine = 1;
     char ERROR_UNEXPECTED_CHAR[50] = "ERROR: Unexpected character ";
     char ERROR_NO_END_QUOTE[50] = "ERROR: Expected \" but didn't find one ";

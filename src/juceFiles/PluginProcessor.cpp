@@ -49,7 +49,7 @@ char* ORchestraAudioProcessor::GetFileText()
     return mORchestraEngine->GetLoadedFileData();
 }
 
-char* ORchestraAudioProcessor::LoadFile(std::string& filePath)
+char* ORchestraAudioProcessor::LoadFile(const std::string& filePath)
 {
     char* loadedFile = mORchestraEngine->LoadFile(filePath);
     if(loadedFile != nullptr)
@@ -60,12 +60,12 @@ char* ORchestraAudioProcessor::LoadFile(std::string& filePath)
     return nullptr;
 }
 
-void ORchestraAudioProcessor::SaveFile(std::string& data)
+void ORchestraAudioProcessor::SaveFile(const std::string& data)
 {
     mORchestraEngine->SaveFile(data);
 }
 
-void ORchestraAudioProcessor::Compile(std::string &data)
+void ORchestraAudioProcessor::Compile(const std::string &data)
 {
     mORchestraEngine->Compile(data);
 }
@@ -176,12 +176,7 @@ bool ORchestraAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts
 void ORchestraAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
     juce::ScopedNoDenormals noDenormals;
-    auto totalNumInputChannels  = getTotalNumInputChannels();
-    auto totalNumOutputChannels = getTotalNumOutputChannels();
-
-    int bufferLength = buffer.getNumSamples();
-    for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
-        buffer.clear (i, 0, bufferLength);
+    const int bufferLength = buffer.getNumSamples();
     
     if(IsRunning)
         mTransportData.isPlaying = IsRunning; // Set the playing to true when standalone
@@ -206,7 +201,7 @@ void ORchestraAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juc
 
 void ORchestraAudioProcessor::FillPositionData(TransportData& data)
 {
-    auto positionInfo = getPlayHead()->getPosition();
+    const auto positionInfo = getPlayHead()->getPosition();
 
     if(positionInfo->getBpm().hasValue())
     {
@@ -257,27 +252,28 @@ juce::AudioProcessorEditor* ORchestraAudioProcessor::createEditor()
 //==============================================================================
 void ORchestraAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
-    // You should use this method to store your parameters in the memory block.
-    // You could do that either as raw data, or use the XML or ValueTree classes
-    // as intermediaries to make it easy to save and load complex data.
-    
-    juce::XmlElement xml("PluginState");
-    xml.setAttribute("filePath", mORchestraEngine->GetSavedFilePath());
-    copyXmlToBinary(xml, destData);
+    auto state = mValueTree.copyState();
+    std::unique_ptr<juce::XmlElement> xml (state.createXml());
+    xml->setAttribute("filePath", mORchestraEngine->GetSavedFilePath());
+    xml->setAttribute("data", mORchestraEngine->GetLoadedFileData());
+    copyXmlToBinary (*xml, destData);
 }
 
 void ORchestraAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
-    // You should use this method to restore your parameters from this memory block,
-    // whose contents will have been created by the getStateInformation() call.
-    
-    std::unique_ptr<juce::XmlElement> xml(getXmlFromBinary(data, sizeInBytes));
-    if (xml && xml->hasTagName("PluginState"))
+    std::unique_ptr<juce::XmlElement> xmlState (getXmlFromBinary (data, sizeInBytes));
+    if (xmlState.get() != nullptr)
     {
-        juce::String filePath = xml->getStringAttribute("filePath", "");
+        if (xmlState->hasTagName (mValueTree.state.getType()))
+        {
+            mValueTree.replaceState (juce::ValueTree::fromXml (*xmlState));
+        }
+        
+        juce::String filePath = xmlState->getStringAttribute("filePath", "");
+        juce::String data = xmlState->getStringAttribute("data", "");
         if(filePath.length() > 0)
         {
-            std::string convertedPath = filePath.toStdString();
+            const std::string convertedPath = filePath.toStdString();
             LoadFile(convertedPath);
             sendChangeMessage();
         }

@@ -11,7 +11,7 @@ VM::VM()
     mErrorReporting = std::make_unique<ErrorReporting>();
 }
 
-bool VM::Prepare(char* data)
+bool VM::Prepare(const char* data)
 {
     Scanner scanner {*mErrorReporting};
     Compiler compiler {scanner.GetTokens(), *mErrorReporting};

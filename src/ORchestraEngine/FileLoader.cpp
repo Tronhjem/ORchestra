@@ -34,7 +34,7 @@ bool FileLoader::LoadFile(const std::string& filePath)
     return true;
 }
 
-bool FileLoader::SaveFile(std::string& data)
+bool FileLoader::SaveFile(const std::string& data)
 {
     mData = data;
     

@@ -59,7 +59,7 @@ void Scanner::SkipWhiteSpace()// append char
     }
 }
 
-bool Scanner::ScanFile(char* data)
+bool Scanner::ScanFile(const char* data)
 {
     ScopedTimer timer("ScanTokens");
 

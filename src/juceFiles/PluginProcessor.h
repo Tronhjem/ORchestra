@@ -70,9 +70,9 @@ public:
     std::array<std::vector<SequenceStep>, STEP_BUFFER_SIZE>& GetStepData() { return mORchestraEngine->GetStepData(); }
     int GetGlobalStepCount() { return mORchestraEngine->GetGlobalStepCount(); }
     
-    char* LoadFile(std::string& filePath);
-    void SaveFile(std::string& data);
-    void Compile(std::string& data);
+    char* LoadFile(const std::string& filePath);
+    void SaveFile(const std::string& data);
+    void Compile(const std::string& data);
     
     bool IsRunning = false;
     double mSampleRate = 44100.0;
