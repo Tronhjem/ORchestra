@@ -13,6 +13,7 @@
 #include "Colours.h"
 #include "TitleBarComponent.h"
 #include "ErrorReporting.h"
+#include "ParamConstants.h"
 
 constexpr int WINDOW_WIDTH = 800;
 constexpr int WINDOW_HEIGHT = 600;
@@ -31,9 +32,11 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor (ORchestraAudioProc
     
     audioProcessor.addChangeListener(this);
     juce::AudioProcessorValueTreeState& valueTree = audioProcessor.GetValueTree();
-    mBpmSliderAttachment.reset (new SliderAttachment(valueTree, "bpm", mBpmBox));
-    mNoteDivisionAttachment.reset (new ComboBoxAttachment(valueTree, "note-division", mNoteDivisonBox));
     
+    mBpmSliderAttachment.reset (new SliderAttachment(valueTree, bpmString, mBpmBox));
+    mTempoDivisionAttachment.reset (new ComboBoxAttachment(valueTree, tempoDivisionString, mTempoDivisionSelectorBox));
+    mNoteLengthAttachment.reset (new ComboBoxAttachment(valueTree, noteLengthString, mNoteLengtSelectorBox));
+
     mGeneralLookAndFeel = std::make_unique<GeneralLookAndFeel>();
     mButtonLookAndFeel = std::make_unique<ButtonLookAndFeel>();
     mTextEditorLookAndFeel = std::make_unique<TextEditorLookAndFeel>();
@@ -68,13 +71,13 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor (ORchestraAudioProc
     mCompileButton.setBounds(buttonXStart, nextLineY, buttonWidth * 1.5f, buttonHeight);
 
     buttonXStart += buttonWidth * 1.5f + COMPONENT_MARGIN;
-    mNoteDivisonBox.setBounds(buttonXStart, nextLineY, buttonWidth * 1.5f, buttonHeight);
+    mTempoDivisionSelectorBox.setBounds(buttonXStart, nextLineY, buttonWidth * 1.5f, buttonHeight);
 
     buttonXStart += buttonWidth * 1.5f + COMPONENT_MARGIN;
     mBpmBox.setBounds(buttonXStart, nextLineY, buttonWidth, buttonHeight);
     
     buttonXStart += buttonWidth + COMPONENT_MARGIN;
-    mNoteLengthSelector.setBounds(buttonXStart, nextLineY, buttonWidth * 1.5f, buttonHeight);
+    mNoteLengtSelectorBox.setBounds(buttonXStart, nextLineY, buttonWidth * 1.5f, buttonHeight);
     
     // ======== NEW LINE ============
     nextLineY += buttonHeight + COMPONENT_MARGIN;
@@ -105,20 +108,17 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor (ORchestraAudioProc
     mBpmBox.setRange(20.0, 300.0, 1.0);
     mBpmBox.setValue(120.0);
 
-    mNoteDivisonBox.addItemList(mNoteDivisions, 3);
-    mNoteDivisonBox.setSelectedItemIndex(3);
+    mTempoDivisionSelectorBox.addItemList(mNoteDivisions, 3);
+    mTempoDivisionSelectorBox.setSelectedItemIndex(3);
     
-    mNoteLengthSelector.addItemList(mNoteDivisions, 3);
-    mNoteLengthSelector.setSelectedItemIndex(3);
+    mNoteLengtSelectorBox.addItemList(mNoteDivisions, 3);
+    mNoteLengtSelectorBox.setSelectedItemIndex(3);
 
     mSaveFileButton.addListener(this);
     mLoadFileButton.addListener(this);
     mCompileButton.addListener(this);
     mCodeEditorTextBox.addListener(this);
     mTogglePlayButton.addListener(this);
-    mNoteDivisonBox.addListener(this);
-    mNoteLengthSelector.addListener(this);
-//    mBpmBox.addListener(this);
     
     juce::LookAndFeel::setDefaultLookAndFeel(mGeneralLookAndFeel.get());
     
@@ -128,8 +128,8 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor (ORchestraAudioProc
     mCompileButton.setLookAndFeel(mButtonLookAndFeel.get());
     mCodeEditorTextBox.setLookAndFeel(mTextEditorLookAndFeel.get());
     mErrorTextBox.setLookAndFeel(mTextEditorLookAndFeel.get());
-    mNoteDivisonBox.setLookAndFeel(mGeneralLookAndFeel.get());
-    mNoteLengthSelector.setLookAndFeel(mGeneralLookAndFeel.get());
+    mTempoDivisionSelectorBox.setLookAndFeel(mGeneralLookAndFeel.get());
+    mNoteLengtSelectorBox.setLookAndFeel(mGeneralLookAndFeel.get());
     mBpmBox.setLookAndFeel(mGeneralLookAndFeel.get());
 
     mCodeEditorTextBox.setReturnKeyStartsNewLine(true);
@@ -153,8 +153,8 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor (ORchestraAudioProc
     addAndMakeVisible(mSaveFileButton);
     addAndMakeVisible(mLoadFileButton);
     addAndMakeVisible(mCompileButton);
-    addAndMakeVisible(mNoteDivisonBox);
-    addAndMakeVisible(mNoteLengthSelector);
+    addAndMakeVisible(mTempoDivisionSelectorBox);
+    addAndMakeVisible(mNoteLengtSelectorBox);
     addAndMakeVisible(mCodeEditorTextBox);
     addAndMakeVisible(mErrorTextBox);
     addAndMakeVisible(timeline);
@@ -239,23 +239,6 @@ void ORchestraAudioProcessorEditor::buttonClicked(juce::Button* button)
         });
     }
 }
-void ORchestraAudioProcessorEditor::comboBoxChanged(ComboBox* changedComboBox)
-{
-    int val = changedComboBox->getSelectedItemIndex();
-//    if(changedComboBox == &mNoteDivisonBox)
-//    {
-//        audioProcessor.SetTempoDivision(static_cast<NoteDivision>(val));
-//    }
-    if(changedComboBox == &mNoteLengthSelector)
-    {
-        audioProcessor.SetNoteLength(static_cast<NoteDivision>(val));
-    }
-}
-
-//void ORchestraAudioProcessorEditor::sliderValueChanged(juce::Slider* slider)
-//{
-////    audioProcessor.SetBpm(slider->getValue());
-//}
 
 //==============================================================================
 void ORchestraAudioProcessorEditor::paint (juce::Graphics& g)

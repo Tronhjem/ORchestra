@@ -27,9 +27,7 @@ typedef juce::AudioProcessorValueTreeState::ComboBoxAttachment ComboBoxAttachmen
 class ORchestraAudioProcessorEditor  :  public juce::AudioProcessorEditor,
                                         public juce::TextEditor::Listener,
                                         public juce::Button::Listener,
-                                        public juce::ComboBox::Listener,
                                         public juce::ChangeListener
-//										public juce::Slider::Listener
 {
 public:
     ORchestraAudioProcessorEditor (ORchestraAudioProcessor&);
@@ -41,8 +39,6 @@ public:
     void textEditorTextChanged(juce::TextEditor& editor) override;
     void extracted();
     void buttonClicked(juce::Button* button) override;
-	void comboBoxChanged (ComboBox* comboBoxThatHasChanged) override;
-//    void sliderValueChanged(juce::Slider* slider) override;
     
 private:
     ORchestraAudioProcessor& audioProcessor;
@@ -61,13 +57,14 @@ private:
     juce::Label mBpmLabel {"bpm","BPM"};
     juce::Label mNoteLengthLabel {"noteLength", "Note Length"};
     
-    juce::ComboBox mNoteDivisonBox;
-    juce::ComboBox mNoteLengthSelector;
-    juce::Slider mBpmBox;
     juce::StringArray mNoteDivisions{ "1n", "2n","4n", "8n", "16n", "32n", "64n"};
+    juce::ComboBox mTempoDivisionSelectorBox;
+    juce::ComboBox mNoteLengtSelectorBox;
+    juce::Slider mBpmBox;
     
     std::unique_ptr<SliderAttachment> mBpmSliderAttachment;
-    std::unique_ptr<ComboBoxAttachment> mNoteDivisionAttachment;
+    std::unique_ptr<ComboBoxAttachment> mTempoDivisionAttachment;
+    std::unique_ptr<ComboBoxAttachment> mNoteLengthAttachment;
 
     juce::FileChooser mFileChooser {"Select a file to load...", juce::File{}, "*.txt"};
     int mFileChooserFlags = juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles;

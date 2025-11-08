@@ -37,8 +37,8 @@ private:
     std::atomic<int> mReadySteps;
     std::atomic<int> mCurrentGlobalStep;
     std::atomic<int> mCurrentProcessingStep;
-    std::atomic<bool> mIsVMInit { false };
-    std::atomic<bool> shouldExit { false };
+    std::atomic<bool> mIsVMInit;
+    std::atomic<bool> shouldExit;
     
     std::thread mWorkerThread;
     std::unique_ptr<VM> mVM;

@@ -15,11 +15,6 @@
 #include "StepData.h"
 #include "ErrorReporting.h"
 
-const StringRef bpmString {"bpm"};
-const StringRef noteDivisionString {"note-division"};
-const juce::ParameterID bpmParamId {bpmString, 1};
-const juce::ParameterID noteDivisionId {noteDivisionString, 1};
-
 enum class NoteDivision
 {
     n1,
@@ -79,10 +74,6 @@ public:
     void SaveFile(std::string& data);
     void Compile(std::string& data);
     
-//    void SetTempoDivision(NoteDivision division) { mTempoDivision = division; }
-    void SetNoteLength(NoteDivision division) { mNoteLength = division; }
-    void SetBpm(double bpm) { }
-    
     bool IsRunning = false;
     double mSampleRate = 44100.0;
 
@@ -90,16 +81,15 @@ private:
     void FillPositionData(TransportData& data);
     TransportData mTransportData;
     std::unique_ptr<ORchestraEngine> mORchestraEngine;
-    inline float GetBpmDivision(NoteDivision noteDiv);
-    inline int GetNoteLength(NoteDivision noteDiv);
+    inline float GetBpmDivision(float noteDiv);
+    inline int GetNoteLength(float noteDiv);
 
     std::atomic<float>* mBpm;
-    std::atomic<float>* mNoteDivision;
-//    NoteDivision mTempoDivision;
-    NoteDivision mNoteLength;
+    std::atomic<float>* mTempoDivision;
+    std::atomic<float>* mNoteLength;
     
     juce::String mSavedFilePath {""};
-    juce::StringArray mNoteDivisions{ "1n", "2n", "4n", "8n", "16n", "32n", "64n"};
+    juce::StringArray mNoteDivisionsStrings{ "1n", "2n", "4n", "8n", "16n", "32n", "64n"};
     juce::AudioProcessorValueTreeState mValueTree;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ORchestraAudioProcessor)

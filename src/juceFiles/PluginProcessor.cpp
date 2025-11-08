@@ -8,38 +8,36 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include "ParamConstants.h"
 
 //==============================================================================
 ORchestraAudioProcessor::ORchestraAudioProcessor() :
-    mValueTree(*this, nullptr, juce::Identifier("ORchestra"),
-    {
-        std::make_unique<juce::AudioParameterFloat>(bpmParamId, "Bpm", 0, 300, 120),
-        std::make_unique<juce::AudioParameterChoice>(noteDivisionId, "Note Division", mNoteDivisions, static_cast<int>(NoteDivision::n4))
-    })
-
 #ifndef JucePlugin_PreferredChannelConfigurations
-    , AudioProcessor (BusesProperties()
+    AudioProcessor (BusesProperties()
                      #if ! JucePlugin_IsMidiEffect
                       #if ! JucePlugin_IsSynth
                        .withInput  ("Input",  juce::AudioChannelSet::stereo(), true)
                       #endif
                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
                      #endif
-                       )
+                       ),
 #endif
-
+    mValueTree(*this, nullptr, juce::Identifier("ORchestra"),
+    {
+        std::make_unique<juce::AudioParameterFloat>(bpmParamId, "Bpm", 0, 300, 120),
+        std::make_unique<juce::AudioParameterChoice>(tempoDivisionId, "Tempo Division", mNoteDivisionsStrings, static_cast<int>(NoteDivision::n4)),
+        std::make_unique<juce::AudioParameterChoice>(noteLengthId, "Note Length", mNoteDivisionsStrings, static_cast<int>(NoteDivision::n4))
+    })
 {
     
     mORchestraEngine = std::make_unique<ORchestraEngine>();
     
     mTransportData.timeInSamples = 0;
     mTransportData.sampleRate = 44100;
-//    mBpm = 60.0;
-//    mTempoDivision = NoteDivision::n4;
-    mNoteLength = NoteDivision::n4;
 
     mBpm = mValueTree.getRawParameterValue(bpmString);
-    mNoteDivision = mValueTree.getRawParameterValue(noteDivisionString);
+    mTempoDivision = mValueTree.getRawParameterValue(tempoDivisionString);
+    mNoteLength = mValueTree.getRawParameterValue(noteLengthString);
 }
 
 ORchestraAudioProcessor::~ORchestraAudioProcessor()
@@ -190,10 +188,9 @@ void ORchestraAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juc
     
 //    FillPositionData(mTransportData);
     
-    const int noteDiv = static_cast<int>(*mNoteDivision);
-    mTransportData.bpmDivision = GetBpmDivision(static_cast<NoteDivision>(noteDiv));
+    mTransportData.bpmDivision = GetBpmDivision(*mTempoDivision);
     mTransportData.bpm = static_cast<double>(*mBpm);
-    mTransportData.noteLengthInSamples = GetNoteLength(mNoteLength);
+    mTransportData.noteLengthInSamples = GetNoteLength(*mNoteLength);
     
     mORchestraEngine->Tick(mTransportData, bufferLength, midiMessages);
     
@@ -294,9 +291,11 @@ juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
     return new ORchestraAudioProcessor();
 }
 
-float ORchestraAudioProcessor::GetBpmDivision(NoteDivision noteDiv)
+float ORchestraAudioProcessor::GetBpmDivision(float noteDiv)
 {
-	switch (noteDiv)
+    const NoteDivision div = static_cast<NoteDivision>(noteDiv);
+    
+	switch (div)
 	{
 	case NoteDivision::n1:
         return 0.25f;
@@ -317,7 +316,7 @@ float ORchestraAudioProcessor::GetBpmDivision(NoteDivision noteDiv)
 	}
 }
 
-int ORchestraAudioProcessor::GetNoteLength(NoteDivision noteDiv)
+int ORchestraAudioProcessor::GetNoteLength(float noteDiv)
 {
     return static_cast<int>(mSampleRate * (60.0 / (*mBpm * GetBpmDivision(noteDiv))));
 }

@@ -86,6 +86,8 @@
         <FILE id="MwiVXx" name="LookAndFeelConstants.h" compile="0" resource="0"
               file="src/juceFiles/LookAndFeelConstants.h"/>
       </GROUP>
+      <FILE id="zUx2S7" name="ParamConstants.h" compile="0" resource="0"
+            file="src/juceFiles/ParamConstants.h"/>
       <FILE id="YiB9wD" name="PluginEditor.cpp" compile="1" resource="0"
             file="src/juceFiles/PluginEditor.cpp"/>
       <FILE id="BRc8iu" name="PluginEditor.h" compile="0" resource="0" file="src/juceFiles/PluginEditor.h"/>

@@ -4,11 +4,11 @@
 #include "ScopedTimer.h"
 
 ORchestraEngine::ORchestraEngine() :
-    mIsVMInit(false),
     mReadySteps(0),
     mCurrentGlobalStep(0),
-    mCurrentProcessingStep(0)
-    
+    mCurrentProcessingStep(0),
+    mIsVMInit(false),
+    shouldExit(false)
 {
     mVM = std::make_unique<VM>();
     mFileLoader = std::make_unique<FileLoader>();

@@ -287,7 +287,6 @@ TokenType Scanner::IdentifierToken()
 
 Token Scanner::BuildIdentifier()
 {
-    char c = PeekCurrent();
     while (IsAlpha(PeekCurrent()) || IsDigit(PeekCurrent()) || PeekCurrent() == '#')
         AdvanceCurrent();
 
