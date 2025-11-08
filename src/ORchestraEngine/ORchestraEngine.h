@@ -19,19 +19,23 @@ public:
     ORchestraEngine();
     ~ORchestraEngine();
     void Tick(const TransportData& transportData, const int bufferLength, juce::MidiBuffer& midiMessages);
-    char* GetLoadedFileData();
-    std::string GetSavedFilePath();
-    std::vector<LogEntry>& GetErrors();
-    char* LoadFile(const std::string& filePath);
-    void SaveFile(const std::string& data);
+    const std::string& GetSavedFilePath();
+    const std::vector<LogEntry>& GetErrors();
+    const std::string& LoadFile(const std::string& filePath);
+    void SaveToFile(const std::string& filePath);
     void Compile(const std::string& data);
     std::array<std::vector<SequenceStep>, STEP_BUFFER_SIZE>& GetStepData() { return mStepRingBuffer; }
     int GetGlobalStepCount() { return mCurrentGlobalStep.load(); }
+    
+    const std::string& GetInstructionData() { return mInstructionData; }
+    void SetInstructionData(const std::string& data) { mInstructionData = data; }
+    
     void WorkerThreadLoop();
     
 private:
     void PreProcessSteps();
-    inline void Initialize(const char* data);
+    inline void Initialize();
+    std::string mInstructionData;
     
     int64_t mSamplesSinceLastStep = 0;
     std::atomic<int> mReadySteps;

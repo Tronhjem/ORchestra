@@ -23,35 +23,35 @@ ORchestraEngine::~ORchestraEngine()
         mWorkerThread.join();
 }
 
-void ORchestraEngine::SaveFile(const std::string& data)
+void ORchestraEngine::SaveToFile(const std::string& filePath)
 {
-    const bool fileSaved = mFileLoader->SaveFile(data);
+    const bool fileSaved = mFileLoader->SaveToFile(filePath, mInstructionData);
     
     if(fileSaved)
     {
-        Compile(mFileLoader->GetData());
+        Compile(mInstructionData);
     }
 }
 
-char* ORchestraEngine::LoadFile(const std::string& filePath)
+const std::string& ORchestraEngine::LoadFile(const std::string& filePath)
 {
-    const bool loaded = mFileLoader->LoadFile(filePath);
+    mInstructionData = mFileLoader->LoadFile(filePath);
     
-    if (loaded)
+    if (mInstructionData.length() > 0)
     {
-        Compile(mFileLoader->GetData());
-        return mFileLoader->GetFileStart();
+        Compile(mInstructionData);
     }
     
-    return nullptr;
+    return mInstructionData;
 }
 
 void ORchestraEngine::Compile(const std::string& data)
 {
-    Initialize(&data[0]);
+    mInstructionData = data;
+    Initialize();
 }
 
-void ORchestraEngine::Initialize(const char* data)
+void ORchestraEngine::Initialize()
 {
     mIsVMInit.store(false, std::memory_order_release);
     
@@ -59,10 +59,10 @@ void ORchestraEngine::Initialize(const char* data)
     mCurrentProcessingStep.store(mCurrentGlobalStep.load(), std::memory_order_release);
     mVM->Reset();
     
-    mIsVMInit.store(mVM->Prepare(data));
+    mIsVMInit.store(mVM->Prepare(&mInstructionData[0]));
 }
 
-std::vector<LogEntry>& ORchestraEngine::GetErrors()
+const std::vector<LogEntry>& ORchestraEngine::GetErrors()
 {
     return mVM->GetErrors();
 }
@@ -105,16 +105,6 @@ void ORchestraEngine::PreProcessSteps()
     
     mReadySteps.fetch_add(stepsToProcess, std::memory_order_acq_rel);
     mCurrentProcessingStep.fetch_add(stepsToProcess, std::memory_order_acq_rel);
-}
-
-char* ORchestraEngine::GetLoadedFileData()
-{
-    return mFileLoader->GetFileStart();
-}
-
-std::string ORchestraEngine::GetSavedFilePath()
-{
-    return mFileLoader->GetSavedFilePath();
 }
 
 void ORchestraEngine::Tick(const TransportData& transportData,

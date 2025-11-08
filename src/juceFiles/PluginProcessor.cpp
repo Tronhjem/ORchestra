@@ -24,7 +24,7 @@ ORchestraAudioProcessor::ORchestraAudioProcessor() :
 #endif
     mValueTree(*this, nullptr, juce::Identifier("ORchestra"),
     {
-        std::make_unique<juce::AudioParameterFloat>(bpmParamId, "Bpm", 0, 300, 120),
+        std::make_unique<juce::AudioParameterInt>(bpmParamId, "Bpm", 10, 300, 120),
         std::make_unique<juce::AudioParameterChoice>(tempoDivisionId, "Tempo Division", mNoteDivisionsStrings, static_cast<int>(NoteDivision::n4)),
         std::make_unique<juce::AudioParameterChoice>(noteLengthId, "Note Length", mNoteDivisionsStrings, static_cast<int>(NoteDivision::n4))
     })
@@ -42,37 +42,6 @@ ORchestraAudioProcessor::ORchestraAudioProcessor() :
 
 ORchestraAudioProcessor::~ORchestraAudioProcessor()
 {
-}
-
-char* ORchestraAudioProcessor::GetFileText()
-{
-    return mORchestraEngine->GetLoadedFileData();
-}
-
-char* ORchestraAudioProcessor::LoadFile(const std::string& filePath)
-{
-    char* loadedFile = mORchestraEngine->LoadFile(filePath);
-    if(loadedFile != nullptr)
-    {
-        return loadedFile;
-    }
-    
-    return nullptr;
-}
-
-void ORchestraAudioProcessor::SaveFile(const std::string& data)
-{
-    mORchestraEngine->SaveFile(data);
-}
-
-void ORchestraAudioProcessor::Compile(const std::string &data)
-{
-    mORchestraEngine->Compile(data);
-}
-
-std::vector<LogEntry>& ORchestraAudioProcessor::GetErrors()
-{
-    return mORchestraEngine->GetErrors();
 }
 
 //==============================================================================
@@ -254,8 +223,7 @@ void ORchestraAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
     auto state = mValueTree.copyState();
     std::unique_ptr<juce::XmlElement> xml (state.createXml());
-    xml->setAttribute("filePath", mORchestraEngine->GetSavedFilePath());
-    xml->setAttribute("data", mORchestraEngine->GetLoadedFileData());
+    xml->setAttribute("data", mORchestraEngine->GetInstructionData());
     copyXmlToBinary (*xml, destData);
 }
 
@@ -269,12 +237,11 @@ void ORchestraAudioProcessor::setStateInformation (const void* data, int sizeInB
             mValueTree.replaceState (juce::ValueTree::fromXml (*xmlState));
         }
         
-        juce::String filePath = xmlState->getStringAttribute("filePath", "");
-        juce::String data = xmlState->getStringAttribute("data", "");
-        if(filePath.length() > 0)
+        const juce::String data = xmlState->getStringAttribute("data", "");
+        if(data.length() > 0)
         {
-            const std::string convertedPath = filePath.toStdString();
-            LoadFile(convertedPath);
+            const std::string convertedData =  data.toStdString();
+            SetInstructionData(convertedData);
             sendChangeMessage();
         }
     }
@@ -292,24 +259,24 @@ float ORchestraAudioProcessor::GetBpmDivision(float noteDiv)
     const NoteDivision div = static_cast<NoteDivision>(noteDiv);
     
 	switch (div)
-	{
-	case NoteDivision::n1:
-        return 0.25f;
-	case NoteDivision::n2:
-        return 0.5f;
-	case NoteDivision::n4:
-        return 1.f;
-	case NoteDivision::n8:
-        return 2.f;
-	case NoteDivision::n16:
-        return 4.f;
-	case NoteDivision::n32:
-        return 8.f;
-	case NoteDivision::n64:
-        return 16.f;
-	default:
-        return 0.f;
-	}
+    {
+        case NoteDivision::n1:
+            return 0.25f;
+        case NoteDivision::n2:
+            return 0.5f;
+        case NoteDivision::n4:
+            return 1.f;
+        case NoteDivision::n8:
+            return 2.f;
+        case NoteDivision::n16:
+            return 4.f;
+        case NoteDivision::n32:
+            return 8.f;
+        case NoteDivision::n64:
+            return 16.f;
+        default:
+            return 0.f;
+    }
 }
 
 int ORchestraAudioProcessor::GetNoteLength(float noteDiv)

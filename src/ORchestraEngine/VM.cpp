@@ -38,7 +38,7 @@ void VM::Reset()
     mErrorReporting->Clear();
 }
 
-std::vector<LogEntry>& VM::GetErrors()
+const std::vector<LogEntry>& VM::GetErrors()
 {
     return mErrorReporting->GetErrors();
 }

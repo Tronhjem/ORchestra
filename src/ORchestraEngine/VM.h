@@ -31,7 +31,7 @@ public:
     bool Tick(std::vector<SequenceStep>& stepQueue, const int globalCount);
     void Reset();
     StepData GetTopStackValue() { return mStack.Top(); }
-    std::vector<LogEntry>& GetErrors();
+    const std::vector<LogEntry>& GetErrors();
 
 private:
     bool ProcessOpCodes(std::vector<Instruction>& setupInstructions);

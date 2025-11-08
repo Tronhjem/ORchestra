@@ -52,28 +52,26 @@ public:
     bool producesMidi() const override;
     bool isMidiEffect() const override;
     double getTailLengthSeconds() const override;
-
     int getNumPrograms() override;
     int getCurrentProgram() override;
     void setCurrentProgram (int index) override;
     const juce::String getProgramName (int index) override;
     void changeProgramName (int index, const juce::String& newName) override;
-
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
     
     juce::AudioProcessorValueTreeState& GetValueTree() { return mValueTree; };
-    
     const TransportData& GetTransportData() { return mTransportData; };
-    char* GetFileText();
-    std::vector<LogEntry>& GetErrors();
-    std::array<std::vector<SequenceStep>, STEP_BUFFER_SIZE>& GetStepData() { return mORchestraEngine->GetStepData(); }
+    
+    const std::string& LoadFile(const std::string& filePath) { return mORchestraEngine->LoadFile(filePath); };
+    void SaveToFile(const std::string& data) {mORchestraEngine->SaveToFile(data); };
+    void Compile(const std::string& data) {mORchestraEngine->Compile(data); };
+    void SetInstructionData(const std::string& data) { mORchestraEngine->SetInstructionData(data); };
+    const std::string& GetInstructionData() { return mORchestraEngine->GetInstructionData(); };
     int GetGlobalStepCount() { return mORchestraEngine->GetGlobalStepCount(); }
-    
-    char* LoadFile(const std::string& filePath);
-    void SaveFile(const std::string& data);
-    void Compile(const std::string& data);
-    
+    std::array<std::vector<SequenceStep>, STEP_BUFFER_SIZE>& GetStepData() { return mORchestraEngine->GetStepData(); }
+    const std::vector<LogEntry>& GetErrors() { return mORchestraEngine->GetErrors(); }
+
     bool IsRunning = false;
     double mSampleRate = 44100.0;
 
