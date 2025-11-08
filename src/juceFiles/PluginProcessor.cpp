@@ -10,9 +10,15 @@
 #include "PluginEditor.h"
 
 //==============================================================================
-ORchestraAudioProcessor::ORchestraAudioProcessor()
+ORchestraAudioProcessor::ORchestraAudioProcessor() :
+    mValueTree(*this, nullptr, juce::Identifier("ORchestra"),
+    {
+        std::make_unique<juce::AudioParameterFloat>(bpmParamId, "Bpm", 0, 300, 120),
+        std::make_unique<juce::AudioParameterChoice>(noteDivisionId, "Note Division", mNoteDivisions, static_cast<int>(NoteDivision::n4))
+    })
+
 #ifndef JucePlugin_PreferredChannelConfigurations
-     : AudioProcessor (BusesProperties()
+    , AudioProcessor (BusesProperties()
                      #if ! JucePlugin_IsMidiEffect
                       #if ! JucePlugin_IsSynth
                        .withInput  ("Input",  juce::AudioChannelSet::stereo(), true)
@@ -21,14 +27,19 @@ ORchestraAudioProcessor::ORchestraAudioProcessor()
                      #endif
                        )
 #endif
+
 {
+    
     mORchestraEngine = std::make_unique<ORchestraEngine>();
     
     mTransportData.timeInSamples = 0;
     mTransportData.sampleRate = 44100;
-    mBpm = 60.0;
-    mTempoDivision = NoteDivision::n4;
+//    mBpm = 60.0;
+//    mTempoDivision = NoteDivision::n4;
     mNoteLength = NoteDivision::n4;
+
+    mBpm = mValueTree.getRawParameterValue(bpmString);
+    mNoteDivision = mValueTree.getRawParameterValue(noteDivisionString);
 }
 
 ORchestraAudioProcessor::~ORchestraAudioProcessor()
@@ -179,9 +190,11 @@ void ORchestraAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juc
     
 //    FillPositionData(mTransportData);
     
-    mTransportData.bpmDivision = GetBpmDivision(mTempoDivision);
-    mTransportData.bpm = mBpm;
+    const int noteDiv = static_cast<int>(*mNoteDivision);
+    mTransportData.bpmDivision = GetBpmDivision(static_cast<NoteDivision>(noteDiv));
+    mTransportData.bpm = static_cast<double>(*mBpm);
     mTransportData.noteLengthInSamples = GetNoteLength(mNoteLength);
+    
     mORchestraEngine->Tick(mTransportData, bufferLength, midiMessages);
     
     if (IsRunning)
@@ -306,5 +319,5 @@ float ORchestraAudioProcessor::GetBpmDivision(NoteDivision noteDiv)
 
 int ORchestraAudioProcessor::GetNoteLength(NoteDivision noteDiv)
 {
-    return static_cast<int>(mSampleRate * (60.0 / (mBpm * GetBpmDivision(noteDiv))));
+    return static_cast<int>(mSampleRate * (60.0 / (*mBpm * GetBpmDivision(noteDiv))));
 }

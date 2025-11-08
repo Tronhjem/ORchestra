@@ -15,6 +15,11 @@
 #include "StepData.h"
 #include "ErrorReporting.h"
 
+const StringRef bpmString {"bpm"};
+const StringRef noteDivisionString {"note-division"};
+const juce::ParameterID bpmParamId {bpmString, 1};
+const juce::ParameterID noteDivisionId {noteDivisionString, 1};
+
 enum class NoteDivision
 {
     n1,
@@ -61,8 +66,10 @@ public:
 
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
+    
+    juce::AudioProcessorValueTreeState& GetValueTree() { return mValueTree; };
+    
     const TransportData& GetTransportData() { return mTransportData; };
-    double mSampleRate = 44100.0;
     char* GetFileText();
     std::vector<LogEntry>& GetErrors();
     std::array<std::vector<SequenceStep>, STEP_BUFFER_SIZE>& GetStepData() { return mORchestraEngine->GetStepData(); }
@@ -72,11 +79,13 @@ public:
     void SaveFile(std::string& data);
     void Compile(std::string& data);
     
-    void SetTempoDivision(NoteDivision division) { mTempoDivision = division; }
+//    void SetTempoDivision(NoteDivision division) { mTempoDivision = division; }
     void SetNoteLength(NoteDivision division) { mNoteLength = division; }
-    void SetBpm(double bpm) { mBpm = bpm; }
-    bool IsRunning = false;
+    void SetBpm(double bpm) { }
     
+    bool IsRunning = false;
+    double mSampleRate = 44100.0;
+
 private:
     void FillPositionData(TransportData& data);
     TransportData mTransportData;
@@ -84,11 +93,14 @@ private:
     inline float GetBpmDivision(NoteDivision noteDiv);
     inline int GetNoteLength(NoteDivision noteDiv);
 
-    double mBpm = 120;
-    NoteDivision mTempoDivision;
+    std::atomic<float>* mBpm;
+    std::atomic<float>* mNoteDivision;
+//    NoteDivision mTempoDivision;
     NoteDivision mNoteLength;
     
     juce::String mSavedFilePath {""};
+    juce::StringArray mNoteDivisions{ "1n", "2n", "4n", "8n", "16n", "32n", "64n"};
+    juce::AudioProcessorValueTreeState mValueTree;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ORchestraAudioProcessor)
 };

@@ -30,6 +30,9 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor (ORchestraAudioProc
     setSize (WINDOW_WIDTH, WINDOW_HEIGHT);
     
     audioProcessor.addChangeListener(this);
+    juce::AudioProcessorValueTreeState& valueTree = audioProcessor.GetValueTree();
+    mBpmSliderAttachment.reset (new SliderAttachment(valueTree, "bpm", mBpmBox));
+    mNoteDivisionAttachment.reset (new ComboBoxAttachment(valueTree, "note-division", mNoteDivisonBox));
     
     mGeneralLookAndFeel = std::make_unique<GeneralLookAndFeel>();
     mButtonLookAndFeel = std::make_unique<ButtonLookAndFeel>();
@@ -38,7 +41,6 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor (ORchestraAudioProc
 //    codeEditor.reset(new juce::CodeEditorComponent(codeDocument, &tokeniser));
 //    codeEditor->setTabSize(4, true);
 //    codeEditor->setLineNumbersShown(true);
-//    codeEditor->loadContent("print(\"Hello, world!\")");
     
     int buttonXStart = OUTER_MARGIN + buttonWidth * 4.8f + COMPONENT_MARGIN * 2.5f;
     int nextLineY = 20;
@@ -116,7 +118,7 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor (ORchestraAudioProc
     mTogglePlayButton.addListener(this);
     mNoteDivisonBox.addListener(this);
     mNoteLengthSelector.addListener(this);
-    mBpmBox.addListener(this);
+//    mBpmBox.addListener(this);
     
     juce::LookAndFeel::setDefaultLookAndFeel(mGeneralLookAndFeel.get());
     
@@ -240,20 +242,20 @@ void ORchestraAudioProcessorEditor::buttonClicked(juce::Button* button)
 void ORchestraAudioProcessorEditor::comboBoxChanged(ComboBox* changedComboBox)
 {
     int val = changedComboBox->getSelectedItemIndex();
-    if(changedComboBox == &mNoteDivisonBox)
-    {
-        audioProcessor.SetTempoDivision(static_cast<NoteDivision>(val));
-    }
-    else if(changedComboBox == &mNoteLengthSelector)
+//    if(changedComboBox == &mNoteDivisonBox)
+//    {
+//        audioProcessor.SetTempoDivision(static_cast<NoteDivision>(val));
+//    }
+    if(changedComboBox == &mNoteLengthSelector)
     {
         audioProcessor.SetNoteLength(static_cast<NoteDivision>(val));
     }
 }
 
-void ORchestraAudioProcessorEditor::sliderValueChanged(juce::Slider* slider)
-{
-    audioProcessor.SetBpm(slider->getValue());
-}
+//void ORchestraAudioProcessorEditor::sliderValueChanged(juce::Slider* slider)
+//{
+////    audioProcessor.SetBpm(slider->getValue());
+//}
 
 //==============================================================================
 void ORchestraAudioProcessorEditor::paint (juce::Graphics& g)
