@@ -87,7 +87,9 @@ void ORchestraEngine::PreProcessSteps()
     if(stepsToProcess < HALF_STEP_BUFFER_SIZE - 5 /*magic number for processing steps earlier than half*/)
         return;
     
+#if _DEBUG
     ScopedTimer timer {"PreProcess"};
+#endif
     
     //TODO: Make sure this doesn't skip a beat
     const int currentStep = mCurrentProcessingStep.load();
@@ -101,7 +103,9 @@ void ORchestraEngine::PreProcessSteps()
         currentData.clear();
         
         mVM->Tick(currentData, i);
+#if _DEBUG
         std::cout << "global step process " << stepWrapped << " " << (int)currentData[0].mFirst.GetValue(0) << std::endl;
+#endif
         mReadySteps.fetch_add(1, std::memory_order_acq_rel);
     }
     
@@ -171,7 +175,9 @@ void ORchestraEngine::Tick(const TransportData& transportData,
                     // ScheduledMidiMessage message {step.mType, firstByte, secondByte, channel, timeStamp, step.mDuration};
                     ScheduledMidiMessage message {step.mType, firstByte, secondByte, channel, timeStamp, transportData.noteLengthInSamples};
                     
+#if _DEBUG
                     std::cout << "play step " << wrappedGlobalStep << " " << (int)firstByte << std::endl;
+#endif
                     mMidiScheduler.PostMidi(message);
                 }
             }
