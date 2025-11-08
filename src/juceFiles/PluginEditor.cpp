@@ -14,6 +14,7 @@
 #include "TitleBarComponent.h"
 #include "ErrorReporting.h"
 #include "ParamConstants.h"
+#include <ctime>
 
 constexpr int WINDOW_WIDTH = 800;
 constexpr int WINDOW_HEIGHT = 600;
@@ -26,7 +27,7 @@ constexpr int codeEditorHeight = 300;
 
 //==============================================================================
 ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor (ORchestraAudioProcessor& p)
-    : AudioProcessorEditor (&p), audioProcessor (p)
+: AudioProcessorEditor (&p), audioProcessor (p), mEditorIsDirty(false)
 {
     setSize (WINDOW_WIDTH, WINDOW_HEIGHT);
     
@@ -57,11 +58,11 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor (ORchestraAudioProc
     buttonXStart = OUTER_MARGIN;
     mTogglePlayButton.setBounds(buttonXStart, nextLineY, buttonWidth, buttonHeight);
     
-    buttonXStart += buttonWidth + COMPONENT_MARGIN;
-    mSaveFileButton.setBounds(buttonXStart, nextLineY, buttonWidth, buttonHeight);
-    
-    buttonXStart += buttonWidth + COMPONENT_MARGIN;
-    mLoadFileButton.setBounds(buttonXStart, nextLineY, buttonWidth, buttonHeight);
+//    buttonXStart += buttonWidth + COMPONENT_MARGIN;
+//    mSaveFileButton.setBounds(buttonXStart, nextLineY, buttonWidth, buttonHeight);
+//    
+//    buttonXStart += buttonWidth + COMPONENT_MARGIN;
+//    mLoadFileButton.setBounds(buttonXStart, nextLineY, buttonWidth, buttonHeight);
     
     buttonXStart += buttonWidth + COMPONENT_MARGIN;
     mCompileButton.setBounds(buttonXStart, nextLineY, buttonWidth * 1.5f, buttonHeight);
@@ -172,12 +173,13 @@ ORchestraAudioProcessorEditor::~ORchestraAudioProcessorEditor()
 void ORchestraAudioProcessorEditor::changeListenerCallback(juce::ChangeBroadcaster* broadCaster)
 {
     const std::string& data = audioProcessor.GetInstructionData();
-    juce::String dataAsString {data};
+    const juce::String dataAsString {data};
     mCodeEditorTextBox.setText(dataAsString);
 }
 
 void ORchestraAudioProcessorEditor::textEditorTextChanged(juce::TextEditor& editor)
 {
+    mEditorIsDirty = true;
 }
 
 void ORchestraAudioProcessorEditor::buttonClicked(juce::Button* button)
@@ -229,6 +231,7 @@ void ORchestraAudioProcessorEditor::buttonClicked(juce::Button* button)
         juce::String text = mCodeEditorTextBox.getText();
         std::string utf8Text = text.toRawUTF8();
         audioProcessor.Compile(utf8Text);
+        mEditorIsDirty = false;
     }
 }
 
@@ -236,6 +239,7 @@ void ORchestraAudioProcessorEditor::buttonClicked(juce::Button* button)
 void ORchestraAudioProcessorEditor::paint (juce::Graphics& g)
 {
     g.fillAll (ORchestraColours::Background);
+    mCompileButton.setEnabled(mEditorIsDirty);
 }
 
 void ORchestraAudioProcessorEditor::resized()

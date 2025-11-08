@@ -84,7 +84,7 @@ void ORchestraEngine::PreProcessSteps()
     const int readySteps = mReadySteps.load();
     const int stepsToProcess = STEP_BUFFER_SIZE - 1 - readySteps; // leave the last step unprocessed.
     
-    if(stepsToProcess < HALF_STEP_BUFFER_SIZE)
+    if(stepsToProcess < HALF_STEP_BUFFER_SIZE - 5 /*magic number for processing steps earlier than half*/)
         return;
     
     ScopedTimer timer {"PreProcess"};
@@ -101,9 +101,10 @@ void ORchestraEngine::PreProcessSteps()
         currentData.clear();
         
         mVM->Tick(currentData, i);
+        std::cout << "global step process " << stepWrapped << " " << (int)currentData[0].mFirst.GetValue(0) << std::endl;
+        mReadySteps.fetch_add(1, std::memory_order_acq_rel);
     }
     
-    mReadySteps.fetch_add(stepsToProcess, std::memory_order_acq_rel);
     mCurrentProcessingStep.fetch_add(stepsToProcess, std::memory_order_acq_rel);
 }
 
@@ -133,9 +134,19 @@ void ORchestraEngine::Tick(const TransportData& transportData,
         
         // if the end of the buffer is longer than the next tick time
         // Check if we should tick in this buffer.
-        if (mIsVMInit && endOfBufferInSamples >= nextStepInSamples)
+#if _DEBUG
+        if (mLastStep == currentStep)
         {
-            ScopedTimer timer {"Process Beat"};
+            JUCE_BREAK_IN_DEBUGGER;
+        }
+        lastTimeInSamples = transportData.timeInSamples;
+#endif
+        
+        if (mIsVMInit && endOfBufferInSamples >= nextStepInSamples && currentStep != mLastStep)
+        {
+            mLastStep = currentStep;
+            
+//            ScopedTimer timer {"Process Beat"};
             mSamplesSinceLastStep = transportData.timeInSamples;
             const int wrappedGlobalStep = currentStep % STEP_BUFFER_SIZE;
             const std::vector<SequenceStep>& currentData = mStepRingBuffer[wrappedGlobalStep];
@@ -160,6 +171,7 @@ void ORchestraEngine::Tick(const TransportData& transportData,
                     // ScheduledMidiMessage message {step.mType, firstByte, secondByte, channel, timeStamp, step.mDuration};
                     ScheduledMidiMessage message {step.mType, firstByte, secondByte, channel, timeStamp, transportData.noteLengthInSamples};
                     
+                    std::cout << "play step " << wrappedGlobalStep << " " << (int)firstByte << std::endl;
                     mMidiScheduler.PostMidi(message);
                 }
             }

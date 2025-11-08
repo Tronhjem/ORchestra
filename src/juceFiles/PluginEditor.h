@@ -44,6 +44,7 @@ private:
     ORchestraAudioProcessor& audioProcessor;
     void changeListenerCallback(juce::ChangeBroadcaster* broadCaster) override;
     
+    bool mEditorIsDirty = false;
     std::unique_ptr<GeneralLookAndFeel> mGeneralLookAndFeel;
     std::unique_ptr<ButtonLookAndFeel> mButtonLookAndFeel;
     std::unique_ptr<TextEditorLookAndFeel> mTextEditorLookAndFeel;
@@ -72,6 +73,7 @@ private:
     Timeline timeline;
     juce::TextEditor mCodeEditorTextBox;
     juce::TextEditor mErrorTextBox;
+    
 
 //    juce::CodeDocument codeDocument;
 //       juce::CodeTokeniser tokeniser; // You can subclass this or use CppTokeniser, LuaTokeniser, etc.

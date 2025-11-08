@@ -22,11 +22,13 @@ the tests with the juce framework unit testing code.
 It's the program is evaluated from top to bottom.
 You will have to declare anything first that you will use later.
 
-Usually this means sequences are created first, then tracks, the sequences triggers to tracks then outputs.
+Usually this means you want to create any data sequences first, then tracks.
 
+General information:
 - New line is a new instruction, it's looking for `\n`
 - All white space is ignored in a line
 - Use `//` for comments until the end of the line
+- Any value is converted into a 8bit integer, but limited to be between 0 and 127, for compatability with MIDI.
 
 ### Operators
 

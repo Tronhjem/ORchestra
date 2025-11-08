@@ -2,6 +2,7 @@
 
 #include <JuceHeader.h>
 #include <memory>
+#include <ctime>
 
 #include "TransportData.h"
 #include "MidiScheduler.h"
@@ -36,6 +37,10 @@ private:
     void PreProcessSteps();
     inline void Initialize();
     std::string mInstructionData;
+#if _DEBUG
+    int mLastStep = -1;
+    int64_t lastTimeInSamples = 0;
+#endif
     
     int64_t mSamplesSinceLastStep = 0;
     std::atomic<int> mReadySteps;
