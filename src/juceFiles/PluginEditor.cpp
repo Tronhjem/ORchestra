@@ -16,13 +16,13 @@
 #include "ParamConstants.h"
 #include <ctime>
 
-constexpr int WINDOW_WIDTH = 800;
-constexpr int WINDOW_HEIGHT = 600;
+constexpr int WINDOW_WIDTH = 1000;
+constexpr int WINDOW_HEIGHT = 800;
 constexpr int COMPONENT_MARGIN = 15;
 constexpr int OUTER_MARGIN = 20;
 const int buttonWidth = 50;
 constexpr int buttonHeight = 20;
-constexpr int codeEditorWidth = 400;
+constexpr int codeEditorWidth = WINDOW_WIDTH - 2 * OUTER_MARGIN;
 constexpr int codeEditorHeight = 300;
 
 //==============================================================================
@@ -42,7 +42,7 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor (ORchestraAudioProc
 //    codeEditor->setTabSize(4, true);
 //    codeEditor->setLineNumbersShown(true);
     
-    int buttonXStart = OUTER_MARGIN + buttonWidth * 4.8f + COMPONENT_MARGIN * 2.5f;
+    int buttonXStart = OUTER_MARGIN + buttonWidth * 2.2f + COMPONENT_MARGIN * 2.5f;
     int nextLineY = 20;
     
     mTempoDivLabel.setBounds(buttonXStart, nextLineY, buttonWidth * 2.f, buttonHeight);
@@ -58,12 +58,6 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor (ORchestraAudioProc
     buttonXStart = OUTER_MARGIN;
     mTogglePlayButton.setBounds(buttonXStart, nextLineY, buttonWidth, buttonHeight);
     
-//    buttonXStart += buttonWidth + COMPONENT_MARGIN;
-//    mSaveFileButton.setBounds(buttonXStart, nextLineY, buttonWidth, buttonHeight);
-//    
-//    buttonXStart += buttonWidth + COMPONENT_MARGIN;
-//    mLoadFileButton.setBounds(buttonXStart, nextLineY, buttonWidth, buttonHeight);
-    
     buttonXStart += buttonWidth + COMPONENT_MARGIN;
     mCompileButton.setBounds(buttonXStart, nextLineY, buttonWidth * 1.5f, buttonHeight);
 
@@ -76,16 +70,21 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor (ORchestraAudioProc
     buttonXStart += buttonWidth + COMPONENT_MARGIN;
     mNoteLengtSelectorBox.setBounds(buttonXStart, nextLineY, buttonWidth * 1.5f, buttonHeight);
     
+    buttonXStart += buttonWidth * 1.5f + COMPONENT_MARGIN;
+    mExportToFileButton.setBounds(buttonXStart, nextLineY, buttonWidth * 1.2f, buttonHeight);
+
+    buttonXStart += buttonWidth * 1.2f + COMPONENT_MARGIN;
+    mImportFileButton.setBounds(buttonXStart, nextLineY, buttonWidth * 1.2f, buttonHeight);
+    
     // ======== NEW LINE ============
     nextLineY += buttonHeight + COMPONENT_MARGIN;
     mCodeEditorTextBox.setBounds(OUTER_MARGIN, nextLineY, codeEditorWidth, codeEditorHeight);
     
-    mErrorTextBox.setBounds(OUTER_MARGIN + codeEditorWidth,
-                       nextLineY, WINDOW_WIDTH - codeEditorWidth - OUTER_MARGIN - OUTER_MARGIN,
-                       codeEditorHeight);
+    nextLineY += codeEditorHeight;
+    mErrorTextBox.setBounds(OUTER_MARGIN, nextLineY, codeEditorWidth, 40);
     
     // ======== NEW LINE ============
-    nextLineY += codeEditorHeight + COMPONENT_MARGIN;
+    nextLineY += 40 + COMPONENT_MARGIN;
     timeline.setBounds(OUTER_MARGIN, nextLineY, 760, 260);
     
 	mBpmBox.setSliderStyle(Slider::SliderStyle::LinearBarVertical);
@@ -105,8 +104,8 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor (ORchestraAudioProc
     mTempoDivisionSelectorBox.addItemList(mNoteDivisions, 3);
     mNoteLengtSelectorBox.addItemList(mNoteDivisions, 3);
 
-    mSaveFileButton.addListener(this);
-    mLoadFileButton.addListener(this);
+    mExportToFileButton.addListener(this);
+    mImportFileButton.addListener(this);
     mCompileButton.addListener(this);
     mCodeEditorTextBox.addListener(this);
     mTogglePlayButton.addListener(this);
@@ -114,8 +113,8 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor (ORchestraAudioProc
     juce::LookAndFeel::setDefaultLookAndFeel(mGeneralLookAndFeel.get());
     
     mTogglePlayButton.setLookAndFeel(mButtonLookAndFeel.get());
-    mSaveFileButton.setLookAndFeel(mButtonLookAndFeel.get());
-    mLoadFileButton.setLookAndFeel(mButtonLookAndFeel.get());
+    mExportToFileButton.setLookAndFeel(mButtonLookAndFeel.get());
+    mImportFileButton.setLookAndFeel(mButtonLookAndFeel.get());
     mCompileButton.setLookAndFeel(mButtonLookAndFeel.get());
     mCodeEditorTextBox.setLookAndFeel(mTextEditorLookAndFeel.get());
     mErrorTextBox.setLookAndFeel(mTextEditorLookAndFeel.get());
@@ -141,8 +140,8 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor (ORchestraAudioProc
     addAndMakeVisible(mBpmLabel);
     addAndMakeVisible(mNoteLengthLabel);
     addAndMakeVisible(mTogglePlayButton);
-    addAndMakeVisible(mSaveFileButton);
-    addAndMakeVisible(mLoadFileButton);
+    addAndMakeVisible(mExportToFileButton);
+    addAndMakeVisible(mImportFileButton);
     addAndMakeVisible(mCompileButton);
     addAndMakeVisible(mTempoDivisionSelectorBox);
     addAndMakeVisible(mNoteLengtSelectorBox);
@@ -163,8 +162,8 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor (ORchestraAudioProc
 ORchestraAudioProcessorEditor::~ORchestraAudioProcessorEditor()
 {
     mTogglePlayButton.setLookAndFeel(nullptr);
-    mSaveFileButton.setLookAndFeel(nullptr);
-    mLoadFileButton.setLookAndFeel(nullptr);
+    mExportToFileButton.setLookAndFeel(nullptr);
+    mImportFileButton.setLookAndFeel(nullptr);
     mCodeEditorTextBox.setLookAndFeel(nullptr);
     
     audioProcessor.removeChangeListener(this);
@@ -189,41 +188,33 @@ void ORchestraAudioProcessorEditor::buttonClicked(juce::Button* button)
         audioProcessor.IsRunning = !audioProcessor.IsRunning;
         mTogglePlayButton.setButtonText(audioProcessor.IsRunning ? "Stop" : "Play");
     }
-    else if(button == &mSaveFileButton)
+    else if(button == &mExportToFileButton)
     {
         //TODO: Should we compile before saving?
-        juce::String text = mCodeEditorTextBox.getText();
-        std::string utf8Text = text.toRawUTF8();
-        audioProcessor.Compile(utf8Text);
+//        juce::String text = mCodeEditorTextBox.getText();
+//        std::string utf8Text = text.toRawUTF8();
+//        audioProcessor.Compile(utf8Text);
         
         mFileChooser.launchAsync(mFileChooserFlags, [this] (const juce::FileChooser& fc)
         {
             juce::File file = mFileChooser.getResult();
             std::string filePath {file.getFullPathName().toRawUTF8()};
-            audioProcessor.SaveToFile(filePath);
+            audioProcessor.ExportToFile(filePath);
         });
         
-        const std::vector<LogEntry>& errors = audioProcessor.GetErrors();
-        if(errors.size() > 0)
-            mErrorTextBox.setText(errors[0].mMessage);
-        else
-            mErrorTextBox.setText("");
+        UpdateErrors();
     }
-    else if(button == &mLoadFileButton)
+    else if(button == &mImportFileButton)
     {
         mFileChooser.launchAsync(mFileChooserFlags, [this] (const juce::FileChooser& fc)
         {
             juce::File file = mFileChooser.getResult();
             std::string filePath {file.getFullPathName().toRawUTF8()};
-            const std::string& data = audioProcessor.LoadFile(filePath);
+            const std::string& data = audioProcessor.ImportFromFile(filePath);
             juce::String dataAsString {data};
             mCodeEditorTextBox.setText(dataAsString);
             
-            const std::vector<LogEntry>& errors = audioProcessor.GetErrors();
-            if(errors.size() > 0)
-                mErrorTextBox.setText(errors[0].mMessage);
-            else
-                mErrorTextBox.setText("");
+            UpdateErrors();
         });
     }
     else if (button == &mCompileButton)
@@ -232,7 +223,18 @@ void ORchestraAudioProcessorEditor::buttonClicked(juce::Button* button)
         std::string utf8Text = text.toRawUTF8();
         audioProcessor.Compile(utf8Text);
         mEditorIsDirty = false;
+        
+        UpdateErrors();
     }
+}
+
+void ORchestraAudioProcessorEditor::UpdateErrors()
+{
+    const std::vector<LogEntry>& errors = audioProcessor.GetErrors();
+    if(errors.size() > 0)
+        mErrorTextBox.setText(errors[0].mMessage);
+    else
+        mErrorTextBox.setText("Compiled successfully!");
 }
 
 //==============================================================================

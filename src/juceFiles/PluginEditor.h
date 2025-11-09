@@ -43,15 +43,16 @@ public:
 private:
     ORchestraAudioProcessor& audioProcessor;
     void changeListenerCallback(juce::ChangeBroadcaster* broadCaster) override;
+    inline void UpdateErrors();
     
     bool mEditorIsDirty = false;
     std::unique_ptr<GeneralLookAndFeel> mGeneralLookAndFeel;
     std::unique_ptr<ButtonLookAndFeel> mButtonLookAndFeel;
     std::unique_ptr<TextEditorLookAndFeel> mTextEditorLookAndFeel;
-    
+
     juce::TextButton mTogglePlayButton {"Play"};
-    juce::TextButton mLoadFileButton {"Load"};
-    juce::TextButton mSaveFileButton {"Save"};
+    juce::TextButton mImportFileButton {"Import"};
+    juce::TextButton mExportToFileButton {"Export"};
     juce::TextButton mCompileButton {"Compile"};
 
     juce::Label mTempoDivLabel{"tempo", "Tempo Division"};

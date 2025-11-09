@@ -794,6 +794,6 @@ void Compiler::ThrowMissingParamCount(int expected, int received)
 
 void Compiler::ThrowUnexpectedEnd(std::string& missingToken)
 {
-    std::string message = "Unexpted end, you're missing a " + missingToken;
+    std::string message = "Unexpected end, you're missing a " + missingToken;
     mErrorReporting.LogError(Peek().mLine, message);
 }

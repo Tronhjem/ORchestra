@@ -23,7 +23,7 @@ ORchestraEngine::~ORchestraEngine()
         mWorkerThread.join();
 }
 
-void ORchestraEngine::SaveToFile(const std::string& filePath)
+void ORchestraEngine::ExportToFile(const std::string& filePath)
 {
     const bool fileSaved = mFileLoader->SaveToFile(filePath, mInstructionData);
     
@@ -33,7 +33,7 @@ void ORchestraEngine::SaveToFile(const std::string& filePath)
     }
 }
 
-const std::string& ORchestraEngine::LoadFile(const std::string& filePath)
+const std::string& ORchestraEngine::ImportFromFile(const std::string& filePath)
 {
     mInstructionData = mFileLoader->LoadFile(filePath);
     
@@ -60,11 +60,6 @@ void ORchestraEngine::Initialize()
     mVM->Reset();
     
     mIsVMInit.store(mVM->Prepare(&mInstructionData[0]));
-}
-
-const std::vector<LogEntry>& ORchestraEngine::GetErrors()
-{
-    return mVM->GetErrors();
 }
 
 void ORchestraEngine::WorkerThreadLoop()
@@ -138,16 +133,17 @@ void ORchestraEngine::Tick(const TransportData& transportData,
         
         // if the end of the buffer is longer than the next tick time
         // Check if we should tick in this buffer.
-#if _DEBUG
-        if (mLastStep == currentStep)
-        {
-            JUCE_BREAK_IN_DEBUGGER;
-        }
-        lastTimeInSamples = transportData.timeInSamples;
-#endif
         
-        if (mIsVMInit && endOfBufferInSamples >= nextStepInSamples && currentStep != mLastStep)
+//        if (mIsVMInit && endOfBufferInSamples >= nextStepInSamples && currentStep != mLastStep)
+        if (mIsVMInit && endOfBufferInSamples >= nextStepInSamples)
         {
+#if _DEBUG
+            if (mLastStep == currentStep)
+            {
+                JUCE_BREAK_IN_DEBUGGER;
+            }
+            lastTimeInSamples = transportData.timeInSamples;
+#endif
             mLastStep = currentStep;
             
 //            ScopedTimer timer {"Process Beat"};

@@ -18,6 +18,7 @@
 
 class Instruction;
 
+
 /// This is the virtual machine that takes care of initializing the Scanner and Compiler
 /// to first read the file, compile it into OpCodes and then later run the OpCodes on each Tick
 /// to populate the SequenceSteps for the ORChestra Engine and MidiScheduler.
@@ -37,6 +38,13 @@ private:
     bool ProcessOpCodes(std::vector<Instruction>& setupInstructions);
     bool ProcessInstruction(const Instruction& instruction, const int stepCount);
     
+    std::unique_ptr<ErrorReporting> mErrorReporting;
+    std::unordered_map<std::string, DataSequence> mVariables;
+    std::vector<Instruction> mRuntimeInstructions;
+    inline uChar RandomValue(const uChar low, const uChar high);
+
+    Stack<StepData> mStack;
+    
     template<typename Operation>
     void PopDoOperationAndPush(Operation op)
     {
@@ -48,11 +56,4 @@ private:
         const StepData result = a.ApplySequenceWithOperation(b, op);
         mStack.Push(StepData{result});
     }
-    
-    std::unique_ptr<ErrorReporting> mErrorReporting;
-    std::unordered_map<std::string, DataSequence> mVariables;
-    std::vector<Instruction> mRuntimeInstructions;
-    inline uChar RandomValue(const uChar low, const uChar high);
-
-    Stack<StepData> mStack;
 };

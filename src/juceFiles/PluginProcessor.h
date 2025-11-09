@@ -63,8 +63,8 @@ public:
     juce::AudioProcessorValueTreeState& GetValueTree() { return mValueTree; };
     const TransportData& GetTransportData() { return mTransportData; };
     
-    const std::string& LoadFile(const std::string& filePath) { return mORchestraEngine->LoadFile(filePath); };
-    void SaveToFile(const std::string& data) {mORchestraEngine->SaveToFile(data); };
+    const std::string& ImportFromFile(const std::string& filePath) { return mORchestraEngine->ImportFromFile(filePath); };
+    void ExportToFile(const std::string& data) {mORchestraEngine->ExportToFile(data); };
     void Compile(const std::string& data) {mORchestraEngine->Compile(data); };
     void SetInstructionData(const std::string& data) { mORchestraEngine->SetInstructionData(data); };
     const std::string& GetInstructionData() { return mORchestraEngine->GetInstructionData(); };

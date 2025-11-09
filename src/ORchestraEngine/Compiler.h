@@ -17,10 +17,10 @@ public:
     bool Compile(std::vector<Instruction>& runtimeInstructions);
 
 private:
-    Token& Consume();
-    Token& Peek();
-    Token& PeekNext();
-    Token& Previous();
+    inline Token& Consume();
+    inline Token& Peek();
+    inline Token& PeekNext();
+    inline Token& Previous();
     
     inline void ThrowUnexpectedTokenError(Token& tokenForError);
     inline void ThrowMissingExpectedToken(std::string& missingToken);

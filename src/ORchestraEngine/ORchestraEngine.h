@@ -20,23 +20,21 @@ public:
     ORchestraEngine();
     ~ORchestraEngine();
     void Tick(const TransportData& transportData, const int bufferLength, juce::MidiBuffer& midiMessages);
-    const std::string& GetSavedFilePath();
-    const std::vector<LogEntry>& GetErrors();
-    const std::string& LoadFile(const std::string& filePath);
-    void SaveToFile(const std::string& filePath);
     void Compile(const std::string& data);
+    const std::string& ImportFromFile(const std::string& filePath);
+    void ExportToFile(const std::string& filePath);
+    
     std::array<std::vector<SequenceStep>, STEP_BUFFER_SIZE>& GetStepData() { return mStepRingBuffer; }
     int GetGlobalStepCount() { return mCurrentGlobalStep.load(); }
-    
+    const std::vector<LogEntry>& GetErrors() { return mVM->GetErrors(); }
     const std::string& GetInstructionData() { return mInstructionData; }
     void SetInstructionData(const std::string& data) { mInstructionData = data; }
     
-    void WorkerThreadLoop();
-    
 private:
+    void WorkerThreadLoop();
     void PreProcessSteps();
     inline void Initialize();
-    std::string mInstructionData;
+    
 #if _DEBUG
     int mLastStep = -1;
     int64_t lastTimeInSamples = 0;
@@ -54,5 +52,7 @@ private:
     std::unique_ptr<FileLoader> mFileLoader;
     std::array<std::vector<SequenceStep>, STEP_BUFFER_SIZE> mStepRingBuffer;
     
+    std::string mInstructionData;
+
     MidiScheduler mMidiScheduler;
 };
