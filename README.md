@@ -17,7 +17,7 @@ Prototype can be found here: <https://github.com/Tronhjem/EuclidsCombinator>
 Tests are provided with a seperate jucer and project for a console app that imports select code and runs
 the tests with the juce framework unit testing code.
 
-# Syntax and rules for ORChestra code
+# Syntax and rules for ORchestra code
 
 It's the program is evaluated from top to bottom.
 You will have to declare anything first that you will use later.
