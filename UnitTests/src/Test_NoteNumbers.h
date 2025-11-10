@@ -19,8 +19,7 @@ public:
 
             StepData result = vm.GetTopStackValue();
             DataUnit value = result.GetValue(0);
-            std::cout << (int)value << std::endl;
-            expect(value == (DataUnit)13 /*C#0 == 13 */);
+            expect(value == 13 /*C#0 == 13 */);
         }
         {
             beginTest("Compiles with Single Note flat number");

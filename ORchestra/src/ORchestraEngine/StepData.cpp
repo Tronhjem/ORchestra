@@ -4,36 +4,21 @@
 #include "Types.h"
 
 StepData::StepData(const DataUnit *data, const int length)
-    : mLength(static_cast<DataUnit>(length))
+    : mLength(length)
 {
 #if _DEBUG
+    assert(length <= MAX_SUB_DIVISION_LENGTH);
     assert(length <= MAX_SUB_DIVISION_LENGTH);
 #endif
 
     SetData(data, mLength);
 }
 
-//StepData::StepData(const DataUnit *data, const DataUnit length)
-//    : mLength(length)
-//{
-//#if _DEBUG
-//    assert(length <= MAX_SUB_DIVISION_LENGTH);
-//#endif
-//
-//    SetData(data, mLength);
-//}
-
 StepData::StepData(const int i)
 {
     mData[0] = static_cast<DataUnit>(i);
-    mLength = static_cast<DataUnit>(1);
+    mLength = 1;
 }
-
-//StepData::StepData(const DataUnit i)
-//{
-//    mData[0] = i;
-//    mLength = static_cast<DataUnit>(1);
-//}
 
 DataUnit StepData::GetValue(const int index) const
 {
@@ -62,9 +47,13 @@ DataUnit StepData::GetEquivalentValueAtIndex(const int index, const int otherLen
     return mData[equivalentIndex];
 }
 
-void StepData::SetData(const DataUnit *data, const DataUnit length)
+void StepData::SetData(const DataUnit *data, const int length)
 {
-    memcpy(mData, data, length);
+#if _DEBUG
+    assert(length <= MAX_SUB_DIVISION_LENGTH);
+#endif
+
+    memcpy(mData, data, static_cast<unsigned long>(length) * sizeof(DataUnit));
     mLength = length;
 }
 

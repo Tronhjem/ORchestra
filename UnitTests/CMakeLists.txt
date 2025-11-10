@@ -25,6 +25,7 @@ target_include_directories(ORchestraTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/${
 
 target_compile_definitions(ORchestraTests
     PRIVATE
+        _TEST=1
         JUCE_WEB_BROWSER=0
         JUCE_USE_CURL=0)
 

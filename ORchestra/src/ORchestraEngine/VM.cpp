@@ -50,7 +50,9 @@ const std::vector<LogEntry> &VM::GetErrors()
 
 bool VM::ProcessOpCodes(std::vector<Instruction> &instructions)
 {
+#if _DEBUG
     ScopedTimer timer("VM Process OpCodes");
+#endif
 
     unsigned long currentIndex = 0;
     auto consume = [&]() -> Instruction &

@@ -651,7 +651,9 @@ bool Compiler::CompileExpression(std::vector<Instruction> &instructions)
 
 bool Compiler::Compile(std::vector<Instruction> &instructions)
 {
+#if _DEBUG
     ScopedTimer timer("Compile");
+#endif
 
     for (;;)
     {

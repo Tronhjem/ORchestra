@@ -12,8 +12,7 @@ ORchestraEngine::ORchestraEngine() : mReadySteps(0),
     mVM = std::make_unique<VM>();
     mFileLoader = std::make_unique<FileLoader>();
 
-    mWorkerThread = std::thread([this]()
-                                { WorkerThreadLoop(); });
+    mWorkerThread = std::thread([this]() { WorkerThreadLoop(); });
 }
 
 ORchestraEngine::~ORchestraEngine()
@@ -133,19 +132,12 @@ void ORchestraEngine::Tick(const TransportData &transportData,
 
         // if the end of the buffer is longer than the next tick time
         // Check if we should tick in this buffer.
-
-        //        if (mIsVMInit && endOfBufferInSamples >= nextStepInSamples && currentStep != mLastStep)
-        if (mIsVMInit && endOfBufferInSamples >= nextStepInSamples)
+        if (mIsVMInit && endOfBufferInSamples >= nextStepInSamples && currentStep != mLastStep)
         {
 #if _DEBUG
             ScopedTimer timer {"Process Beat"};
-//            if (mLastStep == currentStep)
-//            {
-//                JUCE_BREAK_IN_DEBUGGER;
-//            }
-//            lastTimeInSamples = transportData.timeInSamples;
-//            mLastStep = currentStep;
 #endif
+            mLastStep = currentStep;
 
             mSamplesSinceLastStep = transportData.timeInSamples;
             const int wrappedGlobalStep = currentStep % STEP_BUFFER_SIZE;

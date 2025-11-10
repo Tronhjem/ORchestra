@@ -42,7 +42,7 @@ void MidiScheduler::ProcessMidiPosts(juce::MidiBuffer &midiMessages,
             {
                 midiMessages.addEvent(juce::MidiMessage::noteOn(static_cast<int>(message.mChannel),
                                                                 static_cast<int>(message.mFirstByte),
-                                                                static_cast<uint8>(message.mSecondByte)), relativePositionInBuffer);
+                                                                static_cast<unsigned char>(message.mSecondByte)), relativePositionInBuffer);
                 break;
             }
 
@@ -50,7 +50,7 @@ void MidiScheduler::ProcessMidiPosts(juce::MidiBuffer &midiMessages,
             {
                 midiMessages.addEvent(juce::MidiMessage::noteOff(static_cast<int>(message.mChannel),
                                                                   static_cast<int>(message.mFirstByte),
-                                                                  static_cast<uint8>(message.mSecondByte)), 0);
+                                                                  static_cast<unsigned char>(message.mSecondByte)), 0);
                 break;
             }
 
@@ -58,8 +58,7 @@ void MidiScheduler::ProcessMidiPosts(juce::MidiBuffer &midiMessages,
             {
                 midiMessages.addEvent(juce::MidiMessage::controllerEvent(static_cast<int>(message.mChannel),
                                                                   static_cast<int>(message.mFirstByte),
-                                                                  static_cast<int>(message.mSecondByte)), relativePositionInBuffer);
-
+                                                                  static_cast<unsigned char>(message.mSecondByte)), relativePositionInBuffer);
                 break;
             }
 

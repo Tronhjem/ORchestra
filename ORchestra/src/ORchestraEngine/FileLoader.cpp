@@ -12,7 +12,9 @@ FileLoader::FileLoader()
 
 std::string FileLoader::LoadFile(const std::string &filePath)
 {
+#if _DEBUG
     ScopedTimer timer("Read File");
+#endif
 
     std::ifstream file(filePath);
     std::string data;
@@ -44,7 +46,9 @@ bool FileLoader::SaveToFile(const std::string &filePath, const std::string &data
         return false;
     }
 
+#if _DEBUG
     ScopedTimer timer("Write File");
+#endif
 
     file.write(data.c_str(), static_cast<std::streamsize>(data.size()));
 

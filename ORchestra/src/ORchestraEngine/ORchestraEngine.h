@@ -35,11 +35,7 @@ private:
     void PreProcessSteps();
     inline void Initialize();
     
-#if _DEBUG
     int mLastStep = -1;
-    int64_t lastTimeInSamples = 0;
-#endif
-    
     int64_t mSamplesSinceLastStep = 0;
     std::atomic<int> mReadySteps;
     std::atomic<int> mCurrentGlobalStep;
