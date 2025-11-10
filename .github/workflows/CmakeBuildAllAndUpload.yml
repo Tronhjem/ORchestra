@@ -78,17 +78,17 @@ jobs:
       shell: bash
       run: |
         mkdir -p artifacts/${{ matrix.os }}
-        cp build/ORchestr/ORchestra_artefacts/AU/ORchestra.component artifacts/${{ matrix.os }}/
-        cp build/ORchestra/ORchestra_artefacts/VST3/ORchestra.vst3 artifacts/${{ matrix.os }}/
-        cp build/ORchestra/ORchestra_artefacts/Standalone/ORchestra artifacts/${{ matrix.os }}/
+        cp ${{steps.strings.outputs.build-output-dir }}/ORchestra/ORchestra_artefacts/AU/ORchestra.component artifacts/${{ matrix.os }}/
+        cp ${{steps.strings.outputs.build-output-dir }}/ORchestra/ORchestra_artefacts/VST3/ORchestra.vst3 artifacts/${{ matrix.os }}/
+        cp ${{steps.strings.outputs.build-output-dir }}/ORchestra/ORchestra_artefacts/Standalone/ORchestra artifacts/${{ matrix.os }}/
     
     - name: Prepare artifacts (Windows)
       if: startsWith(matrix.os, 'windows')
       shell: bash
       run: |
         mkdir artifacts\${{ matrix.os }}
-        cp build/ORchestra/ORchestra_artefacts/VST3/ORchestra.vst3 artifacts/${{ matrix.os }}/
-        cp build/ORchestra/ORchestra_artefacts/Standalone/ORchestra.exe artifacts/${{ matrix.os }}/
+        cp ${{steps.strings.outputs.build-output-dir }}/ORchestra/ORchestra_artefacts/VST3/ORchestra.vst3 artifacts/${{ matrix.os }}/
+        cp ${{steps.strings.outputs.build-output-dir }}/ORchestra/ORchestra_artefacts/Standalone/ORchestra.exe artifacts/${{ matrix.os }}/
 
     - name: Upload artifacts for ${{ matrix.os }}
       uses: actions/upload-artifact@v4
