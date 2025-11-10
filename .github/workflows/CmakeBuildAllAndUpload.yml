@@ -72,13 +72,23 @@ jobs:
     - name: Build
       # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
       run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
-
-    - name: Prepare platform artifact folder
+    
+    - name: Prepare artifacts (macOS)
+      if: startsWith(matrix.os, 'macos')
       shell: bash
       run: |
-        shopt -s globstar
         mkdir -p artifacts/${{ matrix.os }}
-        cp build/ORchestra/ORchestra_artefacts/**/ORchestra.* artifacts/${{ matrix.os }} 2>/dev/null || true
+        cp build/ORchestr/ORchestra_artefacts/AU/ORchestra.component artifacts/${{ matrix.os }}/
+        cp build/ORchestra/ORchestra_artefacts/VST3/ORchestra.vst3 artifacts/${{ matrix.os }}/
+        cp build/ORchestra/ORchestra_artefacts/Standalone/ORchestra artifacts/${{ matrix.os }}/
+    
+    - name: Prepare artifacts (Windows)
+      if: startsWith(matrix.os, 'windows')
+      shell: bash
+      run: |
+        mkdir artifacts\${{ matrix.os }}
+        cp build/ORchestra/ORchestra_artefacts/VST3/ORchestra.vst3 artifacts/${{ matrix.os }}/
+        cp build/ORchestra/ORchestra_artefacts/Standalone/ORchestra.exe artifacts/${{ matrix.os }}/
 
     - name: Upload artifacts for ${{ matrix.os }}
       uses: actions/upload-artifact@v4
