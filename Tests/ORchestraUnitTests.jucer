@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<JUCERPROJECT id="I6NKaC" name="ORchestraUnitTests" projectType="consoleapp"
+              useAppConfig="0" addUsingNamespaceToJuceHeader="0" displaySplashScreen="1"
+              jucerFormatVersion="1" defines="_TEST" headerPath="../../../src/utils/&#10;../../../src/ORchestraEngine/&#10;../../../src/juceFiles">
+  <MAINGROUP id="KXJX3f" name="ORchestraUnitTests">
+    <GROUP id="{99D7554C-0247-92F8-F092-B98D5967FFD8}" name="fileRefs">
+      <GROUP id="{F9C7F263-4D87-8A52-5C44-C8FD55BA18E6}" name="ORchestra">
+        <FILE id="xw8i3j" name="Compiler.cpp" compile="1" resource="0" file="../src/ORchestraEngine/Compiler.cpp"/>
+        <FILE id="yTdgnV" name="Compiler.h" compile="0" resource="0" file="../src/ORchestraEngine/Compiler.h"/>
+        <FILE id="Uxpa8X" name="CustomMemory.cpp" compile="1" resource="0"
+              file="../src/ORchestraEngine/CustomMemory.cpp"/>
+        <FILE id="jVB08N" name="CustomMemory.h" compile="0" resource="0" file="../src/ORchestraEngine/CustomMemory.h"/>
+        <FILE id="mDir3Z" name="CustomStack.h" compile="0" resource="0" file="../src/ORchestraEngine/CustomStack.h"/>
+        <FILE id="etGmWn" name="DataSequence.cpp" compile="1" resource="0"
+              file="../src/ORchestraEngine/DataSequence.cpp"/>
+        <FILE id="R0gnnV" name="DataSequence.h" compile="0" resource="0" file="../src/ORchestraEngine/DataSequence.h"/>
+        <FILE id="DsQyA8" name="DataSequenceStep.cpp" compile="1" resource="0"
+              file="../src/ORchestraEngine/DataSequenceStep.cpp"/>
+        <FILE id="SFwgjA" name="DataSequenceStep.h" compile="0" resource="0"
+              file="../src/ORchestraEngine/DataSequenceStep.h"/>
+        <FILE id="cLTAO8" name="Defines.h" compile="0" resource="0" file="../src/ORchestraEngine/Defines.h"/>
+        <FILE id="MNuNBg" name="ErrorReporting.cpp" compile="1" resource="0"
+              file="../src/ORchestraEngine/ErrorReporting.cpp"/>
+        <FILE id="XBeGjM" name="ErrorReporting.h" compile="0" resource="0"
+              file="../src/ORchestraEngine/ErrorReporting.h"/>
+        <FILE id="UZu7LK" name="EuclideanGenerator.h" compile="0" resource="0"
+              file="../src/ORchestraEngine/EuclideanGenerator.h"/>
+        <FILE id="KUoCtd" name="FileLoader.cpp" compile="1" resource="0" file="../src/ORchestraEngine/FileLoader.cpp"/>
+        <FILE id="pB0lfW" name="FileLoader.h" compile="0" resource="0" file="../src/ORchestraEngine/FileLoader.h"/>
+        <FILE id="m6UN80" name="Instruction.h" compile="0" resource="0" file="../src/ORchestraEngine/Instruction.h"/>
+        <FILE id="oBhDjd" name="LogicSequence.cpp" compile="1" resource="0"
+              file="../src/ORchestraEngine/LogicSequence.cpp"/>
+        <FILE id="KDaHV9" name="LogicSequence.h" compile="0" resource="0" file="../src/ORchestraEngine/LogicSequence.h"/>
+        <FILE id="E1po6q" name="LogicSequenceCombiner.cpp" compile="1" resource="0"
+              file="../src/ORchestraEngine/LogicSequenceCombiner.cpp"/>
+        <FILE id="FJuTFV" name="LogicSequenceCombiner.h" compile="0" resource="0"
+              file="../src/ORchestraEngine/LogicSequenceCombiner.h"/>
+        <FILE id="JQYfUo" name="MidiScheduler.cpp" compile="1" resource="0"
+              file="../src/ORchestraEngine/MidiScheduler.cpp"/>
+        <FILE id="dpJWPH" name="MidiScheduler.h" compile="0" resource="0" file="../src/ORchestraEngine/MidiScheduler.h"/>
+        <FILE id="oNl9rm" name="ORchestraEngine.cpp" compile="1" resource="0"
+              file="../src/ORchestraEngine/ORchestraEngine.cpp"/>
+        <FILE id="epnHnb" name="ORchestraEngine.h" compile="0" resource="0"
+              file="../src/ORchestraEngine/ORchestraEngine.h"/>
+        <FILE id="eyaWVR" name="Scanner.cpp" compile="1" resource="0" file="../src/ORchestraEngine/Scanner.cpp"/>
+        <FILE id="EF2sgs" name="Scanner.h" compile="0" resource="0" file="../src/ORchestraEngine/Scanner.h"/>
+        <FILE id="SxjOqc" name="StepData.h" compile="0" resource="0" file="../src/ORchestraEngine/StepData.h"/>
+        <FILE id="i4YqGQ" name="StoredFunction.h" compile="0" resource="0"
+              file="../src/ORchestraEngine/StoredFunction.h"/>
+        <FILE id="GByVAz" name="Token.cpp" compile="1" resource="0" file="../src/ORchestraEngine/Token.cpp"/>
+        <FILE id="jIQivk" name="Token.h" compile="0" resource="0" file="../src/ORchestraEngine/Token.h"/>
+        <FILE id="GoH8IV" name="Types.h" compile="0" resource="0" file="../src/ORchestraEngine/Types.h"/>
+        <FILE id="M3Gzfj" name="VM.cpp" compile="1" resource="0" file="../src/ORchestraEngine/VM.cpp"/>
+        <FILE id="LRcI63" name="VM.h" compile="0" resource="0" file="../src/ORchestraEngine/VM.h"/>
+      </GROUP>
+    </GROUP>
+    <GROUP id="{A8C95B41-B00B-6994-8AA7-9BDE10B1B3F2}" name="src">
+      <FILE id="PpZw6I" name="Main.cpp" compile="1" resource="0" file="src/Main.cpp"/>
+      <FILE id="DUM4Qj" name="Test_DataSequence.h" compile="0" resource="0"
+            file="src/Test_DataSequence.h"/>
+      <FILE id="g6tBDx" name="Test_ErrorHandling.h" compile="0" resource="0"
+            file="src/Test_ErrorHandling.h"/>
+      <FILE id="dxF1Rp" name="Test_EuclidAndRandom.h" compile="0" resource="0"
+            file="src/Test_EuclidAndRandom.h"/>
+      <FILE id="jlXYbv" name="test_LogicSequence.h" compile="0" resource="0"
+            file="src/test_LogicSequence.h"/>
+      <FILE id="jOiBoc" name="test_LogicSequenceCombiner.h" compile="0" resource="0"
+            file="src/test_LogicSequenceCombiner.h"/>
+      <FILE id="OsbQKA" name="Test_NoteNumbers.h" compile="0" resource="0"
+            file="src/Test_NoteNumbers.h"/>
+      <FILE id="fTAjsE" name="Test_Operators.h" compile="0" resource="0"
+            file="src/Test_Operators.h"/>
+    </GROUP>
+  </MAINGROUP>
+  <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1"/>
+  <EXPORTFORMATS>
+    <XCODE_MAC targetFolder="Builds/MacOSX">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="1" name="Debug" targetName="EuclidCombinerUnitTests"
+                       headerPath="../../Source/"/>
+        <CONFIGURATION isDebug="0" name="Release" targetName="EuclidCombinerUnitTests"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_audio_basics" path="../../../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../../../JUCE/modules"/>
+        <MODULEPATH id="juce_core" path="../../../../JUCE/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../../../JUCE/modules"/>
+        <MODULEPATH id="juce_events" path="../../../../JUCE/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../../../JUCE/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../../../JUCE/modules"/>
+        <MODULEPATH id="juce_graphics" path="../../../../JUCE/modules"/>
+      </MODULEPATHS>
+    </XCODE_MAC>
+    <VS2022 targetFolder="Builds/VisualStudio2022">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="1" name="Debug"/>
+        <CONFIGURATION isDebug="0" name="Release"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_audio_basics" path="../../juce"/>
+        <MODULEPATH id="juce_audio_devices" path="../../juce"/>
+        <MODULEPATH id="juce_audio_formats" path="../../juce"/>
+        <MODULEPATH id="juce_audio_processors" path="../../juce"/>
+        <MODULEPATH id="juce_core" path="../../juce"/>
+        <MODULEPATH id="juce_data_structures" path="../../juce"/>
+        <MODULEPATH id="juce_events" path="../../juce"/>
+        <MODULEPATH id="juce_graphics" path="../../juce"/>
+        <MODULEPATH id="juce_gui_basics" path="../../juce"/>
+        <MODULEPATH id="juce_gui_extra" path="../../juce"/>
+      </MODULEPATHS>
+    </VS2022>
+  </EXPORTFORMATS>
+  <MODULES>
+    <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_core" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_events" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+  </MODULES>
+</JUCERPROJECT>
