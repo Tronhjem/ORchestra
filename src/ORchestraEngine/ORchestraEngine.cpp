@@ -143,8 +143,8 @@ void ORchestraEngine::Tick(const TransportData& transportData,
                 JUCE_BREAK_IN_DEBUGGER;
             }
             lastTimeInSamples = transportData.timeInSamples;
-#endif
             mLastStep = currentStep;
+#endif
             
 //            ScopedTimer timer {"Process Beat"};
             mSamplesSinceLastStep = transportData.timeInSamples;
