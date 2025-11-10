@@ -1,8 +1,7 @@
 cmake_minimum_required(VERSION 3.22)
 project(ORCHESTRA VERSION 0.0.1)
-add_subdirectory(JUCE)                    # If you've put JUCE in a subdirectory called JUCE
-
-file(GLOB_RECURSE SRC_FILES "src/**/*.cpp")
+add_subdirectory(JUCE)                  # If you've put JUCE in a subdirectory called JUCE
+add_subdirectory(Tests)
 
 juce_add_plugin(ORchestra
     # VERSION ...                               # Set this if the plugin version is different to the project version
@@ -24,6 +23,7 @@ juce_add_plugin(ORchestra
 
 juce_generate_juce_header(ORchestra)
 
+file(GLOB_RECURSE SRC_FILES "src/**/*.cpp")
 target_sources(ORchestra
     PRIVATE
         ${SRC_FILES}

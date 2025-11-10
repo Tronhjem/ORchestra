@@ -11,7 +11,6 @@
 #include "Scanner.h"
 #include "Compiler.h"
 #include "Types.h"
-#include "MidiScheduler.h"
 #include "DataSequence.h"
 #include "StepData.h"
 #include "CustomStack.h"
