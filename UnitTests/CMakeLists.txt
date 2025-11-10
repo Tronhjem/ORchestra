@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 
+
 juce_add_console_app(ORchestraTests
     PRODUCT_NAME "ORchestraTests")
 
@@ -19,6 +20,7 @@ target_sources(ORchestraTests
         ${ORCHESTRA_ENGINE_DIR}/Token.cpp
 )
 
+
 target_include_directories(ORchestraTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/${ORCHESTRA_SOURCE_DIR}/utils)
 target_include_directories(ORchestraTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/${ORCHESTRA_SOURCE_DIR}/juceFiles)
 target_include_directories(ORchestraTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/${ORCHESTRA_ENGINE_DIR})
@@ -36,3 +38,5 @@ target_link_libraries(ORchestraTests
     PUBLIC
         juce::juce_recommended_config_flags
         juce::juce_recommended_warning_flags)
+
+add_test(NAME ORchestraTests COMMAND ORchestraTests)

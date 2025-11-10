@@ -22,5 +22,19 @@ int main(int argc, char *argv[])
     Test_NoteNumbers noteNumbers;
 
     runner.runAllTests();
+    
+    for (int i = 0; i < runner.getNumResults(); ++i)
+    {
+        if (runner.getResult (i)->failures > 0)
+        {
+            std::cout << "Errors for: " << runner.getResult(i)->unitTestName << std::endl;
+            std::cout << runner.getResult(i)->subcategoryName << std::endl;
+            for (auto mes : runner.getResult(i)->messages)
+                std::cout << mes << std::endl;
+
+            return 1;
+        }
+    }
+
     return 0;
 }
