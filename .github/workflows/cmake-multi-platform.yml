@@ -86,5 +86,19 @@ jobs:
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: build-artifacts
-        path: ${{ steps.strings.outputs.build-output-dir }} 
+        name: build-${{ matrix.os }}-${{ matrix.c_compiler }}
+        path: ${{ steps.strings.outputs.build-output-dir }}
+
+    - name: Prepare Release Assets
+      run: |
+        mkdir -p release-assets
+        cp -r ${{ steps.strings.outputs.build-output-dir }}/* release-assets/
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: latest
+        name: "Automated Release"
+        files: release-assets/**
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
