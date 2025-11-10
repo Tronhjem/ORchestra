@@ -4,7 +4,7 @@ template <typename T>
 class Stack
 {
 public:
-    Stack() {};
+    Stack() {}
     T Pop()
     {
 #if _DEBUG
@@ -12,7 +12,7 @@ public:
 #endif
         return mStack[--stackPointer];
     }
-    
+
     void Push(T i)
     {
 #if _DEBUG
@@ -20,12 +20,12 @@ public:
 #endif
         mStack[stackPointer++] = i;
     }
-    
+
     void Clear()
     {
         stackPointer = 0;
     }
-    
+
     T Top()
     {
         return mStack[stackPointer];
@@ -34,5 +34,5 @@ public:
 private:
     // TODO: Should we make this smaller or bigger??
     std::array<T, 64> mStack;
-    int stackPointer = 0;
+    unsigned long stackPointer = 0;
 };

@@ -1,28 +1,30 @@
 #pragma once
 
-enum class OpCode : uChar
+#include "StepData.h"
+
+enum class OpCode : DataUnit
 {
     CONSTANT = 0,
     GET_IDENTIFIER_VALUE,
     GET_IDENTIFIER_WITH_INDEX,
     SET_IDENTIFIER_VALUE,
     SET_IDENTIFIER_ARRAY,
-    
+
     SET_SUBSTEP_ARRAY,
-    
+
     GENERATE_EUCLID_SEQUENCE,
-    
+
     // Math
     ADD,
     SUBTRACT,
     MULTIPLY,
     DIVIDE,
-    
+
     // Logical
     AND,
     OR,
     XOR,
-    
+
     GREATER,
     GREATER_EQUAL,
     LESS,
@@ -34,7 +36,7 @@ enum class OpCode : uChar
     // TRACK,
     NOTE,
     CC,
-    
+
     // Built in Functions
     CALL_FUNCTION,
     GET_RANDOM_IN_RANGE,
@@ -44,13 +46,14 @@ enum class OpCode : uChar
 #endif
 };
 
-class Instruction {
+class Instruction
+{
 public:
-    explicit Instruction(OpCode code) : opCode(code) {}
+    explicit Instruction(OpCode code) : opCode(code), mDataValue() {}
     explicit Instruction(OpCode code, StepData value) : opCode(code), mDataValue(value) {}
     explicit Instruction(OpCode code, std::string name) : opCode(code), mNameValue(name) {}
 
     OpCode opCode;
-    StepData mDataValue = 0;
+    StepData mDataValue;
     std::string mNameValue;
 };

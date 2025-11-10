@@ -1,14 +1,13 @@
 #pragma once
 
-#include <stdint.h>
-#include "DataSequenceStep.h"
+//#include <stdint.h>
 
-typedef unsigned char uChar;
-typedef DataSequenceStep StepData;
+typedef unsigned char DataUnit;
+//static_assert(sizeof(DataUnit) == 1);
+//typedef int DataUnit;
 
-static_assert(sizeof(uChar) == 1);
 
-enum class MidiType : uChar
+enum class MidiType : DataUnit
 {
     NoteOn = 0,
     NoteOff = 2,

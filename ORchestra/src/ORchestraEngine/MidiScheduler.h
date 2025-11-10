@@ -9,9 +9,9 @@
 struct ScheduledMidiMessage
 {
     MidiType mMessageType;
-    uChar mFirstByte;
-    uChar mSecondByte;
-    uChar mChannel;
+    DataUnit mFirstByte;
+    DataUnit mSecondByte;
+    DataUnit mChannel;
     int mScheduledTime;
     int mDuration;
 };

@@ -10,7 +10,7 @@ set(ORCHESTRA_ENGINE_DIR ${ORCHESTRA_SOURCE_DIR}/ORchestraEngine/)
 target_sources(ORchestraTests
     PRIVATE
         src/Main.cpp
-        ${ORCHESTRA_ENGINE_DIR}/DataSequenceStep.cpp
+        ${ORCHESTRA_ENGINE_DIR}/StepData.cpp
         ${ORCHESTRA_ENGINE_DIR}/DataSequence.cpp
         ${ORCHESTRA_ENGINE_DIR}/VM.cpp
         ${ORCHESTRA_ENGINE_DIR}/ErrorReporting.cpp

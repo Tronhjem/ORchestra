@@ -43,3 +43,8 @@ target_link_libraries(ORchestra
         juce::juce_recommended_config_flags
         juce::juce_recommended_lto_flags
         juce::juce_recommended_warning_flags)
+
+# Disable -Wswitch-enum warning for Apple Clang
+if(CMAKE_CXX_COMPILER_ID MATCHES "AppleClang")
+    target_compile_options(ORchestra PRIVATE -Wno-switch-enum)
+endif()

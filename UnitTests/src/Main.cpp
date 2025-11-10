@@ -4,19 +4,23 @@
 #include "Test_ErrorHandling.h"
 #include "Test_DataSequence.h"
 #include "Test_NoteNumbers.h"
+#include "Utility.h"
 
 using namespace juce;
 
-int main (int argc, char* argv[])
+int main(int argc, char *argv[])
 {
+    UNUSED(argc);
+    UNUSED(argv);
+
     UnitTestRunner runner;
-    
+
     Test_Operators opcodeResults;
     Test_EuclidAndRandom euclidAndRandom;
     Test_ErrorHandling errorHandling;
     Test_DataSequence dataSequence;
     Test_NoteNumbers noteNumbers;
-    
+
     runner.runAllTests();
     return 0;
 }

@@ -1,20 +1,30 @@
 #pragma once
 #include <juce_gui_basics/juce_gui_basics.h>
 #include "Colours.h"
+#include "Utility.h"
 
 class TextEditorLookAndFeel : public juce::LookAndFeel_V4
 {
 public:
-    void fillTextEditorBackground(juce::Graphics& g, int width, int height, juce::TextEditor& editor) override
+    void fillTextEditorBackground(juce::Graphics &g, int width, int height, juce::TextEditor &editor) override
     {
-        g.fillAll (ORchestraColours::Background);
+        UNUSED(width);
+        UNUSED(height);
+        UNUSED(editor);
+
+        g.fillAll(ORchestraColours::Background);
     }
-    
-    void drawScrollbar (juce::Graphics& g, juce::ScrollBar& scrollbar,
+
+    void drawScrollbar(juce::Graphics &g, juce::ScrollBar &scrollbar,
                        int x, int y, int width, int height,
                        bool isScrollbarVertical, int thumbStartPosition, int thumbSize,
                        bool isMouseOver, bool isMouseDown) override
     {
+        UNUSED(scrollbar);
+        UNUSED(isMouseOver);
+        UNUSED(isMouseDown);
+        UNUSED(thumbStartPosition);
+
         // Background
         g.setColour(juce::Colours::lightgrey);
         g.fillRect(x, y, width, height);
@@ -26,10 +36,11 @@ public:
         else
             g.fillRoundedRectangle(thumbStartPosition, y, thumbSize, height, 20.4f);
     }
-    
-    void drawTextEditorOutline(juce::Graphics& g, int width, int height, juce::TextEditor& ed) override
-      {
-          g.setColour(ORchestraColours::ButtonBackground); // Or use your palette
-          g.drawRect(0, 0, width, height, 2); // Last parameter is thickness
-      }
+
+    void drawTextEditorOutline(juce::Graphics &g, int width, int height, juce::TextEditor &ed) override
+    {
+        UNUSED(ed);
+        g.setColour(ORchestraColours::ButtonBackground); // Or use your palette
+        g.drawRect(0, 0, width, height, 2);              // Last parameter is thickness
+    }
 };

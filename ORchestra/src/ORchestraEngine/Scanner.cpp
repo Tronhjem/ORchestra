@@ -5,6 +5,11 @@
 #include "Token.h"
 #include "ScopedTimer.h"
 
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wswitch-enum"
+#endif
+
 Scanner::Scanner(ErrorReporting &logger) : mErrorReporting(logger)
 {
 }
@@ -18,7 +23,7 @@ Token Scanner::MakeToken(TokenType tokenType)
     return Token(tokenType, mStart, static_cast<int>(mCurrent - mStart), mCurrentLine);
 }
 
-Token Scanner::MakeErrorToken(char* message, char symbol)
+Token Scanner::MakeErrorToken(char *message, char symbol)
 {
     size_t len = strlen(message);
     message[len] = symbol;
@@ -26,7 +31,7 @@ Token Scanner::MakeErrorToken(char* message, char symbol)
     return Token(TokenType::ERROR, message, (int)strlen(message), mCurrentLine);
 }
 
-void Scanner::SkipWhiteSpace()// append char
+void Scanner::SkipWhiteSpace() // append char
 {
     for (;;)
     {
@@ -59,7 +64,7 @@ void Scanner::SkipWhiteSpace()// append char
     }
 }
 
-bool Scanner::ScanFile(const char* data)
+bool Scanner::ScanFile(const char *data)
 {
     ScopedTimer timer("ScanTokens");
 
@@ -70,9 +75,9 @@ bool Scanner::ScanFile(const char* data)
     {
         Token t = ScanToken();
 
-        if(t.GetType() == TokenType::ERROR)
+        if (t.GetType() == TokenType::ERROR)
         {
-            std::string errorString = std::string(t.mStart, t.mLength);
+            std::string errorString = std::string(t.mStart, static_cast<unsigned long>(t.mLength));
             mErrorReporting.LogError(mCurrentLine, errorString);
             return false;
         }
@@ -91,7 +96,7 @@ Token Scanner::ScanToken()
     SkipWhiteSpace();
 
     mStart = mCurrent;
-    if(IsAtEnd())
+    if (IsAtEnd())
         return MakeToken(TokenType::END);
 
     char c = AdvanceCurrent();
@@ -104,59 +109,59 @@ Token Scanner::ScanToken()
 
     switch (c)
     {
-        case ('\n'):
-        {
-            mCurrentLine++;
-            return MakeToken(TokenType::EOL);
-        }
-            
-        //LOGIC
-        case '&':
-            return MakeToken(TokenType::AND);
-        case '|':
-            return MakeToken(TokenType::OR);
-        case '^':
-            return MakeToken(TokenType::XOR);
-            
-        //Syntax
-        case '(':
-            return MakeToken(TokenType::LEFT_PAREN);
-        case ')':
-            return MakeToken(TokenType::RIGHT_PAREN);
-        case '{':
-            return MakeToken(TokenType::LEFT_BRACE);
-        case '}':
-            return MakeToken(TokenType::RIGHT_BRACE);
-        case '[':
-            return MakeToken(TokenType::LEFT_BRACKET);
-        case ']':
-            return MakeToken(TokenType::RIGHT_BRACKET);
-        case '.':
-            return MakeToken(TokenType::DOT);
-        case ',':
-            return MakeToken(TokenType::COMMA);
-            
-        case '!':
-            return MakeToken(Match('=') ? TokenType::BANG_EQUAL : TokenType::BANG);
-        case '=':
-            return MakeToken(Match('=') ? TokenType::EQUAL_EQUAL : TokenType::EQUAL);
-        case '<':
-            return MakeToken(Match('=') ? TokenType::LESS_EQUAL : TokenType::LESS);
-        case '>':
-            return MakeToken(Match('=') ? TokenType::GREATER_EQUAL : TokenType::GREATER);
-            
-        //MATH
-        case '-':
-            return MakeToken(TokenType::MINUS);
-        case '+':
-            return MakeToken(TokenType::PLUS);
-        case '*':
-            return MakeToken(TokenType::STAR);
-        case '/':
-            return MakeToken(TokenType::SLASH);
-            
-        default:
-            return MakeErrorToken(ERROR_UNEXPECTED_CHAR, c);
+    case ('\n'):
+    {
+        mCurrentLine++;
+        return MakeToken(TokenType::EOL);
+    }
+
+    // LOGIC
+    case '&':
+        return MakeToken(TokenType::AND);
+    case '|':
+        return MakeToken(TokenType::OR);
+    case '^':
+        return MakeToken(TokenType::XOR);
+
+    // Syntax
+    case '(':
+        return MakeToken(TokenType::LEFT_PAREN);
+    case ')':
+        return MakeToken(TokenType::RIGHT_PAREN);
+    case '{':
+        return MakeToken(TokenType::LEFT_BRACE);
+    case '}':
+        return MakeToken(TokenType::RIGHT_BRACE);
+    case '[':
+        return MakeToken(TokenType::LEFT_BRACKET);
+    case ']':
+        return MakeToken(TokenType::RIGHT_BRACKET);
+    case '.':
+        return MakeToken(TokenType::DOT);
+    case ',':
+        return MakeToken(TokenType::COMMA);
+
+    case '!':
+        return MakeToken(Match('=') ? TokenType::BANG_EQUAL : TokenType::BANG);
+    case '=':
+        return MakeToken(Match('=') ? TokenType::EQUAL_EQUAL : TokenType::EQUAL);
+    case '<':
+        return MakeToken(Match('=') ? TokenType::LESS_EQUAL : TokenType::LESS);
+    case '>':
+        return MakeToken(Match('=') ? TokenType::GREATER_EQUAL : TokenType::GREATER);
+
+    // MATH
+    case '-':
+        return MakeToken(TokenType::MINUS);
+    case '+':
+        return MakeToken(TokenType::PLUS);
+    case '*':
+        return MakeToken(TokenType::STAR);
+    case '/':
+        return MakeToken(TokenType::SLASH);
+
+    default:
+        return MakeErrorToken(ERROR_UNEXPECTED_CHAR, c);
     }
 }
 
@@ -204,10 +209,10 @@ char Scanner::AdvanceCurrent()
 
 bool Scanner::Match(char expected)
 {
-    if(IsAtEnd())
+    if (IsAtEnd())
         return false;
 
-    if(*mCurrent != expected)
+    if (*mCurrent != expected)
         return false;
 
     AdvanceCurrent();
@@ -217,10 +222,10 @@ bool Scanner::Match(char expected)
 TokenType Scanner::IdentifierToken()
 {
     auto checkKeyword = [&](int start, int length,
-                            const char* rest, TokenType type)
+                            const char *rest, TokenType type)
     {
         if (mCurrent - mStart == start + length &&
-            memcmp(mStart + start, rest, length) == 0)
+            memcmp(mStart + start, rest, static_cast<unsigned long>(length)) == 0)
         {
             return type;
         }
@@ -247,7 +252,7 @@ TokenType Scanner::IdentifierToken()
         return checkKeyword(1, 3, "ote", TokenType::NOTE);
     case 'c':
         return checkKeyword(1, 1, "c", TokenType::CC);
-            
+
     case 'C':
     case 'D':
     case 'E':
@@ -261,27 +266,27 @@ TokenType Scanner::IdentifierToken()
 
     default:
         return TokenType::IDENTIFIER;
-            
-//    case 'a':
-//        return checkKeyword(1, 2, "nd", TokenType::AND);
-//    case 'c':
-//        return checkKeyword(1, 4, "lass", TokenType::CLASS);
-//    case 'e':
-//        return checkKeyword(1, 3, "lse", TokenType::ELSE);
-//    case 'i':
-//        return checkKeyword(1, 1, "f", TokenType::IF);
-//    case 'n':
-//        return checkKeyword(1, 2, "il", TokenType::NIL);
-//    case 'o':
-//        return checkKeyword(1, 1, "r", TokenType::OR);
-//    case 'r':
-//        return checkKeyword(1, 5, "eturn", TokenType::RETURN);
-//    case 's':
-//        return checkKeyword(1, 4, "uper", TokenType::SUPER);
-//    case 'v':
-//        return checkKeyword(1, 2, "ar", TokenType::VAR);
-//    case 'w':
-//        return checkKeyword(1, 4, "hile", TokenType::WHILE);
+
+        //    case 'a':
+        //        return checkKeyword(1, 2, "nd", TokenType::AND);
+        //    case 'c':
+        //        return checkKeyword(1, 4, "lass", TokenType::CLASS);
+        //    case 'e':
+        //        return checkKeyword(1, 3, "lse", TokenType::ELSE);
+        //    case 'i':
+        //        return checkKeyword(1, 1, "f", TokenType::IF);
+        //    case 'n':
+        //        return checkKeyword(1, 2, "il", TokenType::NIL);
+        //    case 'o':
+        //        return checkKeyword(1, 1, "r", TokenType::OR);
+        //    case 'r':
+        //        return checkKeyword(1, 5, "eturn", TokenType::RETURN);
+        //    case 's':
+        //        return checkKeyword(1, 4, "uper", TokenType::SUPER);
+        //    case 'v':
+        //        return checkKeyword(1, 2, "ar", TokenType::VAR);
+        //    case 'w':
+        //        return checkKeyword(1, 4, "hile", TokenType::WHILE);
     }
 }
 
@@ -297,7 +302,7 @@ Token Scanner::BuildString()
 {
     while (PeekCurrent() != '"' && !IsAtEnd())
     {
-        if(PeekCurrent() == '\n')
+        if (PeekCurrent() == '\n')
         {
             ++mCurrentLine;
             return MakeErrorToken(ERROR_NO_END_QUOTE, PeekCurrent());
@@ -306,7 +311,7 @@ Token Scanner::BuildString()
         AdvanceCurrent();
     }
 
-    if(IsAtEnd())
+    if (IsAtEnd())
     {
         return MakeErrorToken(ERROR_NO_END_QUOTE, PeekCurrent());
     }
@@ -318,8 +323,8 @@ Token Scanner::BuildString()
 
 Token Scanner::BuildDigit()
 {
-    while( IsDigit( PeekCurrent() )) 
-        AdvanceCurrent(); 
+    while (IsDigit(PeekCurrent()))
+        AdvanceCurrent();
 
     if (PeekCurrent() == '.' && IsDigit(PeekNext()))
     {
@@ -331,3 +336,7 @@ Token Scanner::BuildDigit()
 
     return MakeToken(TokenType::NUMBER);
 }
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif

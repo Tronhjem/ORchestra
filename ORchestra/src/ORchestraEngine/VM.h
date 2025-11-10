@@ -14,6 +14,7 @@
 #include "DataSequence.h"
 #include "StepData.h"
 #include "CustomStack.h"
+#include "SequenceStep.h"
 
 class Instruction;
 
@@ -40,7 +41,7 @@ private:
     std::unique_ptr<ErrorReporting> mErrorReporting;
     std::unordered_map<std::string, DataSequence> mVariables;
     std::vector<Instruction> mRuntimeInstructions;
-    inline uChar RandomValue(const uChar low, const uChar high);
+    inline DataUnit RandomValue(const DataUnit low, const DataUnit high);
 
     Stack<StepData> mStack;
     

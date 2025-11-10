@@ -40,15 +40,13 @@
               file="src/ORchestraEngine/CustomMemory.cpp"/>
         <FILE id="H5UEBs" name="CustomMemory.h" compile="0" resource="0" file="src/ORchestraEngine/CustomMemory.h"/>
       </GROUP>
+      <FILE id="KPfA3b" name="StepData.cpp" compile="1" resource="0" file="src/ORchestraEngine/StepData.cpp"/>
+      <FILE id="hi3TE1" name="SequenceStep.h" compile="0" resource="0" file="src/ORchestraEngine/SequenceStep.h"/>
+      <FILE id="TVv6Lm" name="StepData.h" compile="0" resource="0" file="src/ORchestraEngine/StepData.h"/>
       <GROUP id="{C855EF0D-C022-95C7-9D19-9CAEE7B3CA00}" name="Sequences">
-        <FILE id="TVv6Lm" name="StepData.h" compile="0" resource="0" file="src/ORchestraEngine/StepData.h"/>
         <FILE id="N9kQBM" name="DataSequence.cpp" compile="1" resource="0"
               file="src/ORchestraEngine/DataSequence.cpp"/>
         <FILE id="xCJ6UP" name="DataSequence.h" compile="0" resource="0" file="src/ORchestraEngine/DataSequence.h"/>
-        <FILE id="QAaoHy" name="DataSequenceStep.cpp" compile="1" resource="0"
-              file="src/ORchestraEngine/DataSequenceStep.cpp"/>
-        <FILE id="gmYsX0" name="DataSequenceStep.h" compile="0" resource="0"
-              file="src/ORchestraEngine/DataSequenceStep.h"/>
         <FILE id="JqveyO" name="LogicSequence.cpp" compile="1" resource="0"
               file="src/ORchestraEngine/LogicSequence.cpp"/>
         <FILE id="sqoBjm" name="LogicSequence.h" compile="0" resource="0" file="src/ORchestraEngine/LogicSequence.h"/>

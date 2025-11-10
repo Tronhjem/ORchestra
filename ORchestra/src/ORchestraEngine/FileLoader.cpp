@@ -10,20 +10,21 @@ FileLoader::FileLoader()
 {
 }
 
-std::string FileLoader::LoadFile(const std::string& filePath)
+std::string FileLoader::LoadFile(const std::string &filePath)
 {
     ScopedTimer timer("Read File");
-    
-    std::ifstream file (filePath);
+
+    std::ifstream file(filePath);
     std::string data;
 
-    if (!file) {
+    if (!file)
+    {
         std::cerr << "Could not open file " << filePath << std::endl;
         return data;
     }
-    
+
     file.seekg(0, std::ios::end);
-    size_t fileSize = static_cast<size_t>(file.tellg());
+    long fileSize = static_cast<long>(file.tellg());
     file.seekg(0, std::ios::beg);
 
     data.resize(fileSize);
@@ -33,11 +34,12 @@ std::string FileLoader::LoadFile(const std::string& filePath)
     return data;
 }
 
-bool FileLoader::SaveToFile(const std::string& filePath, const std::string& data)
+bool FileLoader::SaveToFile(const std::string &filePath, const std::string &data)
 {
-    std::ofstream file {filePath, std::ios::binary};
-    
-    if (!file.is_open()) {
+    std::ofstream file{filePath, std::ios::binary};
+
+    if (!file.is_open())
+    {
         std::cerr << "Could not save file: " << filePath << std::endl;
         return false;
     }
@@ -45,7 +47,7 @@ bool FileLoader::SaveToFile(const std::string& filePath, const std::string& data
     ScopedTimer timer("Write File");
 
     file.write(data.c_str(), static_cast<std::streamsize>(data.size()));
-               
+
     file.close();
     return true;
 }
