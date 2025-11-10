@@ -3,5 +3,6 @@ JuceLibraryCode/
 .DS_Store
 .vscode/
 *.dSYM
-
+build/
+*.cmake
 
