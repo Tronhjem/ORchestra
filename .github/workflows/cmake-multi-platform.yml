@@ -3,8 +3,6 @@
 name: CMake on multiple platforms
 
 on:
-  push:
-    branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 
@@ -82,23 +80,3 @@ jobs:
       # Execute tests defined by the CMake configuration. Note that --build-config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
       # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
       run: ctest --build-config ${{ matrix.build_type }}
-      
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: build-${{ matrix.os }}-${{ matrix.c_compiler }}
-        path: ${{ steps.strings.outputs.build-output-dir }}
-
-    - name: Prepare Release Assets
-      run: |
-        mkdir -p release-assets
-        cp -r ${{ steps.strings.outputs.build-output-dir }}/* release-assets/
-
-    - name: Create GitHub Release
-      uses: softprops/action-gh-release@v2
-      with:
-        tag_name: latest
-        name: "Automated Release"
-        files: release-assets/**
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
