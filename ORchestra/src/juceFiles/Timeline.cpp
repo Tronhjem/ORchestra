@@ -56,9 +56,9 @@ void Timeline::paint(juce::Graphics &g)
 
         // Calculate alpha values for fadeing steps.
         float alpha = 1.f;
-        if (step >= TIMELINE_STEPS_DRAWN - indexStartFade)
+        if (static_cast<float>(step) >= TIMELINE_STEPS_DRAWN - indexStartFade)
         {
-            float alphaValue = 1.f - (static_cast<float>(step - TIMELINE_STEPS_DRAWN + indexStartFade) / static_cast<float>(indexStartFade));
+            float alphaValue = 1.f - (static_cast<float>(step - TIMELINE_STEPS_DRAWN) + indexStartFade) / indexStartFade;
             alpha = alphaValue * alphaValue;
         }
 
@@ -80,8 +80,8 @@ void Timeline::paint(juce::Graphics &g)
 
             g.setColour(colorToSet.withAlpha(alpha));
 
-            const float y = i * stepY;
-            const float x = step * stepX;
+            const float y = static_cast<float>(i) * stepY;
+            const float x = static_cast<float>(step) * stepX;
 
             g.fillRect(x, y, drawnStepWidth, drawnStepHeight);
             if (step == 0 && stepData.mShouldTrigger.GetValue(0))

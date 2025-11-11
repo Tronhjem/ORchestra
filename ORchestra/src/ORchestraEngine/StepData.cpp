@@ -39,7 +39,7 @@ DataUnit StepData::GetEquivalentValueAtIndex(const int index, const int otherLen
     if (mLength == 1)
         return mData[0];
 
-    const int equivalentIndex = static_cast<int>(floor((static_cast<float>(index) / static_cast<float>(otherLength)) * mLength));
+    const int equivalentIndex = static_cast<int>(floor((static_cast<float>(index) / static_cast<float>(otherLength)) * static_cast<float>(mLength)));
 
 #if _DEBUG
     assert(equivalentIndex < mLength);
