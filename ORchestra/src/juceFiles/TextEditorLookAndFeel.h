@@ -32,9 +32,9 @@ public:
         // Thumb (the draggable part)
         g.setColour(ORchestraColours::ButtonBackground); // Set your custom color here
         if (isScrollbarVertical)
-            g.fillRoundedRectangle(x, thumbStartPosition, width, thumbSize, 20.4f);
+            g.fillRoundedRectangle(static_cast<float>(x), static_cast<float>(thumbStartPosition), static_cast<float>(width), static_cast<float>(thumbSize), 20.4f);
         else
-            g.fillRoundedRectangle(thumbStartPosition, y, thumbSize, height, 20.4f);
+            g.fillRoundedRectangle(static_cast<float>(thumbStartPosition), static_cast<float>(y), static_cast<float>(thumbSize), static_cast<float>(height), 20.4f);
     }
 
     void drawTextEditorOutline(juce::Graphics &g, int width, int height, juce::TextEditor &ed) override
