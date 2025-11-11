@@ -89,5 +89,5 @@ jobs:
     - name: Upload artifacts for ${{ matrix.os }}
       uses: actions/upload-artifact@v4
       with:
-        name: release-artifacts
+        name: release-${{ matrix.os }}
         path: artifacts/${{ matrix.os }}/*
