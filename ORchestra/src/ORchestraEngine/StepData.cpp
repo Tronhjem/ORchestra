@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cstring>
 
 #include "StepData.h"
 #include "Types.h"

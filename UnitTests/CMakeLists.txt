@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.22)
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 juce_add_console_app(ORchestraTests
     PRODUCT_NAME "ORchestraTests")
@@ -30,6 +32,8 @@ target_compile_definitions(ORchestraTests
         _TEST=1
         JUCE_WEB_BROWSER=0
         JUCE_USE_CURL=0)
+
+target_compile_features(ORchestraTests PRIVATE cxx_std_17)
 
 target_link_libraries(ORchestraTests
     PRIVATE
