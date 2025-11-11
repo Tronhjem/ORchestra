@@ -77,17 +77,14 @@ jobs:
       if: startsWith(matrix.os, 'macos')
       run: |
         mkdir -p artifacts/${{ matrix.os }}
-        cp -R ${{steps.strings.outputs.build-output-dir }}/ORchestra/ORchestra_artefacts/Release/AU/ORchestra.component artifacts/${{ matrix.os }}/
-        cp -R ${{steps.strings.outputs.build-output-dir }}/ORchestra/ORchestra_artefacts/Release/VST3/ORchestra.vst3 artifacts/${{ matrix.os }}/
-        cp -R ${{steps.strings.outputs.build-output-dir }}/ORchestra/ORchestra_artefacts/Release/Standalone/ORchestra artifacts/${{ matrix.os }}/
+        cp -R ${{steps.strings.outputs.build-output-dir }}/ORchestra/ORchestra_artefacts/Release/ artifacts/${{ matrix.os }}/
     
     - name: Prepare artifacts (Windows)
       if: startsWith(matrix.os, 'windows')
       shell: pwsh
       run: |
         mkdir artifacts\${{ matrix.os }}
-        Copy-Item -Path "${{ steps.strings.outputs.build-output-dir }}\ORchestra\ORchestra_artefacts\Release\Standalone\ORchestra.exe" -Destination "artifacts\${{ matrix.os }}" -Force
-        Copy-Item -Path "${{ steps.strings.outputs.build-output-dir }}\ORchestra\ORchestra_artefacts\Release\VST3\ORchestra.vst3" -Destination "artifacts\${{ matrix.os }}" -Force
+        Copy-Item -Path "${{ steps.strings.outputs.build-output-dir }}\ORchestra\ORchestra_artefacts\Release\" -Destination "artifacts\${{ matrix.os }}" -Force
 
     - name: Upload artifacts for ${{ matrix.os }}
       uses: actions/upload-artifact@v4
