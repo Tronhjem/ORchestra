@@ -84,7 +84,7 @@ jobs:
       shell: pwsh
       run: |
         mkdir artifacts\${{ matrix.os }}
-        Copy-Item -Path "D:\a\ORchestra\ORchestra\build\ORchestra\ORchestra_artefacts\Release\*" -Destination "artifacts\windows-latest" -Recurse -Force
+        Copy-Item -Path "${{ steps.strings.outputs.build-output-dir }}\ORchestra\ORchestra_artefacts\Release\*" -Destination "artifacts\windows-latest" -Recurse -Force
 
     - name: Upload artifacts for ${{ matrix.os }}
       uses: actions/upload-artifact@v4
