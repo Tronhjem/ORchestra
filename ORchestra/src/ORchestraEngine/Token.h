@@ -89,7 +89,7 @@ public:
           int length, 
           int line);
         
-    TokenType GetType() { return mTokenType; }
+    TokenType GetType() const { return mTokenType; }
 
     TokenType mTokenType;
     const char* mStart;
