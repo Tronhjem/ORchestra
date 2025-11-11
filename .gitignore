@@ -5,4 +5,5 @@ JuceLibraryCode/
 *.dSYM
 build/
 *.cmake
+_codeql_build_dir/
 

@@ -16,7 +16,7 @@ std::string FileLoader::LoadFile(const std::string &filePath)
     ScopedTimer timer("Read File");
 #endif
 
-    std::ifstream file(filePath);
+    std::ifstream file(filePath, std::ios::binary);
     std::string data;
 
     if (!file)
@@ -29,7 +29,7 @@ std::string FileLoader::LoadFile(const std::string &filePath)
     long fileSize = static_cast<long>(file.tellg());
     file.seekg(0, std::ios::beg);
 
-    data.resize(fileSize);
+    data.resize(static_cast<size_t>(fileSize));
     file.read(&data[0], fileSize);
 
     file.close();

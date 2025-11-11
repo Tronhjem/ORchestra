@@ -44,7 +44,13 @@ target_link_libraries(ORchestra
         juce::juce_recommended_lto_flags
         juce::juce_recommended_warning_flags)
 
-# Disable -Wswitch-enum warning for Apple Clang
-if(CMAKE_CXX_COMPILER_ID MATCHES "AppleClang")
-    target_compile_options(ORchestra PRIVATE -Wno-switch-enum)
+# Disable -Wswitch-enum warning for all compilers
+# This warning requires exhaustive case handling for all enum values, even when a default case is present
+# We need to modify the interface compile options of juce_recommended_warning_flags to remove -Wswitch-enum
+# and then add -Wno-switch-enum
+if(CMAKE_CXX_COMPILER_ID MATCHES "AppleClang" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+    get_target_property(WARNING_FLAGS juce_recommended_warning_flags INTERFACE_COMPILE_OPTIONS)
+    list(REMOVE_ITEM WARNING_FLAGS "-Wswitch-enum")
+    list(APPEND WARNING_FLAGS "-Wno-switch-enum")
+    set_target_properties(juce_recommended_warning_flags PROPERTIES INTERFACE_COMPILE_OPTIONS "${WARNING_FLAGS}")
 endif()

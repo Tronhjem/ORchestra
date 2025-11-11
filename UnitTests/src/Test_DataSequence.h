@@ -13,7 +13,7 @@ public:
     void runTest() override
     {
         {
-            beginTest("Check that ran works in data sequence");
+            beginTest("DataSequence: Evaluates ran(50,60) in array, result in range [50,60]");
 
             std::string file{"a = [ran(50,60), 5, 0] \n test a"};
             VM vm;
@@ -24,7 +24,7 @@ public:
             expect(result.GetValue(0) <= 60);
         }
         {
-            beginTest("Basic Get in Data Sequence");
+            beginTest("DataSequence: Accesses array element 'a=[1,0,0], a[0]' correctly (result=1)");
 
             std::string file{"a = [1,0,0] \n test a[0]"};
             VM vm;
@@ -34,14 +34,14 @@ public:
             expect(result.GetValue(0) == 1);
         }
         {
-            beginTest("Check Data Step Get");
+            beginTest("DataSequence: StepData.GetValue(0) returns first element correctly");
 
             DataUnit data[3]{1, 0, 0};
             StepData dataSeqStep{data, 3};
             expect(dataSeqStep.GetValue(0) == 1);
         }
         {
-            beginTest("Sub Step steps");
+            beginTest("DataSequence: Accesses nested array element, returns values correctly");
             std::string file{"a = [[1,4,5],0,0] \n test a[0]"};
             VM vm;
             expect(vm.Prepare(&file[0]));
@@ -52,7 +52,7 @@ public:
             expect(result.GetValue(2) == 5);
         }
         {
-            beginTest("Sub step get equivalent value from other sequence");
+            beginTest("DataSequence: GetEquivalentValueAtIndex maps values to different sequence lengths");
             std::string file{"a = [[60,64],0,0] \n test a[0]"};
             VM vm;
             expect(vm.Prepare(&file[0]));
@@ -65,7 +65,7 @@ public:
             expect(result.GetEquivalentValueAtIndex(3, otherIndexLength) == 64);
         }
         {
-            beginTest("Sub step get equivalent value from other sequence");
+            beginTest("DataSequence: GetEquivalentValueAtIndex maps values to different sequence lengths");
             std::string file{"a = [[60,64],0,0] \n test a[0]"};
             VM vm;
             expect(vm.Prepare(&file[0]));
@@ -77,7 +77,7 @@ public:
             expect(result.GetEquivalentValueAtIndex(2, otherIndexLength) == 64);
         }
         {
-            beginTest("Sub Step steps");
+            beginTest("DataSequence: Accesses nested array element, returns values correctly");
             std::string file{"a = [[1,1,0],0,0] \n test a[0]"};
             VM vm;
             expect(vm.Prepare(&file[0]));
@@ -88,7 +88,7 @@ public:
             expect(result.GetValue(2) == 0);
         }
         {
-            beginTest("Sub step addition off different lengths");
+            beginTest("DataSequence: Adds sequences of length 2 and 4, result has length 4");
 
             DataUnit dataOne[2]{1, 1};
             DataUnit dataTwo[4]{1, 0, 1, 0};
@@ -105,7 +105,7 @@ public:
             expect(added.GetValue(3) == 1);
         }
         {
-            beginTest("Sub step addition of different lenths");
+            beginTest("DataSequence: Adds sequences of length 2 and 3, result has length 3");
 
             DataUnit dataOne[2]{1, 1};
             DataUnit dataTwo[3]{1, 0, 1};
@@ -121,7 +121,7 @@ public:
             expect(added.GetValue(2) == 2);
         }
         {
-            beginTest("Sub step addition clamp");
+            beginTest("DataSequence: Clamps addition overflow to max 127");
 
             DataUnit dataOne[2]{127, 127};
             DataUnit dataTwo[4]{127, 0, 127, 0};
@@ -138,7 +138,7 @@ public:
             expect(added.GetValue(3) == 127);
         }
         {
-            beginTest("Sub step subtraction");
+            beginTest("DataSequence: Subtracts sequences element-wise correctly");
 
             const int length = 3;
             DataUnit dataOne[length]{10, 10, 10};
@@ -156,7 +156,7 @@ public:
             }
         }
         {
-            beginTest("Sub step multiplication");
+            beginTest("DataSequence: Multiplies sequences element-wise correctly");
 
             const int length = 3;
             DataUnit dataOne[length]{10, 10, 10};
@@ -174,7 +174,7 @@ public:
             }
         }
         {
-            beginTest("Sub step division");
+            beginTest("DataSequence: Divides sequences element-wise correctly");
 
             const int length = 3;
             DataUnit dataOne[length]{20, 10, 10};
@@ -192,7 +192,7 @@ public:
             }
         }
         {
-            beginTest("Sub step AND");
+            beginTest("DataSequence: Applies AND operation to sequences element-wise");
 
             const int length = 3;
             DataUnit dataOne[length]{10, 10, 10};
@@ -210,7 +210,7 @@ public:
             }
         }
         {
-            beginTest("Sub step XOR");
+            beginTest("DataSequence: Applies XOR operation to sequences element-wise");
 
             const int length = 3;
             DataUnit dataOne[length]{10, 10, 10};
@@ -228,7 +228,7 @@ public:
             }
         }
         {
-            beginTest("Sub step OR");
+            beginTest("DataSequence: Applies OR operation to sequences element-wise");
 
             const int length = 3;
             DataUnit dataOne[length]{10, 10, 10};
@@ -246,7 +246,7 @@ public:
             }
         }
         {
-            beginTest("Sub Division Add with single digit");
+            beginTest("DataSequence: Adds scalar to nested array sub-division correctly");
 
             std::string file{"a = [[60,65,70], 0, 0] \n b = a + 10 \n test b[0]"};
             VM vm;
@@ -258,7 +258,7 @@ public:
             expect(result.GetValue(2) == 70 + 10);
         }
         {
-            beginTest("Sub Division Add with single digit");
+            beginTest("DataSequence: Adds scalar to nested array sub-division correctly");
 
             std::string file{"a = [[60,65,70], 5, 0] \n b = a[1] + 10 \n test b[1]"};
             VM vm;
