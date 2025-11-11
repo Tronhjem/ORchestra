@@ -1,0 +1,3 @@
+# Hashes of file build rules.
+6f52d9d1259d6848fe86abc3d6646fdc ORchestra/ORchestra_artefacts/JuceLibraryCode/JuceHeader.h
+9565c79f476598d13d3c36b14f16d7cb UnitTests/ORchestraTests_artefacts/JuceLibraryCode/JuceHeader.h
