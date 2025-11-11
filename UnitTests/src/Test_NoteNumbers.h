@@ -11,7 +11,7 @@ public:
     void runTest() override
     {
         {
-            beginTest("Compiles with Single Note sharp number");
+            beginTest("NoteNumbers: Converts 'C#0' to MIDI note 13 correctly");
 
             std::string file{"a = C#0 \n test a"};
             VM vm;
@@ -22,7 +22,7 @@ public:
             expect(value == 13 /*C#0 == 13 */);
         }
         {
-            beginTest("Compiles with Single Note flat number");
+            beginTest("NoteNumbers: Converts 'Db3' to MIDI note 49 correctly");
 
             std::string file{"a = Db3 \n test a"};
             VM vm;
@@ -33,7 +33,7 @@ public:
             expect(value == 49 /*Db3 == 49 */);
         }
         {
-            beginTest("Compiles as part of array");
+            beginTest("NoteNumbers: Parses note in array '[G#5, G#5]' as MIDI 80 correctly");
 
             std::string file{"a = [G#5, G#5] \n test a"};
             VM vm;
@@ -44,7 +44,7 @@ public:
             expect(value == 80 /*G#5 == 80*/);
         }
         {
-            beginTest("Compiles as part of array and expression");
+            beginTest("NoteNumbers: Evaluates 'C0 + 1' in array correctly (result=13)");
 
             std::string file{"a = [C0 + 1, 0] \n test a"};
             VM vm;
@@ -55,14 +55,14 @@ public:
             expect(value == 13);
         }
         {
-            beginTest("Doesn't compile wrong Note Information");
+            beginTest("NoteNumbers: Rejects invalid note 'Dw21312' (compilation fails)");
 
             std::string file{"a = Dw21312 \n test a"};
             VM vm;
             expect(vm.Prepare(&file[0]) == false);
         }
         {
-            beginTest("Require Longer note");
+            beginTest("NoteNumbers: Rejects incomplete note 'C' without octave (compilation fails)");
 
             std::string file{"a = C \n test a"};
             VM vm;

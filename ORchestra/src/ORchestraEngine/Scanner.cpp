@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <cstring>
 
 #include "Scanner.h"
 #include "ErrorReporting.h"

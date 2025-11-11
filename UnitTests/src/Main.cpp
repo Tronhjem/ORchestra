@@ -4,6 +4,11 @@
 #include "Test_ErrorHandling.h"
 #include "Test_DataSequence.h"
 #include "Test_NoteNumbers.h"
+#include "Test_CustomStack.h"
+#include "Test_Token.h"
+#include "Test_Scanner.h"
+#include "Test_FileLoader.h"
+#include "Test_Compiler.h"
 #include "Utility.h"
 
 using namespace juce;
@@ -20,6 +25,11 @@ int main(int argc, char *argv[])
     Test_ErrorHandling errorHandling;
     Test_DataSequence dataSequence;
     Test_NoteNumbers noteNumbers;
+    Test_CustomStack customStack;
+    Test_Token token;
+    Test_Scanner scanner;
+    Test_FileLoader fileLoader;
+    Test_Compiler compiler;
 
     runner.runAllTests();
     
