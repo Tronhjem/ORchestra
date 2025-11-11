@@ -12,7 +12,7 @@ public:
     void runTest() override
     {
         {
-            beginTest("Stack Push and Pop with integers");
+            beginTest("CustomStack: LIFO order maintained for integer values (Push 10,20,30 -> Pop returns 30,20,10)");
             
             Stack<int> stack;
             stack.Push(10);
@@ -24,7 +24,7 @@ public:
             expect(stack.Pop() == 10);
         }
         {
-            beginTest("Stack Push and Pop with StepData");
+            beginTest("CustomStack: LIFO order maintained for StepData values (Push 5,10,15 -> Pop returns 15,10,5)");
             
             Stack<StepData> stack;
             StepData data1(5);
@@ -44,7 +44,7 @@ public:
             expect(result1.GetValue(0) == 5);
         }
         {
-            beginTest("Stack Clear");
+            beginTest("CustomStack: Clear() empties stack and allows reuse");
             
             Stack<int> stack;
             stack.Push(10);
@@ -57,7 +57,7 @@ public:
             expect(stack.Pop() == 100);
         }
         {
-            beginTest("Stack maintains order with multiple operations");
+            beginTest("CustomStack: LIFO order preserved with interleaved Push/Pop operations");
             
             Stack<int> stack;
             stack.Push(1);
@@ -70,14 +70,14 @@ public:
             expect(stack.Pop() == 1);
         }
         {
-            beginTest("Stack with single element");
+            beginTest("CustomStack: Single element Push and Pop works correctly");
             
             Stack<int> stack;
             stack.Push(42);
             expect(stack.Pop() == 42);
         }
         {
-            beginTest("Stack Clear and reuse");
+            beginTest("CustomStack: Clear() resets stack after multiple pushes");
             
             Stack<int> stack;
             for (int i = 0; i < 10; ++i)

@@ -11,7 +11,7 @@ public:
     void runTest() override
     {
         {
-            beginTest("Token construction and GetType");
+            beginTest("Token: Constructs IDENTIFIER token with correct type, length, line number and pointer");
             
             const char* testString = "test";
             Token token(TokenType::IDENTIFIER, testString, 4, 1);
@@ -22,7 +22,7 @@ public:
             expect(token.mStart == testString);
         }
         {
-            beginTest("Token with NUMBER type");
+            beginTest("Token: Constructs NUMBER token with correct type, length=3, line=5");
             
             const char* numberString = "123";
             Token token(TokenType::NUMBER, numberString, 3, 5);
@@ -32,7 +32,7 @@ public:
             expect(token.mLine == 5);
         }
         {
-            beginTest("Token with operator type");
+            beginTest("Token: Constructs PLUS operator token with correct type, length=1, line=10");
             
             const char* opString = "+";
             Token token(TokenType::PLUS, opString, 1, 10);
@@ -42,7 +42,7 @@ public:
             expect(token.mLine == 10);
         }
         {
-            beginTest("Token with parentheses");
+            beginTest("Token: Constructs LEFT_PAREN token with correct type");
             
             const char* parenString = "(";
             Token leftParen(TokenType::LEFT_PAREN, parenString, 1, 2);
@@ -50,7 +50,7 @@ public:
             expect(leftParen.GetType() == TokenType::LEFT_PAREN);
         }
         {
-            beginTest("Token with bracket types");
+            beginTest("Token: Constructs LEFT_BRACKET and RIGHT_BRACKET tokens with correct types");
             
             const char* bracketString = "[";
             Token leftBracket(TokenType::LEFT_BRACKET, bracketString, 1, 1);
@@ -63,7 +63,7 @@ public:
             expect(rightBracket.GetType() == TokenType::RIGHT_BRACKET);
         }
         {
-            beginTest("Token with logic operators");
+            beginTest("Token: Constructs logic operator tokens (AND, OR, XOR) with correct types");
             
             const char* andString = "&";
             Token andToken(TokenType::AND, andString, 1, 1);
@@ -78,7 +78,7 @@ public:
             expect(xorToken.GetType() == TokenType::XOR);
         }
         {
-            beginTest("Token with comparison operators");
+            beginTest("Token: Constructs comparison operator tokens (==, !=) with correct types and length=2");
             
             const char* eqString = "==";
             Token eqToken(TokenType::EQUAL_EQUAL, eqString, 2, 1);
@@ -90,7 +90,7 @@ public:
             expect(neqToken.GetType() == TokenType::BANG_EQUAL);
         }
         {
-            beginTest("Token with keyword types");
+            beginTest("Token: Constructs keyword tokens (RANDOM='ran', EUCLIDEAN='euc') with correct types");
             
             const char* randomStr = "ran";
             Token randomToken(TokenType::RANDOM, randomStr, 3, 1);
@@ -101,7 +101,7 @@ public:
             expect(eucToken.GetType() == TokenType::EUCLIDEAN);
         }
         {
-            beginTest("Token line number tracking");
+            beginTest("Token: Tracks line numbers correctly (lines 1, 42, 100)");
             
             const char* str = "test";
             Token token1(TokenType::IDENTIFIER, str, 4, 1);

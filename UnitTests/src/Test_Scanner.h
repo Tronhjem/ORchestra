@@ -13,7 +13,7 @@ public:
     void runTest() override
     {
         {
-            beginTest("Scanner tokenizes simple number");
+            beginTest("Scanner: Tokenizes simple number '42' as NUMBER token");
             
             ErrorReporting errorReporting;
             Scanner scanner(errorReporting);
@@ -26,7 +26,7 @@ public:
             expect(tokens[0].GetType() == TokenType::NUMBER);
         }
         {
-            beginTest("Scanner tokenizes identifier");
+            beginTest("Scanner: Tokenizes identifier 'myVar' as IDENTIFIER token");
             
             ErrorReporting errorReporting;
             Scanner scanner(errorReporting);
@@ -39,7 +39,7 @@ public:
             expect(tokens[0].GetType() == TokenType::IDENTIFIER);
         }
         {
-            beginTest("Scanner tokenizes operators");
+            beginTest("Scanner: Tokenizes arithmetic operators '+ - * /' as PLUS, MINUS, STAR, SLASH");
             
             ErrorReporting errorReporting;
             Scanner scanner(errorReporting);
@@ -55,7 +55,7 @@ public:
             expect(tokens[3].GetType() == TokenType::SLASH);
         }
         {
-            beginTest("Scanner tokenizes parentheses");
+            beginTest("Scanner: Tokenizes parentheses '()' as LEFT_PAREN, RIGHT_PAREN");
             
             ErrorReporting errorReporting;
             Scanner scanner(errorReporting);
@@ -69,7 +69,7 @@ public:
             expect(tokens[1].GetType() == TokenType::RIGHT_PAREN);
         }
         {
-            beginTest("Scanner tokenizes brackets");
+            beginTest("Scanner: Tokenizes brackets '[]' as LEFT_BRACKET, RIGHT_BRACKET");
             
             ErrorReporting errorReporting;
             Scanner scanner(errorReporting);
@@ -83,7 +83,7 @@ public:
             expect(tokens[1].GetType() == TokenType::RIGHT_BRACKET);
         }
         {
-            beginTest("Scanner tokenizes braces");
+            beginTest("Scanner: Tokenizes braces '{}' as LEFT_BRACE, RIGHT_BRACE");
             
             ErrorReporting errorReporting;
             Scanner scanner(errorReporting);
@@ -97,7 +97,7 @@ public:
             expect(tokens[1].GetType() == TokenType::RIGHT_BRACE);
         }
         {
-            beginTest("Scanner tokenizes assignment and equality");
+            beginTest("Scanner: Distinguishes assignment '=' from equality '==' in 'a = 5 == 5'");
             
             ErrorReporting errorReporting;
             Scanner scanner(errorReporting);
@@ -121,7 +121,7 @@ public:
             expect(foundEqual);
         }
         {
-            beginTest("Scanner tokenizes comparison operators");
+            beginTest("Scanner: Tokenizes comparison operators '< > <= >= !=' correctly");
             
             ErrorReporting errorReporting;
             Scanner scanner(errorReporting);
@@ -138,7 +138,7 @@ public:
             expect(tokens[4].GetType() == TokenType::BANG_EQUAL);
         }
         {
-            beginTest("Scanner tokenizes logic operators");
+            beginTest("Scanner: Tokenizes logic operators '& | ^' as AND, OR, XOR");
             
             ErrorReporting errorReporting;
             Scanner scanner(errorReporting);
@@ -153,7 +153,7 @@ public:
             expect(tokens[2].GetType() == TokenType::XOR);
         }
         {
-            beginTest("Scanner recognizes ran keyword");
+            beginTest("Scanner: Recognizes 'ran' keyword as RANDOM token");
             
             ErrorReporting errorReporting;
             Scanner scanner(errorReporting);
@@ -166,7 +166,7 @@ public:
             expect(tokens[0].GetType() == TokenType::RANDOM);
         }
         {
-            beginTest("Scanner recognizes euc keyword");
+            beginTest("Scanner: Recognizes 'euc' keyword as EUCLIDEAN token");
             
             ErrorReporting errorReporting;
             Scanner scanner(errorReporting);
@@ -179,7 +179,7 @@ public:
             expect(tokens[0].GetType() == TokenType::EUCLIDEAN);
         }
         {
-            beginTest("Scanner handles multiple tokens on one line");
+            beginTest("Scanner: Tokenizes expression 'a = 42 + 10' into 5+ tokens");
             
             ErrorReporting errorReporting;
             Scanner scanner(errorReporting);
@@ -191,7 +191,7 @@ public:
             expect(tokens.size() >= 5);
         }
         {
-            beginTest("Scanner handles comma separation");
+            beginTest("Scanner: Tokenizes comma-separated list '1,2,3' with 2 COMMA tokens");
             
             ErrorReporting errorReporting;
             Scanner scanner(errorReporting);
@@ -209,7 +209,7 @@ public:
             expect(commaCount == 2);
         }
         {
-            beginTest("Scanner handles newlines for line tracking");
+            beginTest("Scanner: Handles multi-line input 'a\\nb\\nc' and tracks line numbers");
             
             ErrorReporting errorReporting;
             Scanner scanner(errorReporting);
@@ -222,7 +222,7 @@ public:
             expect(tokens.size() >= 3);
         }
         {
-            beginTest("Scanner tokenizes array syntax");
+            beginTest("Scanner: Tokenizes array syntax 'a = [1, 2, 3]' with brackets");
             
             ErrorReporting errorReporting;
             Scanner scanner(errorReporting);
@@ -246,7 +246,7 @@ public:
             expect(foundRightBracket);
         }
         {
-            beginTest("Scanner handles expression with parentheses");
+            beginTest("Scanner: Tokenizes expression '(2 + 3) * 4' starting with LEFT_PAREN");
             
             ErrorReporting errorReporting;
             Scanner scanner(errorReporting);

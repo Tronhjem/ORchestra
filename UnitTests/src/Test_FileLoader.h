@@ -12,7 +12,7 @@ public:
     void runTest() override
     {
         {
-            beginTest("FileLoader saves and loads simple text");
+            beginTest("FileLoader: SaveToFile() and LoadFile() roundtrip preserves simple text 'Hello, ORchestra!'");
             
             FileLoader loader;
             std::string testPath = "/tmp/orchestra_test_simple.txt";
@@ -30,7 +30,7 @@ public:
             std::remove(testPath.c_str());
         }
         {
-            beginTest("FileLoader saves and loads multi-line text");
+            beginTest("FileLoader: SaveToFile() and LoadFile() roundtrip preserves multi-line text with newlines");
             
             FileLoader loader;
             std::string testPath = "/tmp/orchestra_test_multiline.txt";
@@ -45,7 +45,7 @@ public:
             std::remove(testPath.c_str());
         }
         {
-            beginTest("FileLoader saves and loads empty string");
+            beginTest("FileLoader: SaveToFile() and LoadFile() roundtrip preserves empty string");
             
             FileLoader loader;
             std::string testPath = "/tmp/orchestra_test_empty.txt";
@@ -60,7 +60,7 @@ public:
             std::remove(testPath.c_str());
         }
         {
-            beginTest("FileLoader saves and loads orchestra script");
+            beginTest("FileLoader: SaveToFile() and LoadFile() roundtrip preserves ORchestra script syntax");
             
             FileLoader loader;
             std::string testPath = "/tmp/orchestra_test_script.txt";
@@ -75,7 +75,7 @@ public:
             std::remove(testPath.c_str());
         }
         {
-            beginTest("FileLoader handles non-existent file");
+            beginTest("FileLoader: LoadFile() returns empty string for non-existent file");
             
             FileLoader loader;
             std::string nonExistentPath = "/tmp/this_file_does_not_exist_12345.txt";
@@ -84,7 +84,7 @@ public:
             expect(loadedData.empty());
         }
         {
-            beginTest("FileLoader saves and loads special characters");
+            beginTest("FileLoader: SaveToFile() and LoadFile() roundtrip preserves special characters");
             
             FileLoader loader;
             std::string testPath = "/tmp/orchestra_test_special.txt";
@@ -99,7 +99,7 @@ public:
             std::remove(testPath.c_str());
         }
         {
-            beginTest("FileLoader saves and loads numbers");
+            beginTest("FileLoader: SaveToFile() and LoadFile() roundtrip preserves numeric string '0123456789'");
             
             FileLoader loader;
             std::string testPath = "/tmp/orchestra_test_numbers.txt";
@@ -114,7 +114,7 @@ public:
             std::remove(testPath.c_str());
         }
         {
-            beginTest("FileLoader overwrites existing file");
+            beginTest("FileLoader: SaveToFile() overwrites existing file with new content");
             
             FileLoader loader;
             std::string testPath = "/tmp/orchestra_test_overwrite.txt";
@@ -135,7 +135,7 @@ public:
             std::remove(testPath.c_str());
         }
         {
-            beginTest("FileLoader handles longer content");
+            beginTest("FileLoader: SaveToFile() and LoadFile() roundtrip preserves 100-line content");
             
             FileLoader loader;
             std::string testPath = "/tmp/orchestra_test_long.txt";
