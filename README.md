@@ -7,15 +7,26 @@ It uses logic operations like `&`, `^`, and `|` to combine sequences into tracks
 Each part loops and is evaluated with the specified operator, allowing sequences of different lengths 
 to phase and create complex rhythmic patterns. Where it gets really powerful is when combining sequences 
 of different legnths and hear how the operations creates interesting evolving patterns.
+
+Original prototype that sparked the idea can be found here: <https://github.com/Tronhjem/EuclidsCombinator>
 ____
 
-Starting work on the plugin version of the prototype Euclids Combinator.
-Prototype can be found here: <https://github.com/Tronhjem/EuclidsCombinator>
+### Build
+
+Until a stable release is available, or if you just want the latest and greatest you can always build it yourself. 
+There's a Projucer file for both the project itself and for the unit tests.
+If you prefer cmake, run it from the top folder as it uses sub directories for Juce. 
+
+If using cmake, remeber to do `git submodule update --recursive` to initialize the juce submodule.  
+Then make a build/ folder in the top directory and cd into that, and run `cmake ../` and you're ready to do `cmake --build .`
+This will build all plugins, standalone and the unit tests.
 
 ### Unit Tests
 
 Tests are provided with a seperate jucer and project for a console app that imports select code and runs
 the tests with the juce framework unit testing code.
+
+____
 
 # Syntax and rules for ORchestra code
 
