@@ -16,7 +16,7 @@ std::string FileLoader::LoadFile(const std::string &filePath)
     ScopedTimer timer("Read File");
 #endif
 
-    std::ifstream file(filePath);
+    std::ifstream file(filePath, std::ios::binary);
     std::string data;
 
     if (!file)
