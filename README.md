@@ -1,5 +1,7 @@
 # ORchestra
 
+[![CMake Build and Upload on push on multiple platforms](https://github.com/Tronhjem/ORchestra/actions/workflows/CmakeBuildAllAndUpload.yml/badge.svg)](https://github.com/Tronhjem/ORchestra/actions/workflows/CmakeBuildAllAndUpload.yml)
+
 Project is still WIP.
 
 This is a sequencer that generates and combines sequences using euclidean algorithms or manual input. 
