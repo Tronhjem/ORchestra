@@ -1,6 +1,6 @@
 # ORchestra
 
-[![Build](https://github.com/Tronhjem/ORchestra/actions/workflows/CmakeBuildAllAndUpload.yml/badge.svg)](https://github.com/Tronhjem/ORchestra/actions/workflows/CmakeBuildAllAndUpload.yml)
+[![Build](https://github.com/Tronhjem/ORchestra/actions/workflows/BuildAndTest.yml/badge.svg)](https://github.com/Tronhjem/ORchestra/actions/workflows/BuildAndTest.yml)
 
 Project is still WIP.
 
