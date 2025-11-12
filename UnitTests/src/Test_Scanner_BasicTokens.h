@@ -1,93 +1,91 @@
 #pragma once
 
-using namespace juce;
+#include "../catch.hpp"
 #include "Scanner.h"
 #include "ErrorReporting.h"
 #include "Token.h"
 
-class Test_Scanner_BasicTokens : public UnitTest
+TEST_CASE("Scanner: Tokenizes simple number '42' as NUMBER token", "[Scanner_BasicTokens]")
 {
-public:
-    Test_Scanner_BasicTokens() : UnitTest("Test_Scanner_BasicTokens") {}
-    
-    void runTest() override
-    {
-        {
-            beginTest("Scanner: Tokenizes simple number '42' as NUMBER token");
             
             ErrorReporting errorReporting;
             Scanner scanner(errorReporting);
             std::string input = "42";
             
-            expect(scanner.ScanFile(input.c_str()));
+            REQUIRE(scanner.ScanFile(input.c_str()));
             
             auto& tokens = scanner.GetTokens();
-            expect(tokens.size() >= 1);
-            expect(tokens[0].GetType() == TokenType::NUMBER);
+            REQUIRE(tokens.size() >= 1);
+            REQUIRE(tokens[0].GetType() == TokenType::NUMBER);
         }
-        {
-            beginTest("Scanner: Tokenizes identifier 'myVar' as IDENTIFIER token");
+
+TEST_CASE("Scanner: Tokenizes identifier 'myVar' as IDENTIFIER token", "[Scanner_BasicTokens]")
+{
             
             ErrorReporting errorReporting;
             Scanner scanner(errorReporting);
             std::string input = "myVar";
             
-            expect(scanner.ScanFile(input.c_str()));
+            REQUIRE(scanner.ScanFile(input.c_str()));
             
             auto& tokens = scanner.GetTokens();
-            expect(tokens.size() >= 1);
-            expect(tokens[0].GetType() == TokenType::IDENTIFIER);
+            REQUIRE(tokens.size() >= 1);
+            REQUIRE(tokens[0].GetType() == TokenType::IDENTIFIER);
         }
-        {
-            beginTest("Scanner: Tokenizes parentheses '()' as LEFT_PAREN, RIGHT_PAREN");
+
+TEST_CASE("Scanner: Tokenizes parentheses '()' as LEFT_PAREN, RIGHT_PAREN", "[Scanner_BasicTokens]")
+{
             
             ErrorReporting errorReporting;
             Scanner scanner(errorReporting);
             std::string input = "()";
             
-            expect(scanner.ScanFile(input.c_str()));
+            REQUIRE(scanner.ScanFile(input.c_str()));
             
             auto& tokens = scanner.GetTokens();
-            expect(tokens.size() >= 2);
-            expect(tokens[0].GetType() == TokenType::LEFT_PAREN);
-            expect(tokens[1].GetType() == TokenType::RIGHT_PAREN);
+            REQUIRE(tokens.size() >= 2);
+            REQUIRE(tokens[0].GetType() == TokenType::LEFT_PAREN);
+            REQUIRE(tokens[1].GetType() == TokenType::RIGHT_PAREN);
         }
-        {
-            beginTest("Scanner: Tokenizes brackets '[]' as LEFT_BRACKET, RIGHT_BRACKET");
+
+TEST_CASE("Scanner: Tokenizes brackets '[]' as LEFT_BRACKET, RIGHT_BRACKET", "[Scanner_BasicTokens]")
+{
             
             ErrorReporting errorReporting;
             Scanner scanner(errorReporting);
             std::string input = "[]";
             
-            expect(scanner.ScanFile(input.c_str()));
+            REQUIRE(scanner.ScanFile(input.c_str()));
             
             auto& tokens = scanner.GetTokens();
-            expect(tokens.size() >= 2);
-            expect(tokens[0].GetType() == TokenType::LEFT_BRACKET);
-            expect(tokens[1].GetType() == TokenType::RIGHT_BRACKET);
+            REQUIRE(tokens.size() >= 2);
+            REQUIRE(tokens[0].GetType() == TokenType::LEFT_BRACKET);
+            REQUIRE(tokens[1].GetType() == TokenType::RIGHT_BRACKET);
         }
-        {
-            beginTest("Scanner: Tokenizes braces '{}' as LEFT_BRACE, RIGHT_BRACE");
+
+TEST_CASE("Scanner: Tokenizes braces '{}' as LEFT_BRACE, RIGHT_BRACE", "[Scanner_BasicTokens]")
+{
             
             ErrorReporting errorReporting;
             Scanner scanner(errorReporting);
             std::string input = "{}";
             
-            expect(scanner.ScanFile(input.c_str()));
+            REQUIRE(scanner.ScanFile(input.c_str()));
             
             auto& tokens = scanner.GetTokens();
-            expect(tokens.size() >= 2);
-            expect(tokens[0].GetType() == TokenType::LEFT_BRACE);
-            expect(tokens[1].GetType() == TokenType::RIGHT_BRACE);
+            REQUIRE(tokens.size() >= 2);
+            REQUIRE(tokens[0].GetType() == TokenType::LEFT_BRACE);
+            REQUIRE(tokens[1].GetType() == TokenType::RIGHT_BRACE);
         }
-        {
-            beginTest("Scanner: Tokenizes comma-separated list '1,2,3' with 2 COMMA tokens");
+
+TEST_CASE("Scanner: Tokenizes comma-separated list '1,2,3' with 2 COMMA tokens", "[Scanner_BasicTokens]")
+{
             
             ErrorReporting errorReporting;
             Scanner scanner(errorReporting);
             std::string input = "1,2,3";
             
-            expect(scanner.ScanFile(input.c_str()));
+            REQUIRE(scanner.ScanFile(input.c_str()));
             
             auto& tokens = scanner.GetTokens();
             int commaCount = 0;
@@ -96,20 +94,19 @@ public:
                 if (token.GetType() == TokenType::COMMA)
                     commaCount++;
             }
-            expect(commaCount == 2);
+            REQUIRE(commaCount == 2);
         }
-        {
-            beginTest("Scanner: Handles multi-line input 'a\\nb\\nc' and tracks line numbers");
+
+TEST_CASE("Scanner: Handles multi-line input 'a\\nb\\nc' and tracks line numbers", "[Scanner_BasicTokens]")
+{
             
             ErrorReporting errorReporting;
             Scanner scanner(errorReporting);
             std::string input = "a\nb\nc";
             
-            expect(scanner.ScanFile(input.c_str()));
+            REQUIRE(scanner.ScanFile(input.c_str()));
             
             auto& tokens = scanner.GetTokens();
             // Line numbers should increase
-            expect(tokens.size() >= 3);
-        }
-    }
-};
+            REQUIRE(tokens.size() >= 3);
+
