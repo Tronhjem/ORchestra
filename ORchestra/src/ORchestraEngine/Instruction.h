@@ -19,6 +19,7 @@ enum class OpCode : DataUnit
     SUBTRACT,
     MULTIPLY,
     DIVIDE,
+    MODULO,
 
     // Logical
     AND,

@@ -61,6 +61,46 @@ public:
             expect (result.GetValue(0) == 2 / 2);
         }
         {
+            beginTest("VM: Evaluates modulo operation '10 % 3' correctly (result=1)");
+            
+            std::string file {"a = 10 % 3 \n test a"};
+            VM vm;
+            expect(vm.Prepare(&file[0]));
+            
+            StepData result = vm.GetTopStackValue();
+            expect (result.GetValue(0) == 10 % 3);
+        }
+        {
+            beginTest("VM: Evaluates modulo operation '7 % 2' correctly (result=1)");
+            
+            std::string file {"a = 7 % 2 \n test a"};
+            VM vm;
+            expect(vm.Prepare(&file[0]));
+            
+            StepData result = vm.GetTopStackValue();
+            expect (result.GetValue(0) == 7 % 2);
+        }
+        {
+            beginTest("VM: Evaluates modulo operation '8 % 4' correctly (result=0)");
+            
+            std::string file {"a = 8 % 4 \n test a"};
+            VM vm;
+            expect(vm.Prepare(&file[0]));
+            
+            StepData result = vm.GetTopStackValue();
+            expect (result.GetValue(0) == 8 % 4);
+        }
+        {
+            beginTest("VM: Handles modulo by zero safely '5 % 0' (result=0)");
+            
+            std::string file {"a = 5 % 0 \n test a"};
+            VM vm;
+            expect(vm.Prepare(&file[0]));
+            
+            StepData result = vm.GetTopStackValue();
+            expect (result.GetValue(0) == 0);
+        }
+        {
             beginTest("VM: Respects operator precedence in '2 + 2 * 5' (result=12, not 20)");
             
             std::string file {"a = 2 + 2 * 5 \n test a"};
@@ -79,6 +119,16 @@ public:
             
             StepData result = vm.GetTopStackValue();
             expect (result.GetValue(0) == 4);
+        }
+        {
+            beginTest("VM: Evaluates modulo in expression '10 % 3 + 2' correctly (result=3)");
+            
+            std::string file {"a = 10 % 3 + 2 \n test a"};
+            VM vm;
+            expect(vm.Prepare(&file[0]));
+            
+            StepData result = vm.GetTopStackValue();
+            expect (result.GetValue(0) == (10 % 3) + 2);
         }
         {
             beginTest("VM: Evaluates parentheses with precedence '(2 + 2) * 2' correctly (result=8)");

@@ -25,6 +25,12 @@ const auto Divide = [](const int a, const int b) {
     return a / b;
 };
 
+const auto Modulo = [](const int a, const int b) {
+    if (b == 0)
+        return 0;
+    return a % b;
+};
+
 // ============================================================================================
 
 constexpr int MAX_DATASEQUENCE_LENGTH = 32;

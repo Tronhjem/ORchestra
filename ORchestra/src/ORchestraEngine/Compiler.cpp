@@ -207,6 +207,9 @@ void Compiler::MakeOperation(TokenType tokenType, std::vector<Instruction> &inst
     case TokenType::SLASH:
         code = OpCode::DIVIDE;
         break;
+    case TokenType::PERCENT:
+        code = OpCode::MODULO;
+        break;
     case TokenType::AND:
         code = OpCode::AND;
         break;
