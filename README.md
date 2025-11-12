@@ -1,6 +1,6 @@
 # ORchestra
 
-[![CMake Build and Upload on push on multiple platforms](https://github.com/Tronhjem/ORchestra/actions/workflows/CmakeBuildAllAndUpload.yml/badge.svg)](https://github.com/Tronhjem/ORchestra/actions/workflows/CmakeBuildAllAndUpload.yml)
+[![Build](https://github.com/Tronhjem/ORchestra/actions/workflows/CmakeBuildAllAndUpload.yml/badge.svg)](https://github.com/Tronhjem/ORchestra/actions/workflows/CmakeBuildAllAndUpload.yml)
 
 Project is still WIP.
 
