@@ -9,6 +9,8 @@ on:
 jobs:
   clang-tidy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     
     steps:
     - uses: actions/checkout@v4
@@ -53,6 +55,8 @@ jobs:
 
   build:
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
 
     strategy:
       fail-fast: false
