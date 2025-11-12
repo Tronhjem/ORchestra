@@ -32,7 +32,9 @@ target_include_directories(ORchestra PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/ORc
 
 # Add FreeType include path for Linux
 if(UNIX AND NOT APPLE)
-    target_include_directories(ORchestra PRIVATE /usr/include/freetype2)
+    target_include_directories(/usr/include/freetype2  -I/usr/local/include/freetype2  -I/usr/include/libpng16)
+    find_package(Freetype)
+    target_link_libraries(ORchestra freetype)
 endif()
 
 target_compile_definitions(ORchestra

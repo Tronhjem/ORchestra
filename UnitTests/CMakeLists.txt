@@ -23,10 +23,16 @@ target_sources(ORchestraTests
         ${ORCHESTRA_ENGINE_DIR}/FileLoader.cpp
 )
 
-
 target_include_directories(ORchestraTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/${ORCHESTRA_SOURCE_DIR}/utils)
 target_include_directories(ORchestraTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/${ORCHESTRA_SOURCE_DIR}/juceFiles)
 target_include_directories(ORchestraTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/${ORCHESTRA_ENGINE_DIR})
+
+# Add FreeType include path for Linux builds
+if(UNIX AND NOT APPLE)
+    target_include_directories(/usr/include/freetype2  -I/usr/local/include/freetype2  -I/usr/include/libpng16)
+    find_package(Freetype)
+    target_link_libraries(ORchestraTests freetype)
+endif()
 
 target_compile_definitions(ORchestraTests
     PRIVATE
