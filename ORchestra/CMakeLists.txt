@@ -30,6 +30,11 @@ target_include_directories(ORchestra PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/uti
 target_include_directories(ORchestra PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/juceFiles)
 target_include_directories(ORchestra PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/ORchestraEngine)
 
+# Add FreeType include path for Linux
+if(UNIX AND NOT APPLE)
+    target_include_directories(ORchestra PRIVATE /usr/include/freetype2)
+endif()
+
 target_compile_definitions(ORchestra
     PUBLIC
         JUCE_WEB_BROWSER=0  # If you remove this, add `NEEDS_WEB_BROWSER TRUE` to the `juce_add_plugin` call
