@@ -1,12 +1,17 @@
 #include <JuceHeader.h>
-#include "Test_Operators.h"
+#include "Test_ArithmeticOperators.h"
+#include "Test_LogicalOperators.h"
+#include "Test_ComparisonOperators.h"
+#include "Test_ArrayOperators.h"
 #include "Test_EuclidAndRandom.h"
 #include "Test_ErrorHandling.h"
 #include "Test_DataSequence.h"
 #include "Test_NoteNumbers.h"
 #include "Test_CustomStack.h"
 #include "Test_Token.h"
-#include "Test_Scanner.h"
+#include "Test_Scanner_BasicTokens.h"
+#include "Test_Scanner_Operators.h"
+#include "Test_Scanner_Expressions.h"
 #include "Test_FileLoader.h"
 #include "Test_Compiler.h"
 #include "Utility.h"
@@ -20,14 +25,19 @@ int main(int argc, char *argv[])
 
     UnitTestRunner runner;
 
-    Test_Operators opcodeResults;
+    Test_ArithmeticOperators arithmeticOperators;
+    Test_LogicalOperators logicalOperators;
+    Test_ComparisonOperators comparisonOperators;
+    Test_ArrayOperators arrayOperators;
     Test_EuclidAndRandom euclidAndRandom;
     Test_ErrorHandling errorHandling;
     Test_DataSequence dataSequence;
     Test_NoteNumbers noteNumbers;
     Test_CustomStack customStack;
     Test_Token token;
-    Test_Scanner scanner;
+    Test_Scanner_BasicTokens scannerBasicTokens;
+    Test_Scanner_Operators scannerOperators;
+    Test_Scanner_Expressions scannerExpressions;
     Test_FileLoader fileLoader;
     Test_Compiler compiler;
 
