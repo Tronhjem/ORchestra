@@ -10,7 +10,7 @@ juce_add_plugin(ORchestra
     NEEDS_MIDI_OUTPUT TRUE                      # Does the plugin need midi output?
     # IS_MIDI_EFFECT TRUE/FALSE                 # Is this plugin a MIDI effect?
     # EDITOR_WANTS_KEYBOARD_FOCUS TRUE/FALSE    # Does the editor need keyboard focus?
-    # COPY_PLUGIN_AFTER_BUILD TRUE/FALSE        # Should the plugin be installed to a default location after building?
+    COPY_PLUGIN_AFTER_BUILD TRUE        # Should the plugin be installed to a default location after building?
     PLUGIN_MANUFACTURER_CODE Juce               # A four-character manufacturer id with at least one upper-case character
     PLUGIN_CODE Dem0                            # A unique four-character plugin id with exactly one upper-case character
                                                 # GarageBand 10.3 requires the first letter to be upper-case, and the remaining letters to be lower-case
@@ -21,14 +21,17 @@ juce_add_plugin(ORchestra
 juce_generate_juce_header(ORchestra)
 
 file(GLOB_RECURSE SRC_FILES "src/**/*.cpp")
+
 target_sources(ORchestra
     PRIVATE
         ${SRC_FILES}
     )
 
-target_include_directories(ORchestra PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/utils)
-target_include_directories(ORchestra PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/juceFiles)
-target_include_directories(ORchestra PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/ORchestraEngine)
+target_include_directories(ORchestra PRIVATE 
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/utils
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/juceFiles
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/ORchestraEngine
+)
 
 target_compile_definitions(ORchestra
     PUBLIC
