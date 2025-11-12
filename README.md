@@ -19,14 +19,44 @@ Until a stable release is available, or if you just want the latest and greatest
 There's a Projucer file for both the project itself and for the unit tests.
 If you prefer cmake, run it from the top folder as it uses sub directories for Juce. 
 
-If using cmake, remeber to do `git submodule update --recursive` to initialize the juce submodule.  
-Then make a build/ folder in the top directory and cd into that, and run `cmake ../` and you're ready to do `cmake --build .`
-This will build all plugins, standalone and the unit tests.
+If using cmake, remember to do `git submodule update --init --recursive` to initialize the juce submodule.  
+Then make a build/ folder in the top directory and cd into that.
+
+#### Build Options
+
+The CMake build supports separate compilation of the plugin and tests for faster development:
+
+**Build tests only (no JUCE dependency, faster):**
+```bash
+cmake -DBUILD_PLUGIN=OFF -DBUILD_TESTS=ON ..
+cmake --build .
+./UnitTests/ORchestraTests
+```
+
+**Build plugin only (requires JUCE):**
+```bash
+cmake -DBUILD_PLUGIN=ON -DBUILD_TESTS=OFF ..
+cmake --build .
+```
+
+**Build both (default):**
+```bash
+cmake ..
+cmake --build .
+```
 
 ### Unit Tests
 
-Tests are provided with a seperate jucer and project for a console app that imports select code and runs
-the tests with the juce framework unit testing code.
+Tests are now using the Catch2 framework and can be built independently from the JUCE plugin.
+This allows for quick test iterations without compiling the entire JUCE framework.
+
+To run tests:
+```bash
+cd build
+cmake -DBUILD_PLUGIN=OFF -DBUILD_TESTS=ON ..
+make
+./UnitTests/ORchestraTests
+```
 
 ____
 
