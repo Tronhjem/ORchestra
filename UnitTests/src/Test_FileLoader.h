@@ -1,11 +1,18 @@
 #pragma once
 
-#include "../catch.hpp"
+using namespace juce;
 #include "FileLoader.h"
 #include <fstream>
 
-TEST_CASE("FileLoader: SaveToFile() and LoadFile() roundtrip preserves simple text 'Hello, ORchestra!'", "[FileLoader]")
+class Test_FileLoader : public UnitTest
 {
+public:
+    Test_FileLoader() : UnitTest("Test_FileLoader") {}
+    
+    void runTest() override
+    {
+        {
+            beginTest("FileLoader: SaveToFile() and LoadFile() roundtrip preserves simple text 'Hello, ORchestra!'");
             
             FileLoader loader;
             File tempFile = File::getSpecialLocation(File::tempDirectory).getChildFile("orchestra_test_simple.txt");
@@ -14,18 +21,17 @@ TEST_CASE("FileLoader: SaveToFile() and LoadFile() roundtrip preserves simple te
             
             // Save file
             bool saved = loader.SaveToFile(testPath, testData);
-            REQUIRE(saved);
+            expect(saved);
             
             // Load file
             std::string loadedData = loader.LoadFile(testPath);
-            REQUIRE(loadedData == testData);
+            expect(loadedData == testData);
             
             // Cleanup
             tempFile.deleteFile();
         }
-
-TEST_CASE("FileLoader: SaveToFile() and LoadFile() roundtrip preserves multi-line text with newlines", "[FileLoader]")
-{
+        {
+            beginTest("FileLoader: SaveToFile() and LoadFile() roundtrip preserves multi-line text with newlines");
             
             FileLoader loader;
             File tempFile = File::getSpecialLocation(File::tempDirectory).getChildFile("orchestra_test_multiline.txt");
@@ -33,16 +39,15 @@ TEST_CASE("FileLoader: SaveToFile() and LoadFile() roundtrip preserves multi-lin
             std::string testData = "line1\nline2\nline3";
             
             bool saved = loader.SaveToFile(testPath, testData);
-            REQUIRE(saved);
+            expect(saved);
             
             std::string loadedData = loader.LoadFile(testPath);
-            REQUIRE(loadedData == testData);
+            expect(loadedData == testData);
             
             tempFile.deleteFile();
         }
-
-TEST_CASE("FileLoader: SaveToFile() and LoadFile() roundtrip preserves empty string", "[FileLoader]")
-{
+        {
+            beginTest("FileLoader: SaveToFile() and LoadFile() roundtrip preserves empty string");
             
             FileLoader loader;
             File tempFile = File::getSpecialLocation(File::tempDirectory).getChildFile("orchestra_test_empty.txt");
@@ -50,16 +55,15 @@ TEST_CASE("FileLoader: SaveToFile() and LoadFile() roundtrip preserves empty str
             std::string testData = "";
             
             bool saved = loader.SaveToFile(testPath, testData);
-            REQUIRE(saved);
+            expect(saved);
             
             std::string loadedData = loader.LoadFile(testPath);
-            REQUIRE(loadedData == testData);
+            expect(loadedData == testData);
             
             tempFile.deleteFile();
         }
-
-TEST_CASE("FileLoader: SaveToFile() and LoadFile() roundtrip preserves ORchestra script syntax", "[FileLoader]")
-{
+        {
+            beginTest("FileLoader: SaveToFile() and LoadFile() roundtrip preserves ORchestra script syntax");
             
             FileLoader loader;
             File tempFile = File::getSpecialLocation(File::tempDirectory).getChildFile("orchestra_test_script.txt");
@@ -67,27 +71,25 @@ TEST_CASE("FileLoader: SaveToFile() and LoadFile() roundtrip preserves ORchestra
             std::string testData = "a = [1, 2, 3]\nb = a + 10\ntest b";
             
             bool saved = loader.SaveToFile(testPath, testData);
-            REQUIRE(saved);
+            expect(saved);
             
             std::string loadedData = loader.LoadFile(testPath);
-            REQUIRE(loadedData == testData);
+            expect(loadedData == testData);
             
             tempFile.deleteFile();
         }
-
-TEST_CASE("FileLoader: LoadFile() returns empty string for non-existent file", "[FileLoader]")
-{
+        {
+            beginTest("FileLoader: LoadFile() returns empty string for non-existent file");
             
             FileLoader loader;
             File tempFile = File::getSpecialLocation(File::tempDirectory).getChildFile("this_file_does_not_exist_12345.txt");
             std::string nonExistentPath = tempFile.getFullPathName().toStdString();
             
             std::string loadedData = loader.LoadFile(nonExistentPath);
-            REQUIRE(loadedData.empty());
+            expect(loadedData.empty());
         }
-
-TEST_CASE("FileLoader: SaveToFile() and LoadFile() roundtrip preserves special characters", "[FileLoader]")
-{
+        {
+            beginTest("FileLoader: SaveToFile() and LoadFile() roundtrip preserves special characters");
             
             FileLoader loader;
             File tempFile = File::getSpecialLocation(File::tempDirectory).getChildFile("orchestra_test_special.txt");
@@ -95,16 +97,15 @@ TEST_CASE("FileLoader: SaveToFile() and LoadFile() roundtrip preserves special c
             std::string testData = "!@#$%^&*()_+-=[]{}|;:',.<>?/`~";
             
             bool saved = loader.SaveToFile(testPath, testData);
-            REQUIRE(saved);
+            expect(saved);
             
             std::string loadedData = loader.LoadFile(testPath);
-            REQUIRE(loadedData == testData);
+            expect(loadedData == testData);
             
             tempFile.deleteFile();
         }
-
-TEST_CASE("FileLoader: SaveToFile() and LoadFile() roundtrip preserves numeric string '0123456789'", "[FileLoader]")
-{
+        {
+            beginTest("FileLoader: SaveToFile() and LoadFile() roundtrip preserves numeric string '0123456789'");
             
             FileLoader loader;
             File tempFile = File::getSpecialLocation(File::tempDirectory).getChildFile("orchestra_test_numbers.txt");
@@ -112,16 +113,15 @@ TEST_CASE("FileLoader: SaveToFile() and LoadFile() roundtrip preserves numeric s
             std::string testData = "0123456789";
             
             bool saved = loader.SaveToFile(testPath, testData);
-            REQUIRE(saved);
+            expect(saved);
             
             std::string loadedData = loader.LoadFile(testPath);
-            REQUIRE(loadedData == testData);
+            expect(loadedData == testData);
             
             tempFile.deleteFile();
         }
-
-TEST_CASE("FileLoader: SaveToFile() overwrites existing file with new content", "[FileLoader]")
-{
+        {
+            beginTest("FileLoader: SaveToFile() overwrites existing file with new content");
             
             FileLoader loader;
             File tempFile = File::getSpecialLocation(File::tempDirectory).getChildFile("orchestra_test_overwrite.txt");
@@ -134,17 +134,16 @@ TEST_CASE("FileLoader: SaveToFile() overwrites existing file with new content", 
             
             // Overwrite with second content
             bool saved = loader.SaveToFile(testPath, testData2);
-            REQUIRE(saved);
+            expect(saved);
             
             std::string loadedData = loader.LoadFile(testPath);
-            REQUIRE(loadedData == testData2);
-            REQUIRE(loadedData != testData1);
+            expect(loadedData == testData2);
+            expect(loadedData != testData1);
             
             tempFile.deleteFile();
         }
-
-TEST_CASE("FileLoader: SaveToFile() and LoadFile() roundtrip preserves 100-line content", "[FileLoader]")
-{
+        {
+            beginTest("FileLoader: SaveToFile() and LoadFile() roundtrip preserves 100-line content");
             
             FileLoader loader;
             File tempFile = File::getSpecialLocation(File::tempDirectory).getChildFile("orchestra_test_long.txt");
@@ -158,10 +157,12 @@ TEST_CASE("FileLoader: SaveToFile() and LoadFile() roundtrip preserves 100-line 
             }
             
             bool saved = loader.SaveToFile(testPath, testData);
-            REQUIRE(saved);
+            expect(saved);
             
             std::string loadedData = loader.LoadFile(testPath);
-            REQUIRE(loadedData == testData);
+            expect(loadedData == testData);
             
             tempFile.deleteFile();
-
+        }
+    }
+};

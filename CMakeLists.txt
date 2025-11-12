@@ -4,4 +4,4 @@ enable_testing()
 
 project(ORCHESTRA VERSION 0.0.1)
 add_subdirectory(UnitTests)
-add_subdirectory(ORchestra)
+# add_subdirectory(ORchestra)  # ORchestra plugin still requires JUCE
