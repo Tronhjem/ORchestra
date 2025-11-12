@@ -6,7 +6,7 @@ using namespace juce;
 class Test_EuclidAndRandom  : public UnitTest
 {
 public:
-    Test_EuclidAndRandom()  : UnitTest ("Test_OpCodeResults") {}
+    Test_EuclidAndRandom()  : UnitTest ("Test_EuclidAndRandom") {}
     
     void runTest() override
     {
