@@ -20,6 +20,7 @@ enum class TokenType
     PLUS,
     SLASH,
     STAR,
+    PERCENT,
 
 
     // Literals.

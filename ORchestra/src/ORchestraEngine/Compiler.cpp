@@ -207,6 +207,9 @@ void Compiler::MakeOperation(TokenType tokenType, std::vector<Instruction> &inst
     case TokenType::SLASH:
         code = OpCode::DIVIDE;
         break;
+    case TokenType::PERCENT:
+        code = OpCode::MODULO;
+        break;
     case TokenType::AND:
         code = OpCode::AND;
         break;
@@ -459,6 +462,7 @@ bool Compiler::CompileExpression(std::vector<Instruction> &instructions)
                t == TokenType::MINUS ||
                t == TokenType::STAR ||
                t == TokenType::SLASH ||
+               t == TokenType::PERCENT ||
                t == TokenType::AND ||
                t == TokenType::OR ||
                t == TokenType::XOR ||
@@ -474,7 +478,7 @@ bool Compiler::CompileExpression(std::vector<Instruction> &instructions)
     {
         if (t == TokenType::PLUS || t == TokenType::MINUS)
             return 1;
-        if (t == TokenType::STAR || t == TokenType::SLASH)
+        if (t == TokenType::STAR || t == TokenType::SLASH || t == TokenType::PERCENT)
             return 2;
 
         return 0;

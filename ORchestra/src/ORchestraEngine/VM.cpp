@@ -313,6 +313,12 @@ bool VM::ProcessInstruction(const Instruction &instruction, const int stepCount)
         break;
     }
 
+    case (OpCode::MODULO):
+    {
+        PopDoOperationAndPush(Modulo);
+        break;
+    }
+
     case (OpCode::LESS):
     {
         PopDoOperationAndPush(Lesser);

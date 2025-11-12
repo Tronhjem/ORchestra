@@ -163,6 +163,8 @@ Token Scanner::ScanToken()
         return MakeToken(TokenType::STAR);
     case '/':
         return MakeToken(TokenType::SLASH);
+    case '%':
+        return MakeToken(TokenType::PERCENT);
 
     default:
         return MakeErrorToken(ERROR_UNEXPECTED_CHAR, c);
