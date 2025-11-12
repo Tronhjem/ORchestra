@@ -28,13 +28,17 @@ jobs:
         sudo apt-get install -y \
           libasound2-dev \
           libcurl4-openssl-dev \
-          libfreetype-dev \
+          libfreetype6-dev \
           libx11-dev \
           libxcomposite-dev \
           libxcursor-dev \
           libxinerama-dev \
           libxrandr-dev \
+          libxext-dev \
+          libxrender-dev \
           mesa-common-dev \
+          libgl1-mesa-dev \
+          libglu1-mesa-dev \
           pkg-config
     
     - name: Configure CMake
