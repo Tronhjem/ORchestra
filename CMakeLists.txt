@@ -9,7 +9,9 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Add FreeType include path for Linux builds
 if(UNIX AND NOT APPLE)
-    include_directories(/usr/include/freetype2)
+    include_directories(/usr/include/freetype2  -I/usr/local/include/freetype2  -I/usr/include/libpng16)
+    find_package(Freetype)
+    target_link_libraries(ORCHESTRA freetype)
 endif()
 
 add_subdirectory(JUCE)                  # If you've put JUCE in a subdirectory called JUCE
