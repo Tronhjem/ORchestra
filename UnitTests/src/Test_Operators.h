@@ -111,6 +111,16 @@ public:
             expect (result.GetValue(0) == 12 /* (2 + 2) * 5 */);
         }
         {
+            beginTest("VM: Respects operator precedence with modulo '10 + 7 % 3' (result=11)");
+            
+            std::string file {"a = 10 + 7 % 3 \n test a"};
+            VM vm;
+            expect(vm.Prepare(&file[0]));
+            
+            StepData result = vm.GetTopStackValue();
+            expect (result.GetValue(0) == 10 + (7 % 3));
+        }
+        {
             beginTest("VM: Evaluates simple parentheses expression '(2) + 2' correctly (result=4)");
             
             std::string file {"a = (2) + 2 \n test a"};
