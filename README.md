@@ -1,6 +1,7 @@
 # ORchestra
 
 [![BuildAndTest](https://github.com/Tronhjem/ORchestra/actions/workflows/BuildAndTest.yml/badge.svg)](https://github.com/Tronhjem/ORchestra/actions/workflows/BuildAndTest.yml)
+[![Run Tests](https://github.com/Tronhjem/ORchestra/actions/workflows/RunTests.yml/badge.svg)](https://github.com/Tronhjem/ORchestra/actions/workflows/RunTests.yml)
 
 Project is still WIP.
 
