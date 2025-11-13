@@ -3,11 +3,24 @@
 #include "FileLoader.h"
 #include <fstream>
 #include <cstdio>
+#include <cstdlib>
+#include <string>
+
+// Cross-platform temporary directory helper
+inline std::string getTempDir() {
+#ifdef _WIN32
+    const char* temp = std::getenv("TEMP");
+    return temp ? std::string(temp) : std::string(".");
+#else
+    return "/tmp";
+#endif
+}
+
 TEST_CASE("FileLoader: SaveToFile() and LoadFile() roundtrip preserves simple text 'Hello, ORchestra!'", "[FileLoader]")
 {
             
             FileLoader loader;
-            std::string testPath = "/tmp/orchestra_test_simple.txt";
+            std::string testPath = getTempDir() + "/orchestra_test_simple.txt";
             std::string testData = "Hello, ORchestra!";
             
             // Save file
@@ -26,7 +39,7 @@ TEST_CASE("FileLoader: SaveToFile() and LoadFile() roundtrip preserves multi-lin
 {
             
             FileLoader loader;
-            std::string testPath = "/tmp/orchestra_test_multiline.txt";
+            std::string testPath = getTempDir() + "/orchestra_test_multiline.txt";
             std::string testData = "line1\nline2\nline3";
             
             bool saved = loader.SaveToFile(testPath, testData);
@@ -41,7 +54,7 @@ TEST_CASE("FileLoader: SaveToFile() and LoadFile() roundtrip preserves empty str
 {
             
             FileLoader loader;
-            std::string testPath = "/tmp/orchestra_test_empty.txt";
+            std::string testPath = getTempDir() + "/orchestra_test_empty.txt";
             std::string testData = "";
             
             bool saved = loader.SaveToFile(testPath, testData);
@@ -56,7 +69,7 @@ TEST_CASE("FileLoader: SaveToFile() and LoadFile() roundtrip preserves ORchestra
 {
             
             FileLoader loader;
-            std::string testPath = "/tmp/orchestra_test_script.txt";
+            std::string testPath = getTempDir() + "/orchestra_test_script.txt";
             std::string testData = "a = [1, 2, 3]\nb = a + 10\ntest b";
             
             bool saved = loader.SaveToFile(testPath, testData);
@@ -71,7 +84,7 @@ TEST_CASE("FileLoader: LoadFile() returns empty string for non-existent file", "
 {
             
             FileLoader loader;
-            std::string nonExistentPath = "/tmp/this_file_does_not_exist_12345.txt";
+            std::string nonExistentPath = getTempDir() + "/this_file_does_not_exist_12345.txt";
             
             std::string loadedData = loader.LoadFile(nonExistentPath);
             REQUIRE(loadedData.empty());
@@ -81,7 +94,7 @@ TEST_CASE("FileLoader: SaveToFile() and LoadFile() roundtrip preserves special c
 {
             
             FileLoader loader;
-            std::string testPath = "/tmp/orchestra_test_special.txt";
+            std::string testPath = getTempDir() + "/orchestra_test_special.txt";
             std::string testData = "!@#$%^&*()_+-=[]{}|;:',.<>?/`~";
             
             bool saved = loader.SaveToFile(testPath, testData);
@@ -96,7 +109,7 @@ TEST_CASE("FileLoader: SaveToFile() and LoadFile() roundtrip preserves numeric s
 {
             
             FileLoader loader;
-            std::string testPath = "/tmp/orchestra_test_numbers.txt";
+            std::string testPath = getTempDir() + "/orchestra_test_numbers.txt";
             std::string testData = "0123456789";
             
             bool saved = loader.SaveToFile(testPath, testData);
@@ -111,7 +124,7 @@ TEST_CASE("FileLoader: SaveToFile() overwrites existing file with new content", 
 {
             
             FileLoader loader;
-            std::string testPath = "/tmp/orchestra_test_overwrite.txt";
+            std::string testPath = getTempDir() + "/orchestra_test_overwrite.txt";
             std::string testData1 = "First content";
             std::string testData2 = "Second content";
             
@@ -132,7 +145,7 @@ TEST_CASE("FileLoader: SaveToFile() and LoadFile() roundtrip preserves 100-line 
 {
             
             FileLoader loader;
-            std::string testPath = "/tmp/orchestra_test_long.txt";
+            std::string testPath = getTempDir() + "/orchestra_test_long.txt";
             std::string testData;
             
             // Create a longer string
