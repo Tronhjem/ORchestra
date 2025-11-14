@@ -62,7 +62,7 @@ enum class TokenType
     PRINT,
 #endif
 #if _TEST
-    TEST,
+    TEST_KEYWORD,
 #endif
 // UNUSED STUFF
 //    SEMICOLON,

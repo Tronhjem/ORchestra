@@ -752,7 +752,7 @@ bool Compiler::Compile(std::vector<Instruction> &instructions)
         }
 
 #if _TEST
-        case TokenType::TEST:
+        case TokenType::TEST_KEYWORD:
         {
             if (Peek().mTokenType == TokenType::IDENTIFIER || Peek().mTokenType == TokenType::NUMBER)
             {

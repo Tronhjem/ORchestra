@@ -248,7 +248,7 @@ TokenType Scanner::IdentifierToken()
 #endif
 #if _TEST
     case 't':
-        return checkKeyword(1, 3, "est", TokenType::TEST);
+        return checkKeyword(1, 3, "est", TokenType::TEST_KEYWORD);
 #endif
     case 'r':
         return checkKeyword(1, 2, "an", TokenType::RANDOM);
