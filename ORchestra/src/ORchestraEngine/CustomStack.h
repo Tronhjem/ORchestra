@@ -1,5 +1,8 @@
 #pragma once
 
+namespace ORchestra {
+
+
 template <typename T>
 class Stack
 {
@@ -36,3 +39,6 @@ private:
     std::array<T, 64> mStack;
     unsigned long stackPointer = 0;
 };
+
+
+} // namespace ORchestra

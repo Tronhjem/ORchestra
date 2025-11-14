@@ -3,6 +3,8 @@
 #include "../catch.hpp"
 #include "VM.h"
 
+
+using namespace ORchestra;
 TEST_CASE("Array: Access first element 'a=[64,65,63], a[0]' evaluates to 64", "[Array]")
 {
     std::string file {"a = [64,65,63] \n test a[0]"};

@@ -3,6 +3,8 @@
 #include "../catch.hpp"
 #include "VM.h"
 
+
+using namespace ORchestra;
 TEST_CASE("Logical: AND operation with non-zero values '64 & 64' evaluates to 1 (true)", "[Logical]")
 {
     std::string file {"a = 64 & 64 \n test a"};

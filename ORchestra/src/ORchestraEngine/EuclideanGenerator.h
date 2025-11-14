@@ -1,6 +1,9 @@
 #pragma once
 #include "DataSequence.h"
 
+namespace ORchestra {
+
+
 static void GenerateEuclideanSequence(StepData *sequence, const int hits, const int length)
 {
     int count = length;
@@ -18,3 +21,6 @@ static void GenerateEuclideanSequence(StepData *sequence, const int hits, const 
         count += hits;
     }
 }
+
+
+} // namespace ORchestra

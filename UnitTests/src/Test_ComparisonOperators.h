@@ -3,6 +3,8 @@
 #include "../catch.hpp"
 #include "VM.h"
 
+
+using namespace ORchestra;
 TEST_CASE("Comparison: Greater-than '1 > 0' evaluates to 1 (true)", "[Comparison]")
 {
     std::string file {"a = 1 > 0 \n test a"};

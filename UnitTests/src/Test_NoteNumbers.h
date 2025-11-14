@@ -3,6 +3,8 @@
 #include "../catch.hpp"
 #include "VM.h"
 
+
+using namespace ORchestra;
 TEST_CASE("NoteNumbers: Converts 'C#0' to MIDI note 13 correctly", "[NoteNumbers]")
 {
     std::string file{"a = C#0 \n test a"};

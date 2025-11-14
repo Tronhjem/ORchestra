@@ -3,6 +3,8 @@
 #include "../catch.hpp"
 #include "VM.h"
 
+
+using namespace ORchestra;
 TEST_CASE("Error: Detects unterminated array 'a = [2,' (compilation fails)", "[Error]")
 {
     std::string file {"a = [2, \n"};

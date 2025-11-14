@@ -3,6 +3,8 @@
 #include "VM.h"
 #include "StepData.h"
 #include "Defines.h"
+
+using namespace ORchestra;
 TEST_CASE("DataSequence: Evaluates ran(50,60) in array, result in range [50,60]", "[DataSequence]")
 {
 

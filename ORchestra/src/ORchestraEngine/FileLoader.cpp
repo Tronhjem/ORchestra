@@ -6,6 +6,9 @@
 #include "FileLoader.h"
 #include "ScopedTimer.h"
 
+namespace ORchestra {
+
+
 FileLoader::FileLoader()
 {
 }
@@ -55,3 +58,6 @@ bool FileLoader::SaveToFile(const std::string &filePath, const std::string &data
     file.close();
     return true;
 }
+
+
+} // namespace ORchestra

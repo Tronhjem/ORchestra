@@ -16,6 +16,9 @@
 #include "CustomStack.h"
 #include "SequenceStep.h"
 
+namespace ORchestra {
+
+
 class Instruction;
 
 
@@ -57,3 +60,6 @@ private:
         mStack.Push(StepData{result});
     }
 };
+
+
+} // namespace ORchestra

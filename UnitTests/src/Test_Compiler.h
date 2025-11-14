@@ -1,6 +1,8 @@
 #pragma once
 #include "../catch.hpp"
 #include "VM.h"
+
+using namespace ORchestra;
 TEST_CASE("Compiler: Compiles nested array [[1,2],[3,4]], accessing a[0] returns [1,2]", "[Compiler]")
 {
             

@@ -3,6 +3,8 @@
 #include "../catch.hpp"
 #include "VM.h"
 
+
+using namespace ORchestra;
 TEST_CASE("Arithmetic: Assigns single value 'a = 74' and retrieves it correctly", "[Arithmetic]")
 {
     std::string file {"a = 74 \n test a"};

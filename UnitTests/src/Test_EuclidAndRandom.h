@@ -3,6 +3,8 @@
 #include "../catch.hpp"
 #include "VM.h"
 
+
+using namespace ORchestra;
 TEST_CASE("Euclidean: Rejects 'euc()' with no parameters (compilation fails)", "[Euclidean]")
 {
     std::string file {"a = euc() \n test a"};

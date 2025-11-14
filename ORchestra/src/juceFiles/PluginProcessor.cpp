@@ -10,6 +10,8 @@
 #include "PluginEditor.h"
 #include "ParamConstants.h"
 
+
+using namespace ORchestra;
 //==============================================================================
 ORchestraAudioProcessor::ORchestraAudioProcessor() :
 #ifndef JucePlugin_PreferredChannelConfigurations

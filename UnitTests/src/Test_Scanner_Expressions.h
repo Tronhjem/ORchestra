@@ -2,7 +2,9 @@
 #include "../catch.hpp"
 #include "Scanner.h"
 #include "ErrorReporting.h"
-#include "Token.h"
+#include "ORchestraToken.h"
+
+using namespace ORchestra;
 TEST_CASE("Scanner: Recognizes 'ran' keyword as RANDOM token", "[Scanner_Expressions]")
 {
             
@@ -14,7 +16,7 @@ TEST_CASE("Scanner: Recognizes 'ran' keyword as RANDOM token", "[Scanner_Express
             
             auto& tokens = scanner.GetTokens();
             REQUIRE(tokens.size() >= 1);
-            REQUIRE(tokens[0].GetType() == TokenType::RANDOM);
+            REQUIRE(tokens[0].GetType() == ORchestraTokenType::RANDOM);
 }
 
 TEST_CASE("Scanner: Recognizes 'euc' keyword as EUCLIDEAN token", "[Scanner_Expressions]")
@@ -28,7 +30,7 @@ TEST_CASE("Scanner: Recognizes 'euc' keyword as EUCLIDEAN token", "[Scanner_Expr
             
             auto& tokens = scanner.GetTokens();
             REQUIRE(tokens.size() >= 1);
-            REQUIRE(tokens[0].GetType() == TokenType::EUCLIDEAN);
+            REQUIRE(tokens[0].GetType() == ORchestraTokenType::EUCLIDEAN);
 }
 
 TEST_CASE("Scanner: Tokenizes expression 'a = 42 + 10' into 5+ tokens", "[Scanner_Expressions]")
@@ -59,9 +61,9 @@ TEST_CASE("Scanner: Tokenizes array syntax 'a = [1, 2, 3]' with brackets", "[Sca
             
             for (const auto& token : tokens)
             {
-                if (token.GetType() == TokenType::LEFT_BRACKET)
+                if (token.GetType() == ORchestraTokenType::LEFT_BRACKET)
                     foundLeftBracket = true;
-                if (token.GetType() == TokenType::RIGHT_BRACKET)
+                if (token.GetType() == ORchestraTokenType::RIGHT_BRACKET)
                     foundRightBracket = true;
             }
             
@@ -80,5 +82,5 @@ TEST_CASE("Scanner: Tokenizes expression '(2 + 3) * 4' starting with LEFT_PAREN"
             
             auto& tokens = scanner.GetTokens();
             REQUIRE(tokens.size() >= 7);
-            REQUIRE(tokens[0].GetType() == TokenType::LEFT_PAREN);
+            REQUIRE(tokens[0].GetType() == ORchestraTokenType::LEFT_PAREN);
 }

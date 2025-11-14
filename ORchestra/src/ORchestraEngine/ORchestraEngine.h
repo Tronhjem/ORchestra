@@ -11,6 +11,9 @@
 #include "StepData.h"
 #include "ErrorReporting.h"
 
+namespace ORchestra {
+
+
 constexpr int STEP_BUFFER_SIZE = 32;
 constexpr int HALF_STEP_BUFFER_SIZE = STEP_BUFFER_SIZE / 2;
 
@@ -52,3 +55,6 @@ private:
 
     MidiScheduler mMidiScheduler;
 };
+
+
+} // namespace ORchestra

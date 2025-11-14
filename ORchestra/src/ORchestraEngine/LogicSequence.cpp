@@ -1,3 +1,6 @@
+
+namespace ORchestra {
+
 //OLD, JUST KEEPING FOR ARCHIVE
 
 //#include <assert.h>
@@ -30,3 +33,6 @@
 //    uChar value = ((1 << index) & mTrigger) >> index;
 //    return value;
 //}
+
+
+} // namespace ORchestra

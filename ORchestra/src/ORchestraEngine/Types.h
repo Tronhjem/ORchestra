@@ -1,5 +1,8 @@
 #pragma once
 
+namespace ORchestra {
+
+
 typedef unsigned char DataUnit;
 static_assert(sizeof(DataUnit) == 1);
 
@@ -9,3 +12,6 @@ enum class MidiType : DataUnit
     NoteOff = 1,
     CC = 2
 };
+
+
+} // namespace ORchestra

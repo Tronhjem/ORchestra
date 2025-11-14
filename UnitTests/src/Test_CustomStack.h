@@ -4,6 +4,8 @@
 #include "CustomStack.h"
 #include "StepData.h"
 
+
+using namespace ORchestra;
 TEST_CASE("CustomStack: LIFO order maintained for integer values (Push 10,20,30 -> Pop returns 30,20,10)", "[CustomStack]")
 {
     Stack<int> stack;

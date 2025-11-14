@@ -15,7 +15,7 @@ add_executable(ORchestraTests
     ${ORCHESTRA_ENGINE_DIR}/ErrorReporting.cpp
     ${ORCHESTRA_ENGINE_DIR}/Scanner.cpp
     ${ORCHESTRA_ENGINE_DIR}/Compiler.cpp
-    ${ORCHESTRA_ENGINE_DIR}/Token.cpp
+    ${ORCHESTRA_ENGINE_DIR}/ORchestraToken.cpp
     ${ORCHESTRA_ENGINE_DIR}/FileLoader.cpp
 )
 

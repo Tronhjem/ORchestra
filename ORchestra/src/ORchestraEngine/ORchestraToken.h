@@ -2,7 +2,9 @@
 
 #include <string>
 
-enum class TokenType
+namespace ORchestra {
+
+enum class ORchestraTokenType
 {
     // Single-character tokens.
     LEFT_PAREN = 0,
@@ -82,22 +84,24 @@ enum class TokenType
 //    WHILE,
 };
 
-class Token
+class ORchestraToken
 {
 public:
-    Token(TokenType tokenType, 
+    ORchestraToken(ORchestraTokenType tokenType, 
           const char* start,
           int length, 
           int line);
         
-    TokenType GetType() const { return mTokenType; }
+    ORchestraTokenType GetType() const { return mTokenType; }
 
-    TokenType mTokenType;
+    ORchestraTokenType mTokenType;
     const char* mStart;
     int mLength;
     int mLine;
 
 private:
-    Token() = delete;
+    ORchestraToken() = delete;
 };
+
+} // namespace ORchestra
 

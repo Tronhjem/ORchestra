@@ -6,6 +6,9 @@
 #include "EuclideanGenerator.h"
 #include "Defines.h"
 
+namespace ORchestra {
+
+
 #ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wswitch-enum"
@@ -389,3 +392,6 @@ bool VM::ProcessInstruction(const Instruction &instruction, const int stepCount)
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif
+
+
+} // namespace ORchestra

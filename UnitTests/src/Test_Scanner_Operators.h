@@ -2,7 +2,9 @@
 #include "../catch.hpp"
 #include "Scanner.h"
 #include "ErrorReporting.h"
-#include "Token.h"
+#include "ORchestraToken.h"
+
+using namespace ORchestra;
 TEST_CASE("Scanner: Tokenizes arithmetic operators '+ - * /' as PLUS, MINUS, STAR, SLASH", "[Scanner_Operators]")
 {
             
@@ -14,10 +16,10 @@ TEST_CASE("Scanner: Tokenizes arithmetic operators '+ - * /' as PLUS, MINUS, STA
             
             auto& tokens = scanner.GetTokens();
             REQUIRE(tokens.size() >= 4);
-            REQUIRE(tokens[0].GetType() == TokenType::PLUS);
-            REQUIRE(tokens[1].GetType() == TokenType::MINUS);
-            REQUIRE(tokens[2].GetType() == TokenType::STAR);
-            REQUIRE(tokens[3].GetType() == TokenType::SLASH);
+            REQUIRE(tokens[0].GetType() == ORchestraTokenType::PLUS);
+            REQUIRE(tokens[1].GetType() == ORchestraTokenType::MINUS);
+            REQUIRE(tokens[2].GetType() == ORchestraTokenType::STAR);
+            REQUIRE(tokens[3].GetType() == ORchestraTokenType::SLASH);
 }
 
 TEST_CASE("Scanner: Distinguishes assignment '=' from equality '==' in 'a = 5 == 5'", "[Scanner_Operators]")
@@ -35,9 +37,9 @@ TEST_CASE("Scanner: Distinguishes assignment '=' from equality '==' in 'a = 5 ==
             
             for (const auto& token : tokens)
             {
-                if (token.GetType() == TokenType::EQUAL)
+                if (token.GetType() == ORchestraTokenType::EQUAL)
                     foundAssign = true;
-                if (token.GetType() == TokenType::EQUAL_EQUAL)
+                if (token.GetType() == ORchestraTokenType::EQUAL_EQUAL)
                     foundEqual = true;
             }
             
@@ -56,11 +58,11 @@ TEST_CASE("Scanner: Tokenizes comparison operators '< > <= >= !=' correctly", "[
             
             auto& tokens = scanner.GetTokens();
             REQUIRE(tokens.size() >= 5);
-            REQUIRE(tokens[0].GetType() == TokenType::LESS);
-            REQUIRE(tokens[1].GetType() == TokenType::GREATER);
-            REQUIRE(tokens[2].GetType() == TokenType::LESS_EQUAL);
-            REQUIRE(tokens[3].GetType() == TokenType::GREATER_EQUAL);
-            REQUIRE(tokens[4].GetType() == TokenType::BANG_EQUAL);
+            REQUIRE(tokens[0].GetType() == ORchestraTokenType::LESS);
+            REQUIRE(tokens[1].GetType() == ORchestraTokenType::GREATER);
+            REQUIRE(tokens[2].GetType() == ORchestraTokenType::LESS_EQUAL);
+            REQUIRE(tokens[3].GetType() == ORchestraTokenType::GREATER_EQUAL);
+            REQUIRE(tokens[4].GetType() == ORchestraTokenType::BANG_EQUAL);
 }
 
 TEST_CASE("Scanner: Tokenizes logic operators '& | ^' as AND, OR, XOR", "[Scanner_Operators]")
@@ -74,7 +76,7 @@ TEST_CASE("Scanner: Tokenizes logic operators '& | ^' as AND, OR, XOR", "[Scanne
             
             auto& tokens = scanner.GetTokens();
             REQUIRE(tokens.size() >= 3);
-            REQUIRE(tokens[0].GetType() == TokenType::AND);
-            REQUIRE(tokens[1].GetType() == TokenType::OR);
-            REQUIRE(tokens[2].GetType() == TokenType::XOR);
+            REQUIRE(tokens[0].GetType() == ORchestraTokenType::AND);
+            REQUIRE(tokens[1].GetType() == ORchestraTokenType::OR);
+            REQUIRE(tokens[2].GetType() == ORchestraTokenType::XOR);
 }

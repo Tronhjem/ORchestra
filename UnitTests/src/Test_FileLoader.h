@@ -6,6 +6,8 @@
 #include <cstdlib>
 #include <string>
 
+
+using namespace ORchestra;
 // Cross-platform temporary directory helper
 inline std::string getTempDir() {
 #ifdef _WIN32

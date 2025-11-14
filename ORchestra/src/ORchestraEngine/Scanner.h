@@ -3,7 +3,10 @@
 #include <vector>
 #include <string>
 
-#include "Token.h"
+#include "ORchestraToken.h"
+
+namespace ORchestra {
+
 
 class ErrorReporting;
 
@@ -14,16 +17,16 @@ public:
     ~Scanner();
     
     bool ScanFile(const char *data);
-    std::vector<Token>& GetTokens() { return mTokens; }
+    std::vector<ORchestraToken>& GetTokens() { return mTokens; }
 
 private:
-    Token ScanToken();
-    Token MakeToken(TokenType token);
-    Token MakeErrorToken(char* message, char symbol);
-    Token BuildString();
-    Token BuildDigit();
-    Token BuildIdentifier();
-    TokenType IdentifierToken();
+    ORchestraToken ScanToken();
+    ORchestraToken MakeToken(ORchestraTokenType token);
+    ORchestraToken MakeErrorToken(char* message, char symbol);
+    ORchestraToken BuildString();
+    ORchestraToken BuildDigit();
+    ORchestraToken BuildIdentifier();
+    ORchestraTokenType IdentifierToken();
     void SkipWhiteSpace();
     
     //Helpers
@@ -37,7 +40,7 @@ private:
 
 private:
     ErrorReporting& mErrorReporting;
-    std::vector<Token> mTokens;
+    std::vector<ORchestraToken> mTokens;
 
     const char* mStart;
     const char* mCurrent;
@@ -45,3 +48,6 @@ private:
     char ERROR_UNEXPECTED_CHAR[50] = "ERROR: Unexpected character ";
     char ERROR_NO_END_QUOTE[50] = "ERROR: Expected \" but didn't find one ";
 };
+
+
+} // namespace ORchestra

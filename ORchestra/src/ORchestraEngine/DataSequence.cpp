@@ -1,5 +1,8 @@
 #include "DataSequence.h"
 
+namespace ORchestra {
+
+
 DataSequence::DataSequence(const std::vector<StepData> &data) : mData(data)
 {
 }
@@ -14,3 +17,6 @@ void DataSequence::SetValue(int index, StepData value)
 {
     mData[static_cast<unsigned long>(index)] = value;
 }
+
+
+} // namespace ORchestra

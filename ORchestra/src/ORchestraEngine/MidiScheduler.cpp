@@ -1,5 +1,8 @@
 #include "MidiScheduler.h"
 #include <algorithm>
+
+namespace ORchestra {
+
 using juce::MidiMessage;
 
 #define CLAMP_TO_MIDI(x, min, max) \
@@ -82,3 +85,6 @@ void MidiScheduler::ClearAllData(juce::MidiBuffer &midiMessages)
 
     mScheduledMidiMessages.clear();
 }
+
+
+} // namespace ORchestra
