@@ -1,6 +1,8 @@
-#include "Token.h"
+#include "ORchestraToken.h"
 
-Token::Token(TokenType tokenType,
+namespace ORchestra {
+
+ORchestraToken::ORchestraToken(ORchestraTokenType tokenType,
       const char* start,
       int length,
       int line) : mTokenType(tokenType),
@@ -9,3 +11,5 @@ Token::Token(TokenType tokenType,
                   mLine(line)
 {
 }
+
+} // namespace ORchestra

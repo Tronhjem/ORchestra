@@ -1,3 +1,6 @@
+
+namespace ORchestra {
+
 //OLD, JUST KEEPING FOR ARCHIVE
 
 //#include <cassert>
@@ -48,3 +51,6 @@
 //            return 0;
 //    }
 //}
+
+
+} // namespace ORchestra

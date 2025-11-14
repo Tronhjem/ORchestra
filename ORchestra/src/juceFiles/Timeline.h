@@ -5,6 +5,8 @@
 #include "ORchestraEngine.h"
 #include "PluginProcessor.h"
 
+
+using namespace ORchestra;
 constexpr int TIMELINE_STEPS_DRAWN = 17;
 constexpr int TIMELINE_ROWS_DRAWN = 5;
 

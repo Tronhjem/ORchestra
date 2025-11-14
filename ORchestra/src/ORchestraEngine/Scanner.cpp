@@ -4,8 +4,11 @@
 
 #include "Scanner.h"
 #include "ErrorReporting.h"
-#include "Token.h"
+#include "ORchestraToken.h"
 #include "ScopedTimer.h"
+
+namespace ORchestra {
+
 
 #ifdef __clang__
 #pragma clang diagnostic push
@@ -20,17 +23,17 @@ Scanner::~Scanner()
 {
 }
 
-Token Scanner::MakeToken(TokenType tokenType)
+ORchestraToken Scanner::MakeToken(ORchestraTokenType tokenType)
 {
-    return Token(tokenType, mStart, static_cast<int>(mCurrent - mStart), mCurrentLine);
+    return ORchestraToken(tokenType, mStart, static_cast<int>(mCurrent - mStart), mCurrentLine);
 }
 
-Token Scanner::MakeErrorToken(char *message, char symbol)
+ORchestraToken Scanner::MakeErrorToken(char *message, char symbol)
 {
     size_t len = strlen(message);
     message[len] = symbol;
     message[len + 1] = '\0';
-    return Token(TokenType::ERROR, message, (int)strlen(message), mCurrentLine);
+    return ORchestraToken(ORchestraTokenType::PARSE_ERROR, message, (int)strlen(message), mCurrentLine);
 }
 
 void Scanner::SkipWhiteSpace() // append char
@@ -77,9 +80,9 @@ bool Scanner::ScanFile(const char *data)
 
     for (;;)
     {
-        Token t = ScanToken();
+        ORchestraToken t = ScanToken();
 
-        if (t.GetType() == TokenType::ERROR)
+        if (t.GetType() == ORchestraTokenType::PARSE_ERROR)
         {
             std::string errorString = std::string(t.mStart, static_cast<unsigned long>(t.mLength));
             mErrorReporting.LogError(mCurrentLine, errorString);
@@ -88,20 +91,20 @@ bool Scanner::ScanFile(const char *data)
 
         mTokens.emplace_back(t);
 
-        if (t.GetType() == TokenType::END)
+        if (t.GetType() == ORchestraTokenType::END)
         {
             return true;
         }
     }
 }
 
-Token Scanner::ScanToken()
+ORchestraToken Scanner::ScanToken()
 {
     SkipWhiteSpace();
 
     mStart = mCurrent;
     if (IsAtEnd())
-        return MakeToken(TokenType::END);
+        return MakeToken(ORchestraTokenType::END);
 
     char c = AdvanceCurrent();
 
@@ -116,55 +119,55 @@ Token Scanner::ScanToken()
     case ('\n'):
     {
         mCurrentLine++;
-        return MakeToken(TokenType::EOL);
+        return MakeToken(ORchestraTokenType::EOL);
     }
 
     // LOGIC
     case '&':
-        return MakeToken(TokenType::AND);
+        return MakeToken(ORchestraTokenType::AND);
     case '|':
-        return MakeToken(TokenType::OR);
+        return MakeToken(ORchestraTokenType::OR);
     case '^':
-        return MakeToken(TokenType::XOR);
+        return MakeToken(ORchestraTokenType::XOR);
 
     // Syntax
     case '(':
-        return MakeToken(TokenType::LEFT_PAREN);
+        return MakeToken(ORchestraTokenType::LEFT_PAREN);
     case ')':
-        return MakeToken(TokenType::RIGHT_PAREN);
+        return MakeToken(ORchestraTokenType::RIGHT_PAREN);
     case '{':
-        return MakeToken(TokenType::LEFT_BRACE);
+        return MakeToken(ORchestraTokenType::LEFT_BRACE);
     case '}':
-        return MakeToken(TokenType::RIGHT_BRACE);
+        return MakeToken(ORchestraTokenType::RIGHT_BRACE);
     case '[':
-        return MakeToken(TokenType::LEFT_BRACKET);
+        return MakeToken(ORchestraTokenType::LEFT_BRACKET);
     case ']':
-        return MakeToken(TokenType::RIGHT_BRACKET);
+        return MakeToken(ORchestraTokenType::RIGHT_BRACKET);
     case '.':
-        return MakeToken(TokenType::DOT);
+        return MakeToken(ORchestraTokenType::DOT);
     case ',':
-        return MakeToken(TokenType::COMMA);
+        return MakeToken(ORchestraTokenType::COMMA);
 
     case '!':
-        return MakeToken(Match('=') ? TokenType::BANG_EQUAL : TokenType::BANG);
+        return MakeToken(Match('=') ? ORchestraTokenType::BANG_EQUAL : ORchestraTokenType::BANG);
     case '=':
-        return MakeToken(Match('=') ? TokenType::EQUAL_EQUAL : TokenType::EQUAL);
+        return MakeToken(Match('=') ? ORchestraTokenType::EQUAL_EQUAL : ORchestraTokenType::EQUAL);
     case '<':
-        return MakeToken(Match('=') ? TokenType::LESS_EQUAL : TokenType::LESS);
+        return MakeToken(Match('=') ? ORchestraTokenType::LESS_EQUAL : ORchestraTokenType::LESS);
     case '>':
-        return MakeToken(Match('=') ? TokenType::GREATER_EQUAL : TokenType::GREATER);
+        return MakeToken(Match('=') ? ORchestraTokenType::GREATER_EQUAL : ORchestraTokenType::GREATER);
 
     // MATH
     case '-':
-        return MakeToken(TokenType::MINUS);
+        return MakeToken(ORchestraTokenType::MINUS);
     case '+':
-        return MakeToken(TokenType::PLUS);
+        return MakeToken(ORchestraTokenType::PLUS);
     case '*':
-        return MakeToken(TokenType::STAR);
+        return MakeToken(ORchestraTokenType::STAR);
     case '/':
-        return MakeToken(TokenType::SLASH);
+        return MakeToken(ORchestraTokenType::SLASH);
     case '%':
-        return MakeToken(TokenType::PERCENT);
+        return MakeToken(ORchestraTokenType::PERCENT);
 
     default:
         return MakeErrorToken(ERROR_UNEXPECTED_CHAR, c);
@@ -225,10 +228,10 @@ bool Scanner::Match(char expected)
     return true;
 }
 
-TokenType Scanner::IdentifierToken()
+ORchestraTokenType Scanner::IdentifierToken()
 {
     auto checkKeyword = [&](int start, int length,
-                            const char *rest, TokenType type)
+                            const char *rest, ORchestraTokenType type)
     {
         if (mCurrent - mStart == start + length &&
             memcmp(mStart + start, rest, static_cast<unsigned long>(length)) == 0)
@@ -236,7 +239,7 @@ TokenType Scanner::IdentifierToken()
             return type;
         }
 
-        return TokenType::IDENTIFIER;
+        return ORchestraTokenType::IDENTIFIER;
     };
 
     // Checking if any of these are reserved words.
@@ -244,20 +247,20 @@ TokenType Scanner::IdentifierToken()
     {
 #if _DEBUG
     case 'p':
-        return checkKeyword(1, 4, "rint", TokenType::PRINT);
+        return checkKeyword(1, 4, "rint", ORchestraTokenType::PRINT);
 #endif
 #if _TEST
     case 't':
-        return checkKeyword(1, 3, "est", TokenType::TEST);
+        return checkKeyword(1, 3, "est", ORchestraTokenType::TEST_KEYWORD);
 #endif
     case 'r':
-        return checkKeyword(1, 2, "an", TokenType::RANDOM);
+        return checkKeyword(1, 2, "an", ORchestraTokenType::RANDOM);
     case 'e':
-        return checkKeyword(1, 2, "uc", TokenType::EUCLIDEAN);
+        return checkKeyword(1, 2, "uc", ORchestraTokenType::EUCLIDEAN);
     case 'n':
-        return checkKeyword(1, 3, "ote", TokenType::NOTE);
+        return checkKeyword(1, 3, "ote", ORchestraTokenType::NOTE);
     case 'c':
-        return checkKeyword(1, 1, "c", TokenType::CC);
+        return checkKeyword(1, 1, "c", ORchestraTokenType::CC);
 
     case 'C':
     case 'D':
@@ -267,36 +270,36 @@ TokenType Scanner::IdentifierToken()
     case 'A':
     case 'B':
     {
-        return TokenType::NOTE_IDENTIFIER;
+        return ORchestraTokenType::NOTE_IDENTIFIER;
     }
 
     default:
-        return TokenType::IDENTIFIER;
+        return ORchestraTokenType::IDENTIFIER;
 
         //    case 'a':
-        //        return checkKeyword(1, 2, "nd", TokenType::AND);
+        //        return checkKeyword(1, 2, "nd", ORchestraTokenType::AND);
         //    case 'c':
-        //        return checkKeyword(1, 4, "lass", TokenType::CLASS);
+        //        return checkKeyword(1, 4, "lass", ORchestraTokenType::CLASS);
         //    case 'e':
-        //        return checkKeyword(1, 3, "lse", TokenType::ELSE);
+        //        return checkKeyword(1, 3, "lse", ORchestraTokenType::ELSE);
         //    case 'i':
-        //        return checkKeyword(1, 1, "f", TokenType::IF);
+        //        return checkKeyword(1, 1, "f", ORchestraTokenType::IF);
         //    case 'n':
-        //        return checkKeyword(1, 2, "il", TokenType::NIL);
+        //        return checkKeyword(1, 2, "il", ORchestraTokenType::NIL);
         //    case 'o':
-        //        return checkKeyword(1, 1, "r", TokenType::OR);
+        //        return checkKeyword(1, 1, "r", ORchestraTokenType::OR);
         //    case 'r':
-        //        return checkKeyword(1, 5, "eturn", TokenType::RETURN);
+        //        return checkKeyword(1, 5, "eturn", ORchestraTokenType::RETURN);
         //    case 's':
-        //        return checkKeyword(1, 4, "uper", TokenType::SUPER);
+        //        return checkKeyword(1, 4, "uper", ORchestraTokenType::SUPER);
         //    case 'v':
-        //        return checkKeyword(1, 2, "ar", TokenType::VAR);
+        //        return checkKeyword(1, 2, "ar", ORchestraTokenType::VAR);
         //    case 'w':
-        //        return checkKeyword(1, 4, "hile", TokenType::WHILE);
+        //        return checkKeyword(1, 4, "hile", ORchestraTokenType::WHILE);
     }
 }
 
-Token Scanner::BuildIdentifier()
+ORchestraToken Scanner::BuildIdentifier()
 {
     while (IsAlpha(PeekCurrent()) || IsDigit(PeekCurrent()) || PeekCurrent() == '#')
         AdvanceCurrent();
@@ -304,7 +307,7 @@ Token Scanner::BuildIdentifier()
     return MakeToken(IdentifierToken());
 }
 
-Token Scanner::BuildString()
+ORchestraToken Scanner::BuildString()
 {
     while (PeekCurrent() != '"' && !IsAtEnd())
     {
@@ -323,11 +326,11 @@ Token Scanner::BuildString()
     }
 
     AdvanceCurrent();
-    Token token = MakeToken(TokenType::STRING);
+    ORchestraToken token = MakeToken(ORchestraTokenType::STRING);
     return token;
 }
 
-Token Scanner::BuildDigit()
+ORchestraToken Scanner::BuildDigit()
 {
     while (IsDigit(PeekCurrent()))
         AdvanceCurrent();
@@ -340,9 +343,12 @@ Token Scanner::BuildDigit()
             AdvanceCurrent();
     }
 
-    return MakeToken(TokenType::NUMBER);
+    return MakeToken(ORchestraTokenType::NUMBER);
 }
 
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif
+
+
+} // namespace ORchestra

@@ -1,3 +1,6 @@
+
+namespace ORchestra {
+
 //OLD, JUST KEEPING FOR ARCHIVE
 
 //#pragma once
@@ -25,3 +28,6 @@
 //    std::vector<LogicSequence> mLogicSequences;
 //    std::vector<Operation> mOperations;
 //};
+
+
+} // namespace ORchestra

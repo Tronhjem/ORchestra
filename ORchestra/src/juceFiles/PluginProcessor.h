@@ -15,6 +15,8 @@
 #include "StepData.h"
 #include "ErrorReporting.h"
 
+
+using namespace ORchestra;
 enum class NoteDivision
 {
   n1,

@@ -7,6 +7,9 @@
 #include "Defines.h"
 #include "Types.h"
 
+namespace ORchestra {
+
+
 /// Each Step in the DataSequences holds a number of unsigned chars that makes up
 /// the sub division of a step. It's necessary to have all values as these DataSequenceSteps
 /// with an array of data, as we need to always be able to combine a single value with a substep
@@ -74,3 +77,6 @@ private:
     //    DataSequenceStep operator== (const DataSequenceStep& other) const;
     // ===========================================================================
 };
+
+
+} // namespace ORchestra

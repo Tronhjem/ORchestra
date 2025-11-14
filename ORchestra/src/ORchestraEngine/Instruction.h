@@ -2,6 +2,9 @@
 
 #include "StepData.h"
 
+namespace ORchestra {
+
+
 enum class OpCode : DataUnit
 {
     CONSTANT = 0,
@@ -58,3 +61,6 @@ public:
     StepData mDataValue;
     std::string mNameValue;
 };
+
+
+} // namespace ORchestra

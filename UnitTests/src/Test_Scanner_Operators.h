@@ -1,41 +1,35 @@
 #pragma once
-
-using namespace juce;
+#include "../catch.hpp"
 #include "Scanner.h"
 #include "ErrorReporting.h"
-#include "Token.h"
+#include "ORchestraToken.h"
 
-class Test_Scanner_Operators : public UnitTest
+using namespace ORchestra;
+TEST_CASE("Scanner: Tokenizes arithmetic operators '+ - * /' as PLUS, MINUS, STAR, SLASH", "[Scanner_Operators]")
 {
-public:
-    Test_Scanner_Operators() : UnitTest("Test_Scanner_Operators") {}
-    
-    void runTest() override
-    {
-        {
-            beginTest("Scanner: Tokenizes arithmetic operators '+ - * /' as PLUS, MINUS, STAR, SLASH");
             
             ErrorReporting errorReporting;
             Scanner scanner(errorReporting);
             std::string input = "+ - * /";
             
-            expect(scanner.ScanFile(input.c_str()));
+            REQUIRE(scanner.ScanFile(input.c_str()));
             
             auto& tokens = scanner.GetTokens();
-            expect(tokens.size() >= 4);
-            expect(tokens[0].GetType() == TokenType::PLUS);
-            expect(tokens[1].GetType() == TokenType::MINUS);
-            expect(tokens[2].GetType() == TokenType::STAR);
-            expect(tokens[3].GetType() == TokenType::SLASH);
-        }
-        {
-            beginTest("Scanner: Distinguishes assignment '=' from equality '==' in 'a = 5 == 5'");
+            REQUIRE(tokens.size() >= 4);
+            REQUIRE(tokens[0].GetType() == ORchestraTokenType::PLUS);
+            REQUIRE(tokens[1].GetType() == ORchestraTokenType::MINUS);
+            REQUIRE(tokens[2].GetType() == ORchestraTokenType::STAR);
+            REQUIRE(tokens[3].GetType() == ORchestraTokenType::SLASH);
+}
+
+TEST_CASE("Scanner: Distinguishes assignment '=' from equality '==' in 'a = 5 == 5'", "[Scanner_Operators]")
+{
             
             ErrorReporting errorReporting;
             Scanner scanner(errorReporting);
             std::string input = "a = 5 == 5";
             
-            expect(scanner.ScanFile(input.c_str()));
+            REQUIRE(scanner.ScanFile(input.c_str()));
             
             auto& tokens = scanner.GetTokens();
             bool foundAssign = false;
@@ -43,46 +37,46 @@ public:
             
             for (const auto& token : tokens)
             {
-                if (token.GetType() == TokenType::EQUAL)
+                if (token.GetType() == ORchestraTokenType::EQUAL)
                     foundAssign = true;
-                if (token.GetType() == TokenType::EQUAL_EQUAL)
+                if (token.GetType() == ORchestraTokenType::EQUAL_EQUAL)
                     foundEqual = true;
             }
             
-            expect(foundAssign);
-            expect(foundEqual);
-        }
-        {
-            beginTest("Scanner: Tokenizes comparison operators '< > <= >= !=' correctly");
+            REQUIRE(foundAssign);
+            REQUIRE(foundEqual);
+}
+
+TEST_CASE("Scanner: Tokenizes comparison operators '< > <= >= !=' correctly", "[Scanner_Operators]")
+{
             
             ErrorReporting errorReporting;
             Scanner scanner(errorReporting);
             std::string input = "< > <= >= !=";
             
-            expect(scanner.ScanFile(input.c_str()));
+            REQUIRE(scanner.ScanFile(input.c_str()));
             
             auto& tokens = scanner.GetTokens();
-            expect(tokens.size() >= 5);
-            expect(tokens[0].GetType() == TokenType::LESS);
-            expect(tokens[1].GetType() == TokenType::GREATER);
-            expect(tokens[2].GetType() == TokenType::LESS_EQUAL);
-            expect(tokens[3].GetType() == TokenType::GREATER_EQUAL);
-            expect(tokens[4].GetType() == TokenType::BANG_EQUAL);
-        }
-        {
-            beginTest("Scanner: Tokenizes logic operators '& | ^' as AND, OR, XOR");
+            REQUIRE(tokens.size() >= 5);
+            REQUIRE(tokens[0].GetType() == ORchestraTokenType::LESS);
+            REQUIRE(tokens[1].GetType() == ORchestraTokenType::GREATER);
+            REQUIRE(tokens[2].GetType() == ORchestraTokenType::LESS_EQUAL);
+            REQUIRE(tokens[3].GetType() == ORchestraTokenType::GREATER_EQUAL);
+            REQUIRE(tokens[4].GetType() == ORchestraTokenType::BANG_EQUAL);
+}
+
+TEST_CASE("Scanner: Tokenizes logic operators '& | ^' as AND, OR, XOR", "[Scanner_Operators]")
+{
             
             ErrorReporting errorReporting;
             Scanner scanner(errorReporting);
             std::string input = "& | ^";
             
-            expect(scanner.ScanFile(input.c_str()));
+            REQUIRE(scanner.ScanFile(input.c_str()));
             
             auto& tokens = scanner.GetTokens();
-            expect(tokens.size() >= 3);
-            expect(tokens[0].GetType() == TokenType::AND);
-            expect(tokens[1].GetType() == TokenType::OR);
-            expect(tokens[2].GetType() == TokenType::XOR);
-        }
-    }
-};
+            REQUIRE(tokens.size() >= 3);
+            REQUIRE(tokens[0].GetType() == ORchestraTokenType::AND);
+            REQUIRE(tokens[1].GetType() == ORchestraTokenType::OR);
+            REQUIRE(tokens[2].GetType() == ORchestraTokenType::XOR);
+}

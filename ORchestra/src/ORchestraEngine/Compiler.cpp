@@ -9,6 +9,9 @@
 #include "Types.h"
 #include "Defines.h"
 
+namespace ORchestra {
+
+
 #ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wswitch-enum"
@@ -17,7 +20,7 @@
 static std::string ranFunctionName = "ran";
 static std::string eucFunctionName = "euc";
 
-Compiler::Compiler(std::vector<Token> &tokens, ErrorReporting &log) : mTokens(tokens), mErrorReporting(log)
+Compiler::Compiler(std::vector<ORchestraToken> &tokens, ErrorReporting &log) : mTokens(tokens), mErrorReporting(log)
 {
     // populate built in functions
     std::vector<Instruction> printInstructions;
@@ -43,12 +46,12 @@ Compiler::Compiler(std::vector<Token> &tokens, ErrorReporting &log) : mTokens(to
     mFunctions[eucFunctionName] = StoredFunction(2, eucInstructions);
 }
 
-Token &Compiler::Consume()
+ORchestraToken &Compiler::Consume()
 {
     return mTokens[mCurrentIndex++];
 }
 
-Token &Compiler::Peek()
+ORchestraToken &Compiler::Peek()
 {
 #if _DEBUG
     assert(mCurrentIndex < mTokens.size());
@@ -56,7 +59,7 @@ Token &Compiler::Peek()
     return mTokens[mCurrentIndex];
 }
 
-Token &Compiler::Previous()
+ORchestraToken &Compiler::Previous()
 {
 #if _DEBUG
     assert(mCurrentIndex < mTokens.size());
@@ -65,17 +68,17 @@ Token &Compiler::Previous()
     return mTokens[mCurrentIndex - 1];
 }
 
-bool Compiler::MakeIdentifierGetter(Token &token, std::vector<Instruction> &instructions)
+bool Compiler::MakeIdentifierGetter(ORchestraToken &token, std::vector<Instruction> &instructions)
 {
     std::string name = std::string(token.mStart, static_cast<unsigned long>(token.mLength));
 
-    if (Peek().mTokenType == TokenType::LEFT_BRACKET)
+    if (Peek().mTokenType == ORchestraTokenType::LEFT_BRACKET)
     {
         Consume(); // for consuming left bracket
 
         CompileExpression(instructions);
 
-        if (Peek().mTokenType != TokenType::RIGHT_BRACKET)
+        if (Peek().mTokenType != ORchestraTokenType::RIGHT_BRACKET)
         {
             std::string missingBracket = "]";
             ThrowMissingExpectedToken(missingBracket);
@@ -94,7 +97,7 @@ bool Compiler::MakeIdentifierGetter(Token &token, std::vector<Instruction> &inst
     return true;
 }
 
-void Compiler::MakeConstant(Token &token, std::vector<Instruction> &instructions)
+void Compiler::MakeConstant(ORchestraToken &token, std::vector<Instruction> &instructions)
 {
     int value = std::stoi(std::string(token.mStart, static_cast<unsigned long>(token.mLength)));
     if (value > 127)
@@ -113,7 +116,7 @@ void Compiler::MakeConstant(Token &token, std::vector<Instruction> &instructions
     instructions.emplace_back(Instruction{OpCode::CONSTANT, static_cast<StepData>(value)});
 }
 
-bool Compiler::MakeNoteIntoConstant(Token &token, std::vector<Instruction> &instructions)
+bool Compiler::MakeNoteIntoConstant(ORchestraToken &token, std::vector<Instruction> &instructions)
 {
     auto noteToValue = [](char letter) -> DataUnit
     {
@@ -190,51 +193,51 @@ bool Compiler::MakeNoteIntoConstant(Token &token, std::vector<Instruction> &inst
     return true;
 }
 
-void Compiler::MakeOperation(TokenType tokenType, std::vector<Instruction> &instructions)
+void Compiler::MakeOperation(ORchestraTokenType tokenType, std::vector<Instruction> &instructions)
 {
     OpCode code = OpCode::END;
     switch (tokenType)
     {
-    case TokenType::PLUS:
+    case ORchestraTokenType::PLUS:
         code = OpCode::ADD;
         break;
-    case TokenType::MINUS:
+    case ORchestraTokenType::MINUS:
         code = OpCode::SUBTRACT;
         break;
-    case TokenType::STAR:
+    case ORchestraTokenType::STAR:
         code = OpCode::MULTIPLY;
         break;
-    case TokenType::SLASH:
+    case ORchestraTokenType::SLASH:
         code = OpCode::DIVIDE;
         break;
-    case TokenType::PERCENT:
+    case ORchestraTokenType::PERCENT:
         code = OpCode::MODULO;
         break;
-    case TokenType::AND:
+    case ORchestraTokenType::AND:
         code = OpCode::AND;
         break;
-    case TokenType::OR:
+    case ORchestraTokenType::OR:
         code = OpCode::OR;
         break;
-    case TokenType::XOR:
+    case ORchestraTokenType::XOR:
         code = OpCode::XOR;
         break;
-    case TokenType::GREATER:
+    case ORchestraTokenType::GREATER:
         code = OpCode::GREATER;
         break;
-    case TokenType::GREATER_EQUAL:
+    case ORchestraTokenType::GREATER_EQUAL:
         code = OpCode::GREATER_EQUAL;
         break;
-    case TokenType::LESS:
+    case ORchestraTokenType::LESS:
         code = OpCode::LESS;
         break;
-    case TokenType::LESS_EQUAL:
+    case ORchestraTokenType::LESS_EQUAL:
         code = OpCode::LESS_EQUAL;
         break;
-    case TokenType::EQUAL_EQUAL:
+    case ORchestraTokenType::EQUAL_EQUAL:
         code = OpCode::EQUAL;
         break;
-    case TokenType::BANG_EQUAL:
+    case ORchestraTokenType::BANG_EQUAL:
         code = OpCode::NOT_EQUAL;
         break;
 
@@ -258,19 +261,19 @@ bool Compiler::CompileFunctionCall(std::vector<Instruction> &instructions, std::
     int paramCounter = 0;
 
     while (paramCounter != functon.mNumOfParams &&
-           Peek().mTokenType != TokenType::RIGHT_PAREN)
+           Peek().mTokenType != ORchestraTokenType::RIGHT_PAREN)
     {
-        Token &currentToken = Peek();
+        ORchestraToken &currentToken = Peek();
         switch (currentToken.mTokenType)
         {
-        case TokenType::COMMA:
+        case ORchestraTokenType::COMMA:
         {
             Consume();
             break;
         }
 
-        case TokenType::END:
-        case TokenType::EOL:
+        case ORchestraTokenType::END:
+        case ORchestraTokenType::EOL:
         {
             ThrowMissingParamCount(functon.mNumOfParams, paramCounter);
             return false;
@@ -289,7 +292,7 @@ bool Compiler::CompileFunctionCall(std::vector<Instruction> &instructions, std::
         }
     }
 
-    if (Peek().mTokenType != TokenType::RIGHT_PAREN)
+    if (Peek().mTokenType != ORchestraTokenType::RIGHT_PAREN)
     {
         ThrowUnexpectedTokenError(Peek());
         return false;
@@ -318,17 +321,17 @@ bool Compiler::CompileArray(std::vector<Instruction> &instructions,
 {
     Consume(); // For the Left Bracket
 
-    if (isLastRecursiveLevel && Peek().mTokenType == TokenType::LEFT_BRACKET)
+    if (isLastRecursiveLevel && Peek().mTokenType == ORchestraTokenType::LEFT_BRACKET)
     {
         ThrowUnexpectedTokenError(Peek());
         return false;
     }
 
-    if (Peek().mTokenType != TokenType::NUMBER &&
-        Peek().mTokenType != TokenType::NOTE_IDENTIFIER &&
-        Peek().mTokenType != TokenType::IDENTIFIER &&
-        Peek().mTokenType != TokenType::RANDOM &&
-        Peek().mTokenType != TokenType::LEFT_BRACKET)
+    if (Peek().mTokenType != ORchestraTokenType::NUMBER &&
+        Peek().mTokenType != ORchestraTokenType::NOTE_IDENTIFIER &&
+        Peek().mTokenType != ORchestraTokenType::IDENTIFIER &&
+        Peek().mTokenType != ORchestraTokenType::RANDOM &&
+        Peek().mTokenType != ORchestraTokenType::LEFT_BRACKET)
     {
         ThrowUnexpectedTokenError(Peek());
         return false;
@@ -336,7 +339,7 @@ bool Compiler::CompileArray(std::vector<Instruction> &instructions,
 
     int valueCounter = 0;
     bool expectsValue = true;
-    while (Peek().mTokenType != TokenType::RIGHT_BRACKET)
+    while (Peek().mTokenType != ORchestraTokenType::RIGHT_BRACKET)
     {
         if (valueCounter >= maxLength)
         {
@@ -345,10 +348,10 @@ bool Compiler::CompileArray(std::vector<Instruction> &instructions,
             return false;
         }
 
-        Token &currentToken = Peek();
+        ORchestraToken &currentToken = Peek();
         switch (currentToken.mTokenType)
         {
-        case TokenType::COMMA:
+        case ORchestraTokenType::COMMA:
         {
             if (expectsValue)
             {
@@ -361,7 +364,7 @@ bool Compiler::CompileArray(std::vector<Instruction> &instructions,
             break;
         }
 
-        case TokenType::LEFT_BRACKET:
+        case ORchestraTokenType::LEFT_BRACKET:
         {
             if (!expectsValue || isLastRecursiveLevel)
             {
@@ -385,10 +388,10 @@ bool Compiler::CompileArray(std::vector<Instruction> &instructions,
             break;
         }
 
-        case TokenType::NUMBER:
-        case TokenType::NOTE_IDENTIFIER:
-        case TokenType::IDENTIFIER:
-        case TokenType::LEFT_PAREN:
+        case ORchestraTokenType::NUMBER:
+        case ORchestraTokenType::NOTE_IDENTIFIER:
+        case ORchestraTokenType::IDENTIFIER:
+        case ORchestraTokenType::LEFT_PAREN:
         {
             if (!expectsValue)
             {
@@ -406,7 +409,7 @@ bool Compiler::CompileArray(std::vector<Instruction> &instructions,
             break;
         }
 
-        case TokenType::RANDOM:
+        case ORchestraTokenType::RANDOM:
         {
             if (!expectsValue)
             {
@@ -424,8 +427,8 @@ bool Compiler::CompileArray(std::vector<Instruction> &instructions,
             break;
         }
 
-        case TokenType::EOL:
-        case TokenType::END:
+        case ORchestraTokenType::EOL:
+        case ORchestraTokenType::END:
         {
             std::string missingToken{"]"};
             ThrowUnexpectedEnd(missingToken);
@@ -440,7 +443,7 @@ bool Compiler::CompileArray(std::vector<Instruction> &instructions,
         }
     }
 
-    if (Consume().mTokenType != TokenType::RIGHT_BRACKET)
+    if (Consume().mTokenType != ORchestraTokenType::RIGHT_BRACKET)
     {
         std::string missingToken{"]"};
         ThrowMissingExpectedToken(missingToken);
@@ -456,59 +459,59 @@ bool Compiler::CompileArray(std::vector<Instruction> &instructions,
 
 bool Compiler::CompileExpression(std::vector<Instruction> &instructions)
 {
-    auto isOperator = [&](const TokenType t) -> bool
+    auto isOperator = [&](const ORchestraTokenType t) -> bool
     {
-        return t == TokenType::PLUS ||
-               t == TokenType::MINUS ||
-               t == TokenType::STAR ||
-               t == TokenType::SLASH ||
-               t == TokenType::PERCENT ||
-               t == TokenType::AND ||
-               t == TokenType::OR ||
-               t == TokenType::XOR ||
-               t == TokenType::GREATER ||
-               t == TokenType::GREATER_EQUAL ||
-               t == TokenType::LESS ||
-               t == TokenType::LESS_EQUAL ||
-               t == TokenType::EQUAL_EQUAL ||
-               t == TokenType::BANG_EQUAL;
+        return t == ORchestraTokenType::PLUS ||
+               t == ORchestraTokenType::MINUS ||
+               t == ORchestraTokenType::STAR ||
+               t == ORchestraTokenType::SLASH ||
+               t == ORchestraTokenType::PERCENT ||
+               t == ORchestraTokenType::AND ||
+               t == ORchestraTokenType::OR ||
+               t == ORchestraTokenType::XOR ||
+               t == ORchestraTokenType::GREATER ||
+               t == ORchestraTokenType::GREATER_EQUAL ||
+               t == ORchestraTokenType::LESS ||
+               t == ORchestraTokenType::LESS_EQUAL ||
+               t == ORchestraTokenType::EQUAL_EQUAL ||
+               t == ORchestraTokenType::BANG_EQUAL;
     };
 
-    auto precedence = [&](const TokenType t) -> int
+    auto precedence = [&](const ORchestraTokenType t) -> int
     {
-        if (t == TokenType::PLUS || t == TokenType::MINUS)
+        if (t == ORchestraTokenType::PLUS || t == ORchestraTokenType::MINUS)
             return 1;
-        if (t == TokenType::STAR || t == TokenType::SLASH || t == TokenType::PERCENT)
+        if (t == ORchestraTokenType::STAR || t == ORchestraTokenType::SLASH || t == ORchestraTokenType::PERCENT)
             return 2;
 
         return 0;
     };
 
-    std::stack<TokenType> ops;
+    std::stack<ORchestraTokenType> ops;
 
-    bool expectsValue = Peek().mTokenType != TokenType::LEFT_PAREN;
+    bool expectsValue = Peek().mTokenType != ORchestraTokenType::LEFT_PAREN;
     int leftParen = 0;
     int rightParen = 0;
 
-    while (Peek().mTokenType != TokenType::EOL &&
-           Peek().mTokenType != TokenType::END &&
-           Peek().mTokenType != TokenType::COMMA &&
-           Peek().mTokenType != TokenType::RIGHT_BRACKET &&
-           Peek().mTokenType != TokenType::RIGHT_BRACE)
+    while (Peek().mTokenType != ORchestraTokenType::EOL &&
+           Peek().mTokenType != ORchestraTokenType::END &&
+           Peek().mTokenType != ORchestraTokenType::COMMA &&
+           Peek().mTokenType != ORchestraTokenType::RIGHT_BRACKET &&
+           Peek().mTokenType != ORchestraTokenType::RIGHT_BRACE)
     {
         // We assume this means we found the end of a function parenteses.
-        if (Peek().mTokenType == TokenType::RIGHT_PAREN &&
+        if (Peek().mTokenType == ORchestraTokenType::RIGHT_PAREN &&
             rightParen == leftParen)
             break;
 
-        Token &currentToken = Consume();
-        const TokenType tType = currentToken.mTokenType;
+        ORchestraToken &currentToken = Consume();
+        const ORchestraTokenType tType = currentToken.mTokenType;
 
         // For nested parenteses where there can be more left parens after each other.
-        if (tType == TokenType::LEFT_PAREN)
+        if (tType == ORchestraTokenType::LEFT_PAREN)
             expectsValue = false;
 
-        if (tType == TokenType::IDENTIFIER)
+        if (tType == ORchestraTokenType::IDENTIFIER)
         {
             if (!expectsValue)
             {
@@ -522,7 +525,7 @@ bool Compiler::CompileExpression(std::vector<Instruction> &instructions)
             expectsValue = false;
         }
 
-        else if (tType == TokenType::NUMBER)
+        else if (tType == ORchestraTokenType::NUMBER)
         {
             if (!expectsValue)
             {
@@ -533,7 +536,7 @@ bool Compiler::CompileExpression(std::vector<Instruction> &instructions)
             MakeConstant(currentToken, instructions);
             expectsValue = false;
         }
-        else if (tType == TokenType::NOTE_IDENTIFIER)
+        else if (tType == ORchestraTokenType::NOTE_IDENTIFIER)
         {
             if (!expectsValue)
             {
@@ -550,7 +553,7 @@ bool Compiler::CompileExpression(std::vector<Instruction> &instructions)
             expectsValue = false;
         }
 
-        else if (tType == TokenType::RANDOM)
+        else if (tType == ORchestraTokenType::RANDOM)
         {
             CompileFunctionCall(instructions, ranFunctionName);
             expectsValue = false;
@@ -566,7 +569,7 @@ bool Compiler::CompileExpression(std::vector<Instruction> &instructions)
 
             while (!ops.empty() && isOperator(ops.top()))
             {
-                TokenType top = ops.top();
+                ORchestraTokenType top = ops.top();
 
                 if ((precedence(top) > precedence(tType)) ||
                     (precedence(top) == precedence(tType)))
@@ -584,7 +587,7 @@ bool Compiler::CompileExpression(std::vector<Instruction> &instructions)
             ops.push(tType);
         }
 
-        else if (tType == TokenType::LEFT_PAREN)
+        else if (tType == ORchestraTokenType::LEFT_PAREN)
         {
             if (expectsValue)
             {
@@ -596,7 +599,7 @@ bool Compiler::CompileExpression(std::vector<Instruction> &instructions)
             ++leftParen;
         }
 
-        else if (tType == TokenType::RIGHT_PAREN)
+        else if (tType == ORchestraTokenType::RIGHT_PAREN)
         {
             if (expectsValue)
             {
@@ -604,12 +607,12 @@ bool Compiler::CompileExpression(std::vector<Instruction> &instructions)
                 return false;
             }
 
-            while (!ops.empty() && ops.top() != TokenType::LEFT_PAREN)
+            while (!ops.empty() && ops.top() != ORchestraTokenType::LEFT_PAREN)
             {
                 MakeOperation(ops.top(), instructions);
                 ops.pop();
             }
-            if (!ops.empty() && ops.top() == TokenType::LEFT_PAREN)
+            if (!ops.empty() && ops.top() == ORchestraTokenType::LEFT_PAREN)
             {
                 ops.pop(); // discard left paren
             }
@@ -661,23 +664,23 @@ bool Compiler::Compile(std::vector<Instruction> &instructions)
 
     for (;;)
     {
-        Token &token = Consume();
+        ORchestraToken &token = Consume();
 
         switch (token.mTokenType)
         {
-        case TokenType::IDENTIFIER:
+        case ORchestraTokenType::IDENTIFIER:
         {
             std::string name = std::string(token.mStart, static_cast<unsigned long>(token.mLength));
 
-            if (Peek().mTokenType == TokenType::EQUAL)
+            if (Peek().mTokenType == ORchestraTokenType::EQUAL)
             {
                 Consume(); // consumes the equal sign
 
-                TokenType tokenType = Peek().mTokenType;
+                ORchestraTokenType tokenType = Peek().mTokenType;
                 switch (tokenType)
                 {
                     // Data Array
-                case TokenType::LEFT_BRACKET:
+                case ORchestraTokenType::LEFT_BRACKET:
                 {
                     StepData arrayLength;
                     const bool isLastRecursiveLevel = false;
@@ -693,11 +696,11 @@ bool Compiler::Compile(std::vector<Instruction> &instructions)
 
                     break;
                 }
-                case TokenType::NUMBER:
-                case TokenType::NOTE_IDENTIFIER:
-                case TokenType::IDENTIFIER:
-                case TokenType::LEFT_PAREN:
-                case TokenType::RANDOM:
+                case ORchestraTokenType::NUMBER:
+                case ORchestraTokenType::NOTE_IDENTIFIER:
+                case ORchestraTokenType::IDENTIFIER:
+                case ORchestraTokenType::LEFT_PAREN:
+                case ORchestraTokenType::RANDOM:
                 {
                     if (!CompileExpression(instructions))
                         return false;
@@ -705,7 +708,7 @@ bool Compiler::Compile(std::vector<Instruction> &instructions)
                     instructions.emplace_back(Instruction{OpCode::SET_IDENTIFIER_VALUE, name});
                     break;
                 }
-                case TokenType::EUCLIDEAN:
+                case ORchestraTokenType::EUCLIDEAN:
                 {
                     Consume();
                     if (!CompileFunctionCall(instructions, eucFunctionName))
@@ -724,7 +727,7 @@ bool Compiler::Compile(std::vector<Instruction> &instructions)
                 }
             }
             // For Functions
-            else if (Peek().mTokenType == TokenType::LEFT_PAREN)
+            else if (Peek().mTokenType == ORchestraTokenType::LEFT_PAREN)
             {
                 if (!CompileFunctionCall(instructions, name))
                     return false;
@@ -739,10 +742,10 @@ bool Compiler::Compile(std::vector<Instruction> &instructions)
         }
 
 #if _DEBUG
-        case TokenType::PRINT:
+        case ORchestraTokenType::PRINT:
 #endif
-        case TokenType::NOTE:
-        case TokenType::CC:
+        case ORchestraTokenType::NOTE:
+        case ORchestraTokenType::CC:
         {
             std::string functionName = std::string(token.mStart, static_cast<unsigned long>(token.mLength));
             if (!CompileFunctionCall(instructions, functionName))
@@ -752,9 +755,9 @@ bool Compiler::Compile(std::vector<Instruction> &instructions)
         }
 
 #if _TEST
-        case TokenType::TEST:
+        case ORchestraTokenType::TEST_KEYWORD:
         {
-            if (Peek().mTokenType == TokenType::IDENTIFIER || Peek().mTokenType == TokenType::NUMBER)
+            if (Peek().mTokenType == ORchestraTokenType::IDENTIFIER || Peek().mTokenType == ORchestraTokenType::NUMBER)
             {
                 CompileExpression(instructions);
             }
@@ -767,11 +770,11 @@ bool Compiler::Compile(std::vector<Instruction> &instructions)
         }
 #endif
 
-        case TokenType::END:
+        case ORchestraTokenType::END:
             instructions.emplace_back(Instruction{OpCode::END});
             return true;
 
-        case TokenType::EOL:
+        case ORchestraTokenType::EOL:
             break;
 
         default:
@@ -781,7 +784,7 @@ bool Compiler::Compile(std::vector<Instruction> &instructions)
     }
 }
 
-void Compiler::ThrowUnexpectedTokenError(Token &tokenForError)
+void Compiler::ThrowUnexpectedTokenError(ORchestraToken &tokenForError)
 {
     std::string token = std::string(tokenForError.mStart, static_cast<unsigned long>(tokenForError.mLength));
     std::string message = std::string("Unexpected Character ") + token;
@@ -813,3 +816,6 @@ void Compiler::ThrowUnexpectedEnd(std::string &missingToken)
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif
+
+
+} // namespace ORchestra

@@ -4,6 +4,9 @@
 #include "StepData.h"
 #include "Types.h"
 
+namespace ORchestra {
+
+
 StepData::StepData(const DataUnit *data, const int length)
     : mLength(length)
 {
@@ -120,3 +123,6 @@ void StepData::SetData(const DataUnit *data, const int length)
 //{
 //    return ApplyOperation(other, [](int a, int b ) { return a == b; });
 //}
+
+
+} // namespace ORchestra

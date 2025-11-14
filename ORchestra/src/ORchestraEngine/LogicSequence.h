@@ -1,3 +1,6 @@
+
+namespace ORchestra {
+
 //OLD, JUST KEEPING FOR ARCHIVE
 
 //#pragma once
@@ -15,3 +18,6 @@
 //    int mLength;
 //    LogicContainer mTrigger;
 //};
+
+
+} // namespace ORchestra

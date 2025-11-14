@@ -3,6 +3,9 @@
 #include "ORchestraEngine.h"
 #include "ScopedTimer.h"
 
+namespace ORchestra {
+
+
 ORchestraEngine::ORchestraEngine() : mReadySteps(0),
                                      mCurrentGlobalStep(0),
                                      mCurrentProcessingStep(0),
@@ -181,3 +184,6 @@ void ORchestraEngine::Tick(const TransportData &transportData,
         mMidiScheduler.ClearAllData(midiMessages);
     }
 }
+
+
+} // namespace ORchestra

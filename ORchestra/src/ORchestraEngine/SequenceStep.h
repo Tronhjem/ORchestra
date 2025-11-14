@@ -2,6 +2,9 @@
 #include "Types.h"
 #include "StepData.h"
 
+namespace ORchestra {
+
+
 class SequenceStep
 {
 public:
@@ -29,3 +32,6 @@ public:
 private:
     SequenceStep() = delete;
 };
+
+
+} // namespace ORchestra

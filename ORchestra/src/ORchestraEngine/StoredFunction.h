@@ -1,6 +1,9 @@
 #pragma once
 #include <string>
 
+namespace ORchestra {
+
+
 class StoredFunction
 {
 public:
@@ -13,3 +16,6 @@ public:
 	int mNumOfParams;
 	std::vector<Instruction> mInstructions;
 };
+
+
+} // namespace ORchestra

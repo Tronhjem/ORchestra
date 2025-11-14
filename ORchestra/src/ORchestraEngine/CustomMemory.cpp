@@ -1,3 +1,6 @@
+
+namespace ORchestra {
+
 // #include "CustomMemory.h"
 
 // void* operator new(std::size_t size) {
@@ -31,3 +34,6 @@
 //         std::free(ptr);
 //     }
 // }
+
+
+} // namespace ORchestra

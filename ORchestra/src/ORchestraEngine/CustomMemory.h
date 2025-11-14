@@ -1,3 +1,6 @@
+
+namespace ORchestra {
+
 // #pragma once
 // #include <cstdlib>
 // #include <iostream>
@@ -11,3 +14,6 @@
 //     void* malloc(std::size_t size);
 //     void free(void* ptr);
 // }
+
+
+} // namespace ORchestra

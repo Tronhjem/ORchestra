@@ -6,6 +6,9 @@
 #include "Types.h"
 #include "StepData.h"
 
+namespace ORchestra {
+
+
 struct ScheduledMidiMessage
 {
     MidiType mMessageType;
@@ -27,3 +30,6 @@ public:
 private:
     std::vector<ScheduledMidiMessage> mScheduledMidiMessages;
 };
+
+
+} // namespace ORchestra
