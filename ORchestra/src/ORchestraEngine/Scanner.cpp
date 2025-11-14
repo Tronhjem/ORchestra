@@ -30,7 +30,7 @@ Token Scanner::MakeErrorToken(char *message, char symbol)
     size_t len = strlen(message);
     message[len] = symbol;
     message[len + 1] = '\0';
-    return Token(TokenType::ERROR, message, (int)strlen(message), mCurrentLine);
+    return Token(TokenType::PARSE_ERROR, message, (int)strlen(message), mCurrentLine);
 }
 
 void Scanner::SkipWhiteSpace() // append char
@@ -79,7 +79,7 @@ bool Scanner::ScanFile(const char *data)
     {
         Token t = ScanToken();
 
-        if (t.GetType() == TokenType::ERROR)
+        if (t.GetType() == TokenType::PARSE_ERROR)
         {
             std::string errorString = std::string(t.mStart, static_cast<unsigned long>(t.mLength));
             mErrorReporting.LogError(mCurrentLine, errorString);

@@ -44,7 +44,7 @@ enum class TokenType
     // Keywords.
     RANDOM,
     EUCLIDEAN,
-    ERROR,
+    PARSE_ERROR,
     NOTE_IDENTIFIER,
     
     // Specific
