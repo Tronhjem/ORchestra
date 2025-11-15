@@ -53,6 +53,7 @@ enum class OpCode : DataUnit
 class Instruction
 {
 public:
+    Instruction() : opCode(OpCode::CONSTANT) {}
     explicit Instruction(OpCode code) : opCode(code), mDataValue() {}
     explicit Instruction(OpCode code, StepData value) : opCode(code), mDataValue(value) {}
     explicit Instruction(OpCode code, std::string name) : opCode(code), mNameValue(name) {}

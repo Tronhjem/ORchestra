@@ -17,23 +17,26 @@ class ErrorReporting;
 class Compiler
 {
 public:
-    Compiler(std::vector<ORchestraToken>& tokens, ErrorReporting& log);
+    Compiler(const std::vector<ORchestraToken>& tokens, ErrorReporting& log);
     bool Compile(std::vector<Instruction>& runtimeInstructions);
+    void Reset();
 
 private:
-    inline ORchestraToken& Consume();
-    inline ORchestraToken& Peek();
-    inline ORchestraToken& PeekNext();
-    inline ORchestraToken& Previous();
+    Compiler() = delete;
+    
+    inline const ORchestraToken& Consume();
+    inline const ORchestraToken& Peek();
+    inline const ORchestraToken& PeekNext();
+    inline const ORchestraToken& Previous();
 
-    inline void ThrowUnexpectedTokenError(ORchestraToken& tokenForError);
-    inline void ThrowMissingExpectedToken(std::string &missingToken);
+    inline void ThrowUnexpectedTokenError(const ORchestraToken& tokenForError);
+    inline void ThrowMissingExpectedToken(std::string& missingToken);
     inline void ThrowMissingParamCount(int expected, int received);
-    inline void ThrowUnexpectedEnd(std::string &missingToken);
+    inline void ThrowUnexpectedEnd(std::string& missingToken);
 
-    inline bool MakeIdentifierGetter(ORchestraToken& token, std::vector<Instruction> &instructions);
-    inline void MakeConstant(ORchestraToken& token, std::vector<Instruction> &instructions);
-    bool MakeNoteIntoConstant(ORchestraToken& token, std::vector<Instruction> &instructions);
+    inline bool MakeIdentifierGetter(const ORchestraToken& token, std::vector<Instruction> &instructions);
+    inline void MakeConstant(const ORchestraToken& token, std::vector<Instruction> &instructions);
+    bool MakeNoteIntoConstant(const ORchestraToken& token, std::vector<Instruction> &instructions);
     inline void MakeOperation(ORchestraTokenType tokenType, std::vector<Instruction> &instructions);
 
     bool CompileExpression(std::vector<Instruction>& instructions);
@@ -42,11 +45,11 @@ private:
                       int maxLength,
                       bool isLastRecursiveLevel);
 
-    bool CompileFunctionCall(std::vector<Instruction>& instructions, std::string &functionName);
+    bool CompileFunctionCall(std::vector<Instruction>& instructions, const std::string& functionName);
 
     unsigned long mCurrentIndex = 0;
-    std::vector<ORchestraToken>& mTokens;
-    ErrorReporting &mErrorReporting;
+    const std::vector<ORchestraToken>& mTokens;
+    ErrorReporting& mErrorReporting;
     std::unordered_map<std::string, StoredFunction> mFunctions;
 };
 

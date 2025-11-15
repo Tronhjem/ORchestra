@@ -101,7 +101,7 @@ void ORchestraEngine::PreProcessSteps()
 
         mVM->Tick(currentData, i);
 #if _DEBUG
-        std::cout << "global step process " << stepWrapped << " " << (int)currentData[0].mFirst.GetValue(0) << std::endl;
+//        std::cout << "global step process " << stepWrapped << " " << (int)currentData[0].mFirst.GetValue(0) << std::endl;
 #endif
         mReadySteps.fetch_add(1, std::memory_order_acq_rel);
     }
@@ -167,7 +167,7 @@ void ORchestraEngine::Tick(const TransportData &transportData,
                     ScheduledMidiMessage message{step.mType, firstByte, secondByte, channel, timeStamp, transportData.noteLengthInSamples};
 
 #if _DEBUG
-                    std::cout << "play step " << wrappedGlobalStep << " " << (int)firstByte << std::endl;
+//                    std::cout << "play step " << wrappedGlobalStep << " " << (int)firstByte << std::endl;
 #endif
                     mMidiScheduler.PostMidi(message);
                 }

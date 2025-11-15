@@ -14,18 +14,20 @@ namespace ORchestra {
 #pragma clang diagnostic ignored "-Wswitch-enum"
 #endif
 
-VM::VM()
+VM::VM() :  mErrorReporting(),
+            mScanner(mErrorReporting),
+            mCompiler(mScanner.GetTokens(), mErrorReporting)
 {
-    mErrorReporting = std::make_unique<ErrorReporting>();
+    mRuntimeInstructions.resize(64);
 }
 
 bool VM::Prepare(const std::string& data)
 {
-    Scanner scanner{*mErrorReporting};
-    Compiler compiler{scanner.GetTokens(), *mErrorReporting};
+//    Scanner scanner{*mErrorReporting};
+    Compiler compiler{mScanner.GetTokens(), mErrorReporting};
 
     bool success = false;
-    success = scanner.ScanFile(data);
+    success = mScanner.ScanFile(data);
     if (success)
     {
         success = compiler.Compile(mRuntimeInstructions);
@@ -35,27 +37,30 @@ bool VM::Prepare(const std::string& data)
         }
     }
 
-    mStack.Clear();
     return success;
 }
 
 void VM::Reset()
 {
+    mScanner.Reset();
+    mCompiler.Reset();
     mVariables.clear();
     mRuntimeInstructions.clear();
-    mErrorReporting->Clear();
+    mErrorReporting.Clear();
 }
 
 const std::vector<LogEntry> &VM::GetErrors()
 {
-    return mErrorReporting->GetErrors();
+    return mErrorReporting.GetErrors();
 }
 
-bool VM::ProcessOpCodes(std::vector<Instruction> &instructions)
+bool VM::ProcessOpCodes(std::vector<Instruction>& instructions)
 {
 #if _DEBUG
     ScopedTimer timer("VM Process OpCodes");
 #endif
+    
+    Stack<StepData> stack;
 
     unsigned long currentIndex = 0;
     auto consume = [&]() -> Instruction &
@@ -71,7 +76,7 @@ bool VM::ProcessOpCodes(std::vector<Instruction> &instructions)
         {
         case (OpCode::SET_IDENTIFIER_VALUE):
         {
-            StepData value = mStack.Pop();
+            StepData value = stack.Pop();
             std::vector<StepData> vectorData{value};
             mVariables[instruction.mNameValue] = DataSequence{vectorData};
 
@@ -80,11 +85,11 @@ bool VM::ProcessOpCodes(std::vector<Instruction> &instructions)
 
         case (OpCode::SET_IDENTIFIER_ARRAY):
         {
-            const int arrayLength = std::clamp(static_cast<int>(mStack.Pop().GetValue(0)), 0, 32);
+            const int arrayLength = std::clamp(static_cast<int>(stack.Pop().GetValue(0)), 0, 32);
             StepData data[32];
             for (int i = arrayLength - 1; i >= 0; --i)
             {
-                data[i] = mStack.Pop();
+                data[i] = stack.Pop();
             }
 
             std::vector<StepData> vectorData{data, data + arrayLength};
@@ -102,7 +107,7 @@ bool VM::ProcessOpCodes(std::vector<Instruction> &instructions)
 
         default:
         {
-            if (!ProcessInstruction(instruction, 0))
+            if (!ProcessInstruction(instruction, 0, stack))
                 return false;
         }
         }
@@ -111,6 +116,8 @@ bool VM::ProcessOpCodes(std::vector<Instruction> &instructions)
 
 bool VM::Tick(std::vector<SequenceStep> &stepQueue, const int globalCount)
 {
+    Stack<StepData> stack;
+    
     unsigned long currentIndex = 0;
     auto consume = [&]() -> Instruction &
     {
@@ -125,10 +132,10 @@ bool VM::Tick(std::vector<SequenceStep> &stepQueue, const int globalCount)
         {
         case (OpCode::NOTE):
         {
-            const StepData channel = mStack.Pop();
-            const StepData vel = mStack.Pop();
-            const StepData note = mStack.Pop();
-            const StepData shouldTrigger = mStack.Pop();
+            const StepData channel = stack.Pop();
+            const StepData vel = stack.Pop();
+            const StepData note = stack.Pop();
+            const StepData shouldTrigger = stack.Pop();
 
             stepQueue.emplace_back(SequenceStep{MidiType::NoteOn, shouldTrigger, note, vel, channel, DEFAULT_NOTE_DURATION});
 
@@ -137,10 +144,10 @@ bool VM::Tick(std::vector<SequenceStep> &stepQueue, const int globalCount)
 
         case (OpCode::CC):
         {
-            const StepData channel = mStack.Pop();
-            const StepData ccValue = mStack.Pop();
-            const StepData ccNumber = mStack.Pop();
-            const StepData shouldTrigger = mStack.Pop();
+            const StepData channel = stack.Pop();
+            const StepData ccValue = stack.Pop();
+            const StepData ccNumber = stack.Pop();
+            const StepData shouldTrigger = stack.Pop();
 
             stepQueue.emplace_back(SequenceStep{MidiType::CC, shouldTrigger, ccNumber, ccValue, channel, DEFAULT_NOTE_DURATION});
 
@@ -151,7 +158,7 @@ bool VM::Tick(std::vector<SequenceStep> &stepQueue, const int globalCount)
             return true;
 
         default:
-            if (!ProcessInstruction(instruction, globalCount))
+                if (!ProcessInstruction(instruction, globalCount, stack))
                 return false;
         }
     }
@@ -172,20 +179,20 @@ DataUnit VM::RandomValue(const DataUnit low, const DataUnit high)
     return static_cast<DataUnit>(std::clamp(result, 0, MAX_UCHAR_VALUE));
 }
 
-bool VM::ProcessInstruction(const Instruction &instruction, const int stepCount)
+bool VM::ProcessInstruction(const Instruction &instruction, const int stepCount, Stack<StepData>& stack)
 {
     switch (instruction.opCode)
     {
     case (OpCode::CONSTANT):
     {
-        mStack.Push(instruction.mDataValue);
+        stack.Push(instruction.mDataValue);
 
         break;
     }
 
     case (OpCode::SET_IDENTIFIER_VALUE):
     {
-        const StepData value = mStack.Pop();
+        const StepData value = stack.Pop();
         mVariables[instruction.mNameValue].SetValue(0, value);
 
         break;
@@ -193,11 +200,11 @@ bool VM::ProcessInstruction(const Instruction &instruction, const int stepCount)
 
     case (OpCode::SET_IDENTIFIER_ARRAY):
     {
-        const int arrayLength = std::clamp(static_cast<int>(mStack.Pop().GetValue(0)), 0, MAX_DATASEQUENCE_LENGTH);
+        const int arrayLength = std::clamp(static_cast<int>(stack.Pop().GetValue(0)), 0, MAX_DATASEQUENCE_LENGTH);
 
         for (int i = arrayLength - 1; i >= 0; --i)
         {
-            mVariables[instruction.mNameValue].SetValue(i, mStack.Pop());
+            mVariables[instruction.mNameValue].SetValue(i, stack.Pop());
         }
 
         break;
@@ -205,35 +212,35 @@ bool VM::ProcessInstruction(const Instruction &instruction, const int stepCount)
 
     case (OpCode::SET_SUBSTEP_ARRAY):
     {
-        const int subStepArrayLength = std::clamp(static_cast<int>(mStack.Pop().GetValue(0)), 0, MAX_SUB_DIVISION_LENGTH);
+        const int subStepArrayLength = std::clamp(static_cast<int>(stack.Pop().GetValue(0)), 0, MAX_SUB_DIVISION_LENGTH);
         DataUnit data[MAX_SUB_DIVISION_LENGTH];
 
         for (int i = subStepArrayLength - 1; i >= 0; --i)
         {
-            data[i] = mStack.Pop().GetValue(0);
+            data[i] = stack.Pop().GetValue(0);
         }
 
         StepData newStepData{data, subStepArrayLength};
-        mStack.Push(newStepData);
+        stack.Push(newStepData);
 
         break;
     }
 
     case (OpCode::GENERATE_EUCLID_SEQUENCE):
     {
-        const int length = std::clamp(static_cast<int>(mStack.Pop().GetValue(0)), 0, MAX_DATASEQUENCE_LENGTH);
-        const int hits = std::clamp(static_cast<int>(mStack.Pop().GetValue(0)), 0, length);
+        const int length = std::clamp(static_cast<int>(stack.Pop().GetValue(0)), 0, MAX_DATASEQUENCE_LENGTH);
+        const int hits = std::clamp(static_cast<int>(stack.Pop().GetValue(0)), 0, length);
         StepData data[32];
 
         GenerateEuclideanSequence(data, hits, length);
 
         for (int i = 0; i < length; ++i)
         {
-            mStack.Push(data[i]);
+            stack.Push(data[i]);
         }
 
         const int clampedLength = std::clamp(length, 0, MAX_UCHAR_VALUE);
-        mStack.Push(StepData{clampedLength});
+        stack.Push(StepData{clampedLength});
 
         break;
     }
@@ -243,12 +250,12 @@ bool VM::ProcessInstruction(const Instruction &instruction, const int stepCount)
         if (mVariables.find(instruction.mNameValue) != mVariables.end())
         {
             const StepData value = mVariables[instruction.mNameValue].GetValue(stepCount);
-            mStack.Push(value);
+            stack.Push(value);
         }
         else
         {
             const std::string error = std::string("VM: Variable not defined");
-            mErrorReporting->LogError(error);
+            mErrorReporting.LogError(error);
             return false;
         }
 
@@ -259,15 +266,15 @@ bool VM::ProcessInstruction(const Instruction &instruction, const int stepCount)
     {
         if (mVariables.find(instruction.mNameValue) != mVariables.end())
         {
-            const int index = mStack.Pop().GetValue(0);
+            const int index = stack.Pop().GetValue(0);
             // GetGalue is done with modulo inside, so no need to worry about out of bounds value
             const StepData value = mVariables[instruction.mNameValue].GetValue(index);
-            mStack.Push(value);
+            stack.Push(value);
         }
         else
         {
             const std::string error = std::string("VM: Variable not defined");
-            mErrorReporting->LogError(error);
+            mErrorReporting.LogError(error);
             return false;
         }
 
@@ -276,94 +283,94 @@ bool VM::ProcessInstruction(const Instruction &instruction, const int stepCount)
 
     case (OpCode::AND):
     {
-        PopDoOperationAndPush(BinaryAND);
+        PopDoOperationAndPush(BinaryAND, stack);
         break;
     }
 
     case (OpCode::OR):
     {
-        PopDoOperationAndPush(BinaryOR);
+        PopDoOperationAndPush(BinaryOR, stack);
         break;
     }
 
     case (OpCode::XOR):
     {
-        PopDoOperationAndPush(BinaryXOR);
+        PopDoOperationAndPush(BinaryXOR, stack);
         break;
     }
 
     case (OpCode::ADD):
     {
-        PopDoOperationAndPush(Add);
+        PopDoOperationAndPush(Add, stack);
         break;
     }
 
     case (OpCode::SUBTRACT):
     {
-        PopDoOperationAndPush(Subtract);
+        PopDoOperationAndPush(Subtract, stack);
         break;
     }
 
     case (OpCode::MULTIPLY):
     {
-        PopDoOperationAndPush(Multiply);
+        PopDoOperationAndPush(Multiply, stack);
         break;
     }
 
     case (OpCode::DIVIDE):
     {
-        PopDoOperationAndPush(Divide);
+        PopDoOperationAndPush(Divide, stack);
         break;
     }
 
     case (OpCode::MODULO):
     {
-        PopDoOperationAndPush(Modulo);
+        PopDoOperationAndPush(Modulo, stack);
         break;
     }
 
     case (OpCode::LESS):
     {
-        PopDoOperationAndPush(Lesser);
+        PopDoOperationAndPush(Lesser, stack);
         break;
     }
 
     case (OpCode::LESS_EQUAL):
     {
-        PopDoOperationAndPush(LesserEqual);
+        PopDoOperationAndPush(LesserEqual, stack);
         break;
     }
 
     case (OpCode::GREATER):
     {
-        PopDoOperationAndPush(Greater);
+        PopDoOperationAndPush(Greater, stack);
         break;
     }
 
     case (OpCode::GREATER_EQUAL):
     {
-        PopDoOperationAndPush(GreaterEqual);
+        PopDoOperationAndPush(GreaterEqual, stack);
         break;
     }
 
     case (OpCode::EQUAL):
     {
-        PopDoOperationAndPush(Equal);
+        PopDoOperationAndPush(Equal, stack);
         break;
     }
 
     case (OpCode::NOT_EQUAL):
     {
-        PopDoOperationAndPush(NotEqual);
+        PopDoOperationAndPush(NotEqual, stack);
         break;
     }
 
     case (OpCode::GET_RANDOM_IN_RANGE):
     {
-        const DataUnit high = mStack.Pop().GetValue(0);
-        const DataUnit low = mStack.Pop().GetValue(0);
+        const DataUnit high = stack.Pop().GetValue(0);
+        const DataUnit low = stack.Pop().GetValue(0);
         const int value = (int)RandomValue(low, high);
-        mStack.Push(StepData{value});
+        stack.Push(StepData{value});
 
         break;
     }
@@ -371,17 +378,17 @@ bool VM::ProcessInstruction(const Instruction &instruction, const int stepCount)
 #if _DEBUG
     case (OpCode::PRINT):
     {
-        const DataUnit value = mStack.Pop().GetValue(0);
+        const DataUnit value = stack.Pop().GetValue(0);
         const std::string message = "PRINT: " + std::to_string(static_cast<int>(value));
         std::cout << message << std::endl;
-        mErrorReporting->LogMessage(message);
+        mErrorReporting.LogMessage(message);
 
         break;
     }
 #endif
     default:
         const std::string err{"Unexpected Operation code"};
-        mErrorReporting->LogError(err);
+        mErrorReporting.LogError(err);
 
         return false;
     }

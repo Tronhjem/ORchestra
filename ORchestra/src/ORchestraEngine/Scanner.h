@@ -21,6 +21,8 @@ public:
     void Reset();
     
 private:
+    Scanner() = delete;
+    
     ORchestraToken ScanToken();
     ORchestraToken MakeToken(ORchestraTokenType token);
     ORchestraToken MakeErrorToken(const std::string_view& message, char symbol);

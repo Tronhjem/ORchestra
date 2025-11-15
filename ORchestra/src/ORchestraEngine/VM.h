@@ -34,22 +34,26 @@ public:
     bool Prepare(const std::string& data);
     bool Tick(std::vector<SequenceStep>& stepQueue, const int globalCount);
     void Reset();
-    StepData GetTopStackValue() { return mStack.Top(); }
     const std::vector<LogEntry>& GetErrors();
-
+    
+#if _TEST
+    StepData GetTopStackValue() { return mStack.Top(); }
+#endif
+    
 private:
     bool ProcessOpCodes(std::vector<Instruction>& setupInstructions);
-    bool ProcessInstruction(const Instruction& instruction, const int stepCount);
+    inline bool ProcessInstruction(const Instruction& instruction, const int stepCount, Stack<StepData>& mStack);
     
-    std::unique_ptr<ErrorReporting> mErrorReporting;
+    ErrorReporting mErrorReporting;
+    Scanner mScanner;
+    Compiler mCompiler;
+    
     std::unordered_map<std::string, DataSequence> mVariables;
     std::vector<Instruction> mRuntimeInstructions;
     inline DataUnit RandomValue(const DataUnit low, const DataUnit high);
 
-    Stack<StepData> mStack;
-    
     template<typename Operation>
-    void PopDoOperationAndPush(Operation op)
+    void PopDoOperationAndPush(Operation op, Stack<StepData> mStack)
     {
         static_assert(std::is_invocable_v<Operation, const int, const int>,
                              "Operation must be callable with two int parameters");

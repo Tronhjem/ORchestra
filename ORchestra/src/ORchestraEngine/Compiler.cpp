@@ -17,10 +17,10 @@ namespace ORchestra {
 #pragma clang diagnostic ignored "-Wswitch-enum"
 #endif
 
-static std::string ranFunctionName = "ran";
-static std::string eucFunctionName = "euc";
+static const std::string ranFunctionName = "ran";
+static const std::string eucFunctionName = "euc";
 
-Compiler::Compiler(std::vector<ORchestraToken> &tokens, ErrorReporting &log) : mTokens(tokens), mErrorReporting(log)
+Compiler::Compiler(const std::vector<ORchestraToken>& tokens, ErrorReporting& log) : mTokens(tokens), mErrorReporting(log)
 {
     // populate built in functions
     std::vector<Instruction> printInstructions;
@@ -46,12 +46,17 @@ Compiler::Compiler(std::vector<ORchestraToken> &tokens, ErrorReporting &log) : m
     mFunctions[eucFunctionName] = StoredFunction(2, eucInstructions);
 }
 
-ORchestraToken &Compiler::Consume()
+void Compiler::Reset()
+{
+    mCurrentIndex = 0;
+}
+
+const ORchestraToken& Compiler::Consume()
 {
     return mTokens[mCurrentIndex++];
 }
 
-ORchestraToken &Compiler::Peek()
+const ORchestraToken& Compiler::Peek()
 {
 #if _DEBUG
     assert(mCurrentIndex < mTokens.size());
@@ -59,7 +64,7 @@ ORchestraToken &Compiler::Peek()
     return mTokens[mCurrentIndex];
 }
 
-ORchestraToken &Compiler::Previous()
+const ORchestraToken& Compiler::Previous()
 {
 #if _DEBUG
     assert(mCurrentIndex < mTokens.size());
@@ -68,7 +73,7 @@ ORchestraToken &Compiler::Previous()
     return mTokens[mCurrentIndex - 1];
 }
 
-bool Compiler::MakeIdentifierGetter(ORchestraToken &token, std::vector<Instruction> &instructions)
+bool Compiler::MakeIdentifierGetter(const ORchestraToken &token, std::vector<Instruction> &instructions)
 {
     std::string name = std::string(token.mStart, static_cast<unsigned long>(token.mLength));
 
@@ -97,7 +102,7 @@ bool Compiler::MakeIdentifierGetter(ORchestraToken &token, std::vector<Instructi
     return true;
 }
 
-void Compiler::MakeConstant(ORchestraToken &token, std::vector<Instruction> &instructions)
+void Compiler::MakeConstant(const ORchestraToken& token, std::vector<Instruction> &instructions)
 {
     int value = std::stoi(std::string(token.mStart, static_cast<unsigned long>(token.mLength)));
     if (value > 127)
@@ -116,7 +121,7 @@ void Compiler::MakeConstant(ORchestraToken &token, std::vector<Instruction> &ins
     instructions.emplace_back(Instruction{OpCode::CONSTANT, static_cast<StepData>(value)});
 }
 
-bool Compiler::MakeNoteIntoConstant(ORchestraToken &token, std::vector<Instruction> &instructions)
+bool Compiler::MakeNoteIntoConstant(const ORchestraToken& token, std::vector<Instruction> &instructions)
 {
     auto noteToValue = [](char letter) -> DataUnit
     {
@@ -248,7 +253,7 @@ void Compiler::MakeOperation(ORchestraTokenType tokenType, std::vector<Instructi
     instructions.emplace_back(Instruction{code});
 }
 
-bool Compiler::CompileFunctionCall(std::vector<Instruction> &instructions, std::string &functionName)
+bool Compiler::CompileFunctionCall(std::vector<Instruction> &instructions, const std::string &functionName)
 {
     if (mFunctions.find(functionName) == mFunctions.end())
     {
@@ -263,7 +268,7 @@ bool Compiler::CompileFunctionCall(std::vector<Instruction> &instructions, std::
     while (paramCounter != functon.mNumOfParams &&
            Peek().mTokenType != ORchestraTokenType::RIGHT_PAREN)
     {
-        ORchestraToken &currentToken = Peek();
+        const ORchestraToken& currentToken = Peek();
         switch (currentToken.mTokenType)
         {
         case ORchestraTokenType::COMMA:
@@ -348,7 +353,7 @@ bool Compiler::CompileArray(std::vector<Instruction> &instructions,
             return false;
         }
 
-        ORchestraToken &currentToken = Peek();
+        const ORchestraToken& currentToken = Peek();
         switch (currentToken.mTokenType)
         {
         case ORchestraTokenType::COMMA:
@@ -504,7 +509,7 @@ bool Compiler::CompileExpression(std::vector<Instruction> &instructions)
             rightParen == leftParen)
             break;
 
-        ORchestraToken &currentToken = Consume();
+        const ORchestraToken &currentToken = Consume();
         const ORchestraTokenType tType = currentToken.mTokenType;
 
         // For nested parenteses where there can be more left parens after each other.
@@ -664,7 +669,7 @@ bool Compiler::Compile(std::vector<Instruction> &instructions)
 
     for (;;)
     {
-        ORchestraToken &token = Consume();
+        const ORchestraToken& token = Consume();
 
         switch (token.mTokenType)
         {
@@ -784,7 +789,7 @@ bool Compiler::Compile(std::vector<Instruction> &instructions)
     }
 }
 
-void Compiler::ThrowUnexpectedTokenError(ORchestraToken &tokenForError)
+void Compiler::ThrowUnexpectedTokenError(const ORchestraToken& tokenForError)
 {
     std::string token = std::string(tokenForError.mStart, static_cast<unsigned long>(tokenForError.mLength));
     std::string message = std::string("Unexpected Character ") + token;
