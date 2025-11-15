@@ -1,5 +1,7 @@
 #pragma once
-#include "../catch.hpp"
+
+#include "catch.hpp"
+        
 #include "VM.h"
 
 using namespace ORchestra;

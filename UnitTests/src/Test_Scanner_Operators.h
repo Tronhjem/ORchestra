@@ -1,5 +1,7 @@
 #pragma once
-#include "../catch.hpp"
+
+#include "catch.hpp"
+
 #include "Scanner.h"
 #include "ErrorReporting.h"
 #include "ORchestraToken.h"

@@ -31,7 +31,7 @@ class VM
 {
 public:
     VM();
-    bool Prepare(const char* data);
+    bool Prepare(const std::string& data);
     bool Tick(std::vector<SequenceStep>& stepQueue, const int globalCount);
     void Reset();
     StepData GetTopStackValue() { return mStack.Top(); }

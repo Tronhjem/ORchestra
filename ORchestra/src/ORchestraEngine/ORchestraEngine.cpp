@@ -61,7 +61,7 @@ void ORchestraEngine::Initialize()
     mCurrentProcessingStep.store(mCurrentGlobalStep.load(), std::memory_order_release);
     mVM->Reset();
 
-    mIsVMInit.store(mVM->Prepare(&mInstructionData[0]));
+    mIsVMInit.store(mVM->Prepare(mInstructionData));
 }
 
 void ORchestraEngine::WorkerThreadLoop()

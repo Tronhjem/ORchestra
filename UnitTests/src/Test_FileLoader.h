@@ -1,5 +1,7 @@
 #pragma once
-#include "../catch.hpp"
+    
+#include "catch.hpp"
+
 #include "FileLoader.h"
 #include <fstream>
 #include <cstdio>

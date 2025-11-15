@@ -15,12 +15,24 @@ namespace ORchestra {
 #pragma clang diagnostic ignored "-Wswitch-enum"
 #endif
 
+constexpr std::string_view ERROR_UNEXPECTED_CHAR = "ERROR: Unexpected character ";
+constexpr std::string_view ERROR_NO_END_QUOTE = "ERROR: Expected \" but didn't find one ";
+
 Scanner::Scanner(ErrorReporting &logger) : mErrorReporting(logger)
 {
+    mTokens.reserve(64);
 }
 
 Scanner::~Scanner()
 {
+}
+
+void Scanner::Reset()
+{
+    mTokens.clear();
+    mCurrentLine = 0;
+    mStart = nullptr;
+    mCurrent = nullptr;
 }
 
 ORchestraToken Scanner::MakeToken(ORchestraTokenType tokenType)
@@ -28,12 +40,15 @@ ORchestraToken Scanner::MakeToken(ORchestraTokenType tokenType)
     return ORchestraToken(tokenType, mStart, static_cast<int>(mCurrent - mStart), mCurrentLine);
 }
 
-ORchestraToken Scanner::MakeErrorToken(char *message, char symbol)
+ORchestraToken Scanner::MakeErrorToken(const std::string_view& message, char symbol)
 {
-    size_t len = strlen(message);
-    message[len] = symbol;
-    message[len + 1] = '\0';
-    return ORchestraToken(ORchestraTokenType::PARSE_ERROR, message, (int)strlen(message), mCurrentLine);
+    std::string errorString;
+    errorString.reserve(message.size() + 1);
+    errorString.append(message.data(), message.size());
+    errorString.append(symbol, 1);
+    
+    mErrorReporting.LogError(mCurrentLine, errorString);
+    return ORchestraToken(ORchestraTokenType::PARSE_ERROR, nullptr, 0, mCurrentLine);
 }
 
 void Scanner::SkipWhiteSpace() // append char
@@ -69,29 +84,27 @@ void Scanner::SkipWhiteSpace() // append char
     }
 }
 
-bool Scanner::ScanFile(const char *data)
+bool Scanner::ScanFile(const std::string& data)
 {
 #if _DEBUG
     ScopedTimer timer("ScanTokens");
 #endif
 
-    mCurrent = data;
-    mStart = data;
+    mCurrent = &data[0];
+    mStart = &data[0];
 
     for (;;)
     {
-        ORchestraToken t = ScanToken();
+        const ORchestraToken token = ScanToken();
 
-        if (t.GetType() == ORchestraTokenType::PARSE_ERROR)
+        if (token.GetType() == ORchestraTokenType::PARSE_ERROR)
         {
-            std::string errorString = std::string(t.mStart, static_cast<unsigned long>(t.mLength));
-            mErrorReporting.LogError(mCurrentLine, errorString);
             return false;
         }
 
-        mTokens.emplace_back(t);
+        mTokens.emplace_back(token);
 
-        if (t.GetType() == ORchestraTokenType::END)
+        if (token.GetType() == ORchestraTokenType::END)
         {
             return true;
         }
@@ -231,7 +244,7 @@ bool Scanner::Match(char expected)
 ORchestraTokenType Scanner::IdentifierToken()
 {
     auto checkKeyword = [&](int start, int length,
-                            const char *rest, ORchestraTokenType type)
+                            const char* rest, ORchestraTokenType type)
     {
         if (mCurrent - mStart == start + length &&
             memcmp(mStart + start, rest, static_cast<unsigned long>(length)) == 0)

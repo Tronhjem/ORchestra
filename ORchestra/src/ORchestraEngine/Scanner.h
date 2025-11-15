@@ -16,13 +16,14 @@ public:
     Scanner(ErrorReporting& logger);
     ~Scanner();
     
-    bool ScanFile(const char *data);
+    bool ScanFile(const std::string& data);
     std::vector<ORchestraToken>& GetTokens() { return mTokens; }
-
+    void Reset();
+    
 private:
     ORchestraToken ScanToken();
     ORchestraToken MakeToken(ORchestraTokenType token);
-    ORchestraToken MakeErrorToken(char* message, char symbol);
+    ORchestraToken MakeErrorToken(const std::string_view& message, char symbol);
     ORchestraToken BuildString();
     ORchestraToken BuildDigit();
     ORchestraToken BuildIdentifier();
@@ -37,16 +38,14 @@ private:
     inline char AdvanceCurrent();
     inline bool IsAlpha(char c);
     inline bool IsDigit(char c);
-
+    
 private:
     ErrorReporting& mErrorReporting;
     std::vector<ORchestraToken> mTokens;
-
+    
     const char* mStart;
     const char* mCurrent;
     int mCurrentLine = 1;
-    char ERROR_UNEXPECTED_CHAR[50] = "ERROR: Unexpected character ";
-    char ERROR_NO_END_QUOTE[50] = "ERROR: Expected \" but didn't find one ";
 };
 
 

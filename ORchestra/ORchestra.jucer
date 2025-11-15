@@ -18,8 +18,10 @@
         <FILE id="s8h8zi" name="Compiler.h" compile="0" resource="0" file="src/ORchestraEngine/Compiler.h"/>
       </GROUP>
       <GROUP id="{7A5F6FBA-8253-AD8A-E007-DA4C8F3C2E33}" name="Scanner">
-        <FILE id="FjSGtq" name="Token.cpp" compile="1" resource="0" file="src/ORchestraEngine/Token.cpp"/>
-        <FILE id="ol4E7N" name="Token.h" compile="0" resource="0" file="src/ORchestraEngine/Token.h"/>
+        <FILE id="UWvOKm" name="ORchestraToken.cpp" compile="1" resource="0"
+              file="src/ORchestraEngine/ORchestraToken.cpp"/>
+        <FILE id="h0oNIn" name="ORchestraToken.h" compile="0" resource="0"
+              file="src/ORchestraEngine/ORchestraToken.h"/>
         <FILE id="EHkVlu" name="Scanner.cpp" compile="1" resource="0" file="src/ORchestraEngine/Scanner.cpp"/>
         <FILE id="crkqkk" name="Scanner.h" compile="0" resource="0" file="src/ORchestraEngine/Scanner.h"/>
       </GROUP>
