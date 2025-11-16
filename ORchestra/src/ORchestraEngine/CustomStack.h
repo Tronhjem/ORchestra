@@ -1,44 +1,48 @@
 #pragma once
+#include <iostream>
 
-namespace ORchestra {
-
-
-template <typename T>
-class Stack
+namespace ORchestra
 {
-public:
-    Stack() {}
-    T Pop()
+
+    template <typename T>
+    class Stack
     {
+    public:
+        Stack() : mStackPointer(0) {}
+        T Pop()
+        {
 #if _DEBUG
-        assert(stackPointer > 0);
+            assert(mStackPointer > 0);
 #endif
-        return mStack[--stackPointer];
-    }
+            return mStack[--mStackPointer];
+        }
 
-    void Push(T i)
-    {
+        void Push(T i)
+        {
 #if _DEBUG
-        assert(stackPointer + 1 <= 64);
+            assert(mStackPointer + 1 <= 64);
 #endif
-        mStack[stackPointer++] = i;
-    }
+            mStack[mStackPointer++] = i;
+        }
 
-    void Clear()
-    {
-        stackPointer = 0;
-    }
+        void Clear()
+        {
+            mStackPointer = 0;
+        }
 
-    T Top()
-    {
-        return mStack[stackPointer];
-    }
+        T Top()
+        {
+#if _DEBUG
+            assert(mStackPointer != 0 && mStackPointer > 0);
+#endif
+            return mStack[mStackPointer - 1];
+        }
 
-private:
-    // TODO: Should we make this smaller or bigger??
-    std::array<T, 64> mStack;
-    unsigned long stackPointer = 0;
-};
+        unsigned long mStackPointer;
 
+    private:
+        // TODO: Should we make this smaller or bigger??
+        std::array<T, 64> mStack;
+    };
 
 } // namespace ORchestra

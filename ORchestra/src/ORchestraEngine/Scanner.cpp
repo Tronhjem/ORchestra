@@ -15,8 +15,8 @@ namespace ORchestra
 #pragma clang diagnostic ignored "-Wswitch-enum"
 #endif
 
-    constexpr std::string_view ERROR_UNEXPECTED_CHAR = "ERROR: Unexpected character ";
-    constexpr std::string_view ERROR_NO_END_QUOTE = "ERROR: Expected \" but didn't find one ";
+    std::string_view ERROR_UNEXPECTED_CHAR = "ERROR: Unexpected character ";
+    std::string_view ERROR_NO_END_QUOTE = "ERROR: Expected \" but didn't find one ";
 
     Scanner::Scanner(ErrorReporting &logger) : mErrorReporting(logger)
     {

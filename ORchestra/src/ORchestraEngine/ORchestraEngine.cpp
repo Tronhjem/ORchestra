@@ -16,6 +16,11 @@ ORchestraEngine::ORchestraEngine() : mReadySteps(0),
     mFileLoader = std::make_unique<FileLoader>();
 
     mWorkerThread = std::thread([this]() { WorkerThreadLoop(); });
+    
+    const std::string file{"a = 74 \n test a"};
+    VM vm;
+    bool process = vm.Prepare(file);
+    std::cout << process;
 }
 
 ORchestraEngine::~ORchestraEngine()
@@ -61,7 +66,7 @@ void ORchestraEngine::Initialize()
     mCurrentProcessingStep.store(mCurrentGlobalStep.load(), std::memory_order_release);
     mVM->Reset();
 
-    mIsVMInit.store(mVM->Prepare(mInstructionData));
+    mIsVMInit.store(mVM->Prepare(&mInstructionData[0]));
 }
 
 void ORchestraEngine::WorkerThreadLoop()

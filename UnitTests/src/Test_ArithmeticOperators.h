@@ -8,7 +8,7 @@ TEST_CASE("Arithmetic: Assigns single value 'a = 74' and retrieves it correctly"
 {
     const std::string file{"a = 74 \n test a"};
     VM vm;
-    REQUIRE(vm.Prepare(file));
+    REQUIRE(vm.Prepare(&file[0]));
 
     StepData result = vm.GetTopStackValue();
     REQUIRE(result.GetValue(0) == 74);

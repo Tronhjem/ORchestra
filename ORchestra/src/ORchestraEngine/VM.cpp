@@ -18,7 +18,7 @@ namespace ORchestra
                mScanner(mErrorReporting),
                mCompiler(mScanner.GetTokens(), mErrorReporting)
     {
-        mRuntimeInstructions.resize(64);
+        mRuntimeInstructions.reserve(64);
     }
 
     bool VM::Prepare(const std::string &data)
@@ -39,11 +39,11 @@ namespace ORchestra
 
     void VM::Reset()
     {
+        mErrorReporting.Clear();
         mScanner.Reset();
         mCompiler.Reset();
         mVariables.clear();
         mRuntimeInstructions.clear();
-        mErrorReporting.Clear();
     }
 
     const std::vector<LogEntry> &VM::GetErrors()
@@ -100,10 +100,16 @@ namespace ORchestra
                 break;
 
             case (OpCode::END):
+            {
 #if _TEST
                 mTopStackValue = stack.Top();
+
+                std::cout << "HELLO" << std::endl;
+                std::cout << stack.mStackPointer << std::endl;
+                std::cout << mTopStackValue.GetValue(0) << std::endl;
 #endif
                 return true;
+            }
 
             default:
             {
