@@ -18,7 +18,7 @@ namespace ORchestra
     std::string_view ERROR_UNEXPECTED_CHAR = "ERROR: Unexpected character ";
     std::string_view ERROR_NO_END_QUOTE = "ERROR: Expected \" but didn't find one ";
 
-    Scanner::Scanner(ErrorReporting &logger) : mErrorReporting(logger)
+    Scanner::Scanner(ErrorReporting& logger) : mErrorReporting(logger)
     {
         mTokens.reserve(64);
     }
@@ -40,7 +40,7 @@ namespace ORchestra
         return ORchestraToken(tokenType, mStart, static_cast<int>(mCurrent - mStart), mCurrentLine);
     }
 
-    ORchestraToken Scanner::MakeErrorToken(const std::string_view &message, char symbol)
+    ORchestraToken Scanner::MakeErrorToken(const std::string_view& message, char symbol)
     {
         std::string errorString;
         errorString.reserve(message.size() + 1);
@@ -84,7 +84,7 @@ namespace ORchestra
         }
     }
 
-    bool Scanner::ScanFile(const std::string &data)
+    bool Scanner::ScanFile(const std::string& data)
     {
 #if _DEBUG
         ScopedTimer timer("ScanTokens");
@@ -143,7 +143,7 @@ namespace ORchestra
         case '^':
             return MakeToken(ORchestraTokenType::XOR);
 
-        // Syntax
+            // Syntax
         case '(':
             return MakeToken(ORchestraTokenType::LEFT_PAREN);
         case ')':
@@ -170,7 +170,7 @@ namespace ORchestra
         case '>':
             return MakeToken(Match('=') ? ORchestraTokenType::GREATER_EQUAL : ORchestraTokenType::GREATER);
 
-        // MATH
+            // MATH
         case '-':
             return MakeToken(ORchestraTokenType::MINUS);
         case '+':
@@ -190,8 +190,8 @@ namespace ORchestra
     bool Scanner::IsAlpha(char c)
     {
         return (c >= 'a' && c <= 'z') ||
-               (c >= 'A' && c <= 'Z') ||
-               c == '_';
+            (c >= 'A' && c <= 'Z') ||
+            c == '_';
     }
 
     bool Scanner::IsDigit(char c)
@@ -244,16 +244,16 @@ namespace ORchestra
     ORchestraTokenType Scanner::IdentifierToken()
     {
         auto checkKeyword = [&](int start, int length,
-                                const char *rest, ORchestraTokenType type)
-        {
-            if (mCurrent - mStart == start + length &&
-                memcmp(mStart + start, rest, static_cast<unsigned long>(length)) == 0)
+            const char* rest, ORchestraTokenType type)
             {
-                return type;
-            }
+                if (mCurrent - mStart == start + length &&
+                    memcmp(mStart + start, rest, static_cast<unsigned long>(length)) == 0)
+                {
+                    return type;
+                }
 
-            return ORchestraTokenType::IDENTIFIER;
-        };
+                return ORchestraTokenType::IDENTIFIER;
+            };
 
         // Checking if any of these are reserved words.
         switch (mStart[0])

@@ -24,62 +24,62 @@ typedef juce::AudioProcessorValueTreeState::ComboBoxAttachment ComboBoxAttachmen
 //==============================================================================
 /**
 */
-class ORchestraAudioProcessorEditor  :  public juce::AudioProcessorEditor,
-                                        public juce::TextEditor::Listener,
-                                        public juce::Button::Listener,
-                                        public juce::ChangeListener
+class ORchestraAudioProcessorEditor : public juce::AudioProcessorEditor,
+  public juce::TextEditor::Listener,
+  public juce::Button::Listener,
+  public juce::ChangeListener
 {
 public:
-    ORchestraAudioProcessorEditor (ORchestraAudioProcessor&);
-    ~ORchestraAudioProcessorEditor() override;
+  ORchestraAudioProcessorEditor(ORchestraAudioProcessor&);
+  ~ORchestraAudioProcessorEditor() override;
 
-    //==============================================================================
-    void paint (juce::Graphics&) override;
-    void resized() override;
-    void textEditorTextChanged(juce::TextEditor& editor) override;
-    void extracted();
-    void buttonClicked(juce::Button* button) override;
-    
+  //==============================================================================
+  void paint(juce::Graphics&) override;
+  void resized() override;
+  void textEditorTextChanged(juce::TextEditor& editor) override;
+  void extracted();
+  void buttonClicked(juce::Button* button) override;
+
 private:
-    ORchestraAudioProcessor& audioProcessor;
-    void changeListenerCallback(juce::ChangeBroadcaster* broadCaster) override;
-    inline void UpdateErrors();
-    
-    bool mEditorIsDirty = false;
-    std::unique_ptr<GeneralLookAndFeel> mGeneralLookAndFeel;
-    std::unique_ptr<ButtonLookAndFeel> mButtonLookAndFeel;
-    std::unique_ptr<TextEditorLookAndFeel> mTextEditorLookAndFeel;
+  ORchestraAudioProcessor& audioProcessor;
+  void changeListenerCallback(juce::ChangeBroadcaster* broadCaster) override;
+  inline void UpdateErrors();
 
-    juce::TextButton mTogglePlayButton {"Play"};
-    juce::TextButton mImportFileButton {"Import"};
-    juce::TextButton mExportToFileButton {"Export"};
-    juce::TextButton mCompileButton {"Compile"};
+  bool mEditorIsDirty = false;
+  std::unique_ptr<GeneralLookAndFeel> mGeneralLookAndFeel;
+  std::unique_ptr<ButtonLookAndFeel> mButtonLookAndFeel;
+  std::unique_ptr<TextEditorLookAndFeel> mTextEditorLookAndFeel;
 
-    juce::Label mTempoDivLabel{"tempo", "Tempo Division"};
-    juce::Label mBpmLabel {"bpm","BPM"};
-    juce::Label mNoteLengthLabel {"noteLength", "Note Length"};
-    
-    juce::StringArray mNoteDivisions{ "1n", "2n","4n", "8n", "16n", "32n", "64n"};
-    juce::ComboBox mTempoDivisionSelectorBox;
-    juce::ComboBox mNoteLengtSelectorBox;
-    juce::Slider mBpmBox;
-    
-    std::unique_ptr<SliderAttachment> mBpmSliderAttachment;
-    std::unique_ptr<ComboBoxAttachment> mTempoDivisionAttachment;
-    std::unique_ptr<ComboBoxAttachment> mNoteLengthAttachment;
+  juce::TextButton mTogglePlayButton{ "Play" };
+  juce::TextButton mImportFileButton{ "Import" };
+  juce::TextButton mExportToFileButton{ "Export" };
+  juce::TextButton mCompileButton{ "Compile" };
 
-    juce::FileChooser mFileChooser {"Select a file to load...", juce::File{}, "*.txt"};
-    int mFileChooserFlags = juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles;
+  juce::Label mTempoDivLabel{ "tempo", "Tempo Division" };
+  juce::Label mBpmLabel{ "bpm","BPM" };
+  juce::Label mNoteLengthLabel{ "noteLength", "Note Length" };
 
-    Timeline timeline;
-    juce::TextEditor mCodeEditorTextBox;
-    juce::TextEditor mErrorTextBox;
-    
+  juce::StringArray mNoteDivisions{ "1n", "2n","4n", "8n", "16n", "32n", "64n" };
+  juce::ComboBox mTempoDivisionSelectorBox;
+  juce::ComboBox mNoteLengtSelectorBox;
+  juce::Slider mBpmBox;
 
-//    juce::CodeDocument codeDocument;
-//       juce::CodeTokeniser tokeniser; // You can subclass this or use CppTokeniser, LuaTokeniser, etc.
-//       std::unique_ptr<juce::CodeEditorComponent> codeEditor;
-    
-    
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ORchestraAudioProcessorEditor)
+  std::unique_ptr<SliderAttachment> mBpmSliderAttachment;
+  std::unique_ptr<ComboBoxAttachment> mTempoDivisionAttachment;
+  std::unique_ptr<ComboBoxAttachment> mNoteLengthAttachment;
+
+  juce::FileChooser mFileChooser{ "Select a file to load...", juce::File{}, "*.txt" };
+  int mFileChooserFlags = juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles;
+
+  Timeline timeline;
+  juce::TextEditor mCodeEditorTextBox;
+  juce::TextEditor mErrorTextBox;
+
+
+  //    juce::CodeDocument codeDocument;
+  //       juce::CodeTokeniser tokeniser; // You can subclass this or use CppTokeniser, LuaTokeniser, etc.
+  //       std::unique_ptr<juce::CodeEditorComponent> codeEditor;
+
+
+  JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ORchestraAudioProcessorEditor)
 };

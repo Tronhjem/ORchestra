@@ -6,189 +6,189 @@
 namespace ORchestra {
 
 
-ORchestraEngine::ORchestraEngine() : mReadySteps(0),
-                                     mCurrentGlobalStep(0),
-                                     mCurrentProcessingStep(0),
-                                     mIsVMInit(false),
-                                     shouldExit(false)
-{
-    mVM = std::make_unique<VM>();
-    mFileLoader = std::make_unique<FileLoader>();
-
-    mWorkerThread = std::thread([this]() { WorkerThreadLoop(); });
-    
-    const std::string file{"a = 74 \n test a"};
-    VM vm;
-    bool process = vm.Prepare(file);
-    std::cout << process;
-}
-
-ORchestraEngine::~ORchestraEngine()
-{
-    shouldExit.store(true);
-    if (mWorkerThread.joinable())
-        mWorkerThread.join();
-}
-
-void ORchestraEngine::ExportToFile(const std::string &filePath)
-{
-    const bool fileSaved = mFileLoader->SaveToFile(filePath, mInstructionData);
-
-    if (fileSaved)
+    ORchestraEngine::ORchestraEngine() : mReadySteps(0),
+        mCurrentGlobalStep(0),
+        mCurrentProcessingStep(0),
+        mIsVMInit(false),
+        shouldExit(false)
     {
-        Compile(mInstructionData);
-    }
-}
+        mVM = std::make_unique<VM>();
+        mFileLoader = std::make_unique<FileLoader>();
 
-const std::string &ORchestraEngine::ImportFromFile(const std::string &filePath)
-{
-    mInstructionData = mFileLoader->LoadFile(filePath);
+        mWorkerThread = std::thread([this]() { WorkerThreadLoop(); });
 
-    if (mInstructionData.length() > 0)
-    {
-        Compile(mInstructionData);
+        const std::string file{ "a = 74 \n test a" };
+        VM vm;
+        bool process = vm.Prepare(file);
+        std::cout << process;
     }
 
-    return mInstructionData;
-}
-
-void ORchestraEngine::Compile(const std::string &data)
-{
-    mInstructionData = data;
-    Initialize();
-}
-
-void ORchestraEngine::Initialize()
-{
-    mIsVMInit.store(false, std::memory_order_release);
-
-    mReadySteps.store(0, std::memory_order_release);
-    mCurrentProcessingStep.store(mCurrentGlobalStep.load(), std::memory_order_release);
-    mVM->Reset();
-
-    mIsVMInit.store(mVM->Prepare(&mInstructionData[0]));
-}
-
-void ORchestraEngine::WorkerThreadLoop()
-{
-    while (!shouldExit.load())
+    ORchestraEngine::~ORchestraEngine()
     {
-        PreProcessSteps();
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
-    }
-}
-
-void ORchestraEngine::PreProcessSteps()
-{
-    if (!mIsVMInit.load())
-        return;
-
-    const int readySteps = mReadySteps.load();
-    const int stepsToProcess = STEP_BUFFER_SIZE - 1 - readySteps; // leave the last step unprocessed.
-
-    if (stepsToProcess < HALF_STEP_BUFFER_SIZE - 5 /*magic number for processing steps earlier than half*/)
-        return;
-
-#if _DEBUG
-    ScopedTimer timer{"PreProcess"};
-#endif
-
-    // TODO: Make sure this doesn't skip a beat
-    const int currentStep = mCurrentProcessingStep.load();
-    const int endGlobalStep = stepsToProcess + currentStep;
-    for (int i = currentStep; i < endGlobalStep; ++i)
-    {
-        const int stepWrapped = i % STEP_BUFFER_SIZE;
-        // tick needs global step and StepData needs it wrapped for ring buffer.
-
-        std::vector<SequenceStep> &currentData = mStepRingBuffer[static_cast<unsigned long>(stepWrapped)];
-        currentData.clear();
-
-        mVM->Tick(currentData, i);
-#if _DEBUG
-//        std::cout << "global step process " << stepWrapped << " " << (int)currentData[0].mFirst.GetValue(0) << std::endl;
-#endif
-        mReadySteps.fetch_add(1, std::memory_order_acq_rel);
+        shouldExit.store(true);
+        if (mWorkerThread.joinable())
+            mWorkerThread.join();
     }
 
-    mCurrentProcessingStep.fetch_add(stepsToProcess, std::memory_order_acq_rel);
-}
-
-void ORchestraEngine::Tick(const TransportData &transportData,
-                           const int bufferLength,
-                           juce::MidiBuffer &midiMessages)
-{
-    if (transportData.isPlaying)
+    void ORchestraEngine::ExportToFile(const std::string& filePath)
     {
-        const double samplesPerStep = static_cast<double>(transportData.sampleRate) * (60.0 / (transportData.bpm * transportData.bpmDivision));
-        const int currentStep = static_cast<int>(ceil(static_cast<double>(transportData.timeInSamples) / samplesPerStep));
+        const bool fileSaved = mFileLoader->SaveToFile(filePath, mInstructionData);
 
-        // Check if we skipped count, to regenerate everything.
-        const int stepDifference = currentStep - mCurrentGlobalStep.load();
-        mCurrentGlobalStep.store(currentStep, std::memory_order_release);
-
-        if (stepDifference > 1 || stepDifference < 0)
+        if (fileSaved)
         {
-            // TODO: should it be 1 or 0?
-            // Do we want to move it entirely down to 0 or still keep the current step we might trigger?
-            mReadySteps.store(1, std::memory_order_release);
-            mCurrentProcessingStep.store(currentStep, std::memory_order_release);
+            Compile(mInstructionData);
+        }
+    }
+
+    const std::string& ORchestraEngine::ImportFromFile(const std::string& filePath)
+    {
+        mInstructionData = mFileLoader->LoadFile(filePath);
+
+        if (mInstructionData.length() > 0)
+        {
+            Compile(mInstructionData);
         }
 
-        const int nextStepInSamples = static_cast<int>(samplesPerStep * currentStep);
-        const int endOfBufferInSamples = static_cast<int>(transportData.timeInSamples + bufferLength);
+        return mInstructionData;
+    }
 
-        // if the end of the buffer is longer than the next tick time
-        // Check if we should tick in this buffer.
-        if (mIsVMInit && endOfBufferInSamples >= nextStepInSamples && currentStep != mLastStep)
+    void ORchestraEngine::Compile(const std::string& data)
+    {
+        mInstructionData = data;
+        Initialize();
+    }
+
+    void ORchestraEngine::Initialize()
+    {
+        mIsVMInit.store(false, std::memory_order_release);
+
+        mReadySteps.store(0, std::memory_order_release);
+        mCurrentProcessingStep.store(mCurrentGlobalStep.load(), std::memory_order_release);
+        mVM->Reset();
+
+        mIsVMInit.store(mVM->Prepare(&mInstructionData[0]));
+    }
+
+    void ORchestraEngine::WorkerThreadLoop()
+    {
+        while (!shouldExit.load())
         {
+            PreProcessSteps();
+            std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        }
+    }
+
+    void ORchestraEngine::PreProcessSteps()
+    {
+        if (!mIsVMInit.load())
+            return;
+
+        const int readySteps = mReadySteps.load();
+        const int stepsToProcess = STEP_BUFFER_SIZE - 1 - readySteps; // leave the last step unprocessed.
+
+        if (stepsToProcess < HALF_STEP_BUFFER_SIZE - 5 /*magic number for processing steps earlier than half*/)
+            return;
+
 #if _DEBUG
-            ScopedTimer timer {"Process Beat"};
+        ScopedTimer timer{ "PreProcess" };
 #endif
-            mLastStep = currentStep;
 
-            mSamplesSinceLastStep = transportData.timeInSamples;
-            const int wrappedGlobalStep = currentStep % STEP_BUFFER_SIZE;
-            const std::vector<SequenceStep> &currentData = mStepRingBuffer[static_cast<unsigned long>(wrappedGlobalStep)];
+        // TODO: Make sure this doesn't skip a beat
+        const int currentStep = mCurrentProcessingStep.load();
+        const int endGlobalStep = stepsToProcess + currentStep;
+        for (int i = currentStep; i < endGlobalStep; ++i)
+        {
+            const int stepWrapped = i % STEP_BUFFER_SIZE;
+            // tick needs global step and StepData needs it wrapped for ring buffer.
 
-            for (const SequenceStep &step : currentData)
+            std::vector<SequenceStep>& currentData = mStepRingBuffer[static_cast<unsigned long>(stepWrapped)];
+            currentData.clear();
+
+            mVM->Tick(currentData, i);
+#if _DEBUG
+            //        std::cout << "global step process " << stepWrapped << " " << (int)currentData[0].mFirst.GetValue(0) << std::endl;
+#endif
+            mReadySteps.fetch_add(1, std::memory_order_acq_rel);
+        }
+
+        mCurrentProcessingStep.fetch_add(stepsToProcess, std::memory_order_acq_rel);
+    }
+
+    void ORchestraEngine::Tick(const TransportData& transportData,
+        const int bufferLength,
+        juce::MidiBuffer& midiMessages)
+    {
+        if (transportData.isPlaying)
+        {
+            const double samplesPerStep = static_cast<double>(transportData.sampleRate) * (60.0 / (transportData.bpm * transportData.bpmDivision));
+            const int currentStep = static_cast<int>(ceil(static_cast<double>(transportData.timeInSamples) / samplesPerStep));
+
+            // Check if we skipped count, to regenerate everything.
+            const int stepDifference = currentStep - mCurrentGlobalStep.load();
+            mCurrentGlobalStep.store(currentStep, std::memory_order_release);
+
+            if (stepDifference > 1 || stepDifference < 0)
             {
-                const int triggerLength = static_cast<int>(step.mShouldTrigger.GetLength());
-
-                for (int i = 0; i < triggerLength; ++i)
-                {
-                    const DataUnit shouldTrigger = step.mShouldTrigger.GetValue(i);
-
-                    if (!shouldTrigger)
-                        continue;
-
-                    const DataUnit firstByte = step.mFirst.GetEquivalentValueAtIndex(i, triggerLength);
-                    const DataUnit secondByte = step.mSecond.GetEquivalentValueAtIndex(i, triggerLength);
-                    const DataUnit channel = step.mChannel.GetEquivalentValueAtIndex(i, triggerLength);
-                    const int timeStamp = nextStepInSamples + i * (static_cast<int>(samplesPerStep) / triggerLength);
-
-                    // TODO: Change to use step.mDuration
-                    // ScheduledMidiMessage message {step.mType, firstByte, secondByte, channel, timeStamp, step.mDuration};
-                    ScheduledMidiMessage message{step.mType, firstByte, secondByte, channel, timeStamp, transportData.noteLengthInSamples};
-
-#if _DEBUG
-//                    std::cout << "play step " << wrappedGlobalStep << " " << (int)firstByte << std::endl;
-#endif
-                    mMidiScheduler.PostMidi(message);
-                }
+                // TODO: should it be 1 or 0?
+                // Do we want to move it entirely down to 0 or still keep the current step we might trigger?
+                mReadySteps.store(1, std::memory_order_release);
+                mCurrentProcessingStep.store(currentStep, std::memory_order_release);
             }
 
-            mReadySteps.fetch_sub(1, std::memory_order_acq_rel);
-        }
+            const int nextStepInSamples = static_cast<int>(samplesPerStep * currentStep);
+            const int endOfBufferInSamples = static_cast<int>(transportData.timeInSamples + bufferLength);
 
-        // Process all Midi.
-        mMidiScheduler.ProcessMidiPosts(midiMessages, bufferLength, endOfBufferInSamples);
+            // if the end of the buffer is longer than the next tick time
+            // Check if we should tick in this buffer.
+            if (mIsVMInit && endOfBufferInSamples >= nextStepInSamples && currentStep != mLastStep)
+            {
+#if _DEBUG
+                ScopedTimer timer{ "Process Beat" };
+#endif
+                mLastStep = currentStep;
+
+                mSamplesSinceLastStep = transportData.timeInSamples;
+                const int wrappedGlobalStep = currentStep % STEP_BUFFER_SIZE;
+                const std::vector<SequenceStep>& currentData = mStepRingBuffer[static_cast<unsigned long>(wrappedGlobalStep)];
+
+                for (const SequenceStep& step : currentData)
+                {
+                    const int triggerLength = static_cast<int>(step.mShouldTrigger.GetLength());
+
+                    for (int i = 0; i < triggerLength; ++i)
+                    {
+                        const DataUnit shouldTrigger = step.mShouldTrigger.GetValue(i);
+
+                        if (!shouldTrigger)
+                            continue;
+
+                        const DataUnit firstByte = step.mFirst.GetEquivalentValueAtIndex(i, triggerLength);
+                        const DataUnit secondByte = step.mSecond.GetEquivalentValueAtIndex(i, triggerLength);
+                        const DataUnit channel = step.mChannel.GetEquivalentValueAtIndex(i, triggerLength);
+                        const int timeStamp = nextStepInSamples + i * (static_cast<int>(samplesPerStep) / triggerLength);
+
+                        // TODO: Change to use step.mDuration
+                        // ScheduledMidiMessage message {step.mType, firstByte, secondByte, channel, timeStamp, step.mDuration};
+                        ScheduledMidiMessage message{ step.mType, firstByte, secondByte, channel, timeStamp, transportData.noteLengthInSamples };
+
+#if _DEBUG
+                        //                    std::cout << "play step " << wrappedGlobalStep << " " << (int)firstByte << std::endl;
+#endif
+                        mMidiScheduler.PostMidi(message);
+                    }
+                }
+
+                mReadySteps.fetch_sub(1, std::memory_order_acq_rel);
+            }
+
+            // Process all Midi.
+            mMidiScheduler.ProcessMidiPosts(midiMessages, bufferLength, endOfBufferInSamples);
+        }
+        else
+        {
+            mMidiScheduler.ClearAllData(midiMessages);
+        }
     }
-    else
-    {
-        mMidiScheduler.ClearAllData(midiMessages);
-    }
-}
 
 
 } // namespace ORchestra

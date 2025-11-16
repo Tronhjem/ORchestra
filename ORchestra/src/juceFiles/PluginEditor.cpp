@@ -27,13 +27,13 @@ constexpr int codeEditorWidth = WINDOW_WIDTH - 2 * OUTER_MARGIN;
 constexpr int codeEditorHeight = 300;
 
 //==============================================================================
-ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProcessor &p)
+ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProcessor& p)
     : AudioProcessorEditor(&p), audioProcessor(p), mEditorIsDirty(false)
 {
     setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
 
     audioProcessor.addChangeListener(this);
-    juce::AudioProcessorValueTreeState &valueTree = audioProcessor.GetValueTree();
+    juce::AudioProcessorValueTreeState& valueTree = audioProcessor.GetValueTree();
 
     mGeneralLookAndFeel = std::make_unique<GeneralLookAndFeel>();
     mButtonLookAndFeel = std::make_unique<ButtonLookAndFeel>();
@@ -151,8 +151,8 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     addAndMakeVisible(timeline);
     addAndMakeVisible(mBpmBox);
 
-    const std::string &data = audioProcessor.GetInstructionData();
-    juce::String dataAsString{data};
+    const std::string& data = audioProcessor.GetInstructionData();
+    juce::String dataAsString{ data };
     mCodeEditorTextBox.setText(dataAsString);
 
     mBpmSliderAttachment.reset(new SliderAttachment(valueTree, bpmString, mBpmBox));
@@ -170,23 +170,23 @@ ORchestraAudioProcessorEditor::~ORchestraAudioProcessorEditor()
     audioProcessor.removeChangeListener(this);
 }
 
-void ORchestraAudioProcessorEditor::changeListenerCallback(juce::ChangeBroadcaster *broadCaster)
+void ORchestraAudioProcessorEditor::changeListenerCallback(juce::ChangeBroadcaster* broadCaster)
 {
     UNUSED(broadCaster);
 
-    const std::string &data = audioProcessor.GetInstructionData();
-    const juce::String dataAsString{data};
+    const std::string& data = audioProcessor.GetInstructionData();
+    const juce::String dataAsString{ data };
     mCodeEditorTextBox.setText(dataAsString);
 }
 
-void ORchestraAudioProcessorEditor::textEditorTextChanged(juce::TextEditor &editor)
+void ORchestraAudioProcessorEditor::textEditorTextChanged(juce::TextEditor& editor)
 {
     UNUSED(editor);
 
     mEditorIsDirty = true;
 }
 
-void ORchestraAudioProcessorEditor::buttonClicked(juce::Button *button)
+void ORchestraAudioProcessorEditor::buttonClicked(juce::Button* button)
 {
     if (button == &mTogglePlayButton)
     {
@@ -200,27 +200,27 @@ void ORchestraAudioProcessorEditor::buttonClicked(juce::Button *button)
         //        std::string utf8Text = text.toRawUTF8();
         //        audioProcessor.Compile(utf8Text);
 
-        mFileChooser.launchAsync(mFileChooserFlags, [this](const juce::FileChooser &fc)
-                                 {
-            UNUSED(fc);
-            juce::File file = mFileChooser.getResult();
-            std::string filePath {file.getFullPathName().toRawUTF8()};
-            audioProcessor.ExportToFile(filePath); });
+        mFileChooser.launchAsync(mFileChooserFlags, [this](const juce::FileChooser& fc)
+            {
+                UNUSED(fc);
+                juce::File file = mFileChooser.getResult();
+                std::string filePath{ file.getFullPathName().toRawUTF8() };
+                audioProcessor.ExportToFile(filePath); });
 
         UpdateErrors();
     }
     else if (button == &mImportFileButton)
     {
-        mFileChooser.launchAsync(mFileChooserFlags, [this](const juce::FileChooser &fc)
-                                 {
-            UNUSED(fc);
-            juce::File file = mFileChooser.getResult();
-            std::string filePath {file.getFullPathName().toRawUTF8()};
-            const std::string& data = audioProcessor.ImportFromFile(filePath);
-            juce::String dataAsString {data};
-            mCodeEditorTextBox.setText(dataAsString);
-            
-            UpdateErrors(); });
+        mFileChooser.launchAsync(mFileChooserFlags, [this](const juce::FileChooser& fc)
+            {
+                UNUSED(fc);
+                juce::File file = mFileChooser.getResult();
+                std::string filePath{ file.getFullPathName().toRawUTF8() };
+                const std::string& data = audioProcessor.ImportFromFile(filePath);
+                juce::String dataAsString{ data };
+                mCodeEditorTextBox.setText(dataAsString);
+
+                UpdateErrors(); });
     }
     else if (button == &mCompileButton)
     {
@@ -235,7 +235,7 @@ void ORchestraAudioProcessorEditor::buttonClicked(juce::Button *button)
 
 void ORchestraAudioProcessorEditor::UpdateErrors()
 {
-    const std::vector<LogEntry> &errors = audioProcessor.GetErrors();
+    const std::vector<LogEntry>& errors = audioProcessor.GetErrors();
     if (errors.size() > 0)
         mErrorTextBox.setText(errors[0].mMessage);
     else
@@ -243,7 +243,7 @@ void ORchestraAudioProcessorEditor::UpdateErrors()
 }
 
 //==============================================================================
-void ORchestraAudioProcessorEditor::paint(juce::Graphics &g)
+void ORchestraAudioProcessorEditor::paint(juce::Graphics& g)
 {
     g.fillAll(ORchestraColours::Background);
     mCompileButton.setEnabled(mEditorIsDirty);

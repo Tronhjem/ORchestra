@@ -15,13 +15,13 @@ namespace ORchestra
 #endif
 
     VM::VM() : mErrorReporting(),
-               mScanner(mErrorReporting),
-               mCompiler(mScanner.GetTokens(), mErrorReporting)
+        mScanner(mErrorReporting),
+        mCompiler(mScanner.GetTokens(), mErrorReporting)
     {
         mRuntimeInstructions.reserve(64);
     }
 
-    bool VM::Prepare(const std::string &data)
+    bool VM::Prepare(const std::string& data)
     {
         bool success = false;
         success = mScanner.ScanFile(data);
@@ -46,12 +46,12 @@ namespace ORchestra
         mRuntimeInstructions.clear();
     }
 
-    const std::vector<LogEntry> &VM::GetErrors()
+    const std::vector<LogEntry>& VM::GetErrors()
     {
         return mErrorReporting.GetErrors();
     }
 
-    bool VM::ProcessOpCodes(std::vector<Instruction> &instructions)
+    bool VM::ProcessOpCodes(std::vector<Instruction>& instructions)
     {
 #if _DEBUG
         ScopedTimer timer("VM Process OpCodes");
@@ -60,22 +60,22 @@ namespace ORchestra
         Stack<StepData> stack;
 
         unsigned long currentIndex = 0;
-        auto consume = [&]() -> Instruction &
-        {
-            return instructions[currentIndex++];
-        };
+        auto consume = [&]() -> Instruction&
+            {
+                return instructions[currentIndex++];
+            };
 
         for (;;)
         {
-            const Instruction &instruction = consume();
+            const Instruction& instruction = consume();
 
             switch (instruction.opCode)
             {
             case (OpCode::SET_IDENTIFIER_VALUE):
             {
                 StepData value = stack.Pop();
-                std::vector<StepData> vectorData{value};
-                mVariables[instruction.mNameValue] = DataSequence{vectorData};
+                std::vector<StepData> vectorData{ value };
+                mVariables[instruction.mNameValue] = DataSequence{ vectorData };
 
                 break;
             }
@@ -89,8 +89,8 @@ namespace ORchestra
                     data[i] = stack.Pop();
                 }
 
-                std::vector<StepData> vectorData{data, data + arrayLength};
-                mVariables[instruction.mNameValue] = DataSequence{vectorData};
+                std::vector<StepData> vectorData{ data, data + arrayLength };
+                mVariables[instruction.mNameValue] = DataSequence{ vectorData };
 
                 break;
             }
@@ -125,19 +125,19 @@ namespace ORchestra
         }
     }
 
-    bool VM::Tick(std::vector<SequenceStep> &stepQueue, const int globalCount)
+    bool VM::Tick(std::vector<SequenceStep>& stepQueue, const int globalCount)
     {
         Stack<StepData> stack;
 
         unsigned long currentIndex = 0;
-        auto consume = [&]() -> Instruction &
-        {
-            return mRuntimeInstructions[currentIndex++];
-        };
+        auto consume = [&]() -> Instruction&
+            {
+                return mRuntimeInstructions[currentIndex++];
+            };
 
         for (;;)
         {
-            const Instruction &instruction = consume();
+            const Instruction& instruction = consume();
 
             switch (instruction.opCode)
             {
@@ -148,7 +148,7 @@ namespace ORchestra
                 const StepData note = stack.Pop();
                 const StepData shouldTrigger = stack.Pop();
 
-                stepQueue.emplace_back(SequenceStep{MidiType::NoteOn, shouldTrigger, note, vel, channel, DEFAULT_NOTE_DURATION});
+                stepQueue.emplace_back(SequenceStep{ MidiType::NoteOn, shouldTrigger, note, vel, channel, DEFAULT_NOTE_DURATION });
 
                 break;
             }
@@ -160,7 +160,7 @@ namespace ORchestra
                 const StepData ccNumber = stack.Pop();
                 const StepData shouldTrigger = stack.Pop();
 
-                stepQueue.emplace_back(SequenceStep{MidiType::CC, shouldTrigger, ccNumber, ccValue, channel, DEFAULT_NOTE_DURATION});
+                stepQueue.emplace_back(SequenceStep{ MidiType::CC, shouldTrigger, ccNumber, ccValue, channel, DEFAULT_NOTE_DURATION });
 
                 break;
             }
@@ -198,7 +198,7 @@ namespace ORchestra
         return static_cast<DataUnit>(std::clamp(result, 0, MAX_UCHAR_VALUE));
     }
 
-    bool VM::ProcessInstruction(const Instruction &instruction, const int stepCount, Stack<StepData> &stack)
+    bool VM::ProcessInstruction(const Instruction& instruction, const int stepCount, Stack<StepData>& stack)
     {
         switch (instruction.opCode)
         {
@@ -239,7 +239,7 @@ namespace ORchestra
                 data[i] = stack.Pop().GetValue(0);
             }
 
-            StepData newStepData{data, subStepArrayLength};
+            StepData newStepData{ data, subStepArrayLength };
             stack.Push(newStepData);
 
             break;
@@ -259,7 +259,7 @@ namespace ORchestra
             }
 
             const int clampedLength = std::clamp(length, 0, MAX_UCHAR_VALUE);
-            stack.Push(StepData{clampedLength});
+            stack.Push(StepData{ clampedLength });
 
             break;
         }
@@ -389,7 +389,7 @@ namespace ORchestra
             const DataUnit high = stack.Pop().GetValue(0);
             const DataUnit low = stack.Pop().GetValue(0);
             const int value = (int)RandomValue(low, high);
-            stack.Push(StepData{value});
+            stack.Push(StepData{ value });
 
             break;
         }
@@ -406,7 +406,7 @@ namespace ORchestra
         }
 #endif
         default:
-            const std::string err{"Unexpected Operation code"};
+            const std::string err{ "Unexpected Operation code" };
             mErrorReporting.LogError(err);
 #if _TEST
             mTopStackValue = stack.Top();

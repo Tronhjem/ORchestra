@@ -14,8 +14,8 @@ class Timeline : public juce::Component, public juce::Timer
 {
 public:
     Timeline() : mAudioProcessor(nullptr),
-                 mLastGlobalStep(-1),
-                 mLastTimeInSamples(0)
+        mLastGlobalStep(-1),
+        mLastTimeInSamples(0)
     {
         startTimerHz(25);
     }
@@ -25,12 +25,12 @@ public:
         stopTimer();
     }
 
-    void SetProcessor(ORchestraAudioProcessor *audioProcessor) { mAudioProcessor = audioProcessor; }
+    void SetProcessor(ORchestraAudioProcessor* audioProcessor) { mAudioProcessor = audioProcessor; }
     void timerCallback() override;
-    void paint(juce::Graphics &g) override;
+    void paint(juce::Graphics& g) override;
 
 private:
-    ORchestraAudioProcessor *mAudioProcessor;
+    ORchestraAudioProcessor* mAudioProcessor;
     int mLastGlobalStep;
     int64_t mLastTimeInSamples;
     // std::array<std::array<int, TIMELINE_ROWS_DRAWN>, TIMELINE_STEPS_DRAWN> mStepXPositions;

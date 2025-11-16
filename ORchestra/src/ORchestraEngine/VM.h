@@ -30,10 +30,10 @@ namespace ORchestra
     {
     public:
         VM();
-        bool Prepare(const std::string &data);
-        bool Tick(std::vector<SequenceStep> &stepQueue, const int globalCount);
+        bool Prepare(const std::string& data);
+        bool Tick(std::vector<SequenceStep>& stepQueue, const int globalCount);
         void Reset();
-        const std::vector<LogEntry> &GetErrors();
+        const std::vector<LogEntry>& GetErrors();
 
 #if _TEST
         StepData GetTopStackValue() { return mTopStackValue; }
@@ -44,8 +44,8 @@ namespace ORchestra
         StepData mTopStackValue;
 #endif
 
-        bool ProcessOpCodes(std::vector<Instruction> &setupInstructions);
-        inline bool ProcessInstruction(const Instruction &instruction, const int stepCount, Stack<StepData> &mStack);
+        bool ProcessOpCodes(std::vector<Instruction>& setupInstructions);
+        inline bool ProcessInstruction(const Instruction& instruction, const int stepCount, Stack<StepData>& mStack);
 
         ErrorReporting mErrorReporting;
         Scanner mScanner;
@@ -56,15 +56,15 @@ namespace ORchestra
         inline DataUnit RandomValue(const DataUnit low, const DataUnit high);
 
         template <typename Operation>
-        void PopDoOperationAndPush(Operation op, Stack<StepData> &stack)
+        void PopDoOperationAndPush(Operation op, Stack<StepData>& stack)
         {
             static_assert(std::is_invocable_v<Operation, const int, const int>,
-                          "Operation must be callable with two int parameters");
+                "Operation must be callable with two int parameters");
 
-            const StepData &b = stack.Pop();
-            const StepData &a = stack.Pop();
+            const StepData& b = stack.Pop();
+            const StepData& a = stack.Pop();
             const StepData result = a.ApplySequenceWithOperation(b, op);
-            stack.Push(StepData{result});
+            stack.Push(StepData{ result });
         }
     };
 
