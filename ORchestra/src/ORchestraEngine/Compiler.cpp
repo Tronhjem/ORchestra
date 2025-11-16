@@ -73,7 +73,7 @@ const ORchestraToken& Compiler::Previous()
     return mTokens[mCurrentIndex - 1];
 }
 
-bool Compiler::MakeIdentifierGetter(const ORchestraToken &token, std::vector<Instruction> &instructions)
+bool Compiler::MakeIdentifierGetter(const ORchestraToken& token, std::vector<Instruction>& instructions)
 {
     std::string name = std::string(token.mStart, static_cast<unsigned long>(token.mLength));
 
@@ -173,7 +173,7 @@ bool Compiler::MakeNoteIntoConstant(const ORchestraToken& token, std::vector<Ins
         numAsString = std::string(token.mStart + octaveIndex, static_cast<unsigned long>(token.mLength - octaveIndex));
         value = std::stoi(numAsString) * 12 + baseNote;
     }
-    catch (std::exception &err)
+    catch (std::exception& err)
     {
         std::string message = std::string("Note Letters are rerved for notes, couldn't convert this to note: ") + numAsString;
         mErrorReporting.LogError(message);
@@ -253,14 +253,14 @@ void Compiler::MakeOperation(ORchestraTokenType tokenType, std::vector<Instructi
     instructions.emplace_back(Instruction{code});
 }
 
-bool Compiler::CompileFunctionCall(std::vector<Instruction> &instructions, const std::string &functionName)
+bool Compiler::CompileFunctionCall(std::vector<Instruction>& instructions, const std::string& functionName)
 {
     if (mFunctions.find(functionName) == mFunctions.end())
     {
         return false;
     }
 
-    StoredFunction &functon = mFunctions[functionName];
+    StoredFunction& functon = mFunctions[functionName];
 
     Consume(); // For Left Parenteses
     int paramCounter = 0;
@@ -309,7 +309,7 @@ bool Compiler::CompileFunctionCall(std::vector<Instruction> &instructions, const
         return false;
     }
 
-    for (Instruction &funcInstruction : functon.mInstructions)
+    for (Instruction& funcInstruction : functon.mInstructions)
     {
         instructions.emplace_back(funcInstruction);
     }
@@ -319,8 +319,8 @@ bool Compiler::CompileFunctionCall(std::vector<Instruction> &instructions, const
     return true;
 }
 
-bool Compiler::CompileArray(std::vector<Instruction> &instructions,
-                            StepData &outLength,
+bool Compiler::CompileArray(std::vector<Instruction>& instructions,
+                            StepData& outLength,
                             int maxLength,
                             bool isLastRecursiveLevel)
 {
@@ -462,7 +462,7 @@ bool Compiler::CompileArray(std::vector<Instruction> &instructions,
     return true;
 }
 
-bool Compiler::CompileExpression(std::vector<Instruction> &instructions)
+bool Compiler::CompileExpression(std::vector<Instruction>& instructions)
 {
     auto isOperator = [&](const ORchestraTokenType t) -> bool
     {
@@ -509,7 +509,7 @@ bool Compiler::CompileExpression(std::vector<Instruction> &instructions)
             rightParen == leftParen)
             break;
 
-        const ORchestraToken &currentToken = Consume();
+        const ORchestraToken& currentToken = Consume();
         const ORchestraTokenType tType = currentToken.mTokenType;
 
         // For nested parenteses where there can be more left parens after each other.
@@ -661,7 +661,7 @@ bool Compiler::CompileExpression(std::vector<Instruction> &instructions)
     return true;
 }
 
-bool Compiler::Compile(std::vector<Instruction> &instructions)
+bool Compiler::Compile(std::vector<Instruction>& instructions)
 {
 #if _DEBUG
     ScopedTimer timer("Compile");
@@ -796,7 +796,7 @@ void Compiler::ThrowUnexpectedTokenError(const ORchestraToken& tokenForError)
     mErrorReporting.LogError(Peek().mLine, message);
 }
 
-void Compiler::ThrowMissingExpectedToken(std::string &missingToken)
+void Compiler::ThrowMissingExpectedToken(std::string& missingToken)
 {
     std::string message = std::string("Missing a ") + missingToken;
     mErrorReporting.LogError(Peek().mLine, message);
@@ -812,7 +812,7 @@ void Compiler::ThrowMissingParamCount(int expected, int received)
     mErrorReporting.LogError(Peek().mLine, message);
 }
 
-void Compiler::ThrowUnexpectedEnd(std::string &missingToken)
+void Compiler::ThrowUnexpectedEnd(std::string& missingToken)
 {
     std::string message = "Unexpected end, you're missing a " + missingToken;
     mErrorReporting.LogError(Peek().mLine, message);

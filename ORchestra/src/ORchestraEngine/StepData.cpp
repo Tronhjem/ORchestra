@@ -7,7 +7,7 @@
 namespace ORchestra {
 
 
-StepData::StepData(const DataUnit *data, const int length)
+StepData::StepData(const DataUnit* data, const int length)
     : mLength(length)
 {
 #if _DEBUG
@@ -51,7 +51,7 @@ DataUnit StepData::GetEquivalentValueAtIndex(const int index, const int otherLen
     return mData[equivalentIndex];
 }
 
-void StepData::SetData(const DataUnit *data, const int length)
+void StepData::SetData(const DataUnit* data, const int length)
 {
 #if _DEBUG
     assert(length <= MAX_SUB_DIVISION_LENGTH);

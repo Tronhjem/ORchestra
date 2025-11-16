@@ -22,7 +22,7 @@ public:
     explicit StepData(const int i);
     DataUnit GetValue(const int index) const;
     DataUnit GetEquivalentValueAtIndex(const int index, const int otherLength) const;
-    void SetData(const DataUnit *data, const int length);
+    void SetData(const DataUnit* data, const int length);
     int GetLength() const { return mLength; }
 
     /// Takes another StepData and returns a new DataSequenceStep
@@ -30,14 +30,14 @@ public:
     /// A lambda is passed that takes 2 ints, and this operation will be applied to each
     /// Sub Division step in the sequence.
     template <typename Operation>
-    StepData ApplySequenceWithOperation(const StepData &otherSequence,
+    StepData ApplySequenceWithOperation(const StepData& otherSequence,
                                         Operation OperationLambda) const
     {
         static_assert(std::is_invocable_v<Operation, const int, const int>,
                       "Operation must be callable with two int parameters");
 
-        const StepData &longest = this->GetLength() > otherSequence.GetLength() ? *this : otherSequence;
-        const StepData &shortest = this->GetLength() <= otherSequence.GetLength() ? *this : otherSequence;
+        const StepData& longest = this->GetLength() > otherSequence.GetLength() ? *this : otherSequence;
+        const StepData& shortest = this->GetLength() <= otherSequence.GetLength() ? *this : otherSequence;
 
         const int newLength = longest.GetLength();
         StepData newStep{};

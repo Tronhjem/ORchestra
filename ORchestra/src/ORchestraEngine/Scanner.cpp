@@ -18,7 +18,7 @@ namespace ORchestra
     std::string_view ERROR_UNEXPECTED_CHAR = "ERROR: Unexpected character ";
     std::string_view ERROR_NO_END_QUOTE = "ERROR: Expected \" but didn't find one ";
 
-    Scanner::Scanner(ErrorReporting &logger) : mErrorReporting(logger)
+    Scanner::Scanner(ErrorReporting& logger) : mErrorReporting(logger)
     {
         mTokens.reserve(64);
     }
@@ -40,7 +40,7 @@ namespace ORchestra
         return ORchestraToken(tokenType, mStart, static_cast<int>(mCurrent - mStart), mCurrentLine);
     }
 
-    ORchestraToken Scanner::MakeErrorToken(const std::string_view &message, char symbol)
+    ORchestraToken Scanner::MakeErrorToken(const std::string_view& message, char symbol)
     {
         std::string errorString;
         errorString.reserve(message.size() + 1);
@@ -244,7 +244,7 @@ namespace ORchestra
     ORchestraTokenType Scanner::IdentifierToken()
     {
         auto checkKeyword = [&](int start, int length,
-                                const char *rest, ORchestraTokenType type)
+                                const char* rest, ORchestraTokenType type)
         {
             if (mCurrent - mStart == start + length &&
                 memcmp(mStart + start, rest, static_cast<unsigned long>(length)) == 0)

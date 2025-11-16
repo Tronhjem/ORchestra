@@ -4,7 +4,7 @@
 namespace ORchestra {
 
 
-static void GenerateEuclideanSequence(StepData *sequence, const int hits, const int length)
+static void GenerateEuclideanSequence(StepData* sequence, const int hits, const int length)
 {
     int count = length;
     for (int i = 0; i < length; ++i)

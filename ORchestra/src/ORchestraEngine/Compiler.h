@@ -41,7 +41,7 @@ private:
 
     bool CompileExpression(std::vector<Instruction>& instructions);
     bool CompileArray(std::vector<Instruction>& instructions,
-                      StepData &outLength,
+                      StepData& outLength,
                       int maxLength,
                       bool isLastRecursiveLevel);
 
