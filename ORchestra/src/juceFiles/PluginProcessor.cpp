@@ -15,19 +15,19 @@ using namespace ORchestra;
 //==============================================================================
 ORchestraAudioProcessor::ORchestraAudioProcessor() :
 #ifndef JucePlugin_PreferredChannelConfigurations
-                                                     AudioProcessor(BusesProperties()
+    AudioProcessor(BusesProperties()
 #if !JucePlugin_IsMidiEffect
 #if !JucePlugin_IsSynth
-                                                                        .withInput("Input", juce::AudioChannelSet::stereo(), true)
+        .withInput("Input", juce::AudioChannelSet::stereo(), true)
 #endif
-                                                                        .withOutput("Output", juce::AudioChannelSet::stereo(), true)
+        .withOutput("Output", juce::AudioChannelSet::stereo(), true)
 #endif
-                                                                        ),
+    ),
 #endif
-                                                     mValueTree(*this, nullptr, juce::Identifier("ORchestra"),
-                                                                {std::make_unique<juce::AudioParameterInt>(bpmParamId, "Bpm", 10, 300, 120),
-                                                                 std::make_unique<juce::AudioParameterChoice>(tempoDivisionId, "Tempo Division", mNoteDivisionsStrings, static_cast<int>(NoteDivision::n4)),
-                                                                 std::make_unique<juce::AudioParameterChoice>(noteLengthId, "Note Length", mNoteDivisionsStrings, static_cast<int>(NoteDivision::n4))})
+    mValueTree(*this, nullptr, juce::Identifier("ORchestra"),
+        { std::make_unique<juce::AudioParameterInt>(bpmParamId, "Bpm", 10, 300, 120),
+         std::make_unique<juce::AudioParameterChoice>(tempoDivisionId, "Tempo Division", mNoteDivisionsStrings, static_cast<int>(NoteDivision::n4)),
+         std::make_unique<juce::AudioParameterChoice>(noteLengthId, "Note Length", mNoteDivisionsStrings, static_cast<int>(NoteDivision::n4)) })
 {
 
     mORchestraEngine = std::make_unique<ORchestraEngine>();
@@ -85,7 +85,7 @@ double ORchestraAudioProcessor::getTailLengthSeconds() const
 int ORchestraAudioProcessor::getNumPrograms()
 {
     return 1; // NB: some hosts don't cope very well if you tell them there are 0 programs,
-              // so this should be at least 1, even if you're not really implementing programs.
+    // so this should be at least 1, even if you're not really implementing programs.
 }
 
 int ORchestraAudioProcessor::getCurrentProgram()
@@ -104,7 +104,7 @@ const juce::String ORchestraAudioProcessor::getProgramName(int index)
     return {};
 }
 
-void ORchestraAudioProcessor::changeProgramName(int index, const juce::String &newName)
+void ORchestraAudioProcessor::changeProgramName(int index, const juce::String& newName)
 {
     UNUSED(index);
     UNUSED(newName);
@@ -122,7 +122,7 @@ void ORchestraAudioProcessor::releaseResources()
 }
 
 #ifndef JucePlugin_PreferredChannelConfigurations
-bool ORchestraAudioProcessor::isBusesLayoutSupported(const BusesLayout &layouts) const
+bool ORchestraAudioProcessor::isBusesLayoutSupported(const BusesLayout& layouts) const
 {
 #if JucePlugin_IsMidiEffect
     juce::ignoreUnused(layouts);
@@ -146,7 +146,7 @@ bool ORchestraAudioProcessor::isBusesLayoutSupported(const BusesLayout &layouts)
 }
 #endif
 
-void ORchestraAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, juce::MidiBuffer &midiMessages)
+void ORchestraAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
     juce::ScopedNoDenormals noDenormals;
     const int bufferLength = buffer.getNumSamples();
@@ -172,7 +172,7 @@ void ORchestraAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, juc
     }
 }
 
-void ORchestraAudioProcessor::FillPositionData(TransportData &data)
+void ORchestraAudioProcessor::FillPositionData(TransportData& data)
 {
     const auto positionInfo = getPlayHead()->getPosition();
 
@@ -217,13 +217,13 @@ bool ORchestraAudioProcessor::hasEditor() const
     return true; // (change this to false if you choose to not supply an editor)
 }
 
-juce::AudioProcessorEditor *ORchestraAudioProcessor::createEditor()
+juce::AudioProcessorEditor* ORchestraAudioProcessor::createEditor()
 {
     return new ORchestraAudioProcessorEditor(*this);
 }
 
 //==============================================================================
-void ORchestraAudioProcessor::getStateInformation(juce::MemoryBlock &destData)
+void ORchestraAudioProcessor::getStateInformation(juce::MemoryBlock& destData)
 {
     auto state = mValueTree.copyState();
     std::unique_ptr<juce::XmlElement> xml(state.createXml());
@@ -231,7 +231,7 @@ void ORchestraAudioProcessor::getStateInformation(juce::MemoryBlock &destData)
     copyXmlToBinary(*xml, destData);
 }
 
-void ORchestraAudioProcessor::setStateInformation(const void *data, int sizeInBytes)
+void ORchestraAudioProcessor::setStateInformation(const void* data, int sizeInBytes)
 {
     std::unique_ptr<juce::XmlElement> xmlState(getXmlFromBinary(data, sizeInBytes));
     if (xmlState.get() != nullptr)
@@ -253,7 +253,7 @@ void ORchestraAudioProcessor::setStateInformation(const void *data, int sizeInBy
 
 //==============================================================================
 // This creates new instances of the plugin..
-juce::AudioProcessor *JUCE_CALLTYPE createPluginFilter()
+juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
     return new ORchestraAudioProcessor();
 }

@@ -22,7 +22,7 @@ void Timeline::timerCallback()
     assert(mAudioProcessor != nullptr);
 #endif
 
-    const TransportData &transportData = mAudioProcessor->GetTransportData();
+    const TransportData& transportData = mAudioProcessor->GetTransportData();
     const int64_t timeInSamples = transportData.timeInSamples;
 
     const double samplesPerStep = static_cast<double>(transportData.sampleRate) * (60.0 / (transportData.bpm * transportData.bpmDivision));
@@ -43,7 +43,7 @@ void Timeline::timerCallback()
     repaint();
 }
 
-void Timeline::paint(juce::Graphics &g)
+void Timeline::paint(juce::Graphics& g)
 {
     const int globalStepOffset = mLastGlobalStep - 1 + STEP_BUFFER_SIZE;
 
@@ -52,7 +52,7 @@ void Timeline::paint(juce::Graphics &g)
         // We start behind the global step, as it's always one ahead and we
         // want to paint the current step being triggered.
         const int stepWrapped = (globalStepOffset + step) % STEP_BUFFER_SIZE;
-        std::vector<SequenceStep> &stepDatas = mAudioProcessor->GetStepData()[static_cast<unsigned long>(stepWrapped)];
+        std::vector<SequenceStep>& stepDatas = mAudioProcessor->GetStepData()[static_cast<unsigned long>(stepWrapped)];
 
         // Calculate alpha values for fadeing steps.
         float alpha = 1.f;
@@ -65,15 +65,15 @@ void Timeline::paint(juce::Graphics &g)
         const int size = static_cast<int>(stepDatas.size());
         for (int i = 0; i < size; ++i)
         {
-            const SequenceStep &stepData = stepDatas[static_cast<unsigned long>(i)];
+            const SequenceStep& stepData = stepDatas[static_cast<unsigned long>(i)];
 
             juce::Colour colorToSet;
             if (stepData.mShouldTrigger.GetValue(0) > 0)
             {
                 float t = static_cast<float>(stepData.mSecond.GetValue(0)) / 127.f;
                 colorToSet = smoothstepColour(ORchestraColours::MinVelocity,
-                                              ORchestraColours::MaxVelocity,
-                                              t);
+                    ORchestraColours::MaxVelocity,
+                    t);
             }
             else
                 colorToSet = ORchestraColours::InactiveStep;
@@ -91,10 +91,10 @@ void Timeline::paint(juce::Graphics &g)
             }
 
             g.setColour(juce::Colours::black);
-            std::string first{std::to_string((int)stepData.mFirst.GetValue(0))};
+            std::string first{ std::to_string((int)stepData.mFirst.GetValue(0)) };
             g.drawText(first, static_cast<int>(x),
-                       static_cast<int>(y + quaterStepHeight),
-                       static_cast<int>(stepWidth), 15, juce::Justification::centred);
+                static_cast<int>(y + quaterStepHeight),
+                static_cast<int>(stepWidth), 15, juce::Justification::centred);
         }
     }
 }

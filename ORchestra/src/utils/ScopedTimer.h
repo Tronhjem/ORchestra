@@ -6,11 +6,11 @@
 class ScopedTimer
 {
 public:
-    ScopedTimer(const std::string &name) :
+    ScopedTimer(const std::string& name) :
         mName(name),
         mStartTime(std::chrono::high_resolution_clock::now())
     {
-        
+
     }
 
     ~ScopedTimer()

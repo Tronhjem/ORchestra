@@ -7,12 +7,12 @@
 class GeneralLookAndFeel : public juce::LookAndFeel_V4
 {
 public:
-    juce::Typeface::Ptr getTypefaceForFont(const juce::Font &) override
+    juce::Typeface::Ptr getTypefaceForFont(const juce::Font&) override
     {
         return juce::Typeface::createSystemTypefaceFor(mFont);
     }
 
-    void drawMenuBarBackground(juce::Graphics &g, int w, int h, bool, juce::MenuBarComponent &) override
+    void drawMenuBarBackground(juce::Graphics& g, int w, int h, bool, juce::MenuBarComponent&) override
     {
         UNUSED(w);
         UNUSED(h);
@@ -20,8 +20,8 @@ public:
         g.fillAll(ORchestraColours::Background); // or your palette color
     }
 
-    void drawButtonBackground(juce::Graphics &g, juce::Button &button,
-                              const juce::Colour &backgroundColour, bool isMouseOverButton, bool isButtonDown) override
+    void drawButtonBackground(juce::Graphics& g, juce::Button& button,
+        const juce::Colour& backgroundColour, bool isMouseOverButton, bool isButtonDown) override
     {
         UNUSED(backgroundColour);
 
@@ -43,9 +43,9 @@ public:
         g.drawRoundedRectangle(bounds, 6.0f, 2.f);
     }
 
-    void drawComboBox(Graphics &g, int width, int height, bool isButtonDown,
-                      int buttonX, int buttonY, int buttonW, int buttonH,
-                      ComboBox &box) override
+    void drawComboBox(Graphics& g, int width, int height, bool isButtonDown,
+        int buttonX, int buttonY, int buttonW, int buttonH,
+        ComboBox& box) override
     {
         UNUSED(isButtonDown);
         UNUSED(buttonY);
@@ -72,10 +72,10 @@ public:
         g.strokePath(path, PathStrokeType(2.0f));
     }
 
-    void drawPopupMenuBackground(Graphics &g, int width, int height) override
+    void drawPopupMenuBackground(Graphics& g, int width, int height) override
     {
         // auto bounds = button.getLocalBounds().toFloat();
-        juce::Rectangle bounds{(float)width, (float)height};
+        juce::Rectangle bounds{ (float)width, (float)height };
 
         juce::Colour fillColour = ORchestraColours::ButtonBackground;
 
@@ -93,9 +93,9 @@ public:
         g.drawRoundedRectangle(bounds, 6.0f, 2.f);
     }
 
-    void drawLinearSlider(juce::Graphics &g, int x, int y, int width, int height,
-                          float sliderPos, float minSliderPos, float maxSliderPos,
-                          const juce::Slider::SliderStyle style, juce::Slider &slider) override
+    void drawLinearSlider(juce::Graphics& g, int x, int y, int width, int height,
+        float sliderPos, float minSliderPos, float maxSliderPos,
+        const juce::Slider::SliderStyle style, juce::Slider& slider) override
     {
         // Draw the track background
         g.setColour(ORchestraColours::ButtonBackground);
@@ -103,15 +103,15 @@ public:
 
         // (Optional) Draw the original slider on top, or customize further
         juce::LookAndFeel_V4::drawLinearSlider(g, x, y, width, height,
-                                               sliderPos, minSliderPos, maxSliderPos, style, slider);
+            sliderPos, minSliderPos, maxSliderPos, style, slider);
     }
 
-    juce::Font getTextButtonFont(juce::TextButton &, int buttonHeight) override
+    juce::Font getTextButtonFont(juce::TextButton&, int buttonHeight) override
     {
         UNUSED(buttonHeight);
         return mFont;
     }
 
 private:
-    const Font mFont{MONOSPACE_FONT_OPTIONS};
+    const Font mFont{ MONOSPACE_FONT_OPTIONS };
 };

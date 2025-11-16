@@ -8,7 +8,7 @@ public:
     {
         g.fillAll(juce::Colours::cornflowerblue); // Your custom color
         g.setColour(juce::Colours::white);
-        FontOptions fontOptions {18.0f, juce::Font::bold};
+        FontOptions fontOptions{ 18.0f, juce::Font::bold };
         g.setFont(juce::Font(fontOptions));
         g.drawText("My Plugin", getLocalBounds(), juce::Justification::centredLeft, true);
     }

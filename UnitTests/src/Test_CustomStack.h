@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../catch.hpp"
+#include "catch.hpp"
 #include "CustomStack.h"
 #include "StepData.h"
 

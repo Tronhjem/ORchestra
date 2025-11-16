@@ -3,15 +3,15 @@
 namespace ORchestra {
 
 
-typedef unsigned char DataUnit;
-static_assert(sizeof(DataUnit) == 1);
+    typedef unsigned char DataUnit;
+    static_assert(sizeof(DataUnit) == 1);
 
-enum class MidiType : DataUnit
-{
-    NoteOn = 0,
-    NoteOff = 1,
-    CC = 2
-};
+    enum class MidiType : DataUnit
+    {
+        NoteOn = 0,
+        NoteOff = 1,
+        CC = 2
+    };
 
 
 } // namespace ORchestra

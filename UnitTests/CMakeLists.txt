@@ -24,11 +24,13 @@ target_include_directories(ORchestraTests PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/${ORCHESTRA_SOURCE_DIR}/utils
     ${CMAKE_CURRENT_SOURCE_DIR}/${ORCHESTRA_SOURCE_DIR}/juceFiles
     ${CMAKE_CURRENT_SOURCE_DIR}/${ORCHESTRA_ENGINE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/../UnitTests/include
 )
 
 target_compile_definitions(ORchestraTests
     PRIVATE
         _TEST=1
+        _DEBUG=1
 )
 
 target_compile_features(ORchestraTests PRIVATE cxx_std_17)

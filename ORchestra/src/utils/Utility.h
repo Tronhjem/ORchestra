@@ -5,12 +5,12 @@
 
 #define UNUSED(X) static_cast<void>(X)
 
-inline juce::Colour lerpColour(const juce::Colour &c1, const juce::Colour &c2, float t)
+inline juce::Colour lerpColour(const juce::Colour& c1, const juce::Colour& c2, float t)
 {
     auto lerp = [t](uint8 a, uint8 b) -> uint8
-    {
-        return static_cast<uint8>(a + (b - a) * t);
-    };
+        {
+            return static_cast<uint8>(a + (b - a) * t);
+        };
     return juce::Colour(
         lerp(c1.getRed(), c2.getRed()),
         lerp(c1.getGreen(), c2.getGreen()),
@@ -30,7 +30,7 @@ inline float smootherstep(float edge0, float edge1, float x)
     return x * x * x * (x * (x * 6.f - 15.f) + 10.f);
 }
 
-inline juce::Colour smoothstepColour(const juce::Colour &a, const juce::Colour &b, float t)
+inline juce::Colour smoothstepColour(const juce::Colour& a, const juce::Colour& b, float t)
 {
     t = juce::jlimit(0.0f, 1.0f, t);
     float s = t * t * (3.0f - 2.0f * t);

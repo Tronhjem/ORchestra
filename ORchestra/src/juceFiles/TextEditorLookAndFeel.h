@@ -6,7 +6,7 @@
 class TextEditorLookAndFeel : public juce::LookAndFeel_V4
 {
 public:
-    void fillTextEditorBackground(juce::Graphics &g, int width, int height, juce::TextEditor &editor) override
+    void fillTextEditorBackground(juce::Graphics& g, int width, int height, juce::TextEditor& editor) override
     {
         UNUSED(width);
         UNUSED(height);
@@ -15,10 +15,10 @@ public:
         g.fillAll(ORchestraColours::Background);
     }
 
-    void drawScrollbar(juce::Graphics &g, juce::ScrollBar &scrollbar,
-                       int x, int y, int width, int height,
-                       bool isScrollbarVertical, int thumbStartPosition, int thumbSize,
-                       bool isMouseOver, bool isMouseDown) override
+    void drawScrollbar(juce::Graphics& g, juce::ScrollBar& scrollbar,
+        int x, int y, int width, int height,
+        bool isScrollbarVertical, int thumbStartPosition, int thumbSize,
+        bool isMouseOver, bool isMouseDown) override
     {
         UNUSED(scrollbar);
         UNUSED(isMouseOver);
@@ -37,7 +37,7 @@ public:
             g.fillRoundedRectangle(static_cast<float>(thumbStartPosition), static_cast<float>(y), static_cast<float>(thumbSize), static_cast<float>(height), 20.4f);
     }
 
-    void drawTextEditorOutline(juce::Graphics &g, int width, int height, juce::TextEditor &ed) override
+    void drawTextEditorOutline(juce::Graphics& g, int width, int height, juce::TextEditor& ed) override
     {
         UNUSED(ed);
         g.setColour(ORchestraColours::ButtonBackground); // Or use your palette

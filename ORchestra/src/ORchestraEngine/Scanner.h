@@ -5,49 +5,51 @@
 
 #include "ORchestraToken.h"
 
-namespace ORchestra {
-
-
-class ErrorReporting;
-
-class Scanner
+namespace ORchestra
 {
-public:
-    Scanner(ErrorReporting& logger);
-    ~Scanner();
-    
-    bool ScanFile(const char *data);
-    std::vector<ORchestraToken>& GetTokens() { return mTokens; }
 
-private:
-    ORchestraToken ScanToken();
-    ORchestraToken MakeToken(ORchestraTokenType token);
-    ORchestraToken MakeErrorToken(char* message, char symbol);
-    ORchestraToken BuildString();
-    ORchestraToken BuildDigit();
-    ORchestraToken BuildIdentifier();
-    ORchestraTokenType IdentifierToken();
-    void SkipWhiteSpace();
-    
-    //Helpers
-    inline bool IsAtEnd();
-    inline bool Match(char expected);
-    inline char PeekCurrent();
-    inline char PeekNext();
-    inline char AdvanceCurrent();
-    inline bool IsAlpha(char c);
-    inline bool IsDigit(char c);
+    class ErrorReporting;
 
-private:
-    ErrorReporting& mErrorReporting;
-    std::vector<ORchestraToken> mTokens;
+    class Scanner
+    {
+    public:
+        Scanner(ErrorReporting& logger);
+        ~Scanner();
 
-    const char* mStart;
-    const char* mCurrent;
-    int mCurrentLine = 1;
-    char ERROR_UNEXPECTED_CHAR[50] = "ERROR: Unexpected character ";
-    char ERROR_NO_END_QUOTE[50] = "ERROR: Expected \" but didn't find one ";
-};
+        bool ScanFile(const std::string& data);
+        std::vector<ORchestraToken>& GetTokens() { return mTokens; }
+        void Reset();
 
+    private:
+        Scanner() = delete;
+
+        ORchestraToken ScanToken();
+        ORchestraToken MakeToken(ORchestraTokenType token);
+        ORchestraToken MakeErrorToken(const std::string_view& message, char symbol);
+        ORchestraToken BuildString();
+        ORchestraToken BuildDigit();
+        ORchestraToken BuildIdentifier();
+        ORchestraTokenType IdentifierToken();
+        void SkipWhiteSpace();
+
+        // Helpers
+        inline bool IsAtEnd();
+        inline bool Match(char expected);
+        inline char PeekCurrent();
+        inline char PeekNext();
+        inline char AdvanceCurrent();
+        inline bool IsAlpha(char c);
+        inline bool IsDigit(char c);
+
+    private:
+        ErrorReporting& mErrorReporting;
+        std::vector<ORchestraToken> mTokens;
+        std::string mData; // Store the data to keep pointers valid
+
+        const char* mStart = nullptr;
+        const char* mCurrent = nullptr;
+
+        int mCurrentLine = 1;
+    };
 
 } // namespace ORchestra
