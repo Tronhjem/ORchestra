@@ -40,6 +40,19 @@ namespace ORchestra {
     constexpr int MAX_UCHAR_VALUE = 127;
     constexpr int DEFAULT_NOTE_DURATION = 11050;
     constexpr int MAX_SUB_DIVISION_LENGTH = 6;
+    constexpr int MAX_MIDI_CHANNEL_NUMBER = 16;
+
+    typedef unsigned char DataUnit;
+    static_assert(sizeof(DataUnit) == 1);
+    constexpr int DATA_UNIT_MAX_VALUE = 127;
+    constexpr int DATA_UNIT_MIN_VALUE = 0;
+
+    enum class MidiType : DataUnit
+    {
+        NoteOn = 0,
+        NoteOff = 1,
+        CC = 2
+    };
 
     // ============================================================================================
 

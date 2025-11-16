@@ -65,7 +65,6 @@
             file="src/ORchestraEngine/ORchestraEngine.cpp"/>
       <FILE id="LcPK4q" name="ORchestraEngine.h" compile="0" resource="0"
             file="src/ORchestraEngine/ORchestraEngine.h"/>
-      <FILE id="Ud516W" name="Types.h" compile="0" resource="0" file="src/ORchestraEngine/Types.h"/>
     </GROUP>
     <GROUP id="{F1896013-22DD-58BE-C991-2EA418BBF7AB}" name="Juce">
       <GROUP id="{490C3D54-058B-FDEF-7C7D-E3D8A995DFB4}" name="Components">

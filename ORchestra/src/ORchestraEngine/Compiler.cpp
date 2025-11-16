@@ -5,7 +5,6 @@
 #include "Compiler.h"
 #include "ErrorReporting.h"
 #include "StepData.h"
-#include "Types.h"
 #include "Defines.h"
 #if _DEBUG
 #include "ScopedTimer.h"
@@ -107,16 +106,16 @@ namespace ORchestra
     void Compiler::MakeConstant(const ORchestraToken& token, std::vector<Instruction>& instructions)
     {
         int value = std::stoi(std::string(token.mStart, static_cast<unsigned long>(token.mLength)));
-        if (value > 127)
+        if (value > DATA_UNIT_MAX_VALUE)
         {
-            value = 127;
-            std::string message = std::string("Value can't be greater than 127, correcting to 127");
+            value = DATA_UNIT_MAX_VALUE;
+            const std::string message = std::string("Value can't be greater than 127, correcting to 127");
             mErrorReporting.LogWarning(message);
         }
-        if (value < 0)
+        if (value < DATA_UNIT_MIN_VALUE)
         {
-            value = 0;
-            std::string message = std::string("Value can't be smaller than 0, correcting to 0");
+            value = DATA_UNIT_MIN_VALUE;
+            const std::string message = std::string("Value can't be smaller than 0, correcting to 0");
             mErrorReporting.LogWarning(message);
         }
 
@@ -311,7 +310,7 @@ namespace ORchestra
             return false;
         }
 
-        for (Instruction& funcInstruction : functon.mInstructions)
+        for (const Instruction& funcInstruction : functon.mInstructions)
         {
             instructions.emplace_back(funcInstruction);
         }

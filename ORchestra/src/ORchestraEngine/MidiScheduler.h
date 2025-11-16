@@ -3,11 +3,10 @@
 #include <JuceHeader.h>
 #include <vector>
 
-#include "Types.h"
 #include "StepData.h"
+#include "Defines.h"
 
 namespace ORchestra {
-
 
     struct ScheduledMidiMessage
     {

@@ -7,10 +7,10 @@
 #include <string>
 #include <cassert>
 
+#include "Defines.h"
 #include "ErrorReporting.h"
 #include "Scanner.h"
 #include "Compiler.h"
-#include "Types.h"
 #include "DataSequence.h"
 #include "StepData.h"
 #include "CustomStack.h"

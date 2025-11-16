@@ -14,9 +14,9 @@ static_cast<DataUnit>(std::clamp(static_cast<int>(x), min, max))
 
     void MidiScheduler::PostMidi(ScheduledMidiMessage& message)
     {
-        message.mFirstByte = CLAMP_TO_MIDI(message.mFirstByte, 0, 127);
-        message.mSecondByte = CLAMP_TO_MIDI(message.mSecondByte, 0, 127);
-        message.mChannel = CLAMP_TO_MIDI(message.mChannel, 0, 16);
+        message.mFirstByte = CLAMP_TO_MIDI(message.mFirstByte, DATA_UNIT_MIN_VALUE, DATA_UNIT_MAX_VALUE);
+        message.mSecondByte = CLAMP_TO_MIDI(message.mSecondByte, DATA_UNIT_MIN_VALUE, DATA_UNIT_MAX_VALUE);
+        message.mChannel = CLAMP_TO_MIDI(message.mChannel, DATA_UNIT_MIN_VALUE, 16);
         mScheduledMidiMessages.emplace_back(message);
 
         if (message.mMessageType == MidiType::NoteOn)

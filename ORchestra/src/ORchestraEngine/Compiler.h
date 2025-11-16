@@ -4,10 +4,10 @@
 #include <unordered_map>
 
 #include "ORchestraToken.h"
-#include "Types.h"
 #include "Instruction.h"
 #include "StoredFunction.h"
 #include "StepData.h"
+#include "Defines.h"
 
 namespace ORchestra {
 

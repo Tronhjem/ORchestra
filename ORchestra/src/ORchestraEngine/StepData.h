@@ -5,7 +5,6 @@
 #include <cmath>
 
 #include "Defines.h"
-#include "Types.h"
 
 namespace ORchestra {
 
