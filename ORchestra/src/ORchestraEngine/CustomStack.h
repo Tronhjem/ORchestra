@@ -1,9 +1,7 @@
 #pragma once
-#include <iostream>
 
 namespace ORchestra
 {
-
     template <typename T>
     class Stack
     {
