@@ -30,7 +30,7 @@ target_include_directories(ORchestraTests PRIVATE
 target_compile_definitions(ORchestraTests
     PRIVATE
         _TEST=1
-        _DEBUG=1
+        $<$<CONFIG:Debug>:_DEBUG=1>
 )
 
 target_compile_features(ORchestraTests PRIVATE cxx_std_17)
