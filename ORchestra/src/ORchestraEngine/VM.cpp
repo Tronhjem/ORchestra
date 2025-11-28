@@ -2,7 +2,10 @@
 
 #include "VM.h"
 
+#if _DEBUG
 #include "ScopedTimer.h"
+#endif
+
 #include "EuclideanGenerator.h"
 #include "Defines.h"
 

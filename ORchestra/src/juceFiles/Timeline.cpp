@@ -32,6 +32,7 @@ void Timeline::timerCallback()
     //  const int64_t samplesSinceLast = timeInSamples - mLastTimeInSamples;
     //  const double deltaPixels = samplesSinceLast * pixelPerSample;
     //  mStepXPositions[step][i] = (mStepXPositions[step][i] - x) + deltaPixels;
+    
     if (currentStep == mLastGlobalStep)
     {
         return;
@@ -45,22 +46,26 @@ void Timeline::timerCallback()
 
 void Timeline::paint(juce::Graphics& g)
 {
+    // We start behind the global step, as it's always one ahead and we
+    // want to paint the current step being triggered.
     const int globalStepOffset = mLastGlobalStep - 1 + STEP_BUFFER_SIZE;
+    const float alpha = 1.f;
 
     for (int step = 0; step < TIMELINE_STEPS_DRAWN; ++step)
     {
-        // We start behind the global step, as it's always one ahead and we
-        // want to paint the current step being triggered.
         const int stepWrapped = (globalStepOffset + step) % STEP_BUFFER_SIZE;
         std::vector<SequenceStep>& stepDatas = mAudioProcessor->GetStepData()[static_cast<unsigned long>(stepWrapped)];
 
-        // Calculate alpha values for fadeing steps.
-        float alpha = 1.f;
-        if (static_cast<float>(step) >= TIMELINE_STEPS_DRAWN - indexStartFade)
-        {
-            float alphaValue = 1.f - (static_cast<float>(step - TIMELINE_STEPS_DRAWN) + indexStartFade) / indexStartFade;
-            alpha = alphaValue * alphaValue;
-        }
+//          ============================================================================================================
+//          DISABLING FADE FOR NOW
+//          ============================================================================================================
+//          Calculate alpha values for fadeing steps.
+//          if (static_cast<float>(step) >= TIMELINE_STEPS_DRAWN - indexStartFade)
+//          {
+//              float alphaValue = 1.f - (static_cast<float>(step - TIMELINE_STEPS_DRAWN) + indexStartFade) / indexStartFade;
+//              alpha = alphaValue * alphaValue;
+//          }
+//          ============================================================================================================
 
         const int size = static_cast<int>(stepDatas.size());
         for (int i = 0; i < size; ++i)
@@ -90,11 +95,16 @@ void Timeline::paint(juce::Graphics& g)
                 g.drawRect(x, y, drawnStepWidth, drawnStepHeight, 2.f);
             }
 
-            g.setColour(juce::Colours::black);
-            std::string first{ std::to_string((int)stepData.mFirst.GetValue(0)) };
-            g.drawText(first, static_cast<int>(x),
-                static_cast<int>(y + quaterStepHeight),
-                static_cast<int>(stepWidth), 15, juce::Justification::centred);
+//            =================================================================================
+//            DISABLE TEXT FOR NOW
+//            =================================================================================
+//            g.setColour(juce::Colours::black);
+//            std::string first{ std::to_string((int)stepData.mFirst.GetValue(0)) };
+//            
+//            g.drawText(first, static_cast<int>(x),
+//                static_cast<int>(y + quaterStepHeight),
+//                static_cast<int>(stepWidth), 15, juce::Justification::centred);
+//            =================================================================================
         }
     }
 }

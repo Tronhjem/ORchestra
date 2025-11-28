@@ -1,5 +1,4 @@
 #include <string>
-#include <cassert>
 #include <stack>
 
 #include "Compiler.h"

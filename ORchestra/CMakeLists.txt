@@ -1,5 +1,10 @@
 cmake_minimum_required(VERSION 3.22)
 
+file(GLOB_RECURSE SRC_FILES "src/**/*.cpp")
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+juce_generate_juce_header(ORchestra)
+
 juce_add_plugin(ORchestra
     # VERSION ...                               # Set this if the plugin version is different to the project version
     # ICON_BIG ...                              # ICON_* arguments specify a path to an image file to use as an icon for the Standalone
@@ -16,11 +21,6 @@ juce_add_plugin(ORchestra
                                                 # GarageBand 10.3 requires the first letter to be upper-case, and the remaining letters to be lower-case
     FORMATS AU VST3 Standalone                  # The formats to build. Other valid formats are: AAX Unity VST AU AUv3
     PRODUCT_NAME "ORchestra")        # The name of the final executable, which can differ from the target name
-
-
-juce_generate_juce_header(ORchestra)
-
-file(GLOB_RECURSE SRC_FILES "src/**/*.cpp")
 
 target_sources(ORchestra
     PRIVATE
