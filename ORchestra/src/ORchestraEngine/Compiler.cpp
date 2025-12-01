@@ -1,11 +1,9 @@
 #include <string>
-#include <cassert>
 #include <stack>
 
 #include "Compiler.h"
 #include "ErrorReporting.h"
 #include "StepData.h"
-#include "Types.h"
 #include "Defines.h"
 #if _DEBUG
 #include "ScopedTimer.h"
@@ -107,16 +105,16 @@ namespace ORchestra
     void Compiler::MakeConstant(const ORchestraToken& token, std::vector<Instruction>& instructions)
     {
         int value = std::stoi(std::string(token.mStart, static_cast<unsigned long>(token.mLength)));
-        if (value > 127)
+        if (value > DATA_UNIT_MAX_VALUE)
         {
-            value = 127;
-            std::string message = std::string("Value can't be greater than 127, correcting to 127");
+            value = DATA_UNIT_MAX_VALUE;
+            const std::string message = std::string("Value can't be greater than 127, correcting to 127");
             mErrorReporting.LogWarning(message);
         }
-        if (value < 0)
+        if (value < DATA_UNIT_MIN_VALUE)
         {
-            value = 0;
-            std::string message = std::string("Value can't be smaller than 0, correcting to 0");
+            value = DATA_UNIT_MIN_VALUE;
+            const std::string message = std::string("Value can't be smaller than 0, correcting to 0");
             mErrorReporting.LogWarning(message);
         }
 
@@ -262,12 +260,12 @@ namespace ORchestra
             return false;
         }
 
-        StoredFunction& functon = mFunctions[functionName];
+        StoredFunction& function = mFunctions[functionName];
 
         Consume(); // For Left Parenteses
         int paramCounter = 0;
 
-        while (paramCounter != functon.mNumOfParams &&
+        while (paramCounter != function.mNumOfParams &&
             Peek().mTokenType != ORchestraTokenType::RIGHT_PAREN)
         {
             const ORchestraToken& currentToken = Peek();
@@ -282,7 +280,7 @@ namespace ORchestra
             case ORchestraTokenType::END:
             case ORchestraTokenType::EOL:
             {
-                ThrowMissingParamCount(functon.mNumOfParams, paramCounter);
+                ThrowMissingParamCount(function.mNumOfParams, paramCounter);
                 return false;
             }
 
@@ -305,13 +303,13 @@ namespace ORchestra
             return false;
         }
 
-        if (functon.mNumOfParams != paramCounter)
+        if (function.mNumOfParams != paramCounter)
         {
-            ThrowMissingParamCount(functon.mNumOfParams, paramCounter);
+            ThrowMissingParamCount(function.mNumOfParams, paramCounter);
             return false;
         }
 
-        for (Instruction& funcInstruction : functon.mInstructions)
+        for (const Instruction& funcInstruction : function.mInstructions)
         {
             instructions.emplace_back(funcInstruction);
         }

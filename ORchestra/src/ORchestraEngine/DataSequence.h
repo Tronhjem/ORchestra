@@ -2,12 +2,11 @@
 
 #include <vector>
 
-#include "Types.h"
 #include "StepData.h"
+#include "Defines.h"
 
-namespace ORchestra {
-
-
+namespace ORchestra
+{
     /// DataSequence holds a number of StepData aka. DataSequenceSteps.
     /// These are the ones we access with the global index to send data.
     class DataSequence
@@ -21,6 +20,5 @@ namespace ORchestra {
     private:
         std::vector<StepData> mData;
     };
-
 
 } // namespace ORchestra

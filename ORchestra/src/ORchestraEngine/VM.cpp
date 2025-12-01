@@ -2,7 +2,10 @@
 
 #include "VM.h"
 
+#if _DEBUG
 #include "ScopedTimer.h"
+#endif
+
 #include "EuclideanGenerator.h"
 #include "Defines.h"
 
@@ -103,10 +106,6 @@ namespace ORchestra
             {
 #if _TEST
                 mTopStackValue = stack.Top();
-
-                std::cout << "HELLO" << std::endl;
-                std::cout << stack.mStackPointer << std::endl;
-                std::cout << mTopStackValue.GetValue(0) << std::endl;
 #endif
                 return true;
             }
