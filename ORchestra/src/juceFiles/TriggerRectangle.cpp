@@ -15,7 +15,7 @@ void TriggerRectangleComponent::timerCallback()
             rect.alpha = 0.f;
     }
     
-    repaint();
+    repaint(getLocalBounds());
 }
 
 void TriggerRectangleComponent::paint(juce::Graphics &g)

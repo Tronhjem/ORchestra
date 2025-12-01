@@ -84,13 +84,13 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     nextLineY += buttonHeight + COMPONENT_MARGIN;
     mCodeEditorTextBox.setBounds(OUTER_MARGIN, nextLineY, codeEditorWidth, codeEditorHeight);
 
-    nextLineY += codeEditorHeight;
-    mErrorTextBox.setBounds(OUTER_MARGIN, nextLineY, codeEditorWidth, 40);
+    nextLineY += codeEditorHeight - 2.f;
+    mErrorTextBox.setBounds(OUTER_MARGIN, nextLineY, codeEditorWidth, 30);
 
     // ======== NEW LINE ============
-    nextLineY += 40 + COMPONENT_MARGIN;
-    mTimeline.setBounds(OUTER_MARGIN, nextLineY, WINDOW_WIDTH - OUTER_MARGIN * 2, 260);
-    mTriggerRectangle.setBounds(OUTER_MARGIN, nextLineY, WINDOW_WIDTH - OUTER_MARGIN * 2, 260);
+    nextLineY += 30 + COMPONENT_MARGIN;
+    mTimeline.setBounds(OUTER_MARGIN, nextLineY, WINDOW_WIDTH - OUTER_MARGIN * 2, WINDOW_HEIGHT - nextLineY - OUTER_MARGIN);
+    mTriggerRectangle.setBounds(OUTER_MARGIN, nextLineY, 100, WINDOW_HEIGHT - nextLineY - OUTER_MARGIN);
 
     mBpmBox.setSliderStyle(Slider::SliderStyle::LinearBarVertical);
     mBpmBox.setSliderSnapsToMousePosition(false);

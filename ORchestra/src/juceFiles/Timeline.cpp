@@ -70,23 +70,11 @@ void Timeline::timerCallback()
     
     for (int index = 0; index < TIMELINE_STEPS_DRAWN; ++index)
     {
-//          ============================================================================================================
-//          DISABLING FADE FOR NOW
-//          ============================================================================================================
-//          Calculate alpha values for fadeing steps.
-//          if (static_cast<float>(step) >= TIMELINE_STEPS_DRAWN - indexStartFade)
-//          {
-//              float alphaValue = 1.f - (static_cast<float>(step - TIMELINE_STEPS_DRAWN) + indexStartFade) / indexStartFade;
-//              alpha = alphaValue * alphaValue;
-//          }
-//          ============================================================================================================
-//
         const int stepWrapped = (globalStepOffset + index) % STEP_BUFFER_SIZE;
         const std::vector<SequenceStep>& sequenceSteps = mAudioProcessor->GetStepData()[static_cast<unsigned long>(stepWrapped)];
 
         for (const auto& step : sequenceSteps)
         {
-
             const DataUnit noteValue = step.mFirst.GetValue(0);
             int yIndex = 0;
             for (const auto uniqueNoteValue : mUniqueNoteValues)
@@ -123,7 +111,7 @@ void Timeline::timerCallback()
         }
     }
     
-    repaint();
+    repaint(getLocalBounds());
 }
 
 void Timeline::paint(juce::Graphics& g)
