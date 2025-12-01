@@ -1,9 +1,9 @@
 #pragma once
 #include <string>
+#include "Instruction.h"
 
-namespace ORchestra {
-
-
+namespace ORchestra
+{
 	class StoredFunction
 	{
 	public:

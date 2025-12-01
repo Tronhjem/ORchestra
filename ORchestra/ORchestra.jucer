@@ -65,10 +65,13 @@
             file="src/ORchestraEngine/ORchestraEngine.cpp"/>
       <FILE id="LcPK4q" name="ORchestraEngine.h" compile="0" resource="0"
             file="src/ORchestraEngine/ORchestraEngine.h"/>
-      <FILE id="Ud516W" name="Types.h" compile="0" resource="0" file="src/ORchestraEngine/Types.h"/>
     </GROUP>
     <GROUP id="{F1896013-22DD-58BE-C991-2EA418BBF7AB}" name="Juce">
       <GROUP id="{490C3D54-058B-FDEF-7C7D-E3D8A995DFB4}" name="Components">
+        <FILE id="Q61vhU" name="TriggerRectangle.cpp" compile="1" resource="0"
+              file="src/juceFiles/TriggerRectangle.cpp"/>
+        <FILE id="KWuVSU" name="TriggerRectangle.h" compile="0" resource="0"
+              file="src/juceFiles/TriggerRectangle.h"/>
         <FILE id="nxNzf8" name="TransportData.h" compile="0" resource="0" file="src/juceFiles/TransportData.h"/>
         <FILE id="h2dHec" name="Timeline.cpp" compile="1" resource="0" file="src/juceFiles/Timeline.cpp"/>
         <FILE id="inbwHe" name="Timeline.h" compile="0" resource="0" file="src/juceFiles/Timeline.h"/>

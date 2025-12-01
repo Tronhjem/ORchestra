@@ -28,7 +28,10 @@ constexpr int codeEditorHeight = 300;
 
 //==============================================================================
 ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProcessor& p)
-    : AudioProcessorEditor(&p), audioProcessor(p), mEditorIsDirty(false)
+        : AudioProcessorEditor(&p),
+          audioProcessor(p),
+          mEditorIsDirty(false),
+          mTimeline(mTriggerRectangle)
 {
     setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
 
@@ -81,12 +84,13 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     nextLineY += buttonHeight + COMPONENT_MARGIN;
     mCodeEditorTextBox.setBounds(OUTER_MARGIN, nextLineY, codeEditorWidth, codeEditorHeight);
 
-    nextLineY += codeEditorHeight;
-    mErrorTextBox.setBounds(OUTER_MARGIN, nextLineY, codeEditorWidth, 40);
+    nextLineY += codeEditorHeight - 2.f;
+    mErrorTextBox.setBounds(OUTER_MARGIN, nextLineY, codeEditorWidth, 30);
 
     // ======== NEW LINE ============
-    nextLineY += 40 + COMPONENT_MARGIN;
-    timeline.setBounds(OUTER_MARGIN, nextLineY, 760, 260);
+    nextLineY += 30 + COMPONENT_MARGIN;
+    mTimeline.setBounds(OUTER_MARGIN, nextLineY, WINDOW_WIDTH - OUTER_MARGIN * 2, WINDOW_HEIGHT - nextLineY - OUTER_MARGIN);
+    mTriggerRectangle.setBounds(OUTER_MARGIN, nextLineY, 100, WINDOW_HEIGHT - nextLineY - OUTER_MARGIN);
 
     mBpmBox.setSliderStyle(Slider::SliderStyle::LinearBarVertical);
     mBpmBox.setSliderSnapsToMousePosition(false);
@@ -134,7 +138,7 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     mErrorTextBox.setColour(juce::TextEditor::textColourId, ORchestraColours::TextColor);
     mErrorTextBox.setMultiLine(true);
 
-    timeline.SetProcessor(&audioProcessor);
+    mTimeline.SetProcessor(&audioProcessor);
     //    codeEditor.setPopupMenuEnabled(true);
 
     addAndMakeVisible(mTempoDivLabel);
@@ -148,7 +152,8 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     addAndMakeVisible(mNoteLengtSelectorBox);
     addAndMakeVisible(mCodeEditorTextBox);
     addAndMakeVisible(mErrorTextBox);
-    addAndMakeVisible(timeline);
+    addAndMakeVisible(mTimeline);
+    addAndMakeVisible(mTriggerRectangle);
     addAndMakeVisible(mBpmBox);
 
     const std::string& data = audioProcessor.GetInstructionData();

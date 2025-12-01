@@ -5,11 +5,9 @@
 #include <cmath>
 
 #include "Defines.h"
-#include "Types.h"
 
-namespace ORchestra {
-
-
+namespace ORchestra 
+{
     /// Each Step in the DataSequences holds a number of unsigned chars that makes up
     /// the sub division of a step. It's necessary to have all values as these DataSequenceSteps
     /// with an array of data, as we need to always be able to combine a single value with a substep
@@ -31,7 +29,7 @@ namespace ORchestra {
         /// Sub Division step in the sequence.
         template <typename Operation>
         StepData ApplySequenceWithOperation(const StepData& otherSequence,
-            Operation OperationLambda) const
+            const Operation operationLambda) const
         {
             static_assert(std::is_invocable_v<Operation, const int, const int>,
                 "Operation must be callable with two int parameters");
@@ -45,7 +43,7 @@ namespace ORchestra {
 
             for (int i = 0; i < newLength; ++i)
             {
-                const int newValue = OperationLambda(static_cast<int>(shortest.GetEquivalentValueAtIndex(i, newLength)),
+                const int newValue = operationLambda(static_cast<int>(shortest.GetEquivalentValueAtIndex(i, newLength)),
                     static_cast<int>(longest.GetValue(i)));
                 newStep.mData[i] = static_cast<DataUnit>(std::clamp(newValue, 0, 127));
             }

@@ -1,100 +1,138 @@
 #include "Timeline.h"
+#include "Defines.h"
+#include "SequenceStep.h"
+#include "StepData.h"
 #include "Utility.h"
 #include "Colours.h"
+#include <algorithm>
 
-constexpr float trackHeight = 32.f;
-constexpr float stepMargin = 2.5f;
-
-constexpr float stepHeight = trackHeight;
-constexpr float quaterStepHeight = trackHeight * 0.25f;
-constexpr float stepWidth = (trackHeight * 1.5f);
-constexpr float drawnStepHeight = stepHeight - stepMargin;
-constexpr float drawnStepWidth = stepWidth - stepMargin;
-
-constexpr float stepY = trackHeight + (trackHeight - stepHeight) / 2.0f;
-constexpr float stepX = stepWidth + stepWidth / 2.0f - stepWidth / 2.0f;
-
-constexpr float indexStartFade = 3.f;
 
 void Timeline::timerCallback()
 {
 #if _DEBUG
     assert(mAudioProcessor != nullptr);
 #endif
-
     const TransportData& transportData = mAudioProcessor->GetTransportData();
     const int64_t timeInSamples = transportData.timeInSamples;
-
     const double samplesPerStep = static_cast<double>(transportData.sampleRate) * (60.0 / (transportData.bpm * transportData.bpmDivision));
     const int currentStep = static_cast<int>(ceil(static_cast<double>(timeInSamples) / samplesPerStep));
-
-    //  const double pixelPerSample = dotSize / samplesPerStep;
-    //  const int64_t samplesSinceLast = timeInSamples - mLastTimeInSamples;
-    //  const double deltaPixels = samplesSinceLast * pixelPerSample;
-    //  mStepXPositions[step][i] = (mStepXPositions[step][i] - x) + deltaPixels;
+    
     if (currentStep == mLastGlobalStep)
     {
         return;
     }
 
+    mUniqueNoteValues.clear();
     mLastGlobalStep = currentStep;
     mLastTimeInSamples = timeInSamples;
+     // We start behind the global step, as it's always one ahead and we
+    // want to paint the current step being triggered.
+    const int globalStepOffset = mLastGlobalStep - 1 + STEP_BUFFER_SIZE;
+    
+    mTriggerRectangle.ClearRectangles();
+    mTimelineTriggerRectangles.clear();
+    
+    //===========================================================================================================
+    // Here we gather the unique pitches
+    for (int index = 0; index < TIMELINE_STEPS_DRAWN; ++index)
+    {
+        const int stepWrapped = (globalStepOffset + index) % STEP_BUFFER_SIZE;
+        const std::vector<SequenceStep>& sequenceSteps = mAudioProcessor->GetStepData()[static_cast<unsigned long>(stepWrapped)];
 
-    repaint();
+        for (const auto& step : sequenceSteps)
+        {
+            //TODO: How should we draw CC?
+            // if (step.mType != MidiType::NoteOn)
+            //     continue;
+
+            const int substepLength = step.mFirst.GetLength();
+            for (int j = 0; j < substepLength; ++j)
+            {
+                const DataUnit noteValue = step.mFirst.GetValue(j);
+                bool isUnique = true;
+                for(const DataUnit uniqueNote : mUniqueNoteValues)
+                {
+                    if (uniqueNote == noteValue)
+                    {
+                        isUnique = false;
+                        break;
+                    }
+                }
+                
+                if (isUnique)
+                    mUniqueNoteValues.emplace_back(noteValue);
+            }
+            
+        }
+    }
+
+    std::sort(mUniqueNoteValues.begin(), mUniqueNoteValues.end(), [](DataUnit a, DataUnit b) { return a > b; } );
+    
+    for (int index = 0; index < TIMELINE_STEPS_DRAWN; ++index)
+    {
+        const int stepWrapped = (globalStepOffset + index) % STEP_BUFFER_SIZE;
+        const std::vector<SequenceStep>& sequenceSteps = mAudioProcessor->GetStepData()[static_cast<unsigned long>(stepWrapped)];
+
+        for (const auto& step : sequenceSteps)
+        {
+            const DataUnit noteValue = step.mFirst.GetValue(0);
+            int yIndex = 0;
+            for (const auto uniqueNoteValue : mUniqueNoteValues)
+            {
+                if (uniqueNoteValue == noteValue)
+                    break;
+
+                ++yIndex;
+            }
+
+            const float x = static_cast<float>(index) * stepWidth + 1.f;
+            const float y = static_cast<float>(yIndex) * trackHeight + 1.f;
+            const float velocityFloat = static_cast<float>(step.mSecond.GetValue(0));
+
+            TriggerRectangle rect {x, y, velocityFloat};
+            mTimelineTriggerRectangles.emplace_back(rect);
+
+            if (index == 0 && step.mShouldTrigger.GetValue(0))
+            {
+                TriggerRectangle rect {x, y, 1.f};
+                mTriggerRectangle.AddRectangle(rect);
+            }
+//            =================================================================================
+//            DISABLE TEXT FOR NOW
+//            =================================================================================
+//           g.setColour(juce::Colours::black);
+//           const std::string noteValueString { std::to_string(static_cast<int>(noteValue))};
+//           
+//           g.drawText(noteValueString, static_cast<int>(x),
+//                      static_cast<int>(y + quaterStepHeight),
+//                      static_cast<int>(stepWidth), 15, juce::Justification::centred);
+
+           // =================================================================================
+        }
+    }
+    
+    repaint(getLocalBounds());
 }
 
 void Timeline::paint(juce::Graphics& g)
 {
-    const int globalStepOffset = mLastGlobalStep - 1 + STEP_BUFFER_SIZE;
-
-    for (int step = 0; step < TIMELINE_STEPS_DRAWN; ++step)
+    for (const auto& rect : mTimelineTriggerRectangles)
     {
-        // We start behind the global step, as it's always one ahead and we
-        // want to paint the current step being triggered.
-        const int stepWrapped = (globalStepOffset + step) % STEP_BUFFER_SIZE;
-        std::vector<SequenceStep>& stepDatas = mAudioProcessor->GetStepData()[static_cast<unsigned long>(stepWrapped)];
+        const juce::Colour colorToSet = GetStepColorFromVelocity(rect.alpha);
+        g.setColour(colorToSet.withAlpha(1.f));
+        g.fillRoundedRectangle(rect.x, rect.y, drawnStepWidth,  drawnStepHeight, roundedCornerSize);
+    }
+}
 
-        // Calculate alpha values for fadeing steps.
-        float alpha = 1.f;
-        if (static_cast<float>(step) >= TIMELINE_STEPS_DRAWN - indexStartFade)
-        {
-            float alphaValue = 1.f - (static_cast<float>(step - TIMELINE_STEPS_DRAWN) + indexStartFade) / indexStartFade;
-            alpha = alphaValue * alphaValue;
-        }
-
-        const int size = static_cast<int>(stepDatas.size());
-        for (int i = 0; i < size; ++i)
-        {
-            const SequenceStep& stepData = stepDatas[static_cast<unsigned long>(i)];
-
-            juce::Colour colorToSet;
-            if (stepData.mShouldTrigger.GetValue(0) > 0)
-            {
-                float t = static_cast<float>(stepData.mSecond.GetValue(0)) / 127.f;
-                colorToSet = smoothstepColour(ORchestraColours::MinVelocity,
-                    ORchestraColours::MaxVelocity,
-                    t);
-            }
-            else
-                colorToSet = ORchestraColours::InactiveStep;
-
-            g.setColour(colorToSet.withAlpha(alpha));
-
-            const float y = static_cast<float>(i) * stepY;
-            const float x = static_cast<float>(step) * stepX;
-
-            g.fillRect(x, y, drawnStepWidth, drawnStepHeight);
-            if (step == 0 && stepData.mShouldTrigger.GetValue(0))
-            {
-                g.setColour(juce::Colours::black);
-                g.drawRect(x, y, drawnStepWidth, drawnStepHeight, 2.f);
-            }
-
-            g.setColour(juce::Colours::black);
-            std::string first{ std::to_string((int)stepData.mFirst.GetValue(0)) };
-            g.drawText(first, static_cast<int>(x),
-                static_cast<int>(y + quaterStepHeight),
-                static_cast<int>(stepWidth), 15, juce::Justification::centred);
-        }
+juce::Colour Timeline::GetStepColorFromVelocity(const float velocity)
+{
+    if (velocity > 0.f)
+    {
+        return smoothstepColour(ORchestraColours::MinVelocity,
+                                ORchestraColours::MaxVelocity, velocity / 127.f);
+    }
+    else
+    {
+        return ORchestraColours::InactiveStep;
     }
 }
