@@ -3,23 +3,24 @@
 #include "Defines.h"
 #include "StepData.h"
 
-namespace ORchestra {
-
-
+namespace ORchestra 
+{
     class SequenceStep
     {
     public:
-        SequenceStep(MidiType midiType,
-            StepData shouldTrigger,
-            const StepData firstData,
-            const StepData secondData,
-            const StepData channel,
-            const int duration) : mType(midiType),
-            mShouldTrigger(shouldTrigger),
-            mFirst(firstData),
-            mSecond(secondData),
-            mChannel(channel),
-            mDuration(duration)
+        SequenceStep( MidiType midiType,
+                      StepData shouldTrigger,
+                      const StepData firstData,
+                      const StepData secondData,
+                      const StepData channel,
+                      const int duration) : 
+
+                      mType(midiType),
+                      mShouldTrigger(shouldTrigger),
+                      mFirst(firstData),
+                      mSecond(secondData),
+                      mChannel(channel),
+                      mDuration(duration)
         {
         }
 
@@ -33,6 +34,5 @@ namespace ORchestra {
     private:
         SequenceStep() = delete;
     };
-
-
 } // namespace ORchestra
+

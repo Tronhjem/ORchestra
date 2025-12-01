@@ -1,9 +1,8 @@
 #pragma once
 
 #include <JuceHeader.h>
-#include "StepData.h"
-#include "ORchestraEngine.h"
 #include "PluginProcessor.h"
+#include "StepData.h"
 
 
 using namespace ORchestra;
@@ -30,6 +29,7 @@ public:
     void paint(juce::Graphics& g) override;
 
 private:
+    inline juce::Colour GetStepColor(const SequenceStep& sequenceStep);
     ORchestraAudioProcessor* mAudioProcessor;
     int mLastGlobalStep;
     int64_t mLastTimeInSamples;

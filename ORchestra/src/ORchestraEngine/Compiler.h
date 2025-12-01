@@ -40,10 +40,11 @@ namespace ORchestra {
         inline void MakeOperation(ORchestraTokenType tokenType, std::vector<Instruction>& instructions);
 
         bool CompileExpression(std::vector<Instruction>& instructions);
-        bool CompileArray(std::vector<Instruction>& instructions,
-            StepData& outLength,
-            int maxLength,
-            bool isLastRecursiveLevel);
+        bool CompileArray(
+                std::vector<Instruction>& instructions,
+                StepData& outLength,
+                int maxLength,
+                bool isLastRecursiveLevel);
 
         bool CompileFunctionCall(std::vector<Instruction>& instructions, const std::string& functionName);
 
