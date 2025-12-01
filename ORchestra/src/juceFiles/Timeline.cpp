@@ -85,8 +85,8 @@ void Timeline::timerCallback()
                 ++yIndex;
             }
 
-            const float x = static_cast<float>(index) * stepXIncrement + 1.f;
-            const float y = static_cast<float>(yIndex) * stepYIncrement + 1.f;
+            const float x = static_cast<float>(index) * stepWidth + 1.f;
+            const float y = static_cast<float>(yIndex) * trackHeight + 1.f;
             const float velocityFloat = static_cast<float>(step.mSecond.GetValue(0));
 
             TriggerRectangle rect {x, y, velocityFloat};

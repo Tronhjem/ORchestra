@@ -260,12 +260,12 @@ namespace ORchestra
             return false;
         }
 
-        StoredFunction& functon = mFunctions[functionName];
+        StoredFunction& function = mFunctions[functionName];
 
         Consume(); // For Left Parenteses
         int paramCounter = 0;
 
-        while (paramCounter != functon.mNumOfParams &&
+        while (paramCounter != function.mNumOfParams &&
             Peek().mTokenType != ORchestraTokenType::RIGHT_PAREN)
         {
             const ORchestraToken& currentToken = Peek();
@@ -280,7 +280,7 @@ namespace ORchestra
             case ORchestraTokenType::END:
             case ORchestraTokenType::EOL:
             {
-                ThrowMissingParamCount(functon.mNumOfParams, paramCounter);
+                ThrowMissingParamCount(function.mNumOfParams, paramCounter);
                 return false;
             }
 
@@ -303,13 +303,13 @@ namespace ORchestra
             return false;
         }
 
-        if (functon.mNumOfParams != paramCounter)
+        if (function.mNumOfParams != paramCounter)
         {
-            ThrowMissingParamCount(functon.mNumOfParams, paramCounter);
+            ThrowMissingParamCount(function.mNumOfParams, paramCounter);
             return false;
         }
 
-        for (const Instruction& funcInstruction : functon.mInstructions)
+        for (const Instruction& funcInstruction : function.mInstructions)
         {
             instructions.emplace_back(funcInstruction);
         }

@@ -13,14 +13,10 @@ constexpr int TIMELINE_ROWS_DRAWN = 5;
 constexpr float trackHeight = 32.f;
 constexpr float stepMargin = 2.5f;
 
-constexpr float quaterStepHeight = trackHeight * 0.25f;
 constexpr float stepHeight = trackHeight;
 constexpr float stepWidth = (trackHeight * 1.5f);
 constexpr float drawnStepHeight = stepHeight - stepMargin;
 constexpr float drawnStepWidth = stepWidth - stepMargin;
-
-constexpr float stepYIncrement = trackHeight + (trackHeight - stepHeight) / 2.0f;
-constexpr float stepXIncrement = stepWidth + stepWidth / 2.0f - stepWidth / 2.0f;
 
 constexpr float roundedCornerSize = 5.f;
 
@@ -48,7 +44,6 @@ public:
     void paint(juce::Graphics& g) override;
 
 private:
-    void UpdateTriggerRectangles(juce::Graphics& g);
     inline juce::Colour GetStepColorFromVelocity(const float velocity);
     ORchestraAudioProcessor* mAudioProcessor;
     int mLastGlobalStep;

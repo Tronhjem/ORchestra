@@ -3,21 +3,23 @@
 #include <JuceHeader.h>
 #include <vector>
 
-struct TriggerRectangle
-{
-    float x;
-    float y;
-    float alpha;
-};
+constexpr float alphaDecrementPerFrame = 1.f/100.f;
     
 namespace ORchestra
 {
+    struct TriggerRectangle
+    {
+        float x;
+        float y;
+        float alpha;
+    };
+
     class TriggerRectangleComponent : public juce::Component, public juce::Timer
     {
     public:
         TriggerRectangleComponent()
         {
-            startTimer(60);
+            startTimerHz(30);
         }
         
         ~TriggerRectangleComponent() override

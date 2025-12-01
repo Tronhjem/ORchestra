@@ -2,14 +2,13 @@
 #include "Timeline.h"
 
 using namespace ORchestra;
-constexpr float alphaDecrementPerFrame = 1.f/20.f;
 
 void TriggerRectangleComponent::timerCallback()
 {
     for (auto& rect : triggerRectangles)
     {
         rect.alpha -= alphaDecrementPerFrame;
-        rect.alpha *= rect.alpha;
+        rect.alpha *= rect.alpha; // squaring for visual fade of alpha
         
         if(rect.alpha < 0.f)
             rect.alpha = 0.f;
