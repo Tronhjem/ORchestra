@@ -28,7 +28,10 @@ constexpr int codeEditorHeight = 300;
 
 //==============================================================================
 ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProcessor& p)
-    : AudioProcessorEditor(&p), audioProcessor(p), mEditorIsDirty(false)
+        : AudioProcessorEditor(&p),
+          audioProcessor(p),
+          mEditorIsDirty(false),
+          mTimeline(mTriggerRectangle)
 {
     setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
 
@@ -86,7 +89,8 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
 
     // ======== NEW LINE ============
     nextLineY += 40 + COMPONENT_MARGIN;
-    timeline.setBounds(OUTER_MARGIN, nextLineY, 760, 260);
+    mTimeline.setBounds(OUTER_MARGIN, nextLineY, WINDOW_WIDTH - OUTER_MARGIN * 2, 260);
+    mTriggerRectangle.setBounds(OUTER_MARGIN, nextLineY, WINDOW_WIDTH - OUTER_MARGIN * 2, 260);
 
     mBpmBox.setSliderStyle(Slider::SliderStyle::LinearBarVertical);
     mBpmBox.setSliderSnapsToMousePosition(false);
@@ -134,7 +138,7 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     mErrorTextBox.setColour(juce::TextEditor::textColourId, ORchestraColours::TextColor);
     mErrorTextBox.setMultiLine(true);
 
-    timeline.SetProcessor(&audioProcessor);
+    mTimeline.SetProcessor(&audioProcessor);
     //    codeEditor.setPopupMenuEnabled(true);
 
     addAndMakeVisible(mTempoDivLabel);
@@ -148,7 +152,8 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     addAndMakeVisible(mNoteLengtSelectorBox);
     addAndMakeVisible(mCodeEditorTextBox);
     addAndMakeVisible(mErrorTextBox);
-    addAndMakeVisible(timeline);
+    addAndMakeVisible(mTimeline);
+    addAndMakeVisible(mTriggerRectangle);
     addAndMakeVisible(mBpmBox);
 
     const std::string& data = audioProcessor.GetInstructionData();
