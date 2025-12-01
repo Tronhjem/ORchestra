@@ -3,27 +3,107 @@
 [![Build](https://github.com/Tronhjem/ORchestra/actions/workflows/Build.yml/badge.svg)](https://github.com/Tronhjem/ORchestra/actions/workflows/Build.yml)
 [![Run Tests](https://github.com/Tronhjem/ORchestra/actions/workflows/RunTests.yml/badge.svg)](https://github.com/Tronhjem/ORchestra/actions/workflows/RunTests.yml)
 
-Project is still WIP.
+> **Note:** Project is still work in progress.
 
-This is a sequencer that generates and combines sequences using euclidean algorithms or manual input. 
-It uses logic operations like `&`, `^`, and `|` to combine sequences into tracks that trigger specific notes. 
-Each part loops and is evaluated with the specified operator, allowing sequences of different lengths 
-to phase and create complex rhythmic patterns. Where it gets really powerful is when combining sequences 
-of different legnths and hear how the operations creates interesting evolving patterns.
+## Overview
+
+ORchestra is a powerful MIDI sequencer plugin that generates and combines sequences using euclidean algorithms or manual input. It features a custom scripting language for creating complex rhythmic patterns through logical operations.
+
+### Key Features
+
+- **Euclidean Rhythm Generation**: Create rhythmic patterns using the euclidean algorithm
+- **Sequence Combination**: Use logic operations (`&`, `^`, `|`) to combine sequences
+- **Phasing Patterns**: Sequences of different lengths phase and evolve over time
+- **Custom Scripting Language**: Powerful yet simple syntax for defining musical patterns
+- **MIDI Output**: Generates MIDI notes and CC messages
+- **Mathematical Operations**: Full arithmetic support with standard precedence
+- **Comparison Operators**: Compare values and create conditional patterns
 
 Original prototype that sparked the idea can be found here: <https://github.com/Tronhjem/EuclidsCombinator>
-____
 
-### Build
+---
 
-Until a stable release is available, or if you just want the latest and greatest you can always build it yourself. 
-There's a Projucer file for both the project itself and for the unit tests.
-If you prefer cmake, run it from the top folder as it uses sub directories for Juce. 
+## Table of Contents
 
-If using cmake, remember to do `git submodule update --init --recursive` to initialize the juce submodule.  
-Then make a build/ folder in the top directory and cd into that.
+- [Prerequisites](#prerequisites)
+- [Quick Start](#quick-start)
+- [Build Instructions](#build-instructions)
+- [Running Tests](#running-tests)
+- [Syntax and Language Reference](#syntax-and-language-reference)
+  - [Operators](#operators)
+  - [Variables](#variables)
+  - [Reserved Keywords](#reserved-keywords)
+  - [Data Sequences](#data-sequences)
+  - [Note Values](#note-values)
+  - [Tracks](#tracks)
+  - [Built-in Functions](#built-in-functions)
+- [Examples](#examples)
+- [Troubleshooting](#troubleshooting)
 
-#### Build Options
+---
+
+## Prerequisites
+
+Before building ORchestra, ensure you have the following installed:
+
+- **CMake** (version 3.22 or higher)
+- **C++ Compiler** with C++17 support (GCC, Clang, or MSVC)
+- **Git** (for cloning and managing submodules)
+- **JUCE Framework** (automatically fetched as a git submodule)
+
+For Ubuntu/Debian:
+```bash
+sudo apt-get install cmake build-essential git
+```
+
+For macOS:
+```bash
+brew install cmake git
+```
+
+---
+
+## Quick Start
+
+The fastest way to get started is using the provided setup script:
+
+```bash
+./setup.sh
+```
+
+This will:
+1. Initialize and update the JUCE submodule
+2. Create a build directory
+3. Configure CMake with default settings
+
+Then build the project:
+```bash
+cd build
+cmake --build .
+```
+
+---
+
+## Build Instructions
+
+### Manual Build Process
+
+**Step 1: Clone and Initialize Submodules**
+
+```bash
+git clone https://github.com/Tronhjem/ORchestra.git
+cd ORchestra
+git submodule update --init --recursive
+```
+
+**Step 2: Create Build Directory**
+
+```bash
+mkdir build
+cd build
+```
+
+### Build Options
 
 The CMake build supports separate compilation of the plugin and tests for faster development:
 
@@ -46,159 +126,369 @@ cmake ..
 cmake --build .
 ```
 
-### Unit Tests
+---
 
-Tests are now using the Catch2 framework and can be built independently from the JUCE plugin.
+## Running Tests
+
+Tests use the Catch2 framework and can be built independently from the JUCE plugin.
 This allows for quick test iterations without compiling the entire JUCE framework.
 
-To run tests:
 ```bash
 cd build
 cmake -DBUILD_PLUGIN=OFF -DBUILD_TESTS=ON ..
-make
+cmake --build .
 ./UnitTests/ORchestraTests
 ```
 
-____
+---
 
-# Syntax and rules for ORchestra code
+## Syntax and Language Reference
 
-It's the program is evaluated from top to bottom.
-You will have to declare anything first that you will use later.
+The ORchestra scripting language is evaluated from top to bottom.
+You must declare variables before using them later in the script.
 
-Usually this means you want to create any data sequences first, then tracks.
+**Best Practice:** Define data sequences first, then create tracks that use them.
 
-General information:
-- New line is a new instruction, it's looking for `\n`
-- All white space is ignored in a line
-- Use `//` for comments until the end of the line
-- Any value is converted into a 8bit integer, but limited to be between 0 and 127, for compatability with MIDI.
+### General Rules
+
+- Each new line is a new instruction (uses `\n` as delimiter)
+- All whitespace within a line is ignored
+- Use `//` for single-line comments
+- All values are 8-bit integers, limited to 0-127 for MIDI compatibility
 
 ### Operators
 
-`+` `-` `*` `/` operates on numbers as you would expect them to in normal math.
-Normal math precedence is implemented, and parentheses can create precedence just like normal programming math. All math operators takes precedence over logical and comparisons
+**Arithmetic Operators**
 
-`|` `^` `&` can be used to evaluate logic operations. This will always use the number as a trigger, meaning check if it's above 0 or not, and combine two numbers and return a 0 or a 1.
+`+` `-` `*` `/` operate on numbers with standard mathematical precedence.
+Parentheses can be used to override precedence, just like in regular programming.
+All arithmetic operators take precedence over logical and comparison operators.
 
-`>` `<` `>=` `<=` `==` `!=` compares two values and return a 0 if false and 1 if true.
+**Logical Operators**
+
+`|` `^` `&` evaluate logic operations on triggers (values > 0 are true).
+These operators always return 0 (false) or 1 (true).
+
+- `|` - OR operation
+- `^` - XOR operation  
+- `&` - AND operation
+
+**Comparison Operators**
+
+`>` `<` `>=` `<=` `==` `!=` compare two values and return 0 (false) or 1 (true).
 
 ### Variables
 
-the `=` operator declares a variable.
-`a =` declares a variable named a
-Variables can be any length but have to start with an alpha numeric character or `_` and can't start with a number.
+The `=` operator declares and assigns a variable.
 
-Following can be assigned to variable:
+**Declaration Syntax:**
+- Variable names can be any length
+- Must start with an alphabetic character or `_`
+- Cannot start with a number
 
-Regular value
-`a = 64`
+**Assignment Examples:**
 
-Any expression:
-`a = 64 + 2`
-`c = a | 1`
-`z = a * (2+4)`
-
-Data sequence
-`a = [127, 0, 64]`
-
-Reference to another var, this will evaluate at the current global step when running, if its a sequence.
-If not it will just refer to the value assigned to that variable.
-`c = [64, 64, 64]`
-`a = c`
-
-if you want to reference a specific value in a data sequence you can access the index, starting at 0
-`c = [64, 65, 70]`
-`a = c[0]`  value is here 64
-`x = c[1]`  value is here 65
-
-Be aware when using `|` `^` `&` `< > ==` these will always return a boolean.
-`a = [64,63]`
-`c = a[0] > 0` Here the value is 1
-
-`z = [1,0]`
-`x = [0,1]`
-`y = z[0] & x[0]` Here the value is 0, as z is 1 at index 0 but x is 0 at index 0 and a AND operation evaluates to 0.
-
-### Reserved keywords
-
-Following words are reserved and can't be used as variable names.
-
-- note
-- cc
-- print
-- test
-- ran
-- euc
-
-### Data sequences
-
-Data is designed to be used anywhere in any way, it is always just the number.
-For triggers, the first argument of `note` or `cc` data, they will evaluate if it's above 0 and be a boolean for trigger.
-For cc's and notes and velocity, values will be sent directly as defined.
-A data sequence is defined like a c style array with `[]` around them, separated by comma.
-One index in the array represent a value to be used in a step, see variables earlier on how to save a data sequence in a variable.
-
-Example of a simple data sequence with 3 values, assigned to a variable a. 
+**Simple value:**
 ```cpp
-a = [64,64,65]
+a = 64
 ```
 
-### Note values
+**Expressions:**
+```cpp
+a = 64 + 2
+c = a | 1
+z = a * (2 + 4)
+```
 
-Notes can be represented as raw midi values from 0 to 127 or can be used with the notation: capital letter for the Note, a `#` or a `b` after for sharp or flat, and a octave from 0 to 10.
-When compiled, these are turned into numbers, which means they can be combined and used with every other value. It's purely for easilier defining note sequences.
-Example of a data sequence using note names instead of numbers
+**Data sequence:**
+```cpp
+a = [127, 0, 64]
+```
+
+**Variable reference:**
+
+References another variable. If it's a sequence, it evaluates at the current global step.
+```cpp
+c = [64, 64, 64]
+a = c  // References the sequence c
+```
+
+**Array indexing:**
+
+Access specific values in a data sequence (zero-indexed):
+```cpp
+c = [64, 65, 70]
+a = c[0]  // value is 64
+x = c[1]  // value is 65
+```
+
+**Boolean operations:**
+
+Note that logical and comparison operators always return 0 or 1:
+```cpp
+a = [64, 63]
+c = a[0] > 0  // value is 1
+
+z = [1, 0]
+x = [0, 1]
+y = z[0] & x[0]  // value is 0 (AND operation: 1 & 0 = 0)
+```
+
+### Reserved Keywords
+
+The following words are reserved and cannot be used as variable names:
+
+- `note` - Creates a MIDI note track
+- `cc` - Creates a MIDI control change track
+- `ran` - Random number generator function
+- `euc` - Euclidean sequence generator function
+
+**Note:** The keywords `print` and `test` are reserved for debugging purposes but are only available in debug builds.
+
+### Data Sequences
+
+Data sequences are arrays of numeric values used to create musical patterns.
+
+**Key Points:**
+- Values can be used anywhere - they're always just numbers
+- For triggers (first argument of `note` or `cc`), values > 0 are treated as true
+- For notes, velocities, and CC values, the values are sent as defined
+- Sequences are defined using C-style array syntax with `[]` and comma separators
+- Each index represents a value to be used in a step
+
+**Example:**
+```cpp
+a = [64, 64, 65]  // Simple 3-step sequence
+```
+
+### Note Values
+
+Notes can be represented in two ways:
+
+**1. Raw MIDI values (0-127):**
+```cpp
+a = [60, 62, 64]  // C4, D4, E4
+```
+
+**2. Musical notation:**
+- Capital letter for the note (C, D, E, F, G, A, B)
+- Optional `#` (sharp) or `b` (flat)
+- Octave number (0-10)
+
+**Example:**
 ```cpp
 a = [C4, C#4, Db2]
 ```
 
+When compiled, note names are converted to MIDI values, allowing them to be combined with other values and used in expressions.
+
 ### Tracks
 
-A track will collect a trigger, data and a midi channel.
-Tracks are not variables and  the keywords `note` or `cc` following `(...)` will define them.
-They need exactly 4 inputs. These can also be expressions or variables.
-The trigger argument will always check if the value is greater than 0 and consider it true or trigger if it is.
+Tracks output MIDI messages and are created using the `note` or `cc` keywords.
 
-For `note` this will be like this:
-`note(trigger, note, velocity, channel)`
+**Important:**
+- Tracks are not variables - they execute immediately
+- Both require exactly 4 arguments
+- Arguments can be values, expressions, or variables
+- The trigger argument checks if value > 0 to determine when to send MIDI
 
-`cc` is like this:
-`cc(trigger, controlNumber, controlValue, channel)`
-
-Example of variables for trigger and note data sequence into a note track
-
+**Note Track Syntax:**
 ```cpp
-a = [1,0,1,0]
-b = [64,64,65]
-
-note(a, b, 100, 1) 
-// a is the trigger, 
-// b is the note track
-// a fixed velocity of 100 and sending to channel 1
+note(trigger, note, velocity, channel)
 ```
 
-### Built in functions
-
-#### Euclidean sequence
-
-We can assign a euclidean data sequence to an identifier by generating it with the built in function `euc(hits, length)` where we supply the number of hits equally divided on the length of the sequence. It can only be used to be assigned to a variable not as a parameter else where. Also not it only generate 0's and 1's and is meant for being used as a trigger track.
-example
-
+**CC Track Syntax:**
 ```cpp
-// euclidean sequence with 4 hits divided on 8 triggers.
-a = euc(4,8)
-// Note track where a the euclidean sequnence is used as trigger.
-note(a, 64, 100, 1)
+cc(trigger, controlNumber, controlValue, channel)
 ```
 
-#### Random
-
-with the function `ran(low,high)` you can generate a random value. First parameter specifies the lower valuer of the random generation and the second, the upper, both included. Meaning `ran(0,4)` will generate a random value between 0 and 4 both included.
-Random is evaluated at every tick and will give a new random value every time, not just at compile time.
-Below is an example of how a random value is used for random velocity
-
+**Example:**
 ```cpp
-vel = ran(50,100)
-note(1, 64, vel, 1)
+a = [1, 0, 1, 0]      // Trigger pattern
+b = [64, 64, 65, 67]  // Note sequence
+
+note(a, b, 100, 1)    // Trigger: a, Notes: b, Velocity: 100, Channel: 1
 ```
+
+### Built-in Functions
+
+#### Euclidean Sequence Generator
+
+The `euc(hits, length)` function generates euclidean rhythm patterns.
+
+**Syntax:**
+```cpp
+euc(hits, length)
+```
+
+**Parameters:**
+- `hits` - Number of beats to distribute
+- `length` - Total length of the sequence
+
+**Returns:** A data sequence containing 0s and 1s (designed for triggers)
+
+**Note:** Can only be used for variable assignment, not as a direct parameter.
+
+**Example:**
+```cpp
+// Euclidean sequence with 4 hits divided across 8 steps
+a = euc(4, 8)
+note(a, 64, 100, 1)  // Use the euclidean pattern as a trigger
+```
+
+#### Random Number Generator
+
+The `ran(low, high)` function generates random values at runtime.
+
+**Syntax:**
+```cpp
+ran(low, high)
+```
+
+**Parameters:**
+- `low` - Minimum value (inclusive)
+- `high` - Maximum value (inclusive)
+
+**Returns:** A random integer between low and high
+
+**Note:** Evaluated at every tick, providing new random values each time.
+
+**Example:**
+```cpp
+vel = ran(50, 100)   // Random velocity between 50-100
+note(1, 64, vel, 1)  // Play C4 with random velocity
+```
+
+---
+
+## Examples
+
+### Basic Pattern
+```cpp
+// Simple kick drum pattern
+kick = [1, 0, 0, 0]
+note(kick, 36, 100, 1)  // C1 on MIDI channel 1
+```
+
+### Euclidean Rhythm
+```cpp
+// Create a euclidean pattern
+pattern = euc(5, 8)
+note(pattern, C4, 100, 1)
+```
+
+### Combining Sequences with Logic
+```cpp
+// Create two patterns
+a = euc(3, 8)
+b = euc(5, 8)
+
+// Combine with XOR - triggers when only one is active
+combined = a ^ b
+note(combined, D4, 100, 1)
+```
+
+### Phasing Patterns
+```cpp
+// Different length sequences phase over time
+pattern1 = euc(3, 8)
+pattern2 = euc(5, 13)
+
+// Combine with AND - both must be active
+both = pattern1 & pattern2
+note(both, E4, 120, 1)
+```
+
+### Random Velocity and Notes
+```cpp
+// Random velocity for each triggered note
+trigger = euc(4, 8)
+velocity = ran(80, 127)
+note(trigger, C4, velocity, 1)
+
+// Random note selection
+notes = [C4, D4, E4, G4, A4]
+randomNote = notes[ran(0, 4)]
+note(1, randomNote, 100, 1)
+```
+
+### Using CC Messages
+```cpp
+// Control filter cutoff with sequence
+cutoff = [64, 80, 100, 120]
+cc(1, 74, cutoff, 1)  // Always trigger, CC#74 (filter cutoff)
+```
+
+### Complex Rhythm
+```cpp
+// Kick on 1 and 3
+kick = [1, 0, 1, 0]
+// Snare on 2 and 4
+snare = [0, 1, 0, 1]
+// Hi-hat euclidean pattern
+hihat = euc(7, 8)
+
+note(kick, 36, 100, 10)   // Kick on channel 10
+note(snare, 38, 100, 10)  // Snare on channel 10
+note(hihat, 42, 80, 10)   // Hi-hat on channel 10
+```
+
+---
+
+## Troubleshooting
+
+### Build Issues
+
+**Problem:** `JUCE not found` error
+```
+Solution: Ensure you've initialized the submodule:
+git submodule update --init --recursive
+```
+
+**Problem:** CMake version too old
+```
+Solution: Install CMake 3.22 or higher:
+- Ubuntu: sudo apt-get install cmake
+- macOS: brew install cmake
+```
+
+**Problem:** Build fails with missing compiler
+```
+Solution: Install build essentials:
+- Ubuntu: sudo apt-get install build-essential
+- macOS: Install Xcode Command Line Tools
+```
+
+### Runtime Issues
+
+**Problem:** Reserved keyword error
+```
+Solution: Check that you're not using: note, cc, ran, euc, print, or test as variable names
+```
+
+**Problem:** Note name parsing error
+```
+Solution: Ensure note names follow the format: [A-G][#/b]?[0-10]
+Examples: C4, F#5, Db3
+```
+
+**Problem:** Index out of bounds
+```
+Solution: Verify array indices are within range (0 to array length - 1)
+```
+
+### Getting Help
+
+- Open an issue on [GitHub](https://github.com/Tronhjem/ORchestra/issues)
+- Check existing issues for similar problems
+- Include your ORchestra script and error messages when reporting bugs
+
+---
+
+## License
+
+MIT License - see [LICENSE](LICENSE) file for details.
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
