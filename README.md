@@ -495,7 +495,7 @@ trigger = [1, 0, 1, [1, 0, 1, 1]]  // Fourth step has rapid hits
 note(trigger, 38, 100, 10)  // Snare drum
 
 // Alternating note pattern with substep variation
-notes = [[60, 64, 67], 60, 62, 64]  // First step plays a chord
+notes = [[60, 64, 67], 60, 62, 64]  // First step plays notes in rapid sequence
 note(1, notes, 100, 1)
 
 // Modulo operation example with substeps
