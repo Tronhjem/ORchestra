@@ -677,12 +677,10 @@ namespace ORchestra
             {
                 std::string name = std::string(token.mStart, static_cast<unsigned long>(token.mLength));
 
-                // Check for array index assignment: identifier[index] = value
                 if (Peek().mTokenType == ORchestraTokenType::LEFT_BRACKET)
                 {
-                    Consume(); // consume left bracket
+                    Consume();
 
-                    // Compile the index expression
                     if (!CompileExpression(instructions))
                     {
                         return false;
@@ -695,14 +693,12 @@ namespace ORchestra
                         return false;
                     }
 
-                    Consume(); // consume right bracket
+                    Consume();
 
-                    // Now check if this is an assignment
                     if (Peek().mTokenType == ORchestraTokenType::EQUAL)
                     {
-                        Consume(); // consume equal sign
+                        Consume();
 
-                        // Compile the value expression
                         if (!CompileExpression(instructions))
                         {
                             return false;
@@ -718,7 +714,7 @@ namespace ORchestra
                 }
                 else if (Peek().mTokenType == ORchestraTokenType::EQUAL)
                 {
-                    Consume(); // consumes the equal sign
+                    Consume();
 
                     ORchestraTokenType tokenType = Peek().mTokenType;
                     switch (tokenType)

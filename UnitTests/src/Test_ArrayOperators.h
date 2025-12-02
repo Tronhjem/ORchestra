@@ -72,7 +72,7 @@ TEST_CASE("Array: Set index with expression 'a=[1,2,3], a[1]=a[0]+10'", "[Array]
     REQUIRE(vm.Prepare(file));
 
     StepData result = vm.GetTopStackValue();
-    REQUIRE(result.GetValue(0) == 11); // 1 + 10
+    REQUIRE(result.GetValue(0) == 11);
 }
 
 TEST_CASE("Array: Set index with variable 'a=[10,20,30], b=50, a[1]=b'", "[Array]")
@@ -112,7 +112,7 @@ TEST_CASE("Array: Verify other elements unchanged after index assignment", "[Arr
     REQUIRE(vm.Prepare(file));
 
     StepData result = vm.GetTopStackValue();
-    REQUIRE(result.GetValue(0) == 64); // First element should be unchanged
+    REQUIRE(result.GetValue(0) == 64);
 }
 
 TEST_CASE("Array: Set index with note value 'a=[60,62,64], a[1]=C4'", "[Array]")
@@ -122,7 +122,7 @@ TEST_CASE("Array: Set index with note value 'a=[60,62,64], a[1]=C4'", "[Array]")
     REQUIRE(vm.Prepare(file));
 
     StepData result = vm.GetTopStackValue();
-    REQUIRE(result.GetValue(0) == 60); // C4 = 60
+    REQUIRE(result.GetValue(0) == 60);
 }
 
 TEST_CASE("Array: Complex scenario with arithmetic 'a=[5,10,15], a[2]=a[0]+a[1]'", "[Array]")
@@ -132,7 +132,7 @@ TEST_CASE("Array: Complex scenario with arithmetic 'a=[5,10,15], a[2]=a[0]+a[1]'
     REQUIRE(vm.Prepare(file));
 
     StepData result = vm.GetTopStackValue();
-    REQUIRE(result.GetValue(0) == 15); // 5 + 10
+    REQUIRE(result.GetValue(0) == 15);
 }
 
 TEST_CASE("Array: Set with multiplication 'a=[2,3,4], a[1]=a[0]*5'", "[Array]")
@@ -142,7 +142,7 @@ TEST_CASE("Array: Set with multiplication 'a=[2,3,4], a[1]=a[0]*5'", "[Array]")
     REQUIRE(vm.Prepare(file));
 
     StepData result = vm.GetTopStackValue();
-    REQUIRE(result.GetValue(0) == 10); // 2 * 5
+    REQUIRE(result.GetValue(0) == 10);
 }
 
 TEST_CASE("Array: Set with comparison result 'a=[50,60,70], a[0]=a[1]>55'", "[Array]")
@@ -152,7 +152,7 @@ TEST_CASE("Array: Set with comparison result 'a=[50,60,70], a[0]=a[1]>55'", "[Ar
     REQUIRE(vm.Prepare(file));
 
     StepData result = vm.GetTopStackValue();
-    REQUIRE(result.GetValue(0) == 1); // 60 > 55 is true (1)
+    REQUIRE(result.GetValue(0) == 1);
 }
 
 TEST_CASE("Array: Swap two elements using temp variable", "[Array]")
@@ -162,5 +162,5 @@ TEST_CASE("Array: Swap two elements using temp variable", "[Array]")
     REQUIRE(vm.Prepare(file));
 
     StepData result = vm.GetTopStackValue();
-    REQUIRE(result.GetValue(0) == 30); // a[0] should now be 30
+    REQUIRE(result.GetValue(0) == 30);
 }
