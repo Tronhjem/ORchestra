@@ -12,6 +12,7 @@ namespace ORchestra {
         GET_IDENTIFIER_WITH_INDEX,
         SET_IDENTIFIER_VALUE,
         SET_IDENTIFIER_ARRAY,
+        SET_IDENTIFIER_WITH_INDEX,
 
         SET_SUBSTEP_ARRAY,
 

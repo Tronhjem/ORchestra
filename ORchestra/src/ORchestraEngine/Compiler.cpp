@@ -677,7 +677,46 @@ namespace ORchestra
             {
                 std::string name = std::string(token.mStart, static_cast<unsigned long>(token.mLength));
 
-                if (Peek().mTokenType == ORchestraTokenType::EQUAL)
+                // Check for array index assignment: identifier[index] = value
+                if (Peek().mTokenType == ORchestraTokenType::LEFT_BRACKET)
+                {
+                    Consume(); // consume left bracket
+
+                    // Compile the index expression
+                    if (!CompileExpression(instructions))
+                    {
+                        return false;
+                    }
+
+                    if (Peek().mTokenType != ORchestraTokenType::RIGHT_BRACKET)
+                    {
+                        std::string missingBracket = "]";
+                        ThrowMissingExpectedToken(missingBracket);
+                        return false;
+                    }
+
+                    Consume(); // consume right bracket
+
+                    // Now check if this is an assignment
+                    if (Peek().mTokenType == ORchestraTokenType::EQUAL)
+                    {
+                        Consume(); // consume equal sign
+
+                        // Compile the value expression
+                        if (!CompileExpression(instructions))
+                        {
+                            return false;
+                        }
+
+                        instructions.emplace_back(Instruction{ OpCode::SET_IDENTIFIER_WITH_INDEX, name });
+                    }
+                    else
+                    {
+                        ThrowUnexpectedTokenError(Peek());
+                        return false;
+                    }
+                }
+                else if (Peek().mTokenType == ORchestraTokenType::EQUAL)
                 {
                     Consume(); // consumes the equal sign
 
