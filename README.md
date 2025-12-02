@@ -245,6 +245,31 @@ x = [0, 1]
 y = z[0] & x[0]  // value is 0 (AND operation: 1 & 0 = 0)
 ```
 
+**Global count variable (`$`):**
+
+The special variable `$` provides access to the global count (tick number):
+- During `Prepare` (preprocessing), `$` evaluates to `0`
+- During `Tick` (runtime), `$` evaluates to the current `globalCount`
+
+This is useful for creating evolving patterns and time-based logic:
+```cpp
+// Simple counter that increments with each tick
+counter = $
+
+// Create a cycling pattern (0, 1, 2, 3, 0, 1, 2, 3...)
+pattern = $ % 4
+
+// Conditional trigger based on tick count
+trigger = $ > 10  // Becomes 1 after 10 ticks
+
+// Velocity that increases over time
+velocity = $ * 2 + 64
+
+// Use in array indexing for sequential access
+notes = [60, 62, 64, 65]
+note_value = notes[$ % 4]
+```
+
 ### Reserved Keywords
 
 The following words are reserved and cannot be used as variable names:
@@ -578,6 +603,35 @@ note(1, notes, 100, 1)
 counter = [[0, 1, 2, 3], 4, 5, 6]
 everyOther = counter % 2  // Creates pattern: [[0,1,0,1], 0, 1, 0]
 note(everyOther, C4, 100, 1)
+```
+
+### Using Global Count (`$`) for Evolving Patterns
+```cpp
+// Create a cycling pattern that repeats every 4 ticks
+phase = $ % 4
+pattern = [1, 0, 1, 0]
+trigger = pattern[phase]
+note(trigger, C4, 100, 1)
+
+// Gradually increase velocity over time
+velocity = ($ * 2) % 127 + 20  // Starts at 20, increases by 2 each tick
+kick = [1, 0, 0, 0]
+note(kick, 36, velocity, 10)
+
+// Change MIDI CC value based on global count
+filterValue = ($ * 4) % 127  // Sweeps filter from 0 to 127
+cc(1, 74, filterValue, 1)  // CC#74 (filter cutoff)
+
+// Conditional pattern that activates after tick 16
+lateEntry = $ > 16
+snare = [0, 1, 0, 1]
+trigger = snare & lateEntry  // Only plays after tick 16
+note(trigger, 38, 100, 10)
+
+// Create a sequence that changes every 8 ticks
+octave = ($ / 8) % 3  // Switches between 0, 1, 2
+baseNote = 60 + (octave * 12)  // C4, C5, C6
+note(1, baseNote, 100, 1)
 ```
 
 ---
