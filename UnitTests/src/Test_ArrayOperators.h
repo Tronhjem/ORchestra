@@ -124,3 +124,43 @@ TEST_CASE("Array: Set index with note value 'a=[60,62,64], a[1]=C4'", "[Array]")
     StepData result = vm.GetTopStackValue();
     REQUIRE(result.GetValue(0) == 60); // C4 = 60
 }
+
+TEST_CASE("Array: Complex scenario with arithmetic 'a=[5,10,15], a[2]=a[0]+a[1]'", "[Array]")
+{
+    std::string file{"a = [5,10,15] \n a[2] = a[0] + a[1] \n test a[2]"};
+    VM vm;
+    REQUIRE(vm.Prepare(file));
+
+    StepData result = vm.GetTopStackValue();
+    REQUIRE(result.GetValue(0) == 15); // 5 + 10
+}
+
+TEST_CASE("Array: Set with multiplication 'a=[2,3,4], a[1]=a[0]*5'", "[Array]")
+{
+    std::string file{"a = [2,3,4] \n a[1] = a[0] * 5 \n test a[1]"};
+    VM vm;
+    REQUIRE(vm.Prepare(file));
+
+    StepData result = vm.GetTopStackValue();
+    REQUIRE(result.GetValue(0) == 10); // 2 * 5
+}
+
+TEST_CASE("Array: Set with comparison result 'a=[50,60,70], a[0]=a[1]>55'", "[Array]")
+{
+    std::string file{"a = [50,60,70] \n a[0] = a[1] > 55 \n test a[0]"};
+    VM vm;
+    REQUIRE(vm.Prepare(file));
+
+    StepData result = vm.GetTopStackValue();
+    REQUIRE(result.GetValue(0) == 1); // 60 > 55 is true (1)
+}
+
+TEST_CASE("Array: Swap two elements using temp variable", "[Array]")
+{
+    std::string file{"a = [10,20,30] \n temp = a[0] \n a[0] = a[2] \n a[2] = temp \n test a[0]"};
+    VM vm;
+    REQUIRE(vm.Prepare(file));
+
+    StepData result = vm.GetTopStackValue();
+    REQUIRE(result.GetValue(0) == 30); // a[0] should now be 30
+}
