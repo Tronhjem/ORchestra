@@ -1,7 +1,9 @@
 #include <cmath>
 
 #include "ORchestraEngine.h"
+#if _DEBUG
 #include "ScopedTimer.h"
+#endif
 
 namespace ORchestra {
 
@@ -171,9 +173,6 @@ namespace ORchestra {
                         // ScheduledMidiMessage message {step.mType, firstByte, secondByte, channel, timeStamp, step.mDuration};
                         ScheduledMidiMessage message{ step.mType, firstByte, secondByte, channel, timeStamp, transportData.noteLengthInSamples };
 
-#if _DEBUG
-                        //                    std::cout << "play step " << wrappedGlobalStep << " " << (int)firstByte << std::endl;
-#endif
                         mMidiScheduler.PostMidi(message);
                     }
                 }

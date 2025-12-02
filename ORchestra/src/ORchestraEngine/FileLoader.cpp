@@ -1,10 +1,11 @@
 #include <fstream>
-#include <sstream>
 #include <string>
 #include <iostream>
 
 #include "FileLoader.h"
+#if _DEBUG
 #include "ScopedTimer.h"
+#endif
 
 namespace ORchestra {
 

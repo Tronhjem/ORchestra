@@ -5,7 +5,9 @@
 #include "Scanner.h"
 #include "ErrorReporting.h"
 #include "ORchestraToken.h"
+#if _DEBUG
 #include "ScopedTimer.h"
+#endif
 
 namespace ORchestra
 {
