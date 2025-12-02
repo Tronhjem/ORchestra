@@ -42,6 +42,12 @@ namespace ORchestra
     private:
 #if _TEST
         StepData mTopStackValue;
+        
+        inline void SafeSetTopStackValue(Stack<StepData>& stack)
+        {
+            if (stack.mStackPointer > 0)
+                mTopStackValue = stack.Top();
+        }
 #endif
 
         bool ProcessOpCodes(std::vector<Instruction>& setupInstructions);

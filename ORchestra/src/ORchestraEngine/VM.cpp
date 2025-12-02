@@ -124,8 +124,7 @@ namespace ORchestra
             case (OpCode::END):
             {
 #if _TEST
-                if (stack.mStackPointer > 0)
-                    mTopStackValue = stack.Top();
+                SafeSetTopStackValue(stack);
 #endif
                 return true;
             }
@@ -135,8 +134,7 @@ namespace ORchestra
                 if (!ProcessInstruction(instruction, 0, stack))
                 {
 #if _TEST
-                    if (stack.mStackPointer > 0)
-                        mTopStackValue = stack.Top();
+                    SafeSetTopStackValue(stack);
 #endif
                     return false;
                 }
@@ -187,8 +185,7 @@ namespace ORchestra
 
             case (OpCode::END):
 #if _TEST
-                if (stack.mStackPointer > 0)
-                    mTopStackValue = stack.Top();
+                SafeSetTopStackValue(stack);
 #endif
                 return true;
 
@@ -196,8 +193,7 @@ namespace ORchestra
                 if (!ProcessInstruction(instruction, globalCount, stack))
                 {
 #if _TEST
-                    if (stack.mStackPointer > 0)
-                        mTopStackValue = stack.Top();
+                    SafeSetTopStackValue(stack);
 #endif
                     return false;
                 }
@@ -463,8 +459,7 @@ namespace ORchestra
         }
 
 #if _TEST
-        if (stack.mStackPointer > 0)
-            mTopStackValue = stack.Top();
+        SafeSetTopStackValue(stack);
 #endif
         return true;
     }
