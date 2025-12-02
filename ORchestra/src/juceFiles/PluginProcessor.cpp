@@ -160,7 +160,7 @@ void ORchestraAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juc
         FillPositionData(mTransportData);
         mTransportData.timeInSamples = mLocalTimeInSamples;
         mTransportData.bpm = static_cast<double>(*mBpm);
-        mTransportData.isPlaying = true; // Set the playing to true when standalone
+        mTransportData.isPlaying = true;
     }
     else if (mShouldSync && !IsRunning)
     {
@@ -172,7 +172,7 @@ void ORchestraAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juc
 
     mORchestraEngine->Tick(mTransportData, bufferLength, midiMessages);
 
-    // for incrementing position itselfm
+    // For incrementing sample position by the buffer and only when IsRunning
     if (!mShouldSync && IsRunning)
     {
         mLocalTimeInSamples += bufferLength; 
@@ -200,28 +200,7 @@ void ORchestraAudioProcessor::FillPositionData(TransportData& data)
     }
 
     data.isPlaying = static_cast<bool>(positionInfo->getIsPlaying());
-
     data.sampleRate = mSampleRate;
-
-    //    if(positionInfo->getTimeInSeconds().hasValue())
-    //    {
-    //        data.time = static_cast<double>(*positionInfo->getTimeInSeconds());
-    //    }
-
-    //    if(positionInfo->getPpqPosition().hasValue())
-    //    {
-    //        data.ppq = static_cast<double>(*positionInfo->getPpqPosition());
-    //    }
-
-    //    if(positionInfo->getTimeSignature().hasValue())
-    //    {
-    //        auto timeSig = *positionInfo->getTimeSignature();
-    //        int barLength = timeSig.numerator;
-    //
-    //        int beatCount = static_cast<int>(data.time / (60.0 / data.bpm));
-    //        data.beat =  beatCount % barLength;
-    //        data.bar = static_cast<int> (beatCount / barLength);
-    //    }
 }
 
 //==============================================================================
