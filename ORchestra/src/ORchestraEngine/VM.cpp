@@ -124,7 +124,8 @@ namespace ORchestra
             case (OpCode::END):
             {
 #if _TEST
-                mTopStackValue = stack.Top();
+                if (stack.mStackPointer > 0)
+                    mTopStackValue = stack.Top();
 #endif
                 return true;
             }
@@ -134,7 +135,8 @@ namespace ORchestra
                 if (!ProcessInstruction(instruction, 0, stack))
                 {
 #if _TEST
-                    mTopStackValue = stack.Top();
+                    if (stack.mStackPointer > 0)
+                        mTopStackValue = stack.Top();
 #endif
                     return false;
                 }
@@ -185,7 +187,8 @@ namespace ORchestra
 
             case (OpCode::END):
 #if _TEST
-                mTopStackValue = stack.Top();
+                if (stack.mStackPointer > 0)
+                    mTopStackValue = stack.Top();
 #endif
                 return true;
 
@@ -193,7 +196,8 @@ namespace ORchestra
                 if (!ProcessInstruction(instruction, globalCount, stack))
                 {
 #if _TEST
-                    mTopStackValue = stack.Top();
+                    if (stack.mStackPointer > 0)
+                        mTopStackValue = stack.Top();
 #endif
                     return false;
                 }
@@ -431,6 +435,13 @@ namespace ORchestra
             break;
         }
 
+        case (OpCode::GET_GLOBAL_COUNT):
+        {
+            stack.Push(StepData{ stepCount });
+
+            break;
+        }
+
 #if _DEBUG
         case (OpCode::PRINT):
         {
@@ -452,7 +463,8 @@ namespace ORchestra
         }
 
 #if _TEST
-        mTopStackValue = stack.Top();
+        if (stack.mStackPointer > 0)
+            mTopStackValue = stack.Top();
 #endif
         return true;
     }

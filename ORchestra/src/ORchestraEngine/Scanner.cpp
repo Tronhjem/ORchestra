@@ -182,6 +182,10 @@ namespace ORchestra
         case '%':
             return MakeToken(ORchestraTokenType::PERCENT);
 
+        // Special variable for global count
+        case '$':
+            return MakeToken(ORchestraTokenType::DOLLAR);
+
         default:
             return MakeErrorToken(ERROR_UNEXPECTED_CHAR, c);
         }
