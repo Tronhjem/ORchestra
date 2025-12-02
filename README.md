@@ -34,6 +34,7 @@ Original prototype that sparked the idea can be found here: <https://github.com/
   - [Variables](#variables)
   - [Reserved Keywords](#reserved-keywords)
   - [Data Sequences](#data-sequences)
+  - [Substeps / Sub-divisions](#substeps--sub-divisions)
   - [Note Values](#note-values)
   - [Tracks](#tracks)
   - [Built-in Functions](#built-in-functions)
@@ -160,9 +161,15 @@ You must declare variables before using them later in the script.
 
 **Arithmetic Operators**
 
-`+` `-` `*` `/` operate on numbers with standard mathematical precedence.
+`+` `-` `*` `/` `%` operate on numbers with standard mathematical precedence.
 Parentheses can be used to override precedence, just like in regular programming.
 All arithmetic operators take precedence over logical and comparison operators.
+
+- `+` - Addition
+- `-` - Subtraction
+- `*` - Multiplication
+- `/` - Division
+- `%` - Modulo (remainder after division)
 
 **Logical Operators**
 
@@ -259,6 +266,54 @@ Data sequences are arrays of numeric values used to create musical patterns.
 **Example:**
 ```cpp
 a = [64, 64, 65]  // Simple 3-step sequence
+```
+
+### Substeps / Sub-divisions
+
+Substeps allow you to subdivide individual steps in a sequence, creating more complex rhythmic patterns within a single step. This is achieved using nested arrays.
+
+**Syntax:**
+
+A substep is defined by placing an array within the main sequence array:
+```cpp
+a = [[value1, value2, ...], normalValue, ...]
+```
+
+**Key Points:**
+- Each step in a sequence can be either a single value or a substep array
+- Substep arrays can contain up to 6 values (MAX_SUB_DIVISION_LENGTH)
+- When a substep is encountered, each value within it is played in sequence before moving to the next step
+- Substeps are useful for creating fills, rolls, or varying note patterns within a single beat
+
+**Examples:**
+
+**Basic substep:**
+```cpp
+// First step has 4 subdivisions, second and third are single values
+a = [[1, 0, 1, 0], 0, 1]
+note(a, 60, 100, 1)
+```
+
+**Mixed substeps with different lengths:**
+```cpp
+// First step subdivided into 3 notes, others are single values
+notes = [[60, 65, 70], 64, 67]
+note(1, notes, 100, 1)
+```
+
+**Substep operations:**
+```cpp
+// Substeps can be used in operations
+a = [[60, 65, 70], 0, 0]
+b = a + 10  // Adds 10 to each value in the substep
+note(1, b, 100, 1)  // Plays [70, 75, 80] in the first step
+```
+
+**Accessing substep elements:**
+```cpp
+// You can access individual substeps using array indexing
+pattern = [[1, 1, 0], 0, 0]
+firstStep = pattern[0]  // Gets the entire substep [1, 1, 0]
 ```
 
 ### Note Values
@@ -431,6 +486,22 @@ hihat = euc(7, 8)
 note(kick, 36, 100, 10)   // Kick on channel 10
 note(snare, 38, 100, 10)  // Snare on channel 10
 note(hihat, 42, 80, 10)   // Hi-hat on channel 10
+```
+
+### Using Substeps for Drum Fills
+```cpp
+// Create a pattern with a drum fill on the 4th step
+trigger = [1, 0, 1, [1, 0, 1, 1]]  // Fourth step has rapid hits
+note(trigger, 38, 100, 10)  // Snare drum
+
+// Alternating note pattern with substep variation
+notes = [[60, 64, 67], 60, 62, 64]  // First step plays a chord
+note(1, notes, 100, 1)
+
+// Modulo operation example with substeps
+counter = [[0, 1, 2, 3], 4, 5, 6]
+everyOther = counter % 2  // Creates pattern: [[0,1,0,1], 0, 1, 0]
+note(everyOther, C4, 100, 1)
 ```
 
 ---
