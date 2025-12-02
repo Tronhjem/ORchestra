@@ -284,6 +284,8 @@ a = [[value1, value2, ...], normalValue, ...]
 - Substep arrays can contain up to 6 values (MAX_SUB_DIVISION_LENGTH)
 - When a substep is encountered, each value within it is played in sequence before moving to the next step
 - Substeps are useful for creating fills, rolls, or varying note patterns within a single beat
+- When using substeps with `note()` or `cc()`, the trigger must also use a substep to activate individual sub-divisions
+- If a trigger substep has more divisions than the note/velocity/CC value substeps, the system will map to the nearest equivalent value proportionally
 
 **Examples:**
 
@@ -314,6 +316,16 @@ note(1, b, 100, 1)  // Plays [70, 75, 80] in the first step
 // You can access individual substeps using array indexing
 pattern = [[1, 1, 0], 0, 0]
 firstStep = pattern[0]  // Gets the entire substep [1, 1, 0]
+```
+
+**Mapping substeps with different lengths:**
+```cpp
+// Trigger has 4 subdivisions, notes only has 2
+trigger = [[1, 1, 1, 1], 0, 0]
+notes = [[60, 64], 0, 0]  // Maps: 60, 60, 64, 64 (nearest value)
+note(trigger, notes, 100, 1)
+
+// This allows fewer note values to span more trigger divisions
 ```
 
 ### Note Values
