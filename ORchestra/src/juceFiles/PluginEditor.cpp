@@ -12,7 +12,6 @@
 
 #include "LookAndFeelConstants.h"
 #include "Colours.h"
-#include "TitleBarComponent.h"
 #include "ErrorReporting.h"
 #include "ParamConstants.h"
 #include "Utility.h"
@@ -66,12 +65,15 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     mCompileButton.setBounds(buttonXStart, nextLineY, static_cast<int>(buttonWidth * 1.5f), buttonHeight);
 
     buttonXStart += static_cast<int>(buttonWidth * 1.5f + COMPONENT_MARGIN);
+    mBpmBox.setBounds(buttonXStart, nextLineY, buttonWidth, buttonHeight);
+
+    buttonXStart += static_cast<int>(buttonWidth + COMPONENT_MARGIN);
+    mSyncToggle.setBounds(buttonXStart, nextLineY, buttonWidth / 2, buttonHeight);
+
+    buttonXStart += static_cast<int>(buttonWidth  / 2 + COMPONENT_MARGIN);
     mTempoDivisionSelectorBox.setBounds(buttonXStart, nextLineY, static_cast<int>(buttonWidth * 1.5f), buttonHeight);
 
     buttonXStart += static_cast<int>(buttonWidth * 1.5f + COMPONENT_MARGIN);
-    mBpmBox.setBounds(buttonXStart, nextLineY, buttonWidth, buttonHeight);
-
-    buttonXStart += buttonWidth + COMPONENT_MARGIN;
     mNoteLengtSelectorBox.setBounds(buttonXStart, nextLineY, static_cast<int>(buttonWidth * 1.5f), buttonHeight);
 
     buttonXStart += static_cast<int>(buttonWidth * 1.5f + COMPONENT_MARGIN);
@@ -84,7 +86,7 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     nextLineY += buttonHeight + COMPONENT_MARGIN;
     mCodeEditorTextBox.setBounds(OUTER_MARGIN, nextLineY, codeEditorWidth, codeEditorHeight);
 
-    nextLineY += codeEditorHeight - 2.f;
+    nextLineY += codeEditorHeight - 2;
     mErrorTextBox.setBounds(OUTER_MARGIN, nextLineY, codeEditorWidth, 30);
 
     // ======== NEW LINE ============
@@ -114,12 +116,14 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     mCompileButton.addListener(this);
     mCodeEditorTextBox.addListener(this);
     mTogglePlayButton.addListener(this);
+    mSyncToggle.addListener(this);
 
     juce::LookAndFeel::setDefaultLookAndFeel(mGeneralLookAndFeel.get());
 
     mTogglePlayButton.setLookAndFeel(mButtonLookAndFeel.get());
     mExportToFileButton.setLookAndFeel(mButtonLookAndFeel.get());
     mImportFileButton.setLookAndFeel(mButtonLookAndFeel.get());
+    mSyncToggle.setLookAndFeel(mButtonLookAndFeel.get());
     mCompileButton.setLookAndFeel(mButtonLookAndFeel.get());
     mCodeEditorTextBox.setLookAndFeel(mTextEditorLookAndFeel.get());
     mErrorTextBox.setLookAndFeel(mTextEditorLookAndFeel.get());
@@ -145,6 +149,7 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     addAndMakeVisible(mBpmLabel);
     addAndMakeVisible(mNoteLengthLabel);
     addAndMakeVisible(mTogglePlayButton);
+    addAndMakeVisible(mSyncToggle);
     addAndMakeVisible(mExportToFileButton);
     addAndMakeVisible(mImportFileButton);
     addAndMakeVisible(mCompileButton);
@@ -170,6 +175,7 @@ ORchestraAudioProcessorEditor::~ORchestraAudioProcessorEditor()
     mTogglePlayButton.setLookAndFeel(nullptr);
     mExportToFileButton.setLookAndFeel(nullptr);
     mImportFileButton.setLookAndFeel(nullptr);
+    mSyncToggle.setLookAndFeel(nullptr);
     mCodeEditorTextBox.setLookAndFeel(nullptr);
 
     audioProcessor.removeChangeListener(this);
@@ -216,8 +222,7 @@ void ORchestraAudioProcessorEditor::buttonClicked(juce::Button* button)
     }
     else if (button == &mImportFileButton)
     {
-        mFileChooser.launchAsync(mFileChooserFlags, [this](const juce::FileChooser& fc)
-            {
+        mFileChooser.launchAsync(mFileChooserFlags, [this](const juce::FileChooser& fc) {
                 UNUSED(fc);
                 juce::File file = mFileChooser.getResult();
                 std::string filePath{ file.getFullPathName().toRawUTF8() };
@@ -225,7 +230,8 @@ void ORchestraAudioProcessorEditor::buttonClicked(juce::Button* button)
                 juce::String dataAsString{ data };
                 mCodeEditorTextBox.setText(dataAsString);
 
-                UpdateErrors(); });
+                UpdateErrors(); 
+            });
     }
     else if (button == &mCompileButton)
     {
@@ -235,6 +241,19 @@ void ORchestraAudioProcessorEditor::buttonClicked(juce::Button* button)
         mEditorIsDirty = false;
 
         UpdateErrors();
+    }
+    else if (button == &mSyncToggle)
+    {
+        const bool shouldSync = mSyncToggle.getToggleState();
+        audioProcessor.ShouldSyncTempo(shouldSync);
+        mTogglePlayButton.setEnabled(!shouldSync);
+        mBpmBox.setEnabled(!shouldSync);
+
+        if(shouldSync)
+        {
+            audioProcessor.IsRunning = false;
+            mTogglePlayButton.setButtonText("Play");
+        }
     }
 }
 

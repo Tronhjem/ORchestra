@@ -24,6 +24,8 @@ ORchestraAudioProcessor::ORchestraAudioProcessor() :
 #endif
     ),
 #endif
+    IsRunning(false),
+    mShouldSync(false),
     mValueTree(*this, nullptr, juce::Identifier("ORchestra"),
         { std::make_unique<juce::AudioParameterInt>(bpmParamId, "Bpm", 10, 300, 120),
          std::make_unique<juce::AudioParameterChoice>(tempoDivisionId, "Tempo Division", mNoteDivisionsStrings, static_cast<int>(NoteDivision::n4)),
@@ -151,24 +153,35 @@ void ORchestraAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juc
     juce::ScopedNoDenormals noDenormals;
     const int bufferLength = buffer.getNumSamples();
 
-    if (IsRunning)
-        mTransportData.isPlaying = IsRunning; // Set the playing to true when standalone
-
-    //    FillPositionData(mTransportData);
+    // We do this to only fill the position data if we ARE syncing
+    // and only fill it when we're NOT syncing but RUNNING.
+    if (!mShouldSync && IsRunning)
+    {
+        FillPositionData(mTransportData);
+        mTransportData.timeInSamples = mLocalTimeInSamples;
+        mTransportData.bpm = static_cast<double>(*mBpm);
+        mTransportData.isPlaying = true; // Set the playing to true when standalone
+    }
+    else if (mShouldSync && !IsRunning)
+    {
+        FillPositionData(mTransportData);
+    }
 
     mTransportData.bpmDivision = GetBpmDivision(*mTempoDivision);
-    mTransportData.bpm = static_cast<double>(*mBpm);
     mTransportData.noteLengthInSamples = GetNoteLength(*mNoteLength);
 
     mORchestraEngine->Tick(mTransportData, bufferLength, midiMessages);
 
-    if (IsRunning)
+    // for incrementing position itselfm
+    if (!mShouldSync && IsRunning)
     {
-        mTransportData.timeInSamples += bufferLength; // Need to increment the position in samples ourselves when standalone.
+        mLocalTimeInSamples += bufferLength; 
     }
-    else if (!IsRunning && !mTransportData.isPlaying)
+    else if (!mShouldSync && !IsRunning)
     {
-        mTransportData.timeInSamples = 0;
+        mLocalTimeInSamples = 0;
+        mTransportData.isPlaying = false;
+        mTransportData.timeInSamples = mLocalTimeInSamples;
     }
 }
 

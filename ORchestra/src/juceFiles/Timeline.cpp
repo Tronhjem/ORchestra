@@ -32,7 +32,7 @@ void Timeline::timerCallback()
     mTriggerRectangle.ClearRectangles();
     mTimelineTriggerRectangles.clear();
     
-    //===========================================================================================================
+    //=================================================================================================
     // Here we gather the unique pitches
     for (int index = 0; index < TIMELINE_STEPS_DRAWN; ++index)
     {
@@ -89,13 +89,13 @@ void Timeline::timerCallback()
             const float y = static_cast<float>(yIndex) * trackHeight + 1.f;
             const float velocityFloat = static_cast<float>(step.mSecond.GetValue(0));
 
-            TriggerRectangle rect {x, y, velocityFloat};
-            mTimelineTriggerRectangles.emplace_back(rect);
+            TriggerRectangle timelineRect {x, y, velocityFloat};
+            mTimelineTriggerRectangles.emplace_back(timelineRect);
 
             if (index == 0 && step.mShouldTrigger.GetValue(0))
             {
-                TriggerRectangle rect {x, y, 1.f};
-                mTriggerRectangle.AddRectangle(rect);
+                TriggerRectangle triggerRect {x, y, 1.f};
+                mTriggerRectangle.AddRectangle(triggerRect);
             }
 //            =================================================================================
 //            DISABLE TEXT FOR NOW

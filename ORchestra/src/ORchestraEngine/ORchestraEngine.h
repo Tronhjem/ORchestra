@@ -44,7 +44,7 @@ namespace ORchestra {
         std::atomic<int> mCurrentGlobalStep;
         std::atomic<int> mCurrentProcessingStep;
         std::atomic<bool> mIsVMInit;
-        std::atomic<bool> shouldExit;
+        std::atomic<bool> mShouldExit;
 
         std::thread mWorkerThread;
         std::unique_ptr<VM> mVM;

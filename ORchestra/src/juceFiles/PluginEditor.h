@@ -17,6 +17,7 @@
 #include "GeneralLookAndFeel.h"
 #include "ButtonsLookAndFeel.h"
 #include "TextEditorLookAndFeel.h"
+#include "juce_gui_basics/juce_gui_basics.h"
 
 typedef juce::AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
 typedef juce::AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
@@ -63,6 +64,7 @@ private:
     juce::StringArray mNoteDivisions{ "1n", "2n","4n", "8n", "16n", "32n", "64n" };
     juce::ComboBox mTempoDivisionSelectorBox;
     juce::ComboBox mNoteLengtSelectorBox;
+    juce::ToggleButton mSyncToggle;
     juce::Slider mBpmBox;
 
     std::unique_ptr<SliderAttachment> mBpmSliderAttachment;
@@ -77,11 +79,9 @@ private:
     juce::TextEditor mCodeEditorTextBox;
     juce::TextEditor mErrorTextBox;
 
-
     //    juce::CodeDocument codeDocument;
     //       juce::CodeTokeniser tokeniser; // You can subclass this or use CppTokeniser, LuaTokeniser, etc.
     //       std::unique_ptr<juce::CodeEditorComponent> codeEditor;
-
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ORchestraAudioProcessorEditor)
 };

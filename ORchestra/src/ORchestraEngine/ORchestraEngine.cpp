@@ -10,7 +10,7 @@ namespace ORchestra {
         mCurrentGlobalStep(0),
         mCurrentProcessingStep(0),
         mIsVMInit(false),
-        shouldExit(false)
+        mShouldExit(false)
     {
         mVM = std::make_unique<VM>();
         mFileLoader = std::make_unique<FileLoader>();
@@ -25,7 +25,7 @@ namespace ORchestra {
 
     ORchestraEngine::~ORchestraEngine()
     {
-        shouldExit.store(true);
+        mShouldExit.store(true);
         if (mWorkerThread.joinable())
             mWorkerThread.join();
     }
@@ -71,7 +71,7 @@ namespace ORchestra {
 
     void ORchestraEngine::WorkerThreadLoop()
     {
-        while (!shouldExit.load())
+        while (!mShouldExit.load())
         {
             PreProcessSteps();
             std::this_thread::sleep_for(std::chrono::milliseconds(50));
