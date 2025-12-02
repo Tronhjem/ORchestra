@@ -52,16 +52,6 @@ Before building ORchestra, ensure you have the following installed:
 - **Git** (for cloning and managing submodules)
 - **JUCE Framework** (automatically fetched as a git submodule)
 
-For Ubuntu/Debian:
-```bash
-sudo apt-get install cmake build-essential git
-```
-
-For macOS:
-```bash
-brew install cmake git
-```
-
 ---
 
 ## Quick Start
@@ -211,6 +201,7 @@ z = a * (2 + 4)
 ```cpp
 a = [127, 0, 64]
 ```
+see for more details [Data Sequences](#data-sequences)
 
 **Variable reference:**
 
@@ -268,9 +259,84 @@ Data sequences are arrays of numeric values used to create musical patterns.
 a = [64, 64, 65]  // Simple 3-step sequence
 ```
 
+### Tracks
+
+Tracks output MIDI messages and are created using the `note` or `cc` keywords.
+These are used to send data from your Data Sequences to midi. 
+
+**Important:**
+- Tracks are not variables - they execute immediately
+- Both require exactly 4 arguments
+- Arguments can be values, expressions, or variables
+- The trigger argument checks if value > 0 to determine when to send MIDI
+- Even if a step in a Data Sequence has a value, it will only send a value if the trigger of the same step is true.
+
+**Note Track Syntax:**
+```cpp
+note(trigger, note, velocity, channel)
+```
+
+**CC Track Syntax:**
+```cpp
+cc(trigger, controlNumber, controlValue, channel)
+```
+
+**Example:**
+```cpp
+a = [1, 0, 1, 0]      // Trigger pattern
+b = [64, 64, 65, 67]  // Note sequence
+
+note(a, b, 100, 1)    // Trigger: a, Notes: b, Velocity: 100, Channel: 1
+```
+
+### Global Step
+
+ORchestra has global count which is receives either from a daw, or calculating the position since start, based on tempo and note divison. 
+This is used to determine which index of each Data Sequence it should pick from.
+Just setting a variable without any index will use the global step. This is how we use our Data Sequences with tracks as sequences for midi.
+Everything is wrapped around the length of the sequence, meaning even if the global count is at 5, and your sequence is 4 long, it will wrap around and be a position 0.
+
+**Example:** 
+```cpp
+a = [1,  0,  1,  0]
+b = [64, 65, 66, 67]
+note(a, b, 100, 1)
+```
+
+For Global Step **0** we have a trigger which is 1, and a note of 64 with a velocity of 100 and midi channel of 1 hardcoded. 
+For Global Step **1**, we have a trigger that is 0 so this will not output any note.
+For Global Step **2**, we have a trigger again, and a note value of 65, with the same velocity, and Global Step **3** will result in nothing played again as we do not have a trigger.
+
+Now when the Global Step becomes 4, the length of the trigger and note Data Sequence is only 3 and we will wrap around, effectively repeating the pattern again. 
+This is part of the power of ORchestra, as we can define triggers and note Data Sequences of different lengths, having triggers on different notes as we loop around. 
+
+**Example:**
+```cpp
+a = [1,  0,  1]
+b = [64, 65, 66, 67]
+
+note(a, b, 100, 1)
+```
+
+Here our note sequence would be as following for each global step:
+```
+Step   Trigger    Note result
+ 0        1           64
+ 1        0           --
+ 2        1           66
+ 3        1           67
+ 4        0           --
+ 5        1           65           
+ 6        1           66           
+```
+
+The possibilites gets quite complex when combining trigger sequences of different lenght with logical operators as it can create quite long variations with simple patterns, because of this phasing functionality of the Global Step accessing.
+
 ### Substeps / Sub-divisions
 
 Substeps allow you to subdivide individual steps in a sequence, creating more complex rhythmic patterns within a single step. This is achieved using nested arrays.
+The length ot the substep divides the step into equally length portions. 
+Sub steps works for all parameters of `note()` or `cc()`, however just like normally, a track is not triggered, it will not play sub divisions for example on notes or velocities.
 
 **Syntax:**
 
@@ -280,8 +346,8 @@ a = [[value1, value2, ...], normalValue, ...]
 ```
 
 **Key Points:**
-- Each step in a sequence can be either a single value or a substep array
-- Substep arrays can contain up to 6 values (MAX_SUB_DIVISION_LENGTH)
+- Each step in a Data Sequence can be either a single value or a substep array
+- Substep arrays can contain up to 6 values / Sub divisions (MAX_SUB_DIVISION_LENGTH)
 - When a substep is encountered, each value within it is played in sequence before moving to the next step
 - Substeps are useful for creating fills, rolls, or varying note patterns within a single beat
 - When using substeps with `note()` or `cc()`, the trigger must also use a substep to activate individual sub-divisions
@@ -292,15 +358,23 @@ a = [[value1, value2, ...], normalValue, ...]
 **Basic substep:**
 ```cpp
 // First step has 4 subdivisions, second and third are single values
+// If the overall note division is set to 4th notes, the first step is playing 2 16th notes with a 16th note pause in between. 
 a = [[1, 0, 1, 0], 0, 1]
 note(a, 60, 100, 1)
 ```
 
 **Mixed substeps with different lengths:**
 ```cpp
-// First step subdivided into 3 notes, others are single values
+// First step subdivided into 3 notes, others are single values.
+// Note that here it will only play the first note, as the trigger is not a subdivided one. 
 notes = [[60, 65, 70], 64, 67]
 note(1, notes, 100, 1)
+
+// If we instead define it like this we have triplets playing for the triggers
+// and each note in the subdivisions have a trigger for it.
+trigger = [[1, 1, 1],     1,  1]
+notes =    [[60, 65, 70], 64, 67]
+note(trigger, notes, 100, 1)
 ```
 
 **Substep operations:**
@@ -349,44 +423,11 @@ a = [C4, C#4, Db2]
 
 When compiled, note names are converted to MIDI values, allowing them to be combined with other values and used in expressions.
 
-### Tracks
-
-Tracks output MIDI messages and are created using the `note` or `cc` keywords.
-
-**Important:**
-- Tracks are not variables - they execute immediately
-- Both require exactly 4 arguments
-- Arguments can be values, expressions, or variables
-- The trigger argument checks if value > 0 to determine when to send MIDI
-
-**Note Track Syntax:**
-```cpp
-note(trigger, note, velocity, channel)
-```
-
-**CC Track Syntax:**
-```cpp
-cc(trigger, controlNumber, controlValue, channel)
-```
-
-**Example:**
-```cpp
-a = [1, 0, 1, 0]      // Trigger pattern
-b = [64, 64, 65, 67]  // Note sequence
-
-note(a, b, 100, 1)    // Trigger: a, Notes: b, Velocity: 100, Channel: 1
-```
-
 ### Built-in Functions
 
 #### Euclidean Sequence Generator
 
 The `euc(hits, length)` function generates euclidean rhythm patterns.
-
-**Syntax:**
-```cpp
-euc(hits, length)
-```
 
 **Parameters:**
 - `hits` - Number of beats to distribute
@@ -406,11 +447,6 @@ note(a, 64, 100, 1)  // Use the euclidean pattern as a trigger
 #### Random Number Generator
 
 The `ran(low, high)` function generates random values at runtime.
-
-**Syntax:**
-```cpp
-ran(low, high)
-```
 
 **Parameters:**
 - `low` - Minimum value (inclusive)
@@ -572,6 +608,3 @@ Solution: Verify array indices are within range (0 to array length - 1)
 
 MIT License - see [LICENSE](LICENSE) file for details.
 
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
