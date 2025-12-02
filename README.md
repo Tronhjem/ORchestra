@@ -220,6 +220,19 @@ a = c[0]  // value is 64
 x = c[1]  // value is 65
 ```
 
+**Array index assignment:**
+
+Set specific values in a data sequence:
+```cpp
+c = [64, 65, 70]
+c[0] = 60  // Changes first element to 60
+c[2] = 72  // Changes third element to 72
+
+// Can use expressions
+notes = [60, 62, 64]
+notes[1] = notes[0] + 5  // Sets second element to 65
+```
+
 **Boolean operations:**
 
 Note that logical and comparison operators always return 0 or 1:
@@ -520,6 +533,21 @@ note(1, randomNote, 100, 1)
 // Control filter cutoff with sequence
 cutoff = [64, 80, 100, 120]
 cc(1, 74, cutoff, 1)  // Always trigger, CC#74 (filter cutoff)
+```
+
+### Modifying Arrays with Index Assignment
+```cpp
+// Create a melody and modify specific notes
+melody = [C4, D4, E4, F4]
+melody[1] = G4  // Change second note to G4
+melody[3] = A4  // Change fourth note to A4
+
+// Create dynamic patterns
+kick = [1, 0, 0, 0]
+kick[2] = 1  // Add extra kick on third beat
+
+note(kick, 36, 100, 10)    // Modified kick pattern
+note(1, melody, 100, 1)    // Modified melody
 ```
 
 ### Complex Rhythm

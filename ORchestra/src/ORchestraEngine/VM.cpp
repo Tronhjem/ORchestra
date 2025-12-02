@@ -98,6 +98,25 @@ namespace ORchestra
                 break;
             }
 
+            case (OpCode::SET_IDENTIFIER_WITH_INDEX):
+            {
+                const StepData value = stack.Pop();
+                const int index = stack.Pop().GetValue(0);
+                
+                if (mVariables.find(instruction.mNameValue) != mVariables.end())
+                {
+                    mVariables[instruction.mNameValue].SetValue(index, value);
+                }
+                else
+                {
+                    const std::string error = std::string("VM: Variable not defined");
+                    mErrorReporting.LogError(error);
+                    return false;
+                }
+
+                break;
+            }
+
             case (OpCode::NOTE):
             case (OpCode::CC):
                 break;
@@ -223,6 +242,25 @@ namespace ORchestra
             for (int i = arrayLength - 1; i >= 0; --i)
             {
                 mVariables[instruction.mNameValue].SetValue(i, stack.Pop());
+            }
+
+            break;
+        }
+
+        case (OpCode::SET_IDENTIFIER_WITH_INDEX):
+        {
+            const StepData value = stack.Pop();
+            const int index = stack.Pop().GetValue(0);
+            
+            if (mVariables.find(instruction.mNameValue) != mVariables.end())
+            {
+                mVariables[instruction.mNameValue].SetValue(index, value);
+            }
+            else
+            {
+                const std::string error = std::string("VM: Variable not defined");
+                mErrorReporting.LogError(error);
+                return false;
             }
 
             break;

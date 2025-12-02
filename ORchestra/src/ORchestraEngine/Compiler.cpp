@@ -677,9 +677,44 @@ namespace ORchestra
             {
                 std::string name = std::string(token.mStart, static_cast<unsigned long>(token.mLength));
 
-                if (Peek().mTokenType == ORchestraTokenType::EQUAL)
+                if (Peek().mTokenType == ORchestraTokenType::LEFT_BRACKET)
                 {
-                    Consume(); // consumes the equal sign
+                    Consume();
+
+                    if (!CompileExpression(instructions))
+                    {
+                        return false;
+                    }
+
+                    if (Peek().mTokenType != ORchestraTokenType::RIGHT_BRACKET)
+                    {
+                        std::string missingBracket = "]";
+                        ThrowMissingExpectedToken(missingBracket);
+                        return false;
+                    }
+
+                    Consume();
+
+                    if (Peek().mTokenType == ORchestraTokenType::EQUAL)
+                    {
+                        Consume();
+
+                        if (!CompileExpression(instructions))
+                        {
+                            return false;
+                        }
+
+                        instructions.emplace_back(Instruction{ OpCode::SET_IDENTIFIER_WITH_INDEX, name });
+                    }
+                    else
+                    {
+                        ThrowUnexpectedTokenError(Peek());
+                        return false;
+                    }
+                }
+                else if (Peek().mTokenType == ORchestraTokenType::EQUAL)
+                {
+                    Consume();
 
                     ORchestraTokenType tokenType = Peek().mTokenType;
                     switch (tokenType)

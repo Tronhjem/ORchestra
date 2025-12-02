@@ -34,3 +34,133 @@ TEST_CASE("Array: Assign array to variable 'a=[64,65,63], b=a' gets first elemen
     StepData result = vm.GetTopStackValue();
     REQUIRE(result.GetValue(0) == 64);
 }
+
+TEST_CASE("Array: Set specific index 'a=[1,2,3], a[1]=5' changes second element to 5", "[Array]")
+{
+    std::string file{"a = [1,2,3] \n a[1] = 5 \n test a[1]"};
+    VM vm;
+    REQUIRE(vm.Prepare(file));
+
+    StepData result = vm.GetTopStackValue();
+    REQUIRE(result.GetValue(0) == 5);
+}
+
+TEST_CASE("Array: Set first index 'a=[10,20,30], a[0]=99' changes first element", "[Array]")
+{
+    std::string file{"a = [10,20,30] \n a[0] = 99 \n test a[0]"};
+    VM vm;
+    REQUIRE(vm.Prepare(file));
+
+    StepData result = vm.GetTopStackValue();
+    REQUIRE(result.GetValue(0) == 99);
+}
+
+TEST_CASE("Array: Set last index 'a=[5,6,7], a[2]=100' changes third element", "[Array]")
+{
+    std::string file{"a = [5,6,7] \n a[2] = 100 \n test a[2]"};
+    VM vm;
+    REQUIRE(vm.Prepare(file));
+
+    StepData result = vm.GetTopStackValue();
+    REQUIRE(result.GetValue(0) == 100);
+}
+
+TEST_CASE("Array: Set index with expression 'a=[1,2,3], a[1]=a[0]+10'", "[Array]")
+{
+    std::string file{"a = [1,2,3] \n a[1] = a[0] + 10 \n test a[1]"};
+    VM vm;
+    REQUIRE(vm.Prepare(file));
+
+    StepData result = vm.GetTopStackValue();
+    REQUIRE(result.GetValue(0) == 11);
+}
+
+TEST_CASE("Array: Set index with variable 'a=[10,20,30], b=50, a[1]=b'", "[Array]")
+{
+    std::string file{"a = [10,20,30] \n b = 50 \n a[1] = b \n test a[1]"};
+    VM vm;
+    REQUIRE(vm.Prepare(file));
+
+    StepData result = vm.GetTopStackValue();
+    REQUIRE(result.GetValue(0) == 50);
+}
+
+TEST_CASE("Array: Set index with calculated index 'a=[1,2,3,4], idx=2, a[idx]=99'", "[Array]")
+{
+    std::string file{"a = [1,2,3,4] \n idx = 2 \n a[idx] = 99 \n test a[2]"};
+    VM vm;
+    REQUIRE(vm.Prepare(file));
+
+    StepData result = vm.GetTopStackValue();
+    REQUIRE(result.GetValue(0) == 99);
+}
+
+TEST_CASE("Array: Multiple index assignments 'a=[1,2,3], a[0]=10, a[1]=20, a[2]=30'", "[Array]")
+{
+    std::string file{"a = [1,2,3] \n a[0] = 10 \n a[1] = 20 \n a[2] = 30 \n test a[0]"};
+    VM vm;
+    REQUIRE(vm.Prepare(file));
+    
+    StepData result = vm.GetTopStackValue();
+    REQUIRE(result.GetValue(0) == 10);
+}
+
+TEST_CASE("Array: Verify other elements unchanged after index assignment", "[Array]")
+{
+    std::string file{"a = [64,65,66] \n a[1] = 100 \n test a[0]"};
+    VM vm;
+    REQUIRE(vm.Prepare(file));
+
+    StepData result = vm.GetTopStackValue();
+    REQUIRE(result.GetValue(0) == 64);
+}
+
+TEST_CASE("Array: Set index with note value 'a=[60,62,64], a[1]=C4'", "[Array]")
+{
+    std::string file{"a = [60,62,64] \n a[1] = C4 \n test a[1]"};
+    VM vm;
+    REQUIRE(vm.Prepare(file));
+
+    StepData result = vm.GetTopStackValue();
+    REQUIRE(result.GetValue(0) == 60);
+}
+
+TEST_CASE("Array: Complex scenario with arithmetic 'a=[5,10,15], a[2]=a[0]+a[1]'", "[Array]")
+{
+    std::string file{"a = [5,10,15] \n a[2] = a[0] + a[1] \n test a[2]"};
+    VM vm;
+    REQUIRE(vm.Prepare(file));
+
+    StepData result = vm.GetTopStackValue();
+    REQUIRE(result.GetValue(0) == 15);
+}
+
+TEST_CASE("Array: Set with multiplication 'a=[2,3,4], a[1]=a[0]*5'", "[Array]")
+{
+    std::string file{"a = [2,3,4] \n a[1] = a[0] * 5 \n test a[1]"};
+    VM vm;
+    REQUIRE(vm.Prepare(file));
+
+    StepData result = vm.GetTopStackValue();
+    REQUIRE(result.GetValue(0) == 10);
+}
+
+TEST_CASE("Array: Set with comparison result 'a=[50,60,70], a[0]=a[1]>55'", "[Array]")
+{
+    std::string file{"a = [50,60,70] \n a[0] = a[1] > 55 \n test a[0]"};
+    VM vm;
+    REQUIRE(vm.Prepare(file));
+
+    StepData result = vm.GetTopStackValue();
+    REQUIRE(result.GetValue(0) == 1);
+}
+
+TEST_CASE("Array: Swap two elements using temp variable", "[Array]")
+{
+    std::string file{"a = [10,20,30] \n temp = a[0] \n a[0] = a[2] \n a[2] = temp \n test a[0]"};
+    VM vm;
+    REQUIRE(vm.Prepare(file));
+
+    StepData result = vm.GetTopStackValue();
+    REQUIRE(result.GetValue(0) == 30);
+}
