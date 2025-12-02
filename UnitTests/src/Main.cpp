@@ -17,4 +17,5 @@
 #include "Test_Scanner_Expressions.h"
 #include "Test_FileLoader.h"
 #include "Test_Compiler.h"
+#include "Test_GlobalCount.h"
 

@@ -336,6 +336,7 @@ namespace ORchestra
             Peek().mTokenType != ORchestraTokenType::NOTE_IDENTIFIER &&
             Peek().mTokenType != ORchestraTokenType::IDENTIFIER &&
             Peek().mTokenType != ORchestraTokenType::RANDOM &&
+            Peek().mTokenType != ORchestraTokenType::DOLLAR &&
             Peek().mTokenType != ORchestraTokenType::LEFT_BRACKET)
         {
             ThrowUnexpectedTokenError(Peek());
@@ -397,6 +398,7 @@ namespace ORchestra
             case ORchestraTokenType::NOTE_IDENTIFIER:
             case ORchestraTokenType::IDENTIFIER:
             case ORchestraTokenType::LEFT_PAREN:
+            case ORchestraTokenType::DOLLAR:
             {
                 if (!expectsValue)
                 {
@@ -561,6 +563,18 @@ namespace ORchestra
             else if (tType == ORchestraTokenType::RANDOM)
             {
                 CompileFunctionCall(instructions, ranFunctionName);
+                expectsValue = false;
+            }
+
+            else if (tType == ORchestraTokenType::DOLLAR)
+            {
+                if (!expectsValue)
+                {
+                    ThrowUnexpectedTokenError(currentToken);
+                    return false;
+                }
+
+                instructions.emplace_back(Instruction{ OpCode::GET_GLOBAL_COUNT });
                 expectsValue = false;
             }
 
@@ -741,6 +755,7 @@ namespace ORchestra
                     case ORchestraTokenType::IDENTIFIER:
                     case ORchestraTokenType::LEFT_PAREN:
                     case ORchestraTokenType::RANDOM:
+                    case ORchestraTokenType::DOLLAR:
                     {
                         if (!CompileExpression(instructions))
                             return false;
@@ -797,7 +812,9 @@ namespace ORchestra
 #if _TEST
             case ORchestraTokenType::TEST_KEYWORD:
             {
-                if (Peek().mTokenType == ORchestraTokenType::IDENTIFIER || Peek().mTokenType == ORchestraTokenType::NUMBER)
+                if (Peek().mTokenType == ORchestraTokenType::IDENTIFIER || 
+                    Peek().mTokenType == ORchestraTokenType::NUMBER ||
+                    Peek().mTokenType == ORchestraTokenType::DOLLAR)
                 {
                     CompileExpression(instructions);
                 }

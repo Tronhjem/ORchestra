@@ -45,6 +45,7 @@ namespace ORchestra {
         // Built in Functions
         CALL_FUNCTION,
         GET_RANDOM_IN_RANGE,
+        GET_GLOBAL_COUNT,
         END,
 #if _DEBUG
         PRINT

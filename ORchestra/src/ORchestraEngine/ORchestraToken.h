@@ -27,6 +27,7 @@ namespace ORchestra {
         IDENTIFIER,
         STRING,
         NUMBER,
+        DOLLAR,
 
         // Logic
         AND,
