@@ -1,4 +1,5 @@
 #pragma once
+#include <array>
 
 namespace ORchestra
 {
@@ -42,5 +43,4 @@ namespace ORchestra
         // TODO: Should we make this smaller or bigger??
         std::array<T, 64> mStack;
     };
-
 } // namespace ORchestra

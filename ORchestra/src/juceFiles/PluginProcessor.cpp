@@ -9,6 +9,7 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 #include "ParamConstants.h"
+#include "juce_audio_processors/juce_audio_processors.h"
 
 
 using namespace ORchestra;
@@ -25,11 +26,19 @@ ORchestraAudioProcessor::ORchestraAudioProcessor() :
     ),
 #endif
     IsRunning(false),
-    mShouldSync(false),
     mValueTree(*this, nullptr, juce::Identifier("ORchestra"),
-        { std::make_unique<juce::AudioParameterInt>(bpmParamId, "Bpm", 10, 300, 120),
-         std::make_unique<juce::AudioParameterChoice>(tempoDivisionId, "Tempo Division", mNoteDivisionsStrings, static_cast<int>(NoteDivision::n4)),
-         std::make_unique<juce::AudioParameterChoice>(noteLengthId, "Note Length", mNoteDivisionsStrings, static_cast<int>(NoteDivision::n4)) })
+        { 
+            std::make_unique<juce::AudioParameterInt>(bpmParamId, "Bpm", 10, 300, 120),
+            std::make_unique<juce::AudioParameterInt>(syncToggleId, "Should Sync", 0, 1, 0),
+            std::make_unique<juce::AudioParameterChoice>(tempoDivisionId,
+                                                         "Tempo Division", 
+                                                         mNoteDivisionsStrings, 
+                                                         static_cast<int>(NoteDivision::n4)),
+            std::make_unique<juce::AudioParameterChoice>(noteLengthId, 
+                                                        "Note Length", 
+                                                        mNoteDivisionsStrings, 
+                                                        static_cast<int>(NoteDivision::n4)) 
+        })
 {
 
     mORchestraEngine = std::make_unique<ORchestraEngine>();
@@ -40,6 +49,7 @@ ORchestraAudioProcessor::ORchestraAudioProcessor() :
     mBpm = mValueTree.getRawParameterValue(bpmString);
     mTempoDivision = mValueTree.getRawParameterValue(tempoDivisionString);
     mNoteLength = mValueTree.getRawParameterValue(noteLengthString);
+    mShouldSync = mValueTree.getRawParameterValue(syncToggleString);
 }
 
 ORchestraAudioProcessor::~ORchestraAudioProcessor()
@@ -155,14 +165,15 @@ void ORchestraAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juc
 
     // We do this to only fill the position data if we ARE syncing
     // and only fill it when we're NOT syncing but RUNNING.
-    if (!mShouldSync && IsRunning)
+    const bool shouldSync = static_cast<bool>(*mShouldSync);
+    if (!shouldSync && IsRunning)
     {
         FillPositionData(mTransportData);
         mTransportData.timeInSamples = mLocalTimeInSamples;
         mTransportData.bpm = static_cast<double>(*mBpm);
         mTransportData.isPlaying = true;
     }
-    else if (mShouldSync && !IsRunning)
+    else if (shouldSync && !IsRunning)
     {
         FillPositionData(mTransportData);
     }
@@ -173,11 +184,11 @@ void ORchestraAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juc
     mORchestraEngine->Tick(mTransportData, bufferLength, midiMessages);
 
     // For incrementing sample position by the buffer and only when IsRunning
-    if (!mShouldSync && IsRunning)
+    if (!shouldSync && IsRunning)
     {
         mLocalTimeInSamples += bufferLength; 
     }
-    else if (!mShouldSync && !IsRunning)
+    else if (!shouldSync && !IsRunning)
     {
         mLocalTimeInSamples = 0;
         mTransportData.isPlaying = false;

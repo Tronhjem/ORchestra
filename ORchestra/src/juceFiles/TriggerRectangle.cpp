@@ -1,5 +1,6 @@
 #include "TriggerRectangle.h"
 #include "Timeline.h"
+#include "LookAndFeelConstants.h" 
 
 using namespace ORchestra;
 
@@ -23,6 +24,7 @@ void TriggerRectangleComponent::paint(juce::Graphics &g)
     {
         const auto color = juce::Colour::fromFloatRGBA(1.f, 1.f, 1.f, rect.alpha);
         g.setColour(color);
-        g.drawRoundedRectangle(rect.x, rect.y, drawnStepWidth, drawnStepHeight, roundedCornerSize, 4.f);
+        constexpr float triggerRectLineThickness = 4.f;
+        g.drawRoundedRectangle(rect.x, rect.y, drawnStepWidth, drawnStepHeight, ROUNDED_CORNER_SIZE, triggerRectLineThickness);
     }
 }

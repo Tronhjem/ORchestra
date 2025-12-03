@@ -5,6 +5,7 @@
 #include "ErrorReporting.h"
 #include "StepData.h"
 #include "Defines.h"
+
 #if _DEBUG
 #include "ScopedTimer.h"
 #endif

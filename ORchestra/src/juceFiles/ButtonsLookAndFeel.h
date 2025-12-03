@@ -3,6 +3,7 @@
 #include "LookAndFeelConstants.h"
 #include "Colours.h"
 #include "Utility.h"
+#include "juce_graphics/juce_graphics.h"
 
 class ButtonLookAndFeel : public juce::LookAndFeel_V4
 {
@@ -20,13 +21,31 @@ public:
         else if (isMouseOverButton)
             fillColour = fillColour.brighter(0.15f);
 
-        // No rounded corners: cornerSize = 0
         g.setColour(fillColour);
-        g.fillRoundedRectangle(bounds, 6.f);
+        g.fillRoundedRectangle(bounds, ROUNDED_CORNER_SIZE);
+    }
 
-        // Optional: draw border
-        g.setColour(fillColour.darker(0.3f));
-        g.drawRoundedRectangle(bounds, 6.0f, 2.f);
+    void drawToggleButton (juce::Graphics& g, juce::ToggleButton& toggleButton,
+                           bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown) override
+    {
+        UNUSED(shouldDrawButtonAsHighlighted);
+        UNUSED(shouldDrawButtonAsDown);
+
+        juce::Colour fillColour = ORchestraColours::ButtonBackground;
+        g.setColour(fillColour);
+
+        g.fillRoundedRectangle(toggleButton.getLocalBounds().toFloat(), ROUNDED_CORNER_SIZE);
+
+        const bool isPressed = toggleButton.getToggleState();
+        if (isPressed)
+        {
+            g.setColour(juce::Colours::white);
+
+            Rectangle<float> bounds = toggleButton.getLocalBounds().toFloat() * 0.6f;
+            bounds.setCentre(toggleButton.getLocalBounds().toFloat().getCentre());
+
+            g.fillEllipse(bounds);
+        }
     }
 
     juce::Font getTextButtonFont(juce::TextButton&, int buttonHeight) override

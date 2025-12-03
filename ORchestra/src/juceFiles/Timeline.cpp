@@ -1,11 +1,12 @@
+#include <algorithm>
+
 #include "Timeline.h"
 #include "Defines.h"
 #include "SequenceStep.h"
 #include "StepData.h"
 #include "Utility.h"
 #include "Colours.h"
-#include <algorithm>
-
+#include "LookAndFeelConstants.h"
 
 void Timeline::timerCallback()
 {
@@ -13,6 +14,9 @@ void Timeline::timerCallback()
     assert(mAudioProcessor != nullptr);
 #endif
     const TransportData& transportData = mAudioProcessor->GetTransportData();
+    if (!transportData.isPlaying)
+        return;
+    
     const int64_t timeInSamples = transportData.timeInSamples;
     const double samplesPerStep = static_cast<double>(transportData.sampleRate) * (60.0 / (transportData.bpm * transportData.bpmDivision));
     const int currentStep = static_cast<int>(ceil(static_cast<double>(timeInSamples) / samplesPerStep));
@@ -120,7 +124,7 @@ void Timeline::paint(juce::Graphics& g)
     {
         const juce::Colour colorToSet = GetStepColorFromVelocity(rect.alpha);
         g.setColour(colorToSet.withAlpha(1.f));
-        g.fillRoundedRectangle(rect.x, rect.y, drawnStepWidth,  drawnStepHeight, roundedCornerSize);
+        g.fillRoundedRectangle(rect.x, rect.y, drawnStepWidth,  drawnStepHeight, ROUNDED_CORNER_SIZE);
     }
 }
 

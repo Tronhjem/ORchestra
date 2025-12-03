@@ -72,8 +72,6 @@ public:
     std::array<std::vector<SequenceStep>, STEP_BUFFER_SIZE>& GetStepData() { return mORchestraEngine->GetStepData(); }
     const std::vector<LogEntry>& GetErrors() { return mORchestraEngine->GetErrors(); }
 
-    void ShouldSyncTempo(bool shouldSync) { mShouldSync = shouldSync; }
-
     bool IsRunning = false;
     double mSampleRate = 44100;
 
@@ -88,7 +86,7 @@ private:
     std::atomic<float>* mBpm;
     std::atomic<float>* mTempoDivision;
     std::atomic<float>* mNoteLength;
-    bool mShouldSync;
+    std::atomic<float>* mShouldSync;
 
     juce::String mSavedFilePath{ "" };
     juce::StringArray mNoteDivisionsStrings{ "1n", "2n", "4n", "8n", "16n", "32n", "64n" };

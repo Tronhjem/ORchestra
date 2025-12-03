@@ -1,4 +1,6 @@
 #pragma once
+#include <JuceHeader.h>
+
 using namespace juce;
 
 namespace ORchestraColours
@@ -14,9 +16,7 @@ namespace ORchestraColours
     const Colour MaxVelocity = Colour::fromString("#D64933");
     const Colour InactiveStep = Colour::fromString("#5B616A");
 
-
     // TETING
-
     //    const Colour MinVelocity = Colour::fromFloatRGBA(0.f, 0.f, 1.f, 1.f);
     //    const Colour MaxVelocity = Colour::fromFloatRGBA(1.f, 0.f, 0.f, 1.f);
     //    const Colour InactiveStep = Colour::fromFloatRGBA(0.3f, 0.3f, 0.3f, 1.f);

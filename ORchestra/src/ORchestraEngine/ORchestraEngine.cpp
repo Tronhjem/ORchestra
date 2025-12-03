@@ -5,9 +5,8 @@
 #include "ScopedTimer.h"
 #endif
 
-namespace ORchestra {
-
-
+namespace ORchestra 
+{
     ORchestraEngine::ORchestraEngine() : mReadySteps(0),
         mCurrentGlobalStep(0),
         mCurrentProcessingStep(0),
@@ -16,13 +15,7 @@ namespace ORchestra {
     {
         mVM = std::make_unique<VM>();
         mFileLoader = std::make_unique<FileLoader>();
-
         mWorkerThread = std::thread([this]() { WorkerThreadLoop(); });
-
-        const std::string file{ "a = 74 \n test a" };
-        VM vm;
-        bool process = vm.Prepare(file);
-        std::cout << process;
     }
 
     ORchestraEngine::~ORchestraEngine()
@@ -37,9 +30,7 @@ namespace ORchestra {
         const bool fileSaved = mFileLoader->SaveToFile(filePath, mInstructionData);
 
         if (fileSaved)
-        {
             Compile(mInstructionData);
-        }
     }
 
     const std::string& ORchestraEngine::ImportFromFile(const std::string& filePath)
@@ -47,9 +38,7 @@ namespace ORchestra {
         mInstructionData = mFileLoader->LoadFile(filePath);
 
         if (mInstructionData.length() > 0)
-        {
             Compile(mInstructionData);
-        }
 
         return mInstructionData;
     }
@@ -98,6 +87,7 @@ namespace ORchestra {
         // TODO: Make sure this doesn't skip a beat
         const int currentStep = mCurrentProcessingStep.load();
         const int endGlobalStep = stepsToProcess + currentStep;
+
         for (int i = currentStep; i < endGlobalStep; ++i)
         {
             const int stepWrapped = i % STEP_BUFFER_SIZE;
@@ -107,9 +97,6 @@ namespace ORchestra {
             currentData.clear();
 
             mVM->Tick(currentData, i);
-#if _DEBUG
-            //        std::cout << "global step process " << stepWrapped << " " << (int)currentData[0].mFirst.GetValue(0) << std::endl;
-#endif
             mReadySteps.fetch_add(1, std::memory_order_acq_rel);
         }
 
@@ -188,6 +175,4 @@ namespace ORchestra {
             mMidiScheduler.ClearAllData(midiMessages);
         }
     }
-
-
 } // namespace ORchestra

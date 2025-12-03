@@ -22,6 +22,7 @@
 typedef juce::AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
 typedef juce::AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
 typedef juce::AudioProcessorValueTreeState::ComboBoxAttachment ComboBoxAttachment;
+typedef juce::AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
 
 //==============================================================================
 /**
@@ -57,6 +58,7 @@ private:
     juce::TextButton mExportToFileButton{ "Export" };
     juce::TextButton mCompileButton{ "Compile" };
 
+    juce::Label mSyncToggleLabel{ "sync", "Sync" };
     juce::Label mTempoDivLabel{ "tempo", "Tempo Division" };
     juce::Label mBpmLabel{ "bpm","BPM" };
     juce::Label mNoteLengthLabel{ "noteLength", "Note Length" };
@@ -64,12 +66,13 @@ private:
     juce::StringArray mNoteDivisions{ "1n", "2n","4n", "8n", "16n", "32n", "64n" };
     juce::ComboBox mTempoDivisionSelectorBox;
     juce::ComboBox mNoteLengtSelectorBox;
-    juce::ToggleButton mSyncToggle;
+    juce::ToggleButton mSyncToggleBox;
     juce::Slider mBpmBox;
 
     std::unique_ptr<SliderAttachment> mBpmSliderAttachment;
     std::unique_ptr<ComboBoxAttachment> mTempoDivisionAttachment;
     std::unique_ptr<ComboBoxAttachment> mNoteLengthAttachment;
+    std::unique_ptr<ButtonAttachment> mToggleButtonAttachment;
 
     juce::FileChooser mFileChooser{ "Select a file to load...", juce::File{}, "*.txt" };
     int mFileChooserFlags = juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles;

@@ -7,11 +7,9 @@
 #include "Instruction.h"
 #include "StoredFunction.h"
 #include "StepData.h"
-#include "Defines.h"
 
-namespace ORchestra {
-
-
+namespace ORchestra 
+{
     class ErrorReporting;
 
     class Compiler
@@ -53,6 +51,4 @@ namespace ORchestra {
         ErrorReporting& mErrorReporting;
         std::unordered_map<std::string, StoredFunction> mFunctions;
     };
-
-
 } // namespace ORchestra

@@ -3,9 +3,8 @@
 #include <string>
 #include <vector>
 
-namespace ORchestra {
-
-
+namespace ORchestra 
+{
     enum class EntryType { Messasge, Warning, Error };
 
     struct LogEntry
@@ -30,6 +29,4 @@ namespace ORchestra {
     private:
         std::vector<LogEntry> mLogEntries;
     };
-
-
 } // namespace ORchestra

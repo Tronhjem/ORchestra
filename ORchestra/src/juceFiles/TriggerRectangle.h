@@ -37,4 +37,4 @@ namespace ORchestra
         
         std::vector<TriggerRectangle> triggerRectangles;
     };
-} // end ORchestra
+} // namespace ORchestra
