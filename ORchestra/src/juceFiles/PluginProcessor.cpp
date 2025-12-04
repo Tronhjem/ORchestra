@@ -163,8 +163,8 @@ void ORchestraAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juc
     juce::ScopedNoDenormals noDenormals;
     const int bufferLength = buffer.getNumSamples();
 
-    // We do this to only fill the position data if we ARE syncing
-    // and only fill it when we're NOT syncing but RUNNING.
+    // Fill position data from DAW when syncing,
+    // or set internal position when running standalone.
     const bool shouldSync = static_cast<bool>(*mShouldSync);
     if (!shouldSync && IsRunning)
     {
