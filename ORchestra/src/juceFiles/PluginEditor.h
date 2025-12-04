@@ -22,8 +22,6 @@
 typedef juce::AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
 typedef juce::AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
 typedef juce::AudioProcessorValueTreeState::ComboBoxAttachment ComboBoxAttachment;
-typedef juce::AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
-
 //==============================================================================
 /**
 */
