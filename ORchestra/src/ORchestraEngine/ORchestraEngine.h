@@ -32,6 +32,7 @@ namespace ORchestra {
         const std::vector<LogEntry>& GetErrors() { return mVM->GetErrors(); }
         const std::string& GetInstructionData() { return mInstructionData; }
         void SetInstructionData(const std::string& data) { mInstructionData = data; }
+        bool IsVMInit() { return mIsVMInit.load(); }
 
     private:
         void WorkerThreadLoop();
@@ -44,7 +45,7 @@ namespace ORchestra {
         std::atomic<int> mCurrentGlobalStep;
         std::atomic<int> mCurrentProcessingStep;
         std::atomic<bool> mIsVMInit;
-        std::atomic<bool> shouldExit;
+        std::atomic<bool> mShouldExit;
 
         std::thread mWorkerThread;
         std::unique_ptr<VM> mVM;

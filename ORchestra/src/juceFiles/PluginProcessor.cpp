@@ -9,6 +9,7 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 #include "ParamConstants.h"
+#include "juce_audio_processors/juce_audio_processors.h"
 
 
 using namespace ORchestra;
@@ -24,10 +25,20 @@ ORchestraAudioProcessor::ORchestraAudioProcessor() :
 #endif
     ),
 #endif
+    IsRunning(false),
     mValueTree(*this, nullptr, juce::Identifier("ORchestra"),
-        { std::make_unique<juce::AudioParameterInt>(bpmParamId, "Bpm", 10, 300, 120),
-         std::make_unique<juce::AudioParameterChoice>(tempoDivisionId, "Tempo Division", mNoteDivisionsStrings, static_cast<int>(NoteDivision::n4)),
-         std::make_unique<juce::AudioParameterChoice>(noteLengthId, "Note Length", mNoteDivisionsStrings, static_cast<int>(NoteDivision::n4)) })
+        { 
+            std::make_unique<juce::AudioParameterInt>(bpmParamId, "Bpm", 10, 300, 120),
+            std::make_unique<juce::AudioParameterInt>(syncToggleId, "Should Sync", 0, 1, 0),
+            std::make_unique<juce::AudioParameterChoice>(tempoDivisionId,
+                                                         "Tempo Division", 
+                                                         mNoteDivisionsStrings, 
+                                                         static_cast<int>(NoteDivision::n4)),
+            std::make_unique<juce::AudioParameterChoice>(noteLengthId, 
+                                                        "Note Length", 
+                                                        mNoteDivisionsStrings, 
+                                                        static_cast<int>(NoteDivision::n4)) 
+        })
 {
 
     mORchestraEngine = std::make_unique<ORchestraEngine>();
@@ -38,6 +49,7 @@ ORchestraAudioProcessor::ORchestraAudioProcessor() :
     mBpm = mValueTree.getRawParameterValue(bpmString);
     mTempoDivision = mValueTree.getRawParameterValue(tempoDivisionString);
     mNoteLength = mValueTree.getRawParameterValue(noteLengthString);
+    mShouldSync = mValueTree.getRawParameterValue(syncToggleString);
 }
 
 ORchestraAudioProcessor::~ORchestraAudioProcessor()
@@ -151,24 +163,36 @@ void ORchestraAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juc
     juce::ScopedNoDenormals noDenormals;
     const int bufferLength = buffer.getNumSamples();
 
-    if (IsRunning)
-        mTransportData.isPlaying = IsRunning; // Set the playing to true when standalone
-
-    //    FillPositionData(mTransportData);
+    // Fill position data from DAW when syncing,
+    // or set internal position when running standalone.
+    const bool shouldSync = static_cast<bool>(*mShouldSync);
+    if (!shouldSync && IsRunning)
+    {
+        FillPositionData(mTransportData);
+        mTransportData.timeInSamples = mLocalTimeInSamples;
+        mTransportData.bpm = static_cast<double>(*mBpm);
+        mTransportData.isPlaying = true;
+    }
+    else if (shouldSync && !IsRunning)
+    {
+        FillPositionData(mTransportData);
+    }
 
     mTransportData.bpmDivision = GetBpmDivision(*mTempoDivision);
-    mTransportData.bpm = static_cast<double>(*mBpm);
     mTransportData.noteLengthInSamples = GetNoteLength(*mNoteLength);
 
     mORchestraEngine->Tick(mTransportData, bufferLength, midiMessages);
 
-    if (IsRunning)
+    // For incrementing sample position by the buffer and only when IsRunning
+    if (!shouldSync && IsRunning)
     {
-        mTransportData.timeInSamples += bufferLength; // Need to increment the position in samples ourselves when standalone.
+        mLocalTimeInSamples += bufferLength; 
     }
-    else if (!IsRunning && !mTransportData.isPlaying)
+    else if (!shouldSync && !IsRunning)
     {
-        mTransportData.timeInSamples = 0;
+        mLocalTimeInSamples = 0;
+        mTransportData.isPlaying = false;
+        mTransportData.timeInSamples = mLocalTimeInSamples;
     }
 }
 
@@ -187,28 +211,7 @@ void ORchestraAudioProcessor::FillPositionData(TransportData& data)
     }
 
     data.isPlaying = static_cast<bool>(positionInfo->getIsPlaying());
-
     data.sampleRate = mSampleRate;
-
-    //    if(positionInfo->getTimeInSeconds().hasValue())
-    //    {
-    //        data.time = static_cast<double>(*positionInfo->getTimeInSeconds());
-    //    }
-
-    //    if(positionInfo->getPpqPosition().hasValue())
-    //    {
-    //        data.ppq = static_cast<double>(*positionInfo->getPpqPosition());
-    //    }
-
-    //    if(positionInfo->getTimeSignature().hasValue())
-    //    {
-    //        auto timeSig = *positionInfo->getTimeSignature();
-    //        int barLength = timeSig.numerator;
-    //
-    //        int beatCount = static_cast<int>(data.time / (60.0 / data.bpm));
-    //        data.beat =  beatCount % barLength;
-    //        data.bar = static_cast<int> (beatCount / barLength);
-    //    }
 }
 
 //==============================================================================

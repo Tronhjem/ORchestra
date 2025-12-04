@@ -1,8 +1,7 @@
 #pragma once
 
-namespace ORchestra {
-
-
+namespace ORchestra 
+{
     // DataSequence Operation Lambdas
 #define OPERATION_BINARY_LAMBDA(op) [](const int a, const int b) { return (a > 0) op (b > 0); }
 #define OPERATION_LAMBDA(op) [](const int a, const int b) { return a op b; }
@@ -53,8 +52,4 @@ namespace ORchestra {
         NoteOff = 1,
         CC = 2
     };
-
-    // ============================================================================================
-
-
 } // namespace ORchestra

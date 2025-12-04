@@ -453,7 +453,7 @@ namespace ORchestra
             const std::string err{ "Unexpected Operation code" };
             mErrorReporting.LogError(err);
 #if _TEST
-            mTopStackValue = stack.Top();
+            SafeSetTopStackValue(stack);
 #endif
             return false;
         }

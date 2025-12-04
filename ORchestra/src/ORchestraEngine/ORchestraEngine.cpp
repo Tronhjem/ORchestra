@@ -1,31 +1,26 @@
 #include <cmath>
 
 #include "ORchestraEngine.h"
+#if _DEBUG
 #include "ScopedTimer.h"
+#endif
 
-namespace ORchestra {
-
-
+namespace ORchestra 
+{
     ORchestraEngine::ORchestraEngine() : mReadySteps(0),
         mCurrentGlobalStep(0),
         mCurrentProcessingStep(0),
         mIsVMInit(false),
-        shouldExit(false)
+        mShouldExit(false)
     {
         mVM = std::make_unique<VM>();
         mFileLoader = std::make_unique<FileLoader>();
-
         mWorkerThread = std::thread([this]() { WorkerThreadLoop(); });
-
-        const std::string file{ "a = 74 \n test a" };
-        VM vm;
-        bool process = vm.Prepare(file);
-        std::cout << process;
     }
 
     ORchestraEngine::~ORchestraEngine()
     {
-        shouldExit.store(true);
+        mShouldExit.store(true);
         if (mWorkerThread.joinable())
             mWorkerThread.join();
     }
@@ -35,9 +30,7 @@ namespace ORchestra {
         const bool fileSaved = mFileLoader->SaveToFile(filePath, mInstructionData);
 
         if (fileSaved)
-        {
             Compile(mInstructionData);
-        }
     }
 
     const std::string& ORchestraEngine::ImportFromFile(const std::string& filePath)
@@ -45,9 +38,7 @@ namespace ORchestra {
         mInstructionData = mFileLoader->LoadFile(filePath);
 
         if (mInstructionData.length() > 0)
-        {
             Compile(mInstructionData);
-        }
 
         return mInstructionData;
     }
@@ -71,7 +62,7 @@ namespace ORchestra {
 
     void ORchestraEngine::WorkerThreadLoop()
     {
-        while (!shouldExit.load())
+        while (!mShouldExit.load())
         {
             PreProcessSteps();
             std::this_thread::sleep_for(std::chrono::milliseconds(50));
@@ -96,6 +87,7 @@ namespace ORchestra {
         // TODO: Make sure this doesn't skip a beat
         const int currentStep = mCurrentProcessingStep.load();
         const int endGlobalStep = stepsToProcess + currentStep;
+
         for (int i = currentStep; i < endGlobalStep; ++i)
         {
             const int stepWrapped = i % STEP_BUFFER_SIZE;
@@ -105,9 +97,6 @@ namespace ORchestra {
             currentData.clear();
 
             mVM->Tick(currentData, i);
-#if _DEBUG
-            //        std::cout << "global step process " << stepWrapped << " " << (int)currentData[0].mFirst.GetValue(0) << std::endl;
-#endif
             mReadySteps.fetch_add(1, std::memory_order_acq_rel);
         }
 
@@ -118,7 +107,7 @@ namespace ORchestra {
         const int bufferLength,
         juce::MidiBuffer& midiMessages)
     {
-        if (transportData.isPlaying)
+        if (transportData.isPlaying && mIsVMInit)
         {
             const double samplesPerStep = static_cast<double>(transportData.sampleRate) * (60.0 / (transportData.bpm * transportData.bpmDivision));
             const int currentStep = static_cast<int>(ceil(static_cast<double>(transportData.timeInSamples) / samplesPerStep));
@@ -140,7 +129,7 @@ namespace ORchestra {
 
             // if the end of the buffer is longer than the next tick time
             // Check if we should tick in this buffer.
-            if (mIsVMInit && endOfBufferInSamples >= nextStepInSamples && currentStep != mLastStep)
+            if (endOfBufferInSamples >= nextStepInSamples && currentStep != mLastStep)
             {
 #if _DEBUG
                 ScopedTimer timer{ "Process Beat" };
@@ -171,9 +160,6 @@ namespace ORchestra {
                         // ScheduledMidiMessage message {step.mType, firstByte, secondByte, channel, timeStamp, step.mDuration};
                         ScheduledMidiMessage message{ step.mType, firstByte, secondByte, channel, timeStamp, transportData.noteLengthInSamples };
 
-#if _DEBUG
-                        //                    std::cout << "play step " << wrappedGlobalStep << " " << (int)firstByte << std::endl;
-#endif
                         mMidiScheduler.PostMidi(message);
                     }
                 }
@@ -189,6 +175,4 @@ namespace ORchestra {
             mMidiScheduler.ClearAllData(midiMessages);
         }
     }
-
-
 } // namespace ORchestra

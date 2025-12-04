@@ -1,12 +1,12 @@
 #pragma once
 
 #include <JuceHeader.h>
+
 #include "PluginProcessor.h"
-#include "StepData.h"
 #include "TriggerRectangle.h"
 
-
 using namespace ORchestra;
+
 constexpr int TIMELINE_STEPS_DRAWN = 20;
 constexpr int TIMELINE_ROWS_DRAWN = 5;
 
@@ -17,8 +17,6 @@ constexpr float stepHeight = trackHeight;
 constexpr float stepWidth = (trackHeight * 1.5f);
 constexpr float drawnStepHeight = stepHeight - stepMargin;
 constexpr float drawnStepWidth = stepWidth - stepMargin;
-
-constexpr float roundedCornerSize = 5.f;
 
 class Timeline : public juce::Component, public juce::Timer
 {

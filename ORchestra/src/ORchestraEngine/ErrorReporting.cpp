@@ -2,9 +2,8 @@
 
 #include "ErrorReporting.h"
 
-namespace ORchestra {
-
-
+namespace ORchestra 
+{
     void ErrorReporting::LogError(const int line, std::string& message)
     {
         message = message + " at line " + std::to_string(line) + "\n";
@@ -41,6 +40,4 @@ namespace ORchestra {
     {
         mLogEntries.clear();
     }
-
-
 } // namespace ORchestra

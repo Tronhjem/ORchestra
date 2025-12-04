@@ -1,10 +1,9 @@
 #pragma once
 
-#include <vector>
+#include <string>
 
-namespace ORchestra {
-
-
+namespace ORchestra 
+{
     class FileLoader
     {
     public:
@@ -12,6 +11,4 @@ namespace ORchestra {
         std::string LoadFile(const std::string& filePath);
         bool SaveToFile(const std::string& filePath, const std::string& data);
     };
-
-
 } // namespace ORchestra

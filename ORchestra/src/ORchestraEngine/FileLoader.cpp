@@ -1,14 +1,13 @@
 #include <fstream>
-#include <sstream>
-#include <string>
 #include <iostream>
 
 #include "FileLoader.h"
+#if _DEBUG
 #include "ScopedTimer.h"
+#endif
 
-namespace ORchestra {
-
-
+namespace ORchestra 
+{
     FileLoader::FileLoader()
     {
     }
@@ -58,6 +57,4 @@ namespace ORchestra {
         file.close();
         return true;
     }
-
-
 } // namespace ORchestra

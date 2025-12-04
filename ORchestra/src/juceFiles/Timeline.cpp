@@ -1,11 +1,12 @@
+#include <algorithm>
+
 #include "Timeline.h"
 #include "Defines.h"
 #include "SequenceStep.h"
 #include "StepData.h"
 #include "Utility.h"
 #include "Colours.h"
-#include <algorithm>
-
+#include "LookAndFeelConstants.h"
 
 void Timeline::timerCallback()
 {
@@ -13,6 +14,9 @@ void Timeline::timerCallback()
     assert(mAudioProcessor != nullptr);
 #endif
     const TransportData& transportData = mAudioProcessor->GetTransportData();
+    if (!transportData.isPlaying || !mAudioProcessor->IsORchestraVMInit())
+        return;
+    
     const int64_t timeInSamples = transportData.timeInSamples;
     const double samplesPerStep = static_cast<double>(transportData.sampleRate) * (60.0 / (transportData.bpm * transportData.bpmDivision));
     const int currentStep = static_cast<int>(ceil(static_cast<double>(timeInSamples) / samplesPerStep));
@@ -32,7 +36,7 @@ void Timeline::timerCallback()
     mTriggerRectangle.ClearRectangles();
     mTimelineTriggerRectangles.clear();
     
-    //===========================================================================================================
+    //=================================================================================================
     // Here we gather the unique pitches
     for (int index = 0; index < TIMELINE_STEPS_DRAWN; ++index)
     {
@@ -89,13 +93,13 @@ void Timeline::timerCallback()
             const float y = static_cast<float>(yIndex) * trackHeight + 1.f;
             const float velocityFloat = static_cast<float>(step.mSecond.GetValue(0));
 
-            TriggerRectangle rect {x, y, velocityFloat};
-            mTimelineTriggerRectangles.emplace_back(rect);
+            TriggerRectangle timelineRect {x, y, velocityFloat};
+            mTimelineTriggerRectangles.emplace_back(timelineRect);
 
             if (index == 0 && step.mShouldTrigger.GetValue(0))
             {
-                TriggerRectangle rect {x, y, 1.f};
-                mTriggerRectangle.AddRectangle(rect);
+                TriggerRectangle triggerRect {x, y, 1.f};
+                mTriggerRectangle.AddRectangle(triggerRect);
             }
 //            =================================================================================
 //            DISABLE TEXT FOR NOW
@@ -120,7 +124,7 @@ void Timeline::paint(juce::Graphics& g)
     {
         const juce::Colour colorToSet = GetStepColorFromVelocity(rect.alpha);
         g.setColour(colorToSet.withAlpha(1.f));
-        g.fillRoundedRectangle(rect.x, rect.y, drawnStepWidth,  drawnStepHeight, roundedCornerSize);
+        g.fillRoundedRectangle(rect.x, rect.y, drawnStepWidth,  drawnStepHeight, ROUNDED_CORNER_SIZE);
     }
 }
 

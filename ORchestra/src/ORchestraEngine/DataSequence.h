@@ -3,7 +3,6 @@
 #include <vector>
 
 #include "StepData.h"
-#include "Defines.h"
 
 namespace ORchestra
 {
