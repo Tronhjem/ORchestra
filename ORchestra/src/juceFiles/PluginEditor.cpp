@@ -250,7 +250,7 @@ void ORchestraAudioProcessorEditor::buttonClicked(juce::Button* button)
     }
     else if (button == &mSyncToggleBox)
     {
-        // state is set from value true.
+        
        
         // TODO: This logic should probably be somewhere else.
         const bool shouldSync = mSyncToggleBox.getToggleState();
