@@ -14,7 +14,7 @@ void Timeline::timerCallback()
     assert(mAudioProcessor != nullptr);
 #endif
     const TransportData& transportData = mAudioProcessor->GetTransportData();
-    if (!transportData.isPlaying)
+    if (!transportData.isPlaying || !mAudioProcessor->IsORchestraVMInit())
         return;
     
     const int64_t timeInSamples = transportData.timeInSamples;

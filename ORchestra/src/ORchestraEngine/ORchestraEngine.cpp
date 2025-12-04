@@ -107,7 +107,7 @@ namespace ORchestra
         const int bufferLength,
         juce::MidiBuffer& midiMessages)
     {
-        if (transportData.isPlaying)
+        if (transportData.isPlaying && mIsVMInit)
         {
             const double samplesPerStep = static_cast<double>(transportData.sampleRate) * (60.0 / (transportData.bpm * transportData.bpmDivision));
             const int currentStep = static_cast<int>(ceil(static_cast<double>(transportData.timeInSamples) / samplesPerStep));
@@ -129,7 +129,7 @@ namespace ORchestra
 
             // if the end of the buffer is longer than the next tick time
             // Check if we should tick in this buffer.
-            if (mIsVMInit && endOfBufferInSamples >= nextStepInSamples && currentStep != mLastStep)
+            if (endOfBufferInSamples >= nextStepInSamples && currentStep != mLastStep)
             {
 #if _DEBUG
                 ScopedTimer timer{ "Process Beat" };

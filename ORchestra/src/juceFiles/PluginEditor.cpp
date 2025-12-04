@@ -205,30 +205,42 @@ void ORchestraAudioProcessorEditor::textEditorTextChanged(juce::TextEditor& edit
 
 void ORchestraAudioProcessorEditor::buttonClicked(juce::Button* button)
 {
+    auto processorReadAndCompile = [&]()
+    {
+        juce::String text = mCodeEditorTextBox.getText();
+        std::string utf8Text = text.toRawUTF8();
+        audioProcessor.Compile(utf8Text);
+        mEditorIsDirty = false;
+
+        UpdateErrors();
+    };
+
     if (button == &mTogglePlayButton)
     {
+        if (mEditorIsDirty)
+            processorReadAndCompile();
         audioProcessor.IsRunning = !audioProcessor.IsRunning;
         mTogglePlayButton.setButtonText(audioProcessor.IsRunning ? "Stop" : "Play");
     }
     else if (button == &mExportToFileButton)
     {
         // TODO: Should we compile before saving?
-        //        juce::String text = mCodeEditorTextBox.getText();
-        //        std::string utf8Text = text.toRawUTF8();
-        //        audioProcessor.Compile(utf8Text);
-
+        // processorReadAndCompile();
+        
         mFileChooser.launchAsync(mFileChooserFlags, [this](const juce::FileChooser& fc)
             {
                 UNUSED(fc);
                 juce::File file = mFileChooser.getResult();
                 std::string filePath{ file.getFullPathName().toRawUTF8() };
-                audioProcessor.ExportToFile(filePath); });
+                audioProcessor.ExportToFile(filePath);
+            });
 
         UpdateErrors();
     }
     else if (button == &mImportFileButton)
     {
-        mFileChooser.launchAsync(mFileChooserFlags, [this](const juce::FileChooser& fc) {
+        mFileChooser.launchAsync(mFileChooserFlags, [this](const juce::FileChooser& fc)
+             {
                 UNUSED(fc);
                 juce::File file = mFileChooser.getResult();
                 std::string filePath{ file.getFullPathName().toRawUTF8() };
@@ -241,17 +253,10 @@ void ORchestraAudioProcessorEditor::buttonClicked(juce::Button* button)
     }
     else if (button == &mCompileButton)
     {
-        juce::String text = mCodeEditorTextBox.getText();
-        std::string utf8Text = text.toRawUTF8();
-        audioProcessor.Compile(utf8Text);
-        mEditorIsDirty = false;
-
-        UpdateErrors();
+        processorReadAndCompile();
     }
     else if (button == &mSyncToggleBox)
     {
-        // state is set from value true.
-       
         // TODO: This logic should probably be somewhere else.
         const bool shouldSync = mSyncToggleBox.getToggleState();
         mTogglePlayButton.setEnabled(!shouldSync);

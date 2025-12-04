@@ -38,9 +38,6 @@
         <FILE id="ZmkuQV" name="EuclideanGenerator.h" compile="0" resource="0"
               file="src/ORchestraEngine/EuclideanGenerator.h"/>
         <FILE id="UfMjbU" name="CustomStack.h" compile="0" resource="0" file="src/ORchestraEngine/CustomStack.h"/>
-        <FILE id="Qwuq3L" name="CustomMemory.cpp" compile="1" resource="0"
-              file="src/ORchestraEngine/CustomMemory.cpp"/>
-        <FILE id="H5UEBs" name="CustomMemory.h" compile="0" resource="0" file="src/ORchestraEngine/CustomMemory.h"/>
       </GROUP>
       <FILE id="KPfA3b" name="StepData.cpp" compile="1" resource="0" file="src/ORchestraEngine/StepData.cpp"/>
       <FILE id="hi3TE1" name="SequenceStep.h" compile="0" resource="0" file="src/ORchestraEngine/SequenceStep.h"/>

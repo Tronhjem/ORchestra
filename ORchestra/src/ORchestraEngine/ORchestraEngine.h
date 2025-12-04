@@ -32,6 +32,7 @@ namespace ORchestra {
         const std::vector<LogEntry>& GetErrors() { return mVM->GetErrors(); }
         const std::string& GetInstructionData() { return mInstructionData; }
         void SetInstructionData(const std::string& data) { mInstructionData = data; }
+        bool IsVMInit() { return mIsVMInit.load(); }
 
     private:
         void WorkerThreadLoop();
