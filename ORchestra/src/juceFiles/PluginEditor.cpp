@@ -210,8 +210,11 @@ void ORchestraAudioProcessorEditor::buttonClicked(juce::Button* button)
         juce::String text = mCodeEditorTextBox.getText();
         std::string utf8Text = text.toRawUTF8();
         audioProcessor.Compile(utf8Text);
-        mEditorIsDirty = false;
-
+        if (audioProcessor.IsORchestraVMInit())
+        {
+            mEditorIsDirty = false;
+        }
+        
         UpdateErrors();
     };
 
@@ -219,8 +222,12 @@ void ORchestraAudioProcessorEditor::buttonClicked(juce::Button* button)
     {
         if (mEditorIsDirty)
             processorReadAndCompile();
-        audioProcessor.IsRunning = !audioProcessor.IsRunning;
-        mTogglePlayButton.setButtonText(audioProcessor.IsRunning ? "Stop" : "Play");
+        
+        if (audioProcessor.IsORchestraVMInit())
+        {
+            audioProcessor.IsRunning = !audioProcessor.IsRunning;
+            mTogglePlayButton.setButtonText(audioProcessor.IsRunning ? "Stop" : "Play");
+        }
     }
     else if (button == &mExportToFileButton)
     {
