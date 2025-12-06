@@ -4,7 +4,10 @@
               addUsingNamespaceToJuceHeader="1" displaySplashScreen="1" jucerFormatVersion="1"
               pluginCharacteristicsValue="pluginEditorRequiresKeys,pluginProducesMidiOut"
               pluginManufacturer="SonoTron" pluginFormats="buildAU,buildStandalone,buildVST3"
-              headerPath="../../src/utils/&#10;../../src/ORchestraEngine/&#10;../../src/juceFiles/">
+              headerPath="../../src/utils/&#10;../../src/ORchestraEngine/&#10;../../src/juceFiles/"
+              version="0.1" companyName="SonoTron" companyWebsite="tronhjem.com"
+              companyEmail="ctronhjem@gmail.com" pluginManufacturerCode="SNTN"
+              pluginCode="ORCS" pluginAUMainType="'aumi'" pluginVST3Category="Generator">
   <MAINGROUP id="NmvJK8" name="ORchestra">
     <GROUP id="{E299E670-1FE1-03DE-20C3-FBBF8D41B1FE}" name="Utils">
       <FILE id="e1HjCc" name="ScopedTimer.h" compile="0" resource="0" file="src/utils/ScopedTimer.h"/>

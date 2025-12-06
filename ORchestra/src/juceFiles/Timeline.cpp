@@ -93,13 +93,16 @@ void Timeline::timerCallback()
             const float y = static_cast<float>(yIndex) * trackHeight + 1.f;
             const float velocityFloat = static_cast<float>(step.mSecond.GetValue(0));
 
-            TriggerRectangle timelineRect {x, y, velocityFloat};
-            mTimelineTriggerRectangles.emplace_back(timelineRect);
-
-            if (index == 0 && step.mShouldTrigger.GetValue(0))
+            if(step.mShouldTrigger.GetValue(0))
             {
-                TriggerRectangle triggerRect {x, y, 1.f};
-                mTriggerRectangle.AddRectangle(triggerRect);
+                TriggerRectangle timelineRect {x, y, velocityFloat};
+                mTimelineTriggerRectangles.emplace_back(timelineRect);
+
+                if (index == 0)
+                {
+                    TriggerRectangle triggerRect {x, y, 1.f};
+                    mTriggerRectangle.AddRectangle(triggerRect);
+                }
             }
 //            =================================================================================
 //            DISABLE TEXT FOR NOW

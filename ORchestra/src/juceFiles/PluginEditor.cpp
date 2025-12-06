@@ -147,6 +147,7 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     mErrorTextBox.setMultiLine(true);
 
     mTimeline.SetProcessor(&audioProcessor);
+    mTriggerRectangle.SetProcessor(&audioProcessor);
     //    codeEditor.setPopupMenuEnabled(true);
 
     addAndMakeVisible(mSyncToggleLabel);
@@ -174,6 +175,8 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     mTempoDivisionAttachment.reset(new ComboBoxAttachment(valueTree, tempoDivisionString, mTempoDivisionSelectorBox));
     mNoteLengthAttachment.reset(new ComboBoxAttachment(valueTree, noteLengthString, mNoteLengtSelectorBox));
     mToggleButtonAttachment.reset(new ButtonAttachment(valueTree, syncToggleString, mSyncToggleBox));
+
+    setWantsKeyboardFocus(true);
 }
 
 ORchestraAudioProcessorEditor::~ORchestraAudioProcessorEditor()

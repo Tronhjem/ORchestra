@@ -3,8 +3,11 @@
 #include <JuceHeader.h>
 #include <vector>
 
-constexpr float alphaDecrementPerFrame = 1.f/100.f;
-    
+#include "PluginProcessor.h"
+
+constexpr int updateFrequency = 30;
+constexpr float miliesecondsPerFrameInverse = 1.f / (1000.f / static_cast<float>(updateFrequency));
+
 namespace ORchestra
 {
     struct TriggerRectangle
@@ -19,7 +22,7 @@ namespace ORchestra
     public:
         TriggerRectangleComponent()
         {
-            startTimerHz(30);
+            startTimerHz(updateFrequency);
         }
         
         ~TriggerRectangleComponent() override
@@ -30,8 +33,10 @@ namespace ORchestra
 
         void AddRectangle(TriggerRectangle rect) { triggerRectangles.emplace_back(rect); }
         void ClearRectangles() { triggerRectangles.clear(); }
+        void SetProcessor(ORchestraAudioProcessor* audioProcessor) { mAudioProcessor = audioProcessor; }
         
     private:
+        ORchestraAudioProcessor* mAudioProcessor;
         void timerCallback() override;
         void paint(juce::Graphics& g) override;
         

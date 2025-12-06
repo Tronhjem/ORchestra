@@ -162,6 +162,7 @@ void ORchestraAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juc
 {
     juce::ScopedNoDenormals noDenormals;
     const int bufferLength = buffer.getNumSamples();
+    buffer.clear();
 
     // Fill position data from DAW when syncing,
     // or set internal position when running standalone.
@@ -180,6 +181,10 @@ void ORchestraAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juc
 
     mTransportData.bpmDivision = GetBpmDivision(*mTempoDivision);
     mTransportData.noteLengthInSamples = GetNoteLength(*mNoteLength);
+
+    // Making sure that count in, doesn't crash when time is negative.
+    if(mTransportData.timeInSamples < 0)
+        return;
 
     mORchestraEngine->Tick(mTransportData, bufferLength, midiMessages);
 
@@ -249,6 +254,7 @@ void ORchestraAudioProcessor::setStateInformation(const void* data, int sizeInBy
         {
             const std::string convertedData = pluginData.toStdString();
             SetInstructionData(convertedData);
+            Compile(convertedData);
             sendChangeMessage();
         }
     }
