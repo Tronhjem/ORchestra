@@ -459,7 +459,7 @@ namespace ORchestra
                 // 1 = whole note (0.25), 2 = half note (0.5), 3 = quarter note (1.0), 
                 // 4 = 8th note (2.0), 5 = 16th note (4.0), 6 = 32nd note (8.0), 7 = 64th note (16.0)
                 const int divIndex = std::clamp(static_cast<int>(noteDivValue), 1, 7);
-                float bpmDivision = 0.0f;
+                float bpmDivision = 1.0f; // Default to quarter note
                 switch (divIndex)
                 {
                 case 1:
@@ -482,9 +482,6 @@ namespace ORchestra
                     break;
                 case 7:
                     bpmDivision = 16.0f;
-                    break;
-                default:
-                    bpmDivision = 1.0f;
                     break;
                 }
                 mTransportData->bpmDivision = bpmDivision;
