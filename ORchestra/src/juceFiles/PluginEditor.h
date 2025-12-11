@@ -10,6 +10,8 @@
 
 #include <JuceHeader.h>
 
+#include "ORchestraCodeEditorComponent.h"
+#include "ORchestraCodeEditorTokenizer.h"
 #include "PluginProcessor.h"
 #include "Timeline.h"
 #include "TriggerRectangle.h"
@@ -78,12 +80,11 @@ private:
 
     TriggerRectangleComponent mTriggerRectangle;
     Timeline mTimeline;
-    // juce::TextEditor mCodeEditorTextBox;
     juce::TextEditor mErrorTextBox;
 
-    juce::LuaTokeniser mTokeniser;
+    ORchestraCodeEditorTokenizer mTokeniser;
     juce::CodeDocument mCodeDocument;
-    juce::CodeEditorComponent mCodeEditor;
+    ORchestraCodeEditorComponent mCodeEditor;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ORchestraAudioProcessorEditor)
 };
