@@ -278,6 +278,8 @@ The following words are reserved and cannot be used as variable names:
 - `cc` - Creates a MIDI control change track
 - `ran` - Random number generator function
 - `euc` - Euclidean sequence generator function
+- `bpm` - Sets the BPM (tempo) for the sequencer
+- `noteDiv` - Sets the note division (timing resolution)
 
 **Note:** The keywords `print` and `test` are reserved for debugging purposes but are only available in debug builds.
 
@@ -500,6 +502,52 @@ vel = ran(50, 100)   // Random velocity between 50-100
 note(1, 64, vel, 1)  // Play C4 with random velocity
 ```
 
+#### BPM (Tempo) Control
+
+The `bpm(tempo)` function sets the tempo for the sequencer.
+
+**Parameters:**
+- `tempo` - BPM value (0-127). Common values: 60 = slow, 80 = moderate, 120 = fast
+
+**Note:** 
+- Sets the internal tempo instead of using the value from the DAW or UI
+- Limited to 0-127 range due to language constraints
+- Called during initialization, not every tick
+
+**Example:**
+```cpp
+bpm(120)             // Set tempo to 120 BPM
+pattern = euc(4, 8)
+note(pattern, C4, 100, 1)
+```
+
+#### Note Division Control
+
+The `noteDiv(division)` function sets the note division (timing resolution) for the sequencer.
+
+**Parameters:**
+- `division` - Note division value (1-7):
+  - `1` = Whole note
+  - `2` = Half note
+  - `3` = Quarter note (default)
+  - `4` = 8th note
+  - `5` = 16th note
+  - `6` = 32nd note
+  - `7` = 64th note
+
+**Note:** 
+- Sets the internal note division instead of using the value from the DAW or UI
+- Determines how often the sequencer steps forward
+- Called during initialization, not every tick
+
+**Example:**
+```cpp
+noteDiv(4)           // Set to 8th notes
+bpm(120)
+pattern = euc(3, 8)
+note(pattern, C4, 100, 1)  // Triggers on 8th notes at 120 BPM
+```
+
 ---
 
 ## Examples
@@ -558,6 +606,23 @@ note(1, randomNote, 100, 1)
 // Control filter cutoff with sequence
 cutoff = [64, 80, 100, 120]
 cc(1, 74, cutoff, 1)  // Always trigger, CC#74 (filter cutoff)
+```
+
+### Setting Tempo and Division from Script
+```cpp
+// Override DAW tempo and use fast 16th notes
+bpm(120)
+noteDiv(5)  // 16th notes
+
+// Create rapid hi-hat pattern
+hihat = euc(11, 16)
+note(hihat, 42, 80, 10)
+
+// Kick and snare on quarter notes
+kick = [1, 0, 0, 0]
+snare = [0, 0, 0, 0, 1, 0, 0, 0]
+note(kick, 36, 100, 10)
+note(snare, 38, 100, 10)
 ```
 
 ### Modifying Arrays with Index Assignment
