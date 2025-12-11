@@ -1,6 +1,7 @@
 #pragma once
 
 #include "StepData.h"
+#include <string>
 
 namespace ORchestra 
 {
@@ -56,10 +57,10 @@ namespace ORchestra
     class Instruction
     {
     public:
-        Instruction() : opCode(OpCode::CONSTANT) {}
-        explicit Instruction(OpCode code) : opCode(code), mDataValue() {}
-        explicit Instruction(OpCode code, StepData value) : opCode(code), mDataValue(value) {}
-        explicit Instruction(OpCode code, std::string name) : opCode(code), mNameValue(name) {}
+        explicit Instruction() : opCode(OpCode::CONSTANT), mDataValue(0), mNameValue("") {}
+        explicit Instruction(OpCode code) : opCode(code), mDataValue(0), mNameValue("") {}
+        explicit Instruction(OpCode code, StepData value) : opCode(code), mDataValue(value), mNameValue("") {}
+        explicit Instruction(OpCode code, std::string name) : opCode(code), mDataValue(0), mNameValue(name) {}
 
         OpCode opCode;
         StepData mDataValue;

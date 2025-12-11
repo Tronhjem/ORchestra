@@ -1,5 +1,7 @@
 #pragma once
-#include <string>
+
+#include <vector>
+
 #include "Instruction.h"
 
 namespace ORchestra
@@ -7,15 +9,13 @@ namespace ORchestra
 	class StoredFunction
 	{
 	public:
-		StoredFunction() {}
+		StoredFunction() : mNumOfParams(0), mInstructions() {}
 		StoredFunction(int numOfParams, std::vector<Instruction>& instructions) : mNumOfParams(numOfParams),
 			mInstructions(instructions)
 		{
 		}
 
 		int mNumOfParams;
-		std::vector<Instruction> mInstructions;
+		std::vector<Instruction> mInstructions {};
 	};
-
-
 } // namespace ORchestra
