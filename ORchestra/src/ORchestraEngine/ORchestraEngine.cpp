@@ -14,6 +14,7 @@ namespace ORchestra
         mShouldExit(false)
     {
         mVM = std::make_unique<VM>();
+        mVM->SetTransportData(&mScriptTransportData);
         mFileLoader = std::make_unique<FileLoader>();
         mWorkerThread = std::thread([this]() { WorkerThreadLoop(); });
     }
@@ -55,6 +56,11 @@ namespace ORchestra
 
         mReadySteps.store(0, std::memory_order_release);
         mCurrentProcessingStep.store(mCurrentGlobalStep.load(), std::memory_order_release);
+        
+        // Reset script transport data to default values (0 means not set)
+        mScriptTransportData.bpm = 0.0;
+        mScriptTransportData.bpmDivision = 0.0f;
+        
         mVM->Reset();
 
         mIsVMInit.store(mVM->Prepare(&mInstructionData[0]));
@@ -109,7 +115,11 @@ namespace ORchestra
     {
         if (transportData.isPlaying && mIsVMInit)
         {
-            const double samplesPerStep = static_cast<double>(transportData.sampleRate) * (60.0 / (transportData.bpm * transportData.bpmDivision));
+            // Use script-provided BPM and division if they were set, otherwise use the provided values
+            const double bpm = mScriptTransportData.bpm > 0.0 ? mScriptTransportData.bpm : transportData.bpm;
+            const float bpmDivision = mScriptTransportData.bpmDivision > 0.0f ? mScriptTransportData.bpmDivision : transportData.bpmDivision;
+            
+            const double samplesPerStep = static_cast<double>(transportData.sampleRate) * (60.0 / (bpm * bpmDivision));
             const int currentStep = static_cast<int>(ceil(static_cast<double>(transportData.timeInSamples) / samplesPerStep));
 
             // Check if we skipped count, to regenerate everything.

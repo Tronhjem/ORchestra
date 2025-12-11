@@ -1,6 +1,7 @@
 #include <algorithm>
 
 #include "VM.h"
+#include "TransportData.h"
 
 #if _DEBUG
 #include "ScopedTimer.h"
@@ -434,6 +435,60 @@ namespace ORchestra
         case (OpCode::GET_GLOBAL_COUNT):
         {
             stack.Push(StepData{ stepCount });
+
+            break;
+        }
+
+        case (OpCode::SET_BPM):
+        {
+            const DataUnit bpmValue = stack.Pop().GetValue(0);
+            if (mTransportData != nullptr)
+            {
+                mTransportData->bpm = static_cast<double>(bpmValue);
+            }
+
+            break;
+        }
+
+        case (OpCode::SET_NOTE_DIVISION):
+        {
+            const DataUnit noteDivValue = stack.Pop().GetValue(0);
+            if (mTransportData != nullptr)
+            {
+                // Convert 1-7 to bpmDivision values
+                // 1 = whole note (0.25), 2 = half note (0.5), 3 = quarter note (1.0), 
+                // 4 = 8th note (2.0), 5 = 16th note (4.0), 6 = 32nd note (8.0), 7 = 64th note (16.0)
+                const int divIndex = std::clamp(static_cast<int>(noteDivValue), 1, 7);
+                float bpmDivision = 0.0f;
+                switch (divIndex)
+                {
+                case 1:
+                    bpmDivision = 0.25f;
+                    break;
+                case 2:
+                    bpmDivision = 0.5f;
+                    break;
+                case 3:
+                    bpmDivision = 1.0f;
+                    break;
+                case 4:
+                    bpmDivision = 2.0f;
+                    break;
+                case 5:
+                    bpmDivision = 4.0f;
+                    break;
+                case 6:
+                    bpmDivision = 8.0f;
+                    break;
+                case 7:
+                    bpmDivision = 16.0f;
+                    break;
+                default:
+                    bpmDivision = 1.0f;
+                    break;
+                }
+                mTransportData->bpmDivision = bpmDivision;
+            }
 
             break;
         }

@@ -55,6 +55,8 @@ namespace ORchestra {
         std::string mInstructionData;
 
         MidiScheduler mMidiScheduler;
+        
+        TransportData mScriptTransportData;
     };
 
 
