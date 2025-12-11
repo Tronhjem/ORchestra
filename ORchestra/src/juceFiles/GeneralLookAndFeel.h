@@ -86,11 +86,11 @@ public:
 
         // No rounded corners: cornerSize = 0
         g.setColour(fillColour);
-        g.fillRoundedRectangle(bounds, 6.f);
+        g.fillRoundedRectangle(bounds, ROUNDED_CORNER_SIZE);
 
-        // Optional: draw border
-        g.setColour(fillColour.darker(0.3f));
-        g.drawRoundedRectangle(bounds, 6.0f, 2.f);
+        // // Optional: draw border
+        // g.setColour(fillColour.darker(0.3f));
+        // g.drawRoundedRectangle(bounds, ROUNDED_CORNER_SIZE, COMPONENT_LINE_THICKNESS);
     }
 
     void drawLinearSlider(juce::Graphics& g, int x, int y, int width, int height,

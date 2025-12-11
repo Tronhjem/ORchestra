@@ -18,6 +18,7 @@
 #include "ButtonsLookAndFeel.h"
 #include "TextEditorLookAndFeel.h"
 #include "juce_gui_basics/juce_gui_basics.h"
+#include "juce_gui_extra/juce_gui_extra.h"
 
 typedef juce::AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
 typedef juce::AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
@@ -77,12 +78,12 @@ private:
 
     TriggerRectangleComponent mTriggerRectangle;
     Timeline mTimeline;
-    juce::TextEditor mCodeEditorTextBox;
+    // juce::TextEditor mCodeEditorTextBox;
     juce::TextEditor mErrorTextBox;
 
-    //    juce::CodeDocument codeDocument;
-    //       juce::CodeTokeniser tokeniser; // You can subclass this or use CppTokeniser, LuaTokeniser, etc.
-    //       std::unique_ptr<juce::CodeEditorComponent> codeEditor;
+    juce::LuaTokeniser mTokeniser;
+    juce::CodeDocument mCodeDocument;
+    juce::CodeEditorComponent mCodeEditor;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ORchestraAudioProcessorEditor)
 };
