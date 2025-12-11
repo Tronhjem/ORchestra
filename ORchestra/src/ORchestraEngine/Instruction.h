@@ -46,6 +46,8 @@ namespace ORchestra
         CALL_FUNCTION,
         GET_RANDOM_IN_RANGE,
         GET_GLOBAL_COUNT,
+        SET_BPM,
+        SET_NOTE_DIVISION,
         END,
 #if _DEBUG
         PRINT

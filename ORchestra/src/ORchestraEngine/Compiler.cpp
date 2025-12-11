@@ -20,6 +20,8 @@ namespace ORchestra
 
     static const std::string ranFunctionName = "ran";
     static const std::string eucFunctionName = "euc";
+    static const std::string bpmFunctionName = "bpm";
+    static const std::string noteDivFunctionName = "noteDiv";
 
     Compiler::Compiler(const std::vector<ORchestraToken>& tokens, ErrorReporting& log) :
             mVariableIdCounter(0),
@@ -50,6 +52,14 @@ namespace ORchestra
         std::vector<Instruction> eucInstructions;
         eucInstructions.emplace_back(Instruction{ OpCode::GENERATE_EUCLID_SEQUENCE });
         mFunctions[eucFunctionName] = StoredFunction(2, eucInstructions);
+
+        std::vector<Instruction> bpmInstructions;
+        bpmInstructions.emplace_back(Instruction{ OpCode::SET_BPM });
+        mFunctions[bpmFunctionName] = StoredFunction(1, bpmInstructions);
+
+        std::vector<Instruction> noteDivInstructions;
+        noteDivInstructions.emplace_back(Instruction{ OpCode::SET_NOTE_DIVISION });
+        mFunctions[noteDivFunctionName] = StoredFunction(1, noteDivInstructions);
     }
 
     void Compiler::Reset()
