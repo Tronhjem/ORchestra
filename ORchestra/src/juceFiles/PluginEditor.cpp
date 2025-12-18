@@ -11,8 +11,7 @@
 #include "PluginEditor.h"
 
 #include "LookAndFeelConstants.h"
-#include "Colours.h"
-#include "ErrorReporting.h"
+#include "Colors.h"
 #include "ParamConstants.h"
 #include "Utility.h"
 #include "juce_audio_processors/juce_audio_processors.h"

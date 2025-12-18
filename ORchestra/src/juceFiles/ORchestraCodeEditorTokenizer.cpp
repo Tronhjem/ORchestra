@@ -1,6 +1,6 @@
 
 #include "ORchestraCodeEditorTokenizer.h"
-#include "Colours.h"
+#include "Colors.h"
 
 namespace ORchestra
 {

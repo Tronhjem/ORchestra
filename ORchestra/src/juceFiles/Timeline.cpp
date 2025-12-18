@@ -5,7 +5,7 @@
 #include "SequenceStep.h"
 #include "StepData.h"
 #include "Utility.h"
-#include "Colours.h"
+#include "Colors.h"
 #include "LookAndFeelConstants.h"
 
 void Timeline::timerCallback()
