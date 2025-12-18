@@ -66,6 +66,7 @@ namespace ORchestra
     };
 
     using ColorPalette = CatppuccinMocha;
+
     struct CodeColor
     {
         static constexpr uint32_t Error = ColorPalette::Red;
