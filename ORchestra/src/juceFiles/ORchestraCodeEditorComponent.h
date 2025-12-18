@@ -1,12 +1,54 @@
+ /* ==============================================================================
+
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
+
+   JUCE is an open source framework subject to commercial or open source
+   licensing.
+
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
+
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
+
+   Or:
+
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
+
+  ==============================================================================
+*/
+
+// Largely copied from JUCE juce_CodeEdtitorComponent.h
+// As it's not possible to set look and feel for this component to style it
+// The modifications will live here until I have the time and will to make a pull request.
+
 #pragma once
 
 #include "juce_gui_extra/juce_gui_extra.h"
 #include <JuceHeader.h>
 
 using namespace juce;
-// Copied from JUCE CodeEdtitorComponent.h
 namespace ORchestra
 {
+    class ORchestraCodeEditorChangeListener
+    {
+        public:
+            virtual void CodeEditorHasChanged() = 0;
+    };
+
     class CodeTokeniser;
 
     class ORchestraCodeEditorComponent : public TextInputTarget,
@@ -360,9 +402,12 @@ namespace ORchestra
         /** @internal */
         std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
 
+        void AddChangeListener(ORchestraCodeEditorChangeListener* changeListener) { mChangeListener = changeListener; }
+
     private:
         //==============================================================================
         CodeDocument& document;
+        ORchestraCodeEditorChangeListener* mChangeListener;
 
         Font font { withDefaultMetrics (FontOptions{}) };
         int firstLineOnScreen = 0, spacesPerTab = 4;

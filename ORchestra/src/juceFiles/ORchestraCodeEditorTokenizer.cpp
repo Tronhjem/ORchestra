@@ -1,5 +1,6 @@
 
 #include "ORchestraCodeEditorTokenizer.h"
+#include "Colours.h"
 
 namespace ORchestra
 {
@@ -8,20 +9,21 @@ namespace ORchestra
         static bool isReservedKeyword (String::CharPointerType token, const int tokenLength) noexcept
         {
             static const char* const keywords2Char[] =
-                { "if", "or", "in", "do", nullptr };
+                { "cc", nullptr };
 
             static const char* const keywords3Char[] =
-                { "and", "end", "for", "nil", "not", nullptr };
+                { "euc", "ran",  "bpm", "div", nullptr };
 
             static const char* const keywords4Char[] =
-                { "then", "true", "else", nullptr };
+                { "note",  nullptr };
 
-            static const char* const keywords5Char[] =
-                {  "false", "local", "until", "while", "break", nullptr };
-
-            static const char* const keywords6Char[] =
-                { "repeat", "return", "elseif", nullptr};
-
+            // static const char* const keywords5Char[] =
+            //     {  "false", "local", "until", "while", "break", nullptr };
+            //
+            // static const char* const keywords6Char[] =
+            //     { "repeat", "return", "elseif", nullptr};
+            //
+            
             static const char* const keywordsOther[] =
                 { "function", "@interface", "@end", "@synthesize", "@dynamic", "@public",
                   "@private", "@property", "@protected", "@class", nullptr };
@@ -33,8 +35,8 @@ namespace ORchestra
                 case 2:   k = keywords2Char; break;
                 case 3:   k = keywords3Char; break;
                 case 4:   k = keywords4Char; break;
-                case 5:   k = keywords5Char; break;
-                case 6:   k = keywords6Char; break;
+                // case 5:   k = keywords5Char; break;
+                // case 6:   k = keywords6Char; break;
 
                 default:
                     if (tokenLength < 2 || tokenLength > 16)
@@ -108,34 +110,34 @@ namespace ORchestra
                 return result;
             }
 
+            // case ';':
+            // case ':':
             case ',':
-            case ';':
-            case ':':
                 source.skip();
                 return ORchestraCodeEditorTokenizer::tokenType_punctuation;
 
+            // case '{':   case '}':
             case '(':   case ')':
-            case '{':   case '}':
             case '[':   case ']':
                 source.skip();
                 return ORchestraCodeEditorTokenizer::tokenType_bracket;
 
-            case '"':
-            case '\'':
-                CppTokeniserFunctions::skipQuotedString (source);
-                return ORchestraCodeEditorTokenizer::tokenType_string;
+            // case '"':
+            // case '\'':
+            //     CppTokeniserFunctions::skipQuotedString (source);
+            //     return ORchestraCodeEditorTokenizer::tokenType_string;
 
             case '+':
                 source.skip();
                 CppTokeniserFunctions::skipIfNextCharMatches (source, '+', '=');
                 return ORchestraCodeEditorTokenizer::tokenType_operator;
 
-            case '-':
+            case '/':
             {
                 source.skip();
                 auto result = CppTokeniserFunctions::parseNumber (source);
 
-                if (source.peekNextChar() == '-')
+                if (source.peekNextChar() == '/')
                 {
                     source.skipToEndOfLine();
                     return ORchestraCodeEditorTokenizer::tokenType_comment;
@@ -143,26 +145,27 @@ namespace ORchestra
 
                 if (result == ORchestraCodeEditorTokenizer::tokenType_error)
                 {
-                    CppTokeniserFunctions::skipIfNextCharMatches (source, '-', '=');
+                    // CppTokeniserFunctions::skipIfNextCharMatches (source, '/', '=');
+                    CppTokeniserFunctions::skipIfNextCharMatches (source, '/');
                     return ORchestraCodeEditorTokenizer::tokenType_operator;
                 }
 
                 return result;
             }
 
-            case '*':   case '%':
-            case '=':   case '!':
+            case '*':   
+            case '-':   
+            case '%':
+            case '=':   
+            case '$':
+            case '|':  
+            case '&':   
+            case '^':
                 source.skip();
-                CppTokeniserFunctions::skipIfNextCharMatches (source, '=');
-                return ORchestraCodeEditorTokenizer::tokenType_operator;
-
-            case '?':
-            case '~':
-                source.skip();
+                // CppTokeniserFunctions::skipIfNextCharMatches (source, '=');
                 return ORchestraCodeEditorTokenizer::tokenType_operator;
 
             case '<':   case '>':
-            case '|':   case '&':   case '^':
                 source.skip();
                 CppTokeniserFunctions::skipIfNextCharMatches (source, firstChar);
                 CppTokeniserFunctions::skipIfNextCharMatches (source, '=');
@@ -190,17 +193,15 @@ namespace ORchestra
     {
         static const CodeEditorComponent::ColourScheme::TokenType types[] =
         {
-            { "Error",          Colour (0xffcc0000) },
-            { "Comment",        Colour (0xff3c3c3c) },
-            { "Keyword",        Colour (0xff0000cc) },
-            // { "Operator",       Colour (0xff225500) },
-            { "Operator",       Colour (0xff0000ff) },
-            { "Identifier",     Colour (0xff000000) },
-            { "Integer",        Colour (0xff880099) },
-            { "Float",          Colour (0xff885500) },
-            { "String",         Colour (0xff990099) },
-            { "Bracket",        Colour (0xff000055) },
-            { "Punctuation",    Colour (0xff004400) }
+            { "Error",          Colour (CodeColor::Error) },
+            { "Comment",        Colour (CodeColor::Comment) },
+            { "Keyword",        Colour (CodeColor::Keyword) },
+            { "Operator",       Colour (CodeColor::Operator) },
+            { "Identifier",     Colour (CodeColor::Identifier) },
+            { "Integer",        Colour (CodeColor::Integer) },
+            { "Float",          Colour (CodeColor::Float) },
+            { "Bracket",        Colour (CodeColor::Bracket) },
+            { "Punctuation",    Colour (CodeColor::Punctuation) }
         };
 
         CodeEditorComponent::ColourScheme cs;
@@ -210,5 +211,4 @@ namespace ORchestra
 
         return cs;
     }
-
 } // namespace ORchestra

@@ -3,10 +3,10 @@
 
 #include <JuceHeader.h>
 
-/// Inspired by the LuaTokeniser in JUCE 
+/// Inspired by the juce_LuaTokeniser
 namespace ORchestra
 {
-    class ORchestraCodeEditorTokenizer   : public juce::CodeTokeniser
+    class ORchestraCodeEditorTokenizer : public juce::CodeTokeniser
     {
     public:
         //==============================================================================
