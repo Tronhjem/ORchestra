@@ -30,19 +30,12 @@ namespace ORchestra
 
     void ORchestraEngine::ExportToFile(const std::string& filePath)
     {
-        const bool fileSaved = mFileLoader->SaveToFile(filePath, mInstructionData);
-
-        if (fileSaved)
-            Compile(mInstructionData);
+        mFileLoader->SaveToFile(filePath, mInstructionData);
     }
 
     const std::string& ORchestraEngine::ImportFromFile(const std::string& filePath)
     {
         mInstructionData = mFileLoader->LoadFile(filePath);
-
-        if (mInstructionData.length() > 0)
-            Compile(mInstructionData);
-
         return mInstructionData;
     }
 
@@ -60,7 +53,8 @@ namespace ORchestra
         mCurrentProcessingStep.store(mCurrentGlobalStep.load(), std::memory_order_release);
         mVM->Reset();
 
-        mIsVMInit.store(mVM->Prepare(&mInstructionData[0]));
+        const bool innitSuccess = mVM->Prepare(&mInstructionData[0]);
+        mIsVMInit.store(innitSuccess);
         WakeWorker();
     }
 

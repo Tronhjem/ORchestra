@@ -26,7 +26,6 @@ namespace ORchestra
         ORchestraToken ScanToken();
         ORchestraToken MakeToken(ORchestraTokenType token);
         ORchestraToken MakeErrorToken(const std::string_view& message, char symbol);
-        ORchestraToken BuildString();
         ORchestraToken BuildDigit();
         ORchestraToken BuildIdentifier();
         ORchestraTokenType IdentifierToken();

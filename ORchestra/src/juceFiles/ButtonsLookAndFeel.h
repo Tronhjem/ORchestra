@@ -5,6 +5,8 @@
 #include "Utility.h"
 #include "juce_graphics/juce_graphics.h"
 
+using namespace ORchestra;
+
 class ButtonLookAndFeel : public juce::LookAndFeel_V4
 {
 public:
@@ -14,7 +16,7 @@ public:
         UNUSED(backgroundColour);
         auto bounds = button.getLocalBounds().toFloat();
 
-        juce::Colour fillColour = ORchestraColours::ButtonBackground;
+        juce::Colour fillColour = ButtonBackgroundColor;
 
         if (isButtonDown)
             fillColour = fillColour.darker(0.15f);
@@ -31,7 +33,7 @@ public:
         UNUSED(shouldDrawButtonAsHighlighted);
         UNUSED(shouldDrawButtonAsDown);
 
-        juce::Colour fillColour = ORchestraColours::ButtonBackground;
+        juce::Colour fillColour = ButtonBackgroundColor;
         g.setColour(fillColour);
 
         g.fillRoundedRectangle(toggleButton.getLocalBounds().toFloat(), ROUNDED_CORNER_SIZE);

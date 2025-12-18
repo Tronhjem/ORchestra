@@ -135,11 +135,11 @@ juce::Colour Timeline::GetStepColorFromVelocity(const float velocity)
 {
     if (velocity > 0.f)
     {
-        return smoothstepColour(ORchestraColours::MinVelocity,
-                                ORchestraColours::MaxVelocity, velocity / 127.f);
+        return smoothstepColour(MinVelocityColor,
+                                MaxVelocityColor, velocity / 127.f);
     }
     else
     {
-        return ORchestraColours::InactiveStep;
+        return InactiveStepColor;
     }
 }

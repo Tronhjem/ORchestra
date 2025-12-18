@@ -3,6 +3,8 @@
 #include "Colours.h"
 #include "Utility.h"
 
+using namespace ORchestra;
+
 class TextEditorLookAndFeel : public juce::LookAndFeel_V4
 {
 public:
@@ -12,7 +14,7 @@ public:
         UNUSED(height);
         UNUSED(editor);
 
-        g.fillAll(ORchestraColours::Background);
+        g.fillAll(BackgroundColor);
     }
 
     void drawScrollbar(juce::Graphics& g, juce::ScrollBar& scrollbar,
@@ -30,7 +32,7 @@ public:
         g.fillRect(x, y, width, height);
 
         // Thumb (the draggable part)
-        g.setColour(ORchestraColours::ButtonBackground); // Set your custom color here
+        g.setColour(ButtonBackgroundColor); // Set your custom color here
         if (isScrollbarVertical)
             g.fillRoundedRectangle(static_cast<float>(x), static_cast<float>(thumbStartPosition), static_cast<float>(width), static_cast<float>(thumbSize), 20.4f);
         else
@@ -40,7 +42,7 @@ public:
     void drawTextEditorOutline(juce::Graphics& g, int width, int height, juce::TextEditor& ed) override
     {
         UNUSED(ed);
-        g.setColour(ORchestraColours::ButtonBackground); // Or use your palette
+        g.setColour(ButtonBackgroundColor); // Or use your palette
         g.drawRect(0, 0, width, height, 2);              // Last parameter is thickness
     }
 };

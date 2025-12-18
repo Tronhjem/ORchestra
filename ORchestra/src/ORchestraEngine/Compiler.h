@@ -29,9 +29,11 @@ namespace ORchestra
         inline const ORchestraToken& Previous();
 
         inline void ThrowUnexpectedTokenError(const ORchestraToken& tokenForError);
-        inline void ThrowMissingExpectedToken(std::string& missingToken);
+        inline void ThrowUnexpectedStart(const ORchestraToken& tokenForError);
+        inline void ThrowMissingExpectedToken(const std::string& missingToken);
         inline void ThrowMissingParamCount(int expected, int received);
-        inline void ThrowUnexpectedEnd(std::string& missingToken);
+        inline void ThrowUnexpectedEnd(const std::string& missingToken);
+        inline void ThrowUnknownFunctionOrVariable(const std::string& name);
 
         inline bool MakeIdentifierGetter(const ORchestraToken& token, std::vector<Instruction>& instructions);
         inline void MakeConstant(const ORchestraToken& token, std::vector<Instruction>& instructions);

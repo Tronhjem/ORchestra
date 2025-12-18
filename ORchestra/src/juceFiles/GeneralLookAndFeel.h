@@ -4,6 +4,8 @@
 #include "Colours.h"
 #include "Utility.h"
 
+using namespace ORchestra;
+
 class GeneralLookAndFeel : public juce::LookAndFeel_V4
 {
 public:
@@ -17,7 +19,7 @@ public:
         UNUSED(w);
         UNUSED(h);
 
-        g.fillAll(ORchestraColours::Background); // or your palette color
+        g.fillAll(BackgroundColor); // or your palette color
     }
 
     void drawButtonBackground(juce::Graphics& g, juce::Button& button,
@@ -27,7 +29,7 @@ public:
 
         auto bounds = button.getLocalBounds().toFloat();
 
-        juce::Colour fillColour = ORchestraColours::ButtonBackground;
+        juce::Colour fillColour = BackgroundColor;
 
         if (isButtonDown)
             fillColour = fillColour.darker(0.15f);
@@ -56,10 +58,10 @@ public:
         auto cornerSize = box.findParentComponentOfClass<ChoicePropertyComponent>() != nullptr ? 0.0f : 3.0f;
         Rectangle<int> boxBounds(0, 0, width, height);
 
-        g.setColour(ORchestraColours::ButtonBackground);
+        g.setColour(BackgroundColor);
         g.fillRoundedRectangle(boxBounds.toFloat(), cornerSize);
 
-        g.setColour(ORchestraColours::ButtonBackground);
+        g.setColour(BackgroundColor);
         g.drawRoundedRectangle(boxBounds.toFloat().reduced(0.5f, 0.5f), cornerSize, 1.0f);
 
         Rectangle<int> arrowZone(width - 30, 0, 20, height);
@@ -77,7 +79,7 @@ public:
         // auto bounds = button.getLocalBounds().toFloat();
         juce::Rectangle bounds{ (float)width, (float)height };
 
-        juce::Colour fillColour = ORchestraColours::ButtonBackground;
+        juce::Colour fillColour = BackgroundColor;
 
         // if (isButtonDown)
         //     fillColour = fillColour.darker(0.15f);
@@ -98,7 +100,7 @@ public:
         const juce::Slider::SliderStyle style, juce::Slider& slider) override
     {
         // Draw the track background
-        g.setColour(ORchestraColours::ButtonBackground);
+        g.setColour(BackgroundColor);
         g.fillRect(x, y, width, height);
 
         // (Optional) Draw the original slider on top, or customize further
