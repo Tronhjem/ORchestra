@@ -81,7 +81,7 @@ namespace ORchestra
     };
 
     const Colour OutlineColor = Colour(ColorPalette::Mantle);
-    const Colour BackgroundColor = Colour(ColorPalette::Surface0);
+    const Colour BackgroundColor = Colour(ColorPalette::Base);
     const Colour ButtonBackgroundColor = Colour(ColorPalette::Blue);
     const Colour TextColor = Colour(ColorPalette::Text);
 
