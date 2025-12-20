@@ -81,7 +81,7 @@ namespace ORchestra
                     });
             } // end lock scope
                 
-            if (! mShouldExit.load(std::memory_order_relaxed)) 
+            if (!mShouldExit.load(std::memory_order_relaxed)) 
             {
                 if(PreProcessSteps())
                     mHasWork.store(false, std::memory_order_release);
