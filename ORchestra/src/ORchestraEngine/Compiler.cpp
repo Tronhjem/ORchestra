@@ -26,9 +26,11 @@ namespace ORchestra
             mTokens(tokens),
             mErrorReporting(log)
     {
+        mVariableIDMap.reserve(8); // Magic number for size of variables estimated as a good start.
+
         // populate built in functions
-        std::vector<Instruction> printInstructions;
 #if _DEBUG
+        std::vector<Instruction> printInstructions;
         printInstructions.emplace_back(Instruction{ OpCode::PRINT });
         mFunctions["print"] = StoredFunction(1, printInstructions);
 #endif
