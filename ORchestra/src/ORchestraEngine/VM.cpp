@@ -324,7 +324,7 @@ namespace ORchestra
             if (instruction.mId < mVariables.size())
             {
                 const int index = stack.Pop().GetValue(0);
-                // GetGalue is done with modulo inside, so no need to worry about out of bounds value
+                // GetValue is done with modulo inside, so no need to worry about out of bounds value
                 const StepData value = mVariables[instruction.mId].GetValue(index);
                 stack.Push(value);
             }
