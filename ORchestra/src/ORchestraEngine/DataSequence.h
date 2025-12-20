@@ -6,7 +6,7 @@
 
 namespace ORchestra
 {
-    /// DataSequence holds a number of StepData aka. DataSequenceSteps.
+    /// DataSequence holds a number of StepData.
     /// These are the ones we access with the global index to send data.
     class DataSequence
     {
