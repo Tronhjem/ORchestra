@@ -11,7 +11,8 @@ namespace ORchestra
         mCurrentGlobalStep(0),
         mCurrentProcessingStep(0),
         mIsVMInit(false),
-        mShouldExit(false)
+        mShouldExit(false),
+        mHasWork(false)
     {
         mVM = std::make_unique<VM>();
         mFileLoader = std::make_unique<FileLoader>();
@@ -20,7 +21,9 @@ namespace ORchestra
 
     ORchestraEngine::~ORchestraEngine()
     {
-        mShouldExit.store(true);
+        mShouldExit.store(true, std::memory_order_release);
+        mCV.notify_one();
+
         if (mWorkerThread.joinable())
             mWorkerThread.join();
     }
@@ -58,27 +61,40 @@ namespace ORchestra
         mVM->Reset();
 
         mIsVMInit.store(mVM->Prepare(&mInstructionData[0]));
+        WakeWorker();
+    }
+
+    void ORchestraEngine::WakeWorker()
+    {
+        mHasWork.store(true, std:: memory_order_release);
+        mCV.notify_one();
     }
 
     void ORchestraEngine::WorkerThreadLoop()
     {
-        while (!mShouldExit.load())
+        while (!mShouldExit.load(std::memory_order_relaxed)) {
         {
-            PreProcessSteps();
-            std::this_thread::sleep_for(std::chrono::milliseconds(50));
+            std::unique_lock<std::mutex> lock(mCVMutex);
+            mCV.wait(lock, [this] {
+                    return mHasWork.load(std::memory_order_acquire) || mShouldExit.load(std::memory_order_acquire);
+                });
+            }
+                
+            if (! mShouldExit.load(std::memory_order_relaxed)) 
+            {
+                if(PreProcessSteps())
+                    mHasWork.store(false, std::memory_order_release);
+            }
         }
     }
 
-    void ORchestraEngine::PreProcessSteps()
+    bool ORchestraEngine::PreProcessSteps()
     {
         if (!mIsVMInit.load())
-            return;
+            return false;
 
         const int readySteps = mReadySteps.load();
         const int stepsToProcess = STEP_BUFFER_SIZE - 1 - readySteps; // leave the last step unprocessed.
-
-        if (stepsToProcess < HALF_STEP_BUFFER_SIZE - 5 /*magic number for processing steps earlier than half*/)
-            return;
 
 #if _DEBUG
         ScopedTimer timer{ "PreProcess" };
@@ -101,6 +117,8 @@ namespace ORchestra
         }
 
         mCurrentProcessingStep.fetch_add(stepsToProcess, std::memory_order_acq_rel);
+        
+        return true;
     }
 
     void ORchestraEngine::Tick(const TransportData& transportData,
@@ -132,39 +150,40 @@ namespace ORchestra
             if (endOfBufferInSamples >= nextStepInSamples && currentStep != mLastStep)
             {
 #if _DEBUG
-                ScopedTimer timer{ "Process Beat" };
+               ScopedTimer timer{ "Process Beat" };
 #endif
-                mLastStep = currentStep;
+               mLastStep = currentStep;
 
-                mSamplesSinceLastStep = transportData.timeInSamples;
-                const int wrappedGlobalStep = currentStep % STEP_BUFFER_SIZE;
-                const std::vector<SequenceStep>& currentData = mStepRingBuffer[static_cast<unsigned long>(wrappedGlobalStep)];
+               mSamplesSinceLastStep = transportData.timeInSamples;
+               const int wrappedGlobalStep = currentStep % STEP_BUFFER_SIZE;
+               const std::vector<SequenceStep>& currentData = mStepRingBuffer[static_cast<unsigned long>(wrappedGlobalStep)];
+               for (const SequenceStep& step : currentData)
+               {
+                   const int triggerLength = static_cast<int>(step.mShouldTrigger.GetLength());
 
-                for (const SequenceStep& step : currentData)
-                {
-                    const int triggerLength = static_cast<int>(step.mShouldTrigger.GetLength());
+                   for (int i = 0; i < triggerLength; ++i)
+                   {
+                       const DataUnit shouldTrigger = step.mShouldTrigger.GetValue(i);
 
-                    for (int i = 0; i < triggerLength; ++i)
-                    {
-                        const DataUnit shouldTrigger = step.mShouldTrigger.GetValue(i);
-
-                        if (!shouldTrigger)
+                       if (!shouldTrigger)
                             continue;
 
-                        const DataUnit firstByte = step.mFirst.GetEquivalentValueAtIndex(i, triggerLength);
-                        const DataUnit secondByte = step.mSecond.GetEquivalentValueAtIndex(i, triggerLength);
-                        const DataUnit channel = step.mChannel.GetEquivalentValueAtIndex(i, triggerLength);
-                        const int timeStamp = nextStepInSamples + i * (static_cast<int>(samplesPerStep) / triggerLength);
+                       const DataUnit firstByte = step.mFirst.GetEquivalentValueAtIndex(i, triggerLength);
+                       const DataUnit secondByte = step.mSecond.GetEquivalentValueAtIndex(i, triggerLength);
+                       const DataUnit channel = step.mChannel.GetEquivalentValueAtIndex(i, triggerLength);
+                       const int timeStamp = nextStepInSamples + i * (static_cast<int>(samplesPerStep) / triggerLength);
 
-                        // TODO: Change to use step.mDuration
-                        // ScheduledMidiMessage message {step.mType, firstByte, secondByte, channel, timeStamp, step.mDuration};
-                        ScheduledMidiMessage message{ step.mType, firstByte, secondByte, channel, timeStamp, transportData.noteLengthInSamples };
+                       // TODO: Change to use step.mDuration
+                       // ScheduledMidiMessage message {step.mType, firstByte, secondByte, channel, timeStamp, step.mDuration};
+                       ScheduledMidiMessage message{ step.mType, firstByte, secondByte, channel, timeStamp, transportData.noteLengthInSamples };
 
-                        mMidiScheduler.PostMidi(message);
-                    }
-                }
+                       mMidiScheduler.PostMidi(message);
+                   }
+               }
 
-                mReadySteps.fetch_sub(1, std::memory_order_acq_rel);
+               mReadySteps.fetch_sub(1, std::memory_order_acq_rel);
+               if (mReadySteps.load() < HALF_STEP_BUFFER_SIZE - 5) /*magic number for processing steps earlier than half*/
+                   WakeWorker();
             }
 
             // Process all Midi.
