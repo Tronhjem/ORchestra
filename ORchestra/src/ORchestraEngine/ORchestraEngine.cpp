@@ -83,7 +83,7 @@ namespace ORchestra
                 
             if (!mShouldExit.load(std::memory_order_relaxed)) 
             {
-                if(PreProcessSteps())
+                if (PreProcessSteps())
                     mHasWork.store(false, std::memory_order_release);
             }
         }
