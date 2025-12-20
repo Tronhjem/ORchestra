@@ -80,7 +80,6 @@ namespace ORchestra
                 StepData value = stack.Pop();
                 std::vector<StepData> vectorData{ value };
                 mVariables.emplace_back(DataSequence{ vectorData });
-//                mVariables[instruction.mId] = ;
 
                 break;
             }
@@ -95,7 +94,6 @@ namespace ORchestra
                 }
 
                 std::vector<StepData> vectorData{ data, data + arrayLength };
-//                mVariables[instruction.mId] = DataSequence{ vectorData };
                 mVariables.emplace_back(DataSequence{ vectorData });
 
                 break;
@@ -106,7 +104,6 @@ namespace ORchestra
                 const StepData value = stack.Pop();
                 const int index = stack.Pop().GetValue(0);
                 
-//                if (mVariables.find(instruction.mId) != mVariables.end())
                 if (instruction.mId < mVariables.size())
                 {
                     mVariables[instruction.mId].SetValue(index, value);
@@ -256,7 +253,6 @@ namespace ORchestra
             const StepData value = stack.Pop();
             const int index = stack.Pop().GetValue(0);
             
-//            if (mVariables.find(instruction.mId) != mVariables.end())
             if (instruction.mId < mVariables.size())
             {
                 mVariables[instruction.mId].SetValue(index, value);
@@ -308,7 +304,6 @@ namespace ORchestra
 
         case (OpCode::GET_IDENTIFIER_VALUE):
         {
-//            if (mVariables.find(instruction.mId) != mVariables.end())
             if (instruction.mId < mVariables.size())
             {
                 const StepData value = mVariables[instruction.mId].GetValue(stepCount);
@@ -326,7 +321,6 @@ namespace ORchestra
 
         case (OpCode::GET_IDENTIFIER_WITH_INDEX):
         {
-//            if (mVariables.find(instruction.mId) != mVariables.end())
             if (instruction.mId < mVariables.size())
             {
                 const int index = stack.Pop().GetValue(0);
