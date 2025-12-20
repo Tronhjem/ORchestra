@@ -66,7 +66,7 @@ namespace ORchestra
 
     void ORchestraEngine::WakeWorker()
     {
-        mHasWork.store(true, std:: memory_order_release);
+        mHasWork.store(true, std::memory_order_release);
         mCV.notify_one();
     }
 
