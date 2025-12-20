@@ -22,6 +22,7 @@ namespace ORchestra
         mCompiler(mScanner.GetTokens(), mErrorReporting)
     {
         mRuntimeInstructions.reserve(64);
+        mVariables.reserve(16);
     }
 
     bool VM::Prepare(const std::string& data)
@@ -78,22 +79,22 @@ namespace ORchestra
             {
                 StepData value = stack.Pop();
                 std::vector<StepData> vectorData{ value };
-                mVariables[instruction.mNameValue] = DataSequence{ vectorData };
+                mVariables.emplace_back(DataSequence{ vectorData });
 
                 break;
             }
 
             case (OpCode::SET_IDENTIFIER_ARRAY):
             {
-                const int arrayLength = std::clamp(static_cast<int>(stack.Pop().GetValue(0)), 0, 32);
-                StepData data[32];
+                const int arrayLength = std::clamp(static_cast<int>(stack.Pop().GetValue(0)), 0, MAX_DATASEQUENCE_LENGTH);
+                StepData data[MAX_DATASEQUENCE_LENGTH];
                 for (int i = arrayLength - 1; i >= 0; --i)
                 {
                     data[i] = stack.Pop();
                 }
 
                 std::vector<StepData> vectorData{ data, data + arrayLength };
-                mVariables[instruction.mNameValue] = DataSequence{ vectorData };
+                mVariables.emplace_back(DataSequence{ vectorData });
 
                 break;
             }
@@ -103,9 +104,9 @@ namespace ORchestra
                 const StepData value = stack.Pop();
                 const int index = stack.Pop().GetValue(0);
                 
-                if (mVariables.find(instruction.mNameValue) != mVariables.end())
+                if (instruction.mId < mVariables.size())
                 {
-                    mVariables[instruction.mNameValue].SetValue(index, value);
+                    mVariables[instruction.mId].SetValue(index, value);
                 }
                 else
                 {
@@ -230,7 +231,7 @@ namespace ORchestra
         case (OpCode::SET_IDENTIFIER_VALUE):
         {
             const StepData value = stack.Pop();
-            mVariables[instruction.mNameValue].SetValue(0, value);
+            mVariables[instruction.mId].SetValue(0, value);
 
             break;
         }
@@ -241,7 +242,7 @@ namespace ORchestra
 
             for (int i = arrayLength - 1; i >= 0; --i)
             {
-                mVariables[instruction.mNameValue].SetValue(i, stack.Pop());
+                mVariables[instruction.mId].SetValue(i, stack.Pop());
             }
 
             break;
@@ -252,9 +253,9 @@ namespace ORchestra
             const StepData value = stack.Pop();
             const int index = stack.Pop().GetValue(0);
             
-            if (mVariables.find(instruction.mNameValue) != mVariables.end())
+            if (instruction.mId < mVariables.size())
             {
-                mVariables[instruction.mNameValue].SetValue(index, value);
+                mVariables[instruction.mId].SetValue(index, value);
             }
             else
             {
@@ -303,9 +304,9 @@ namespace ORchestra
 
         case (OpCode::GET_IDENTIFIER_VALUE):
         {
-            if (mVariables.find(instruction.mNameValue) != mVariables.end())
+            if (instruction.mId < mVariables.size())
             {
-                const StepData value = mVariables[instruction.mNameValue].GetValue(stepCount);
+                const StepData value = mVariables[instruction.mId].GetValue(stepCount);
                 stack.Push(value);
             }
             else
@@ -320,11 +321,11 @@ namespace ORchestra
 
         case (OpCode::GET_IDENTIFIER_WITH_INDEX):
         {
-            if (mVariables.find(instruction.mNameValue) != mVariables.end())
+            if (instruction.mId < mVariables.size())
             {
                 const int index = stack.Pop().GetValue(0);
-                // GetGalue is done with modulo inside, so no need to worry about out of bounds value
-                const StepData value = mVariables[instruction.mNameValue].GetValue(index);
+                // GetValue is done with modulo inside, so no need to worry about out of bounds value
+                const StepData value = mVariables[instruction.mId].GetValue(index);
                 stack.Push(value);
             }
             else

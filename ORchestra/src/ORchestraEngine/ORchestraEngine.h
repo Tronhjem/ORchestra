@@ -3,12 +3,13 @@
 #include <JuceHeader.h>
 #include <memory>
 #include <ctime>
+#include <mutex>
+#include <condition_variable>
 
 #include "TransportData.h"
 #include "MidiScheduler.h"
 #include "VM.h"
 #include "FileLoader.h"
-#include "StepData.h"
 #include "ErrorReporting.h"
 
 namespace ORchestra {
@@ -35,8 +36,9 @@ namespace ORchestra {
         bool IsVMInit() { return mIsVMInit.load(); }
 
     private:
+        void WakeWorker();
         void WorkerThreadLoop();
-        void PreProcessSteps();
+        bool PreProcessSteps();
         inline void Initialize();
 
         int mLastStep = -1;
@@ -46,7 +48,10 @@ namespace ORchestra {
         std::atomic<int> mCurrentProcessingStep;
         std::atomic<bool> mIsVMInit;
         std::atomic<bool> mShouldExit;
+        std::atomic<bool> mHasWork;
 
+        std::mutex mCVMutex;
+        std::condition_variable mCV;
         std::thread mWorkerThread;
         std::unique_ptr<VM> mVM;
         std::unique_ptr<FileLoader> mFileLoader;

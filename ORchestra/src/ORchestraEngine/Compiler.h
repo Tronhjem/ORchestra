@@ -8,7 +8,8 @@
 #include "StoredFunction.h"
 #include "StepData.h"
 
-namespace ORchestra 
+
+namespace ORchestra
 {
     class ErrorReporting;
 
@@ -45,10 +46,14 @@ namespace ORchestra
                 bool isLastRecursiveLevel);
 
         bool CompileFunctionCall(std::vector<Instruction>& instructions, const std::string& functionName);
-
+        
+        inline uint16_t GetOrCreateVariableID(const std::string& varName);
+        
+        uint16_t mVariableIdCounter;
         unsigned long mCurrentIndex = 0;
         const std::vector<ORchestraToken>& mTokens;
         ErrorReporting& mErrorReporting;
         std::unordered_map<std::string, StoredFunction> mFunctions;
+        std::unordered_map<std::string, uint16_t> mVariableIDMap;
     };
 } // namespace ORchestra

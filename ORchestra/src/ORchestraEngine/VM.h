@@ -55,7 +55,7 @@ namespace ORchestra
         Scanner mScanner;
         Compiler mCompiler;
 
-        std::unordered_map<std::string, DataSequence> mVariables;
+        std::vector<DataSequence> mVariables;
         std::vector<Instruction> mRuntimeInstructions;
         inline DataUnit RandomValue(const DataUnit low, const DataUnit high);
 

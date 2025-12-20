@@ -21,11 +21,16 @@ namespace ORchestra
     static const std::string ranFunctionName = "ran";
     static const std::string eucFunctionName = "euc";
 
-    Compiler::Compiler(const std::vector<ORchestraToken>& tokens, ErrorReporting& log) : mTokens(tokens), mErrorReporting(log)
+    Compiler::Compiler(const std::vector<ORchestraToken>& tokens, ErrorReporting& log) :
+            mVariableIdCounter(0),
+            mTokens(tokens),
+            mErrorReporting(log)
     {
+        mVariableIDMap.reserve(8); // Magic number for size of variables estimated as a good start.
+
         // populate built in functions
-        std::vector<Instruction> printInstructions;
 #if _DEBUG
+        std::vector<Instruction> printInstructions;
         printInstructions.emplace_back(Instruction{ OpCode::PRINT });
         mFunctions["print"] = StoredFunction(1, printInstructions);
 #endif
@@ -50,6 +55,8 @@ namespace ORchestra
     void Compiler::Reset()
     {
         mCurrentIndex = 0;
+        mVariableIDMap.clear();
+        mVariableIdCounter = 0;
     }
 
     const ORchestraToken& Compiler::Consume()
@@ -76,7 +83,8 @@ namespace ORchestra
 
     bool Compiler::MakeIdentifierGetter(const ORchestraToken& token, std::vector<Instruction>& instructions)
     {
-        std::string name = std::string(token.mStart, static_cast<unsigned long>(token.mLength));
+        const std::string name = std::string(token.mStart, static_cast<unsigned long>(token.mLength));
+        const uint16_t id = GetOrCreateVariableID(name);
 
         if (Peek().mTokenType == ORchestraTokenType::LEFT_BRACKET)
         {
@@ -93,11 +101,11 @@ namespace ORchestra
 
             Consume(); // for consuming right bracket
 
-            instructions.emplace_back(Instruction{ OpCode::GET_IDENTIFIER_WITH_INDEX, name });
+            instructions.emplace_back(Instruction{ OpCode::GET_IDENTIFIER_WITH_INDEX, id });
         }
         else
         {
-            instructions.emplace_back(Instruction{ OpCode::GET_IDENTIFIER_VALUE, name });
+            instructions.emplace_back(Instruction{ OpCode::GET_IDENTIFIER_VALUE, id });
         }
 
         return true;
@@ -690,8 +698,9 @@ namespace ORchestra
             {
             case ORchestraTokenType::IDENTIFIER:
             {
-                std::string name = std::string(token.mStart, static_cast<unsigned long>(token.mLength));
-
+                const std::string name = std::string(token.mStart, static_cast<unsigned long>(token.mLength));
+                const uint16_t id = GetOrCreateVariableID(name);
+                
                 if (Peek().mTokenType == ORchestraTokenType::LEFT_BRACKET)
                 {
                     Consume();
@@ -719,7 +728,7 @@ namespace ORchestra
                             return false;
                         }
 
-                        instructions.emplace_back(Instruction{ OpCode::SET_IDENTIFIER_WITH_INDEX, name });
+                        instructions.emplace_back(Instruction{ OpCode::SET_IDENTIFIER_WITH_INDEX, id });
                     }
                     else
                     {
@@ -742,7 +751,7 @@ namespace ORchestra
                         if (CompileArray(instructions, arrayLength, MAX_DATASEQUENCE_LENGTH, isLastRecursiveLevel))
                         {
                             instructions.emplace_back(Instruction{ OpCode::CONSTANT, arrayLength });
-                            instructions.emplace_back(Instruction{ OpCode::SET_IDENTIFIER_ARRAY, name });
+                            instructions.emplace_back(Instruction{ OpCode::SET_IDENTIFIER_ARRAY, id });
                         }
                         else
                         {
@@ -761,7 +770,7 @@ namespace ORchestra
                         if (!CompileExpression(instructions))
                             return false;
 
-                        instructions.emplace_back(Instruction{ OpCode::SET_IDENTIFIER_VALUE, name });
+                        instructions.emplace_back(Instruction{ OpCode::SET_IDENTIFIER_VALUE, id });
                         break;
                     }
                     case ORchestraTokenType::EUCLIDEAN:
@@ -770,7 +779,7 @@ namespace ORchestra
                         if (!CompileFunctionCall(instructions, eucFunctionName))
                             return false;
 
-                        instructions.emplace_back(Instruction{ OpCode::SET_IDENTIFIER_ARRAY, name });
+                        instructions.emplace_back(Instruction{ OpCode::SET_IDENTIFIER_ARRAY, id });
 
                         break;
                     }
@@ -869,6 +878,17 @@ namespace ORchestra
     {
         std::string message = "Unexpected end, you're missing a " + missingToken;
         mErrorReporting.LogError(Peek().mLine, message);
+    }
+
+    uint16_t Compiler::GetOrCreateVariableID(const std::string& varName)
+    {
+        if (mVariableIDMap.find(varName) != mVariableIDMap.end())
+        {
+            return mVariableIDMap[varName];
+        }
+        
+        mVariableIDMap[varName] = mVariableIdCounter++;
+        return mVariableIDMap[varName];
     }
 
 #ifdef __clang__
