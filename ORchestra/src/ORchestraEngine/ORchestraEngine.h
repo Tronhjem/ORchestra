@@ -14,9 +14,13 @@
 
 namespace ORchestra {
 
-
     constexpr int STEP_BUFFER_SIZE = 32;
+    constexpr int STEP_BUFFER_SIZE_MASK = STEP_BUFFER_SIZE - 1;
     constexpr int HALF_STEP_BUFFER_SIZE = STEP_BUFFER_SIZE / 2;
+
+    static_assert(STEP_BUFFER_SIZE > 0 && 
+                  (STEP_BUFFER_SIZE & (STEP_BUFFER_SIZE - 1)) == 0, 
+                  "STEP_BUFFER_SIZE must be a power of two");
 
     class ORchestraEngine
     {

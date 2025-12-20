@@ -80,19 +80,12 @@ namespace ORchestra
         static constexpr uint32_t Punctuation = ColorPalette::Text;
     };
 
-<<<<<<< HEAD
     const Colour OutlineColor = Colour(ColorPalette::Mantle);
-=======
->>>>>>> bb0fe81 (Rename Colour.h to Color.h)
     const Colour BackgroundColor = Colour(ColorPalette::Surface0);
     const Colour ButtonBackgroundColor = Colour(ColorPalette::Blue);
     const Colour TextColor = Colour(ColorPalette::Text);
 
-<<<<<<< HEAD
     const Colour MinVelocityColor = Colour::fromString("#275DAD");
-=======
-    static const Colour MinVelocityColor = Colour::fromString("#275DAD");
->>>>>>> bb0fe81 (Rename Colour.h to Color.h)
     const Colour MaxVelocityColor = Colour::fromString("#D64933");
     const Colour InactiveStepColor = Colour::fromString("#5B616A");
     

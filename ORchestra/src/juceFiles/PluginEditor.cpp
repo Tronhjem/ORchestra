@@ -100,12 +100,7 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     mBpmBox.setSliderStyle(Slider::SliderStyle::LinearBarVertical);
     mBpmBox.setSliderSnapsToMousePosition(false);
 
-    mBpmBox.setColour(Slider::backgroundColourId, ButtonBackgroundColor);
-    mBpmBox.setColour(Slider::trackColourId, ButtonBackgroundColor);
-    mBpmBox.setColour(Slider::thumbColourId, ButtonBackgroundColor);
-    mBpmBox.setColour(Slider::textBoxBackgroundColourId, ButtonBackgroundColor);
-    mBpmBox.setColour(Slider::textBoxHighlightColourId, ButtonBackgroundColor);
-    mBpmBox.setColour(Slider::textBoxOutlineColourId, ButtonBackgroundColor);
+    mBpmBox.setColour(Slider::textBoxOutlineColourId, BackgroundColor);
 
     mSyncToggleLabel.setColour(juce::Label::textColourId, TextColor);
     mTempoDivLabel.setColour(juce::Label::textColourId, TextColor);
