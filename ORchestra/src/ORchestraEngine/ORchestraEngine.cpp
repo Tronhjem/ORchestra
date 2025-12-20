@@ -72,13 +72,14 @@ namespace ORchestra
 
     void ORchestraEngine::WorkerThreadLoop()
     {
-        while (!mShouldExit.load(std::memory_order_relaxed)) {
+        while (!mShouldExit.load(std::memory_order_relaxed))
         {
-            std::unique_lock<std::mutex> lock(mCVMutex);
-            mCV.wait(lock, [this] {
-                    return mHasWork.load(std::memory_order_acquire) || mShouldExit.load(std::memory_order_acquire);
-                });
-            }
+            { // Lock scope
+                std::unique_lock<std::mutex> lock(mCVMutex);
+                mCV.wait(lock, [this] {
+                        return mHasWork.load(std::memory_order_acquire) || mShouldExit.load(std::memory_order_acquire);
+                    });
+            } // end lock scope
                 
             if (! mShouldExit.load(std::memory_order_relaxed)) 
             {
