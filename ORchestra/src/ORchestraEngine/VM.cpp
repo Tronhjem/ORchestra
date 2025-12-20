@@ -22,6 +22,7 @@ namespace ORchestra
         mCompiler(mScanner.GetTokens(), mErrorReporting)
     {
         mRuntimeInstructions.reserve(64);
+        mVariables.reserve(32);
     }
 
     bool VM::Prepare(const std::string& data)

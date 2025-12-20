@@ -16,6 +16,9 @@ namespace ORchestra
         mVM = std::make_unique<VM>();
         mFileLoader = std::make_unique<FileLoader>();
         mWorkerThread = std::thread([this]() { WorkerThreadLoop(); });
+
+        for(auto& stepBuffer : mStepRingBuffer)
+            stepBuffer.reserve(10); // Magic value estimated for a good start size. 
     }
 
     ORchestraEngine::~ORchestraEngine()
@@ -84,7 +87,7 @@ namespace ORchestra
 
         for (int i = currentStep; i < endGlobalStep; ++i)
         {
-            const int stepWrapped = i % STEP_BUFFER_SIZE;
+            const int stepWrapped = i & STEP_BUFFER_SIZE_MASK;
             // tick needs global step and StepData needs it wrapped for ring buffer.
 
             std::vector<SequenceStep>& currentData = mStepRingBuffer[static_cast<unsigned long>(stepWrapped)];
