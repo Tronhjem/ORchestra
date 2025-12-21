@@ -1,8 +1,7 @@
 #pragma once
 
 #include <cstdint>
-
-#include "StepData.h"
+#include "Defines.h"
 
 namespace ORchestra 
 {
@@ -56,13 +55,13 @@ namespace ORchestra
     {
     public:
         Instruction() : opCode(OpCode::CONSTANT) {}
-        explicit Instruction(OpCode code) : opCode(code), mDataValue() {}
-        explicit Instruction(OpCode code, StepData value) : opCode(code), mDataValue(value) {}
+        explicit Instruction(OpCode code) : opCode(code) {}
+        explicit Instruction(OpCode code, DataUnit value) : opCode(code), mDataValue(value) {}
         explicit Instruction(OpCode code, uint16_t id) : opCode(code), mId(id) {}
 
         OpCode opCode;
+        DataUnit mDataValue;
         uint16_t mId;
-        StepData mDataValue;
     };
 
 } // namespace ORchestra

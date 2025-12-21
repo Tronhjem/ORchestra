@@ -245,7 +245,8 @@ namespace ORchestra
         {
         case (OpCode::CONSTANT):
         {
-            stack.Push(instruction.mDataValue);
+            StepData value {instruction.mDataValue};
+            stack.Push(value);
 
             break;
         }
