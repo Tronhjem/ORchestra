@@ -3,7 +3,6 @@
 #include <cstdint>
 
 #include "StepData.h"
-#include <string>
 
 namespace ORchestra 
 {
@@ -58,17 +57,10 @@ namespace ORchestra
     class Instruction
     {
     public:
-<<<<<<< HEAD
         Instruction() : opCode(OpCode::CONSTANT) {}
         explicit Instruction(OpCode code) : opCode(code), mDataValue() {}
         explicit Instruction(OpCode code, StepData value) : opCode(code), mDataValue(value) {}
         explicit Instruction(OpCode code, uint16_t id) : opCode(code), mId(id) {}
-=======
-        explicit Instruction() : opCode(OpCode::CONSTANT), mDataValue(0), mNameValue("") {}
-        explicit Instruction(OpCode code) : opCode(code), mDataValue(0), mNameValue("") {}
-        explicit Instruction(OpCode code, StepData value) : opCode(code), mDataValue(value), mNameValue("") {}
-        explicit Instruction(OpCode code, std::string name) : opCode(code), mDataValue(0), mNameValue(name) {}
->>>>>>> 66d386634bcd7cf55c0344103f5f7d9dc33291bd
 
         OpCode opCode;
         uint16_t mId;

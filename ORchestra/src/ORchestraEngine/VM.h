@@ -30,7 +30,6 @@ namespace ORchestra
     {
     public:
         VM();
-        void SetTransportData(TransportData* transportData) { mTransportData = transportData; }
         bool Prepare(const std::string& data);
         bool Tick(std::vector<SequenceStep>& stepQueue, const int globalCount);
         void Reset();
@@ -62,8 +61,6 @@ namespace ORchestra
         std::vector<Instruction> mRuntimeInstructions;
         inline DataUnit RandomValue(const DataUnit low, const DataUnit high);
         
-        TransportData* mTransportData = nullptr;
-
         template <typename Operation>
         inline void PopDoOperationAndPush(Operation op, Stack<StepData>& stack)
         {
