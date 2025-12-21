@@ -34,17 +34,16 @@ namespace ORchestra
             static_assert(std::is_invocable_v<Operation, const int, const int>,
                 "Operation must be callable with two int parameters");
 
-            const StepData& longest = this->GetLength() > otherSequence.GetLength() ? *this : otherSequence;
-            const StepData& shortest = this->GetLength() <= otherSequence.GetLength() ? *this : otherSequence;
+            const int newLength = std::max(this->GetLength(), otherSequence.GetLength()); 
 
-            const int newLength = longest.GetLength();
             StepData newStep{};
             newStep.mLength = newLength;
 
             for (int i = 0; i < newLength; ++i)
             {
-                const int newValue = operationLambda(static_cast<int>(shortest.GetEquivalentValueAtIndex(i, newLength)),
-                    static_cast<int>(longest.GetValue(i)));
+                const int newValue = operationLambda(
+                        static_cast<int>(this->GetEquivalentValueAtIndex(i, newLength)),
+                        static_cast<int>(otherSequence.GetEquivalentValueAtIndex(i, newLength)));
                 newStep.mData[i] = static_cast<DataUnit>(std::clamp(newValue, 0, 127));
             }
 

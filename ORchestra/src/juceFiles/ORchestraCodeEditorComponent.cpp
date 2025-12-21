@@ -39,6 +39,8 @@
 #include <memory>
 
 #include "ORchestraCodeEditorComponent.h"
+#include "LookAndFeelConstants.h"
+#include "Colors.h"
 
 using namespace juce;
 

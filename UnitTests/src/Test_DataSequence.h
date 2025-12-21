@@ -9,13 +9,17 @@
 using namespace ORchestra;
 TEST_CASE("DataSequence: Evaluates ran(50,60) in array, result in range [50,60]", "[DataSequence]")
 {
-    std::string file{"a = [ran(50,60), 5, 0] \n test a"};
-    VM vm;
-    REQUIRE(vm.Prepare(file));
+    std::string file{"a = [ran(30,60), 5, 0] \n test a"};
 
-    StepData result = vm.GetTopStackValue();
-    REQUIRE(result.GetValue(0) >= 50);
-    REQUIRE(result.GetValue(0) <= 60);
+    for (int i = 0; i < 40; ++i)
+    {
+        VM vm;
+        REQUIRE(vm.Prepare(file));
+
+        StepData result = vm.GetTopStackValue();
+        REQUIRE(result.GetValue(0) >= 30);
+        REQUIRE(result.GetValue(0) <= 60);
+    }
 }
 
 TEST_CASE("DataSequence: Accesses array element 'a=[1,0,0], a[0]' correctly (result=1)", "[DataSequence]")
@@ -81,8 +85,118 @@ TEST_CASE("DataSequence: Accesses nested array element [1,1,0], returns values c
     REQUIRE(vm.Prepare(file));
 
     StepData result = vm.GetTopStackValue();
+    REQUIRE(result.GetLength() == 3);
     REQUIRE(result.GetValue(0) == 1);
     REQUIRE(result.GetValue(1) == 1);
+    REQUIRE(result.GetValue(2) == 0);
+}
+
+TEST_CASE("DataSequence: Accesses nested array element [1,1,0] added with other, returns values correctly", "[DataSequence]")
+{
+    std::string file{"a = [[1,1,0],0,0] \n b = [[1,1,0], 0 , 0] \n test a[0] + b[0]"};
+    VM vm;
+    REQUIRE(vm.Prepare(file));
+
+    StepData result = vm.GetTopStackValue();
+    REQUIRE(result.GetLength() == 3);
+    REQUIRE(result.GetValue(0) == 2);
+    REQUIRE(result.GetValue(1) == 2);
+    REQUIRE(result.GetValue(2) == 0);
+}
+
+TEST_CASE("DataSequence: Accesses nested array element [1,2,0] subtractd with other, returns values correctly", "[DataSequence]")
+{
+    std::string file{"a = [[1,2,0],0,0] \n b = [[1,1,0], 0 , 0] \n test a[0] - b[0]"};
+    VM vm;
+    REQUIRE(vm.Prepare(file));
+
+    StepData result = vm.GetTopStackValue();
+    REQUIRE(result.GetLength() == 3);
+    REQUIRE(result.GetValue(0) == 0);
+    REQUIRE(result.GetValue(1) == 1);
+    REQUIRE(result.GetValue(2) == 0);
+}
+
+TEST_CASE("DataSequence: Accesses nested array element [2,4,0] divided with other, returns values correctly", "[DataSequence]")
+{
+    std::string file{"a = [[2,4,0],0,0] \n b = [[2,2,0], 0 , 0] \n test a[0] / b[0]"};
+    VM vm;
+    REQUIRE(vm.Prepare(file));
+
+    StepData result = vm.GetTopStackValue();
+    REQUIRE(result.GetLength() == 3);
+    REQUIRE(result.GetValue(0) == 1);
+    REQUIRE(result.GetValue(1) == 2);
+    REQUIRE(result.GetValue(2) == 0);
+}
+
+TEST_CASE("DataSequence: Accesses nested array element [2,4,0] mutiplied with other, returns values correctly", "[DataSequence]")
+{
+    std::string file{"a = [[2,4,0],0,0] \n b = [[2,2,0], 0 , 0] \n test a[0] * b[0]"};
+    VM vm;
+    REQUIRE(vm.Prepare(file));
+
+    StepData result = vm.GetTopStackValue();
+    REQUIRE(result.GetLength() == 3);
+    REQUIRE(result.GetValue(0) == 4);
+    REQUIRE(result.GetValue(1) == 8);
+    REQUIRE(result.GetValue(2) == 0);
+}
+
+TEST_CASE("DataSequence: Accesses nested array element [1,1,3] subtractd with other of different lengths, returns values correctly", "[DataSequence]")
+{
+    std::string file{"a = [[1,2,3],0,0] \n b = [[1,1], 0 , 0] \n test a[0] - b[0]"};
+    VM vm;
+    REQUIRE(vm.Prepare(file));
+
+    StepData result = vm.GetTopStackValue();
+    REQUIRE(result.GetLength() == 3);
+
+    REQUIRE(result.GetValue(0) == 0);
+    REQUIRE(result.GetValue(1) == 1);
+    REQUIRE(result.GetValue(2) == 2);
+}
+
+TEST_CASE("DataSequence: Accesses nested array element [3,1] subtractd with other of different lengths, returns values correctly", "[DataSequence]")
+{
+    std::string file{"a = [[1,2,3],0,0] \n b = [[3,1], 0 , 0] \n test b[0] - a[0]"};
+    VM vm;
+    REQUIRE(vm.Prepare(file));
+
+    StepData result = vm.GetTopStackValue();
+    REQUIRE(result.GetLength() == 3);
+
+    REQUIRE(result.GetValue(0) == 2);
+    REQUIRE(result.GetValue(1) == 1);
+    REQUIRE(result.GetValue(2) == 0);
+}
+
+TEST_CASE("DataSequence: Accesses nested array element [3,5] subtractd with other of different lengths, returns values correctly", "[DataSequence]")
+{
+    std::string file{"a = [[1,2,3,4],0,0] \n b = [[3,5], 0 , 0] \n test b[0] - a[0]"};
+    VM vm;
+    REQUIRE(vm.Prepare(file));
+
+    StepData result = vm.GetTopStackValue();
+    REQUIRE(result.GetLength() == 4);
+
+    REQUIRE(result.GetValue(0) == 2);
+    REQUIRE(result.GetValue(1) == 1);
+    REQUIRE(result.GetValue(2) == 2);
+    REQUIRE(result.GetValue(3) == 1);
+}
+
+TEST_CASE("DataSequence: Accesses nested array element [2,4,0] divided with other of different lengths, returns values correctly", "[DataSequence]")
+{
+    std::string file{"a = [[2,4,0],0,0] \n b = [[2,2], 0 , 0] \n test a[0] / b[0]"};
+    VM vm;
+    REQUIRE(vm.Prepare(file));
+
+    StepData result = vm.GetTopStackValue();
+    REQUIRE(result.GetLength() == 3);
+
+    REQUIRE(result.GetValue(0) == 1);
+    REQUIRE(result.GetValue(1) == 2);
     REQUIRE(result.GetValue(2) == 0);
 }
 

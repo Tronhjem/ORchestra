@@ -133,8 +133,9 @@ namespace ORchestra
         {
         case ('\n'):
         {
+            const ORchestraToken token = MakeToken(ORchestraTokenType::EOL);
             mCurrentLine++;
-            return MakeToken(ORchestraTokenType::EOL);
+            return token;
         }
 
         // LOGIC

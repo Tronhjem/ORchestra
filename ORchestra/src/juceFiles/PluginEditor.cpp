@@ -133,14 +133,17 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     mCodeEditor.setLookAndFeel(mTextEditorLookAndFeel.get());
     
     mCodeEditor.setFont(MONOSPACE_FONT_OPTIONS);
-    mCodeEditor.setColour(juce::CodeEditorComponent::ColourIds::backgroundColourId, BackgroundColor);
-    mCodeEditor.setColour(juce::CodeEditorComponent::ColourIds::lineNumberBackgroundId, BackgroundColor);
+    mCodeEditor.setColour(juce::CodeEditorComponent::ColourIds::backgroundColourId, TextEditorBackgroundColor);
+    mCodeEditor.setColour(juce::CodeEditorComponent::ColourIds::lineNumberBackgroundId, TextEditorBackgroundColor);
+    mCodeEditor.setColour(juce::CodeEditorComponent::ColourIds::highlightColourId, HighlightColor.withAlpha(0.3f));
     mCodeEditor.setColour(juce::CodeEditorComponent::ColourIds::defaultTextColourId, TextColor);
     mCodeEditor.setColour(juce::CodeEditorComponent::ColourIds::lineNumberTextId, TextColor);
+    mCodeEditor.setScrollbarThickness(4);
 
     mErrorTextBox.setFont(MONOSPACE_FONT_OPTIONS);
     mErrorTextBox.setColour(juce::TextEditor::textColourId, TextColor);
     mErrorTextBox.setMultiLine(true);
+    mErrorTextBox.setEnabled(false);
 
     mTimeline.SetProcessor(&audioProcessor);
     mTriggerRectangle.SetProcessor(&audioProcessor);

@@ -10,11 +10,10 @@ using namespace ORchestra;
 constexpr int TIMELINE_STEPS_DRAWN = 20;
 constexpr int TIMELINE_ROWS_DRAWN = 5;
 
-constexpr float trackHeight = 32.f;
+constexpr float stepHeight = 20.f;
+constexpr float stepWidth = 48.f;
 constexpr float stepMargin = 2.5f;
 
-constexpr float stepHeight = trackHeight;
-constexpr float stepWidth = (trackHeight * 1.5f);
 constexpr float drawnStepHeight = stepHeight - stepMargin;
 constexpr float drawnStepWidth = stepWidth - stepMargin;
 

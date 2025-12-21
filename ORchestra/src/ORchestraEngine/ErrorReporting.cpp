@@ -6,7 +6,7 @@ namespace ORchestra
 {
     void ErrorReporting::LogError(const int line, std::string& message)
     {
-        message = message + " at line " + std::to_string(line) + "\n";
+        message = message + ", at line " + std::to_string(line) + "\n";
         mLogEntries.emplace_back(LogEntry{ EntryType::Error, line, std::move(message) });
         std::cout << message << std::endl;
     }
@@ -19,7 +19,7 @@ namespace ORchestra
 
     void ErrorReporting::LogWarning(const int line, std::string& message)
     {
-        message = message + " at line " + std::to_string(line) + "\n";
+        message = message + ", at line " + std::to_string(line) + "\n";
         mLogEntries.emplace_back(LogEntry{ EntryType::Warning, line, std::move(message) });
         std::cout << message << std::endl;
     }

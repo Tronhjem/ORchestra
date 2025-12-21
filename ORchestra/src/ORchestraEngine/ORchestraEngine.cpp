@@ -148,7 +148,7 @@ namespace ORchestra
             if (endOfBufferInSamples >= nextStepInSamples && currentStep != mLastStep)
             {
 #if _DEBUG
-               ScopedTimer timer{ "Process Beat" };
+//               ScopedTimer timer{ "Process Beat" };
 #endif
                mLastStep = currentStep;
 
@@ -180,7 +180,7 @@ namespace ORchestra
                }
 
                mReadySteps.fetch_sub(1, std::memory_order_acq_rel);
-               if (mReadySteps.load() < HALF_STEP_BUFFER_SIZE - 5) /*magic number for processing steps earlier than half*/
+               if (mReadySteps.load() < HALF_STEP_BUFFER_SIZE) /*magic number for processing steps earlier than half*/
                    WakeWorker();
             }
 

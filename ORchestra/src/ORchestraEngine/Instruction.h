@@ -39,7 +39,6 @@ namespace ORchestra
         NOT_EQUAL,
 
         // Specific
-        // TRACK,
         NOTE,
         CC,
 
@@ -62,8 +61,8 @@ namespace ORchestra
         explicit Instruction(OpCode code, uint16_t id) : opCode(code), mId(id) {}
 
         OpCode opCode;
-        StepData mDataValue;
         uint16_t mId;
+        StepData mDataValue;
     };
 
 } // namespace ORchestra

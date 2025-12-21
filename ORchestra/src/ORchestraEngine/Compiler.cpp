@@ -309,7 +309,7 @@ namespace ORchestra
 
         if (Peek().mTokenType != ORchestraTokenType::RIGHT_PAREN)
         {
-            ThrowUnexpectedTokenError(Peek());
+            ThrowMissingExpectedToken(")");
             return false;
         }
 
@@ -884,7 +884,7 @@ namespace ORchestra
     {
         std::string message = std::string("Expected '") +
             std::to_string(expected) +
-            std::string("' but received ") +
+            std::string("' function parameters, but received ") +
             std::to_string(received);
 
         mErrorReporting.LogError(Peek().mLine, message);
