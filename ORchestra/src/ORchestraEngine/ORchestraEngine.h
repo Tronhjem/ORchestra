@@ -53,7 +53,7 @@ namespace ORchestra {
 
         std::array<std::vector<SequenceStep>, STEP_BUFFER_SIZE>& GetStepData() { return mStepRingBuffer; }
         int GetGlobalStepCount() { return mCurrentGlobalStep.load(); }
-        const std::vector<LogEntry>& GetErrors() { return mVM->GetErrors(); }
+        const std::vector<LogEntry>& GetErrors() { return mVM.GetErrors(); }
         const std::string& GetInstructionData() { return mInstructionData; }
         void SetInstructionData(const std::string& data) { mInstructionData = data; }
         bool IsVMInit() { return mIsVMInit.load(); }
@@ -76,13 +76,13 @@ namespace ORchestra {
         std::mutex mCVMutex;
         std::condition_variable mCV;
         std::thread mWorkerThread;
-        std::unique_ptr<VM> mVM;
         std::unique_ptr<FileLoader> mFileLoader;
         std::array<std::vector<SequenceStep>, STEP_BUFFER_SIZE> mStepRingBuffer;
 
         std::string mInstructionData;
 
         MidiScheduler mMidiScheduler;
+        VM mVM;
     };
 
 

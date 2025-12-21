@@ -31,9 +31,9 @@ namespace ORchestra
         mCurrentProcessingStep(0),
         mIsVMInit(false),
         mShouldExit(false),
-        mHasWork(false)
+        mHasWork(false),
+        mVM()
     {
-        mVM = std::make_unique<VM>();
         mFileLoader = std::make_unique<FileLoader>();
         mWorkerThread = std::thread([this]() { WorkerThreadLoop(); });
 
@@ -73,9 +73,9 @@ namespace ORchestra
 
         mReadySteps.store(0, std::memory_order_release);
         mCurrentProcessingStep.store(mCurrentGlobalStep.load(), std::memory_order_release);
-        mVM->Reset();
+        mVM.Reset();
 
-        const bool innitSuccess = mVM->Prepare(&mInstructionData[0]);
+        const bool innitSuccess = mVM.Prepare(&mInstructionData[0]);
         mIsVMInit.store(innitSuccess);
         WakeWorker();
     }
@@ -129,7 +129,7 @@ namespace ORchestra
             std::vector<SequenceStep>& currentData = mStepRingBuffer[static_cast<unsigned long>(stepWrapped)];
             currentData.clear();
 
-            mVM->Tick(currentData, i);
+            mVM.Tick(currentData, i);
             mReadySteps.fetch_add(1, std::memory_order_acq_rel);
         }
 
