@@ -266,6 +266,7 @@ namespace ORchestra
     {
         if (mFunctions.find(functionName) == mFunctions.end())
         {
+            ThrowUnknownFunctionOrVariable(functionName);
             return false;
         }
 
@@ -308,7 +309,7 @@ namespace ORchestra
 
         if (Peek().mTokenType != ORchestraTokenType::RIGHT_PAREN)
         {
-            ThrowUnexpectedTokenError(Peek());
+            ThrowMissingExpectedToken(")");
             return false;
         }
 
@@ -851,14 +852,29 @@ namespace ORchestra
         }
     }
 
-    void Compiler::ThrowUnexpectedTokenError(const ORchestraToken& tokenForError)
+    void Compiler::ThrowUnknownFunctionOrVariable(const std::string& name)
     {
-        std::string token = std::string(tokenForError.mStart, static_cast<unsigned long>(tokenForError.mLength));
-        std::string message = std::string("Unexpected Character ") + token;
+        std::string message = std::string("Unexpected function or variable '") + name + std::string("'");
         mErrorReporting.LogError(Peek().mLine, message);
     }
 
-    void Compiler::ThrowMissingExpectedToken(std::string& missingToken)
+    void Compiler::ThrowUnexpectedTokenError(const ORchestraToken& tokenForError)
+    {
+        std::string token = std::string(tokenForError.mStart, static_cast<unsigned long>(tokenForError.mLength));
+        std::string message = std::string("Unexpected Character '") + token + std::string("'");
+        mErrorReporting.LogError(tokenForError.mLine, message);
+    }
+
+    void Compiler::ThrowUnexpectedStart(const ORchestraToken& tokenForError)
+    {
+        std::string token = std::string(tokenForError.mStart, static_cast<unsigned long>(tokenForError.mLength));
+        std::string message = std::string("Unexpected Character '") 
+                                          + token 
+                                          + std::string("'. Start a line with an variable identifier, or note() or cc()");
+        mErrorReporting.LogError(tokenForError.mLine, message);
+    }
+
+    void Compiler::ThrowMissingExpectedToken(const std::string& missingToken)
     {
         std::string message = std::string("Missing a ") + missingToken;
         mErrorReporting.LogError(Peek().mLine, message);
@@ -866,15 +882,15 @@ namespace ORchestra
 
     void Compiler::ThrowMissingParamCount(int expected, int received)
     {
-        std::string message = std::string("Expected ") +
+        std::string message = std::string("Expected '") +
             std::to_string(expected) +
-            std::string(" but received ") +
+            std::string("' function parameters, but received ") +
             std::to_string(received);
 
         mErrorReporting.LogError(Peek().mLine, message);
     }
 
-    void Compiler::ThrowUnexpectedEnd(std::string& missingToken)
+    void Compiler::ThrowUnexpectedEnd(const std::string& missingToken)
     {
         std::string message = "Unexpected end, you're missing a " + missingToken;
         mErrorReporting.LogError(Peek().mLine, message);

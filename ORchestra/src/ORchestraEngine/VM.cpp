@@ -16,6 +16,7 @@ namespace ORchestra
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wswitch-enum"
 #endif
+    unsigned int VM::mRanSeed = static_cast<unsigned int>(rand());
 
     VM::VM() : mErrorReporting(),
         mScanner(mErrorReporting),
@@ -210,11 +211,11 @@ namespace ORchestra
         }
 
         int calculatedRange = static_cast<int>(high) - static_cast<int>(low) + 1;
-        calculatedRange = std::clamp(calculatedRange, 1, MAX_UCHAR_VALUE);
+        calculatedRange = std::clamp(calculatedRange, 1, DATA_UNIT_MAX_VALUE);
 
-        const int value = rand() % calculatedRange;
+        const int value = fast_rand() % calculatedRange;
         const int result = value + static_cast<int>(low);
-        return static_cast<DataUnit>(std::clamp(result, 0, MAX_UCHAR_VALUE));
+        return static_cast<DataUnit>(std::clamp(result, 0, DATA_UNIT_MAX_VALUE));
     }
 
     bool VM::ProcessInstruction(const Instruction& instruction, const int stepCount, Stack<StepData>& stack)
@@ -287,7 +288,7 @@ namespace ORchestra
         {
             const int length = std::clamp(static_cast<int>(stack.Pop().GetValue(0)), 0, MAX_DATASEQUENCE_LENGTH);
             const int hits = std::clamp(static_cast<int>(stack.Pop().GetValue(0)), 0, length);
-            StepData data[32];
+            StepData data[MAX_DATASEQUENCE_LENGTH];
 
             GenerateEuclideanSequence(data, hits, length);
 
@@ -296,7 +297,7 @@ namespace ORchestra
                 stack.Push(data[i]);
             }
 
-            const int clampedLength = std::clamp(length, 0, MAX_UCHAR_VALUE);
+            const int clampedLength = std::clamp(length, 0, DATA_UNIT_MAX_VALUE);
             stack.Push(StepData{ clampedLength });
 
             break;

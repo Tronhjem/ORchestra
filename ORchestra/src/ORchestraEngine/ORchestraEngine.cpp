@@ -17,6 +17,9 @@ namespace ORchestra
         mVM = std::make_unique<VM>();
         mFileLoader = std::make_unique<FileLoader>();
         mWorkerThread = std::thread([this]() { WorkerThreadLoop(); });
+
+        for(auto& stepBuffer : mStepRingBuffer)
+            stepBuffer.reserve(10); // Magic value estimated for a good start size. 
     }
 
     ORchestraEngine::~ORchestraEngine()
@@ -30,19 +33,12 @@ namespace ORchestra
 
     void ORchestraEngine::ExportToFile(const std::string& filePath)
     {
-        const bool fileSaved = mFileLoader->SaveToFile(filePath, mInstructionData);
-
-        if (fileSaved)
-            Compile(mInstructionData);
+        mFileLoader->SaveToFile(filePath, mInstructionData);
     }
 
     const std::string& ORchestraEngine::ImportFromFile(const std::string& filePath)
     {
         mInstructionData = mFileLoader->LoadFile(filePath);
-
-        if (mInstructionData.length() > 0)
-            Compile(mInstructionData);
-
         return mInstructionData;
     }
 
@@ -60,7 +56,8 @@ namespace ORchestra
         mCurrentProcessingStep.store(mCurrentGlobalStep.load(), std::memory_order_release);
         mVM->Reset();
 
-        mIsVMInit.store(mVM->Prepare(&mInstructionData[0]));
+        const bool innitSuccess = mVM->Prepare(&mInstructionData[0]);
+        mIsVMInit.store(innitSuccess);
         WakeWorker();
     }
 
@@ -107,7 +104,7 @@ namespace ORchestra
 
         for (int i = currentStep; i < endGlobalStep; ++i)
         {
-            const int stepWrapped = i % STEP_BUFFER_SIZE;
+            const int stepWrapped = i & STEP_BUFFER_SIZE_MASK;
             // tick needs global step and StepData needs it wrapped for ring buffer.
 
             std::vector<SequenceStep>& currentData = mStepRingBuffer[static_cast<unsigned long>(stepWrapped)];
@@ -151,7 +148,7 @@ namespace ORchestra
             if (endOfBufferInSamples >= nextStepInSamples && currentStep != mLastStep)
             {
 #if _DEBUG
-               ScopedTimer timer{ "Process Beat" };
+//               ScopedTimer timer{ "Process Beat" };
 #endif
                mLastStep = currentStep;
 
@@ -183,7 +180,7 @@ namespace ORchestra
                }
 
                mReadySteps.fetch_sub(1, std::memory_order_acq_rel);
-               if (mReadySteps.load() < HALF_STEP_BUFFER_SIZE - 5) /*magic number for processing steps earlier than half*/
+               if (mReadySteps.load() < HALF_STEP_BUFFER_SIZE) /*magic number for processing steps earlier than half*/
                    WakeWorker();
             }
 

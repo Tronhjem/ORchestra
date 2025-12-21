@@ -11,10 +11,11 @@
 #include "PluginEditor.h"
 
 #include "LookAndFeelConstants.h"
-#include "Colours.h"
-#include "ErrorReporting.h"
+#include "Colors.h"
 #include "ParamConstants.h"
 #include "Utility.h"
+#include "juce_audio_processors/juce_audio_processors.h"
+#include "juce_gui_extra/juce_gui_extra.h"
 
 constexpr int WINDOW_WIDTH = 1000;
 constexpr int WINDOW_HEIGHT = 800;
@@ -29,8 +30,8 @@ constexpr int codeEditorHeight = 300;
 ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProcessor& p)
         : AudioProcessorEditor(&p),
           audioProcessor(p),
-          mEditorIsDirty(false),
-          mTimeline(mTriggerRectangle)
+          mTimeline(mTriggerRectangle),
+          mCodeEditor(mCodeDocument, &mTokeniser)
 {
     setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
 
@@ -41,9 +42,8 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     mButtonLookAndFeel = std::make_unique<ButtonLookAndFeel>();
     mTextEditorLookAndFeel = std::make_unique<TextEditorLookAndFeel>();
 
-    //    codeEditor.reset(new juce::CodeEditorComponent(codeDocument, &tokeniser));
-    //    codeEditor->setTabSize(4, true);
-    //    codeEditor->setLineNumbersShown(true);
+    mCodeEditor.setTabSize(4, true);
+    mCodeEditor.setLineNumbersShown(true);
 
     int buttonXStart = static_cast<int>(OUTER_MARGIN - 10);
     int nextLineY = 20;
@@ -87,7 +87,7 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
 
     // ======== NEW LINE ============
     nextLineY += buttonHeight + COMPONENT_MARGIN;
-    mCodeEditorTextBox.setBounds(OUTER_MARGIN, nextLineY, codeEditorWidth, codeEditorHeight);
+    mCodeEditor.setBounds(OUTER_MARGIN, nextLineY, codeEditorWidth, codeEditorHeight);
 
     nextLineY += codeEditorHeight - 2;
     mErrorTextBox.setBounds(OUTER_MARGIN, nextLineY, codeEditorWidth, 30);
@@ -100,17 +100,12 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     mBpmBox.setSliderStyle(Slider::SliderStyle::LinearBarVertical);
     mBpmBox.setSliderSnapsToMousePosition(false);
 
-    mBpmBox.setColour(Slider::backgroundColourId, ORchestraColours::ButtonBackground);
-    mBpmBox.setColour(Slider::trackColourId, ORchestraColours::ButtonBackground);
-    mBpmBox.setColour(Slider::thumbColourId, ORchestraColours::ButtonBackground);
-    mBpmBox.setColour(Slider::textBoxBackgroundColourId, ORchestraColours::ButtonBackground);
-    mBpmBox.setColour(Slider::textBoxHighlightColourId, ORchestraColours::ButtonBackground);
-    mBpmBox.setColour(Slider::textBoxOutlineColourId, ORchestraColours::ButtonBackground);
+    mBpmBox.setColour(Slider::textBoxOutlineColourId, BackgroundColor);
 
-    mSyncToggleLabel.setColour(juce::Label::textColourId, juce::Colours::black);
-    mTempoDivLabel.setColour(juce::Label::textColourId, juce::Colours::black);
-    mBpmLabel.setColour(juce::Label::textColourId, juce::Colours::black);
-    mNoteLengthLabel.setColour(juce::Label::textColourId, juce::Colours::black);
+    mSyncToggleLabel.setColour(juce::Label::textColourId, TextColor);
+    mTempoDivLabel.setColour(juce::Label::textColourId, TextColor);
+    mBpmLabel.setColour(juce::Label::textColourId, TextColor);
+    mNoteLengthLabel.setColour(juce::Label::textColourId, TextColor);
 
     mTempoDivisionSelectorBox.addItemList(mNoteDivisions, 3);
     mNoteLengtSelectorBox.addItemList(mNoteDivisions, 3);
@@ -118,9 +113,10 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     mExportToFileButton.addListener(this);
     mImportFileButton.addListener(this);
     mCompileButton.addListener(this);
-    mCodeEditorTextBox.addListener(this);
+
     mTogglePlayButton.addListener(this);
     mSyncToggleBox.addListener(this);
+    mCodeEditor.AddChangeListener(this);
 
     juce::LookAndFeel::setDefaultLookAndFeel(mGeneralLookAndFeel.get());
 
@@ -129,26 +125,28 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     mImportFileButton.setLookAndFeel(mButtonLookAndFeel.get());
     mSyncToggleBox.setLookAndFeel(mButtonLookAndFeel.get());
     mCompileButton.setLookAndFeel(mButtonLookAndFeel.get());
-    mCodeEditorTextBox.setLookAndFeel(mTextEditorLookAndFeel.get());
     mErrorTextBox.setLookAndFeel(mTextEditorLookAndFeel.get());
     mTempoDivisionSelectorBox.setLookAndFeel(mGeneralLookAndFeel.get());
     mNoteLengtSelectorBox.setLookAndFeel(mGeneralLookAndFeel.get());
     mBpmBox.setLookAndFeel(mGeneralLookAndFeel.get());
 
-    mCodeEditorTextBox.setReturnKeyStartsNewLine(true);
-    mCodeEditorTextBox.setMultiLine(true);
-    mCodeEditorTextBox.setScrollbarsShown(true);
-    mCodeEditorTextBox.setCaretVisible(true);
-    mCodeEditorTextBox.setFont(MONOSPACE_FONT_OPTIONS);
-    mCodeEditorTextBox.setColour(juce::TextEditor::textColourId, ORchestraColours::TextColor);
+    mCodeEditor.setLookAndFeel(mTextEditorLookAndFeel.get());
+    
+    mCodeEditor.setFont(MONOSPACE_FONT_OPTIONS);
+    mCodeEditor.setColour(juce::CodeEditorComponent::ColourIds::backgroundColourId, TextEditorBackgroundColor);
+    mCodeEditor.setColour(juce::CodeEditorComponent::ColourIds::lineNumberBackgroundId, TextEditorBackgroundColor);
+    mCodeEditor.setColour(juce::CodeEditorComponent::ColourIds::highlightColourId, HighlightColor.withAlpha(0.3f));
+    mCodeEditor.setColour(juce::CodeEditorComponent::ColourIds::defaultTextColourId, TextColor);
+    mCodeEditor.setColour(juce::CodeEditorComponent::ColourIds::lineNumberTextId, TextColor);
+    mCodeEditor.setScrollbarThickness(4);
 
     mErrorTextBox.setFont(MONOSPACE_FONT_OPTIONS);
-    mErrorTextBox.setColour(juce::TextEditor::textColourId, ORchestraColours::TextColor);
+    mErrorTextBox.setColour(juce::TextEditor::textColourId, TextColor);
     mErrorTextBox.setMultiLine(true);
+    mErrorTextBox.setEnabled(false);
 
     mTimeline.SetProcessor(&audioProcessor);
     mTriggerRectangle.SetProcessor(&audioProcessor);
-    //    codeEditor.setPopupMenuEnabled(true);
 
     addAndMakeVisible(mSyncToggleLabel);
     addAndMakeVisible(mTempoDivLabel);
@@ -161,7 +159,9 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     addAndMakeVisible(mCompileButton);
     addAndMakeVisible(mTempoDivisionSelectorBox);
     addAndMakeVisible(mNoteLengtSelectorBox);
-    addAndMakeVisible(mCodeEditorTextBox);
+
+    addAndMakeVisible(mCodeEditor);
+
     addAndMakeVisible(mErrorTextBox);
     addAndMakeVisible(mTimeline);
     addAndMakeVisible(mTriggerRectangle);
@@ -169,7 +169,7 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
 
     const std::string& data = audioProcessor.GetInstructionData();
     juce::String dataAsString{ data };
-    mCodeEditorTextBox.setText(dataAsString);
+    mCodeDocument.insertText(0, dataAsString);
 
     mBpmSliderAttachment.reset(new SliderAttachment(valueTree, bpmString, mBpmBox));
     mTempoDivisionAttachment.reset(new ComboBoxAttachment(valueTree, tempoDivisionString, mTempoDivisionSelectorBox));
@@ -185,7 +185,7 @@ ORchestraAudioProcessorEditor::~ORchestraAudioProcessorEditor()
     mExportToFileButton.setLookAndFeel(nullptr);
     mImportFileButton.setLookAndFeel(nullptr);
     mSyncToggleBox.setLookAndFeel(nullptr);
-    mCodeEditorTextBox.setLookAndFeel(nullptr);
+    mCodeEditor.setLookAndFeel(nullptr);
 
     audioProcessor.removeChangeListener(this);
 }
@@ -196,26 +196,28 @@ void ORchestraAudioProcessorEditor::changeListenerCallback(juce::ChangeBroadcast
 
     const std::string& data = audioProcessor.GetInstructionData();
     const juce::String dataAsString{ data };
-    mCodeEditorTextBox.setText(dataAsString);
+    mCodeDocument.insertText(0, dataAsString);
 }
 
-void ORchestraAudioProcessorEditor::textEditorTextChanged(juce::TextEditor& editor)
+void ORchestraAudioProcessorEditor::CodeEditorHasChanged()
 {
-    UNUSED(editor);
-
-    mEditorIsDirty = true;
+    if(mCodeDocument.hasChangedSinceSavePoint())
+    {
+        mCompileButton.setEnabled(true);
+    }
 }
 
 void ORchestraAudioProcessorEditor::buttonClicked(juce::Button* button)
 {
     auto processorReadAndCompile = [&]()
     {
-        juce::String text = mCodeEditorTextBox.getText();
+        juce::String text = mCodeDocument.getAllContent();
         std::string utf8Text = text.toRawUTF8();
         audioProcessor.Compile(utf8Text);
         if (audioProcessor.IsORchestraVMInit())
         {
-            mEditorIsDirty = false;
+            mCodeDocument.setSavePoint();
+            mCompileButton.setEnabled(false);
         }
         
         UpdateErrors();
@@ -223,7 +225,7 @@ void ORchestraAudioProcessorEditor::buttonClicked(juce::Button* button)
 
     if (button == &mTogglePlayButton)
     {
-        if (mEditorIsDirty)
+        if (mCodeDocument.hasChangedSinceSavePoint())
             processorReadAndCompile();
         
         if (audioProcessor.IsORchestraVMInit())
@@ -256,14 +258,17 @@ void ORchestraAudioProcessorEditor::buttonClicked(juce::Button* button)
                 std::string filePath{ file.getFullPathName().toRawUTF8() };
                 const std::string& data = audioProcessor.ImportFromFile(filePath);
                 juce::String dataAsString{ data };
-                mCodeEditorTextBox.setText(dataAsString);
+                mCodeDocument.insertText(0, dataAsString);
 
-                UpdateErrors(); 
             });
+
+        processorReadAndCompile();
+        UpdateErrors(); 
     }
     else if (button == &mCompileButton)
     {
-        processorReadAndCompile();
+        if (mCodeDocument.hasChangedSinceSavePoint())
+            processorReadAndCompile();
     }
     else if (button == &mSyncToggleBox)
     {
@@ -292,8 +297,8 @@ void ORchestraAudioProcessorEditor::UpdateErrors()
 //==============================================================================
 void ORchestraAudioProcessorEditor::paint(juce::Graphics& g)
 {
-    g.fillAll(ORchestraColours::Background);
-    mCompileButton.setEnabled(mEditorIsDirty);
+    g.fillAll(BackgroundColor);
+    mCompileButton.setEnabled(mCodeDocument.hasChangedSinceSavePoint());
 }
 
 void ORchestraAudioProcessorEditor::resized()

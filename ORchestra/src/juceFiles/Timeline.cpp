@@ -5,7 +5,7 @@
 #include "SequenceStep.h"
 #include "StepData.h"
 #include "Utility.h"
-#include "Colours.h"
+#include "Colors.h"
 #include "LookAndFeelConstants.h"
 
 void Timeline::timerCallback()
@@ -90,7 +90,7 @@ void Timeline::timerCallback()
             }
 
             const float x = static_cast<float>(index) * stepWidth + 1.f;
-            const float y = static_cast<float>(yIndex) * trackHeight + 1.f;
+            const float y = static_cast<float>(yIndex) * stepHeight + 1.f;
             const float velocityFloat = static_cast<float>(step.mSecond.GetValue(0));
 
             if(step.mShouldTrigger.GetValue(0))
@@ -104,17 +104,6 @@ void Timeline::timerCallback()
                     mTriggerRectangle.AddRectangle(triggerRect);
                 }
             }
-//            =================================================================================
-//            DISABLE TEXT FOR NOW
-//            =================================================================================
-//           g.setColour(juce::Colours::black);
-//           const std::string noteValueString { std::to_string(static_cast<int>(noteValue))};
-//           
-//           g.drawText(noteValueString, static_cast<int>(x),
-//                      static_cast<int>(y + quaterStepHeight),
-//                      static_cast<int>(stepWidth), 15, juce::Justification::centred);
-
-           // =================================================================================
         }
     }
     
@@ -133,13 +122,6 @@ void Timeline::paint(juce::Graphics& g)
 
 juce::Colour Timeline::GetStepColorFromVelocity(const float velocity)
 {
-    if (velocity > 0.f)
-    {
-        return smoothstepColour(ORchestraColours::MinVelocity,
-                                ORchestraColours::MaxVelocity, velocity / 127.f);
-    }
-    else
-    {
-        return ORchestraColours::InactiveStep;
-    }
+        return smoothstepColour(MinVelocityColor,
+                                MaxVelocityColor, velocity / 127.f);
 }

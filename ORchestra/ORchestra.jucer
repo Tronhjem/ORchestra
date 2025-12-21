@@ -68,6 +68,14 @@
     </GROUP>
     <GROUP id="{F1896013-22DD-58BE-C991-2EA418BBF7AB}" name="Juce">
       <GROUP id="{490C3D54-058B-FDEF-7C7D-E3D8A995DFB4}" name="Components">
+        <FILE id="ZTopYG" name="ORchestraCodeEditorComponent.cpp" compile="1"
+              resource="0" file="src/juceFiles/ORchestraCodeEditorComponent.cpp"/>
+        <FILE id="JPWJkb" name="ORchestraCodeEditorComponent.h" compile="0"
+              resource="0" file="src/juceFiles/ORchestraCodeEditorComponent.h"/>
+        <FILE id="CnDUtK" name="ORchestraCodeEditorTokenizer.cpp" compile="1"
+              resource="0" file="src/juceFiles/ORchestraCodeEditorTokenizer.cpp"/>
+        <FILE id="GtRIxx" name="ORchestraCodeEditorTokenizer.h" compile="0"
+              resource="0" file="src/juceFiles/ORchestraCodeEditorTokenizer.h"/>
         <FILE id="Q61vhU" name="TriggerRectangle.cpp" compile="1" resource="0"
               file="src/juceFiles/TriggerRectangle.cpp"/>
         <FILE id="KWuVSU" name="TriggerRectangle.h" compile="0" resource="0"
@@ -79,7 +87,7 @@
               file="src/juceFiles/TitleBarComponent.h"/>
       </GROUP>
       <GROUP id="{3B2E5272-9F24-BF92-C5AC-A4AEAEC2158F}" name="LookAndFeel">
-        <FILE id="tAkJ72" name="Colours.h" compile="0" resource="0" file="src/juceFiles/Colours.h"/>
+        <FILE id="NXV5aG" name="Colors.h" compile="0" resource="0" file="src/juceFiles/Colors.h"/>
         <FILE id="CoDYBE" name="ButtonsLookAndFeel.h" compile="0" resource="0"
               file="src/juceFiles/ButtonsLookAndFeel.h"/>
         <FILE id="Xo6MSc" name="TextEditorLookAndFeel.h" compile="0" resource="0"

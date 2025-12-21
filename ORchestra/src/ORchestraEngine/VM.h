@@ -60,7 +60,7 @@ namespace ORchestra
         inline DataUnit RandomValue(const DataUnit low, const DataUnit high);
 
         template <typename Operation>
-        void PopDoOperationAndPush(Operation op, Stack<StepData>& stack)
+        inline void PopDoOperationAndPush(Operation op, Stack<StepData>& stack)
         {
             static_assert(std::is_invocable_v<Operation, const int, const int>,
                 "Operation must be callable with two int parameters");
@@ -69,6 +69,12 @@ namespace ORchestra
             const StepData& a = stack.Pop();
             const StepData result = a.ApplySequenceWithOperation(b, op);
             stack.Push(StepData{ result });
+        }
+        
+        static unsigned int mRanSeed;
+        inline int fast_rand() {
+            mRanSeed = (214013 * mRanSeed + 2531011);
+            return (mRanSeed >> 16) & 0x7FFF;
         }
     };
 

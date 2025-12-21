@@ -17,10 +17,9 @@ namespace ORchestra
 #pragma clang diagnostic ignored "-Wswitch-enum"
 #endif
 
-    std::string_view ERROR_UNEXPECTED_CHAR = "ERROR: Unexpected character ";
-    std::string_view ERROR_NO_END_QUOTE = "ERROR: Expected \" but didn't find one ";
+    std::string_view ERROR_UNEXPECTED_CHAR = "Unsupported character '";
 
-    Scanner::Scanner(ErrorReporting& logger) : mErrorReporting(logger)
+    Scanner::Scanner(ErrorReporting& logger) : mErrorReporting(logger), mCurrentLine(1)
     {
         mTokens.reserve(64);
     }
@@ -32,7 +31,7 @@ namespace ORchestra
     void Scanner::Reset()
     {
         mTokens.clear();
-        mCurrentLine = 0;
+        mCurrentLine = 1;
         mStart = nullptr;
         mCurrent = nullptr;
     }
@@ -45,9 +44,10 @@ namespace ORchestra
     ORchestraToken Scanner::MakeErrorToken(const std::string_view& message, char symbol)
     {
         std::string errorString;
-        errorString.reserve(message.size() + 1);
+        errorString.reserve(message.size() + 2);
         errorString.append(message.data(), message.size());
         errorString.append(&symbol, 1);
+        errorString.append("'", 1);
 
         mErrorReporting.LogError(mCurrentLine, errorString);
         return ORchestraToken(ORchestraTokenType::PARSE_ERROR, nullptr, 0, mCurrentLine);
@@ -133,8 +133,9 @@ namespace ORchestra
         {
         case ('\n'):
         {
+            const ORchestraToken token = MakeToken(ORchestraTokenType::EOL);
             mCurrentLine++;
-            return MakeToken(ORchestraTokenType::EOL);
+            return token;
         }
 
         // LOGIC
@@ -172,7 +173,7 @@ namespace ORchestra
         case '>':
             return MakeToken(Match('=') ? ORchestraTokenType::GREATER_EQUAL : ORchestraTokenType::GREATER);
 
-            // MATH
+        // MATH
         case '-':
             return MakeToken(ORchestraTokenType::MINUS);
         case '+':
@@ -184,7 +185,6 @@ namespace ORchestra
         case '%':
             return MakeToken(ORchestraTokenType::PERCENT);
 
-        // Special variable for global count
         case '$':
             return MakeToken(ORchestraTokenType::DOLLAR);
 
@@ -324,29 +324,6 @@ namespace ORchestra
             AdvanceCurrent();
 
         return MakeToken(IdentifierToken());
-    }
-
-    ORchestraToken Scanner::BuildString()
-    {
-        while (PeekCurrent() != '"' && !IsAtEnd())
-        {
-            if (PeekCurrent() == '\n')
-            {
-                ++mCurrentLine;
-                return MakeErrorToken(ERROR_NO_END_QUOTE, PeekCurrent());
-            }
-
-            AdvanceCurrent();
-        }
-
-        if (IsAtEnd())
-        {
-            return MakeErrorToken(ERROR_NO_END_QUOTE, PeekCurrent());
-        }
-
-        AdvanceCurrent();
-        ORchestraToken token = MakeToken(ORchestraTokenType::STRING);
-        return token;
     }
 
     ORchestraToken Scanner::BuildDigit()

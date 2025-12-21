@@ -10,6 +10,8 @@
 
 #include <JuceHeader.h>
 
+#include "ORchestraCodeEditorComponent.h"
+#include "ORchestraCodeEditorTokenizer.h"
 #include "PluginProcessor.h"
 #include "Timeline.h"
 #include "TriggerRectangle.h"
@@ -18,6 +20,7 @@
 #include "ButtonsLookAndFeel.h"
 #include "TextEditorLookAndFeel.h"
 #include "juce_gui_basics/juce_gui_basics.h"
+#include "juce_gui_extra/juce_gui_extra.h"
 
 typedef juce::AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
 typedef juce::AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
@@ -26,9 +29,9 @@ typedef juce::AudioProcessorValueTreeState::ComboBoxAttachment ComboBoxAttachmen
 /**
 */
 class ORchestraAudioProcessorEditor : public juce::AudioProcessorEditor,
-    public juce::TextEditor::Listener,
     public juce::Button::Listener,
-    public juce::ChangeListener
+    public juce::ChangeListener,
+    public ORchestraCodeEditorChangeListener
 {
 public:
     ORchestraAudioProcessorEditor(ORchestraAudioProcessor&);
@@ -37,16 +40,16 @@ public:
     //==============================================================================
     void paint(juce::Graphics&) override;
     void resized() override;
-    void textEditorTextChanged(juce::TextEditor& editor) override;
     void extracted();
-    void buttonClicked(juce::Button* button) override;
+    void CodeEditorHasChanged() override;
 
 private:
-    ORchestraAudioProcessor& audioProcessor;
+    void buttonClicked(juce::Button* button) override;
     void changeListenerCallback(juce::ChangeBroadcaster* broadCaster) override;
+
+    ORchestraAudioProcessor& audioProcessor;
     inline void UpdateErrors();
 
-    bool mEditorIsDirty = false;
     std::unique_ptr<GeneralLookAndFeel> mGeneralLookAndFeel;
     std::unique_ptr<ButtonLookAndFeel> mButtonLookAndFeel;
     std::unique_ptr<TextEditorLookAndFeel> mTextEditorLookAndFeel;
@@ -77,12 +80,11 @@ private:
 
     TriggerRectangleComponent mTriggerRectangle;
     Timeline mTimeline;
-    juce::TextEditor mCodeEditorTextBox;
     juce::TextEditor mErrorTextBox;
 
-    //    juce::CodeDocument codeDocument;
-    //       juce::CodeTokeniser tokeniser; // You can subclass this or use CppTokeniser, LuaTokeniser, etc.
-    //       std::unique_ptr<juce::CodeEditorComponent> codeEditor;
+    ORchestraCodeEditorTokenizer mTokeniser;
+    juce::CodeDocument mCodeDocument;
+    ORchestraCodeEditorComponent mCodeEditor;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ORchestraAudioProcessorEditor)
 };

@@ -1,7 +1,9 @@
 #pragma once
 #include <juce_gui_basics/juce_gui_basics.h>
-#include "Colours.h"
+#include "Colors.h"
 #include "Utility.h"
+
+using namespace ORchestra;
 
 class TextEditorLookAndFeel : public juce::LookAndFeel_V4
 {
@@ -12,7 +14,7 @@ public:
         UNUSED(height);
         UNUSED(editor);
 
-        g.fillAll(ORchestraColours::Background);
+        g.fillAll(TextEditorBackgroundColor);
     }
 
     void drawScrollbar(juce::Graphics& g, juce::ScrollBar& scrollbar,
@@ -26,21 +28,23 @@ public:
         UNUSED(thumbStartPosition);
 
         // Background
-        g.setColour(juce::Colours::lightgrey);
+        g.setColour(TextEditorBackgroundColor);
         g.fillRect(x, y, width, height);
 
-        // Thumb (the draggable part)
-        g.setColour(ORchestraColours::ButtonBackground); // Set your custom color here
+        g.setColour(ButtonBackgroundColor);
         if (isScrollbarVertical)
-            g.fillRoundedRectangle(static_cast<float>(x), static_cast<float>(thumbStartPosition), static_cast<float>(width), static_cast<float>(thumbSize), 20.4f);
+            g.fillRoundedRectangle(static_cast<float>(x), static_cast<float>(thumbStartPosition), static_cast<float>(width), static_cast<float>(thumbSize), ROUNDED_CORNER_SIZE);
         else
-            g.fillRoundedRectangle(static_cast<float>(thumbStartPosition), static_cast<float>(y), static_cast<float>(thumbSize), static_cast<float>(height), 20.4f);
+            g.fillRoundedRectangle(static_cast<float>(thumbStartPosition), static_cast<float>(y), static_cast<float>(width), static_cast<float>(height), ROUNDED_CORNER_SIZE);
     }
 
     void drawTextEditorOutline(juce::Graphics& g, int width, int height, juce::TextEditor& ed) override
     {
+        UNUSED(g);
+        UNUSED(width);
+        UNUSED(height);
         UNUSED(ed);
-        g.setColour(ORchestraColours::ButtonBackground); // Or use your palette
-        g.drawRect(0, 0, width, height, 2);              // Last parameter is thickness
+//        g.setColour(ButtonBackgroundColor);
+//        g.drawRect(0, 0, width, height, 2);
     }
 };

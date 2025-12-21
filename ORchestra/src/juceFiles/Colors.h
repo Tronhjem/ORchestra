@@ -81,12 +81,13 @@ namespace ORchestra
     };
 
     const Colour OutlineColor = Colour(ColorPalette::Mantle);
-    const Colour BackgroundColor = Colour(ColorPalette::Surface0);
+    const Colour BackgroundColor = Colour(ColorPalette::Base);
     const Colour ButtonBackgroundColor = Colour(ColorPalette::Blue);
+    const Colour TextEditorBackgroundColor = Colour(ColorPalette::Base);
     const Colour TextColor = Colour(ColorPalette::Text);
+    const Colour HighlightColor = Colour(ColorPalette::Blue);
 
-    const Colour MinVelocityColor = Colour::fromString("#275DAD");
-    const Colour MaxVelocityColor = Colour::fromString("#D64933");
-    const Colour InactiveStepColor = Colour::fromString("#5B616A");
+    const Colour MinVelocityColor = Colour(ColorPalette::Lavender);
+    const Colour MaxVelocityColor = Colour(ColorPalette::Red);
     
 } // namespace ORchestra
