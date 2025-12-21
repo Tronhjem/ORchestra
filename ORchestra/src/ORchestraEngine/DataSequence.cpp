@@ -14,6 +14,9 @@ namespace ORchestra
 
     void DataSequence::SetValue(int index, StepData value)
     {
+#if _DEBUG
+        assert(index < mData.size());
+#endif
         mData[static_cast<unsigned long>(index)] = value;
     }
 } // namespace ORchestra

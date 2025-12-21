@@ -700,7 +700,6 @@ namespace ORchestra
             case ORchestraTokenType::IDENTIFIER:
             {
                 const std::string name = std::string(token.mStart, static_cast<unsigned long>(token.mLength));
-                const uint16_t id = GetOrCreateVariableID(name);
                 
                 if (Peek().mTokenType == ORchestraTokenType::LEFT_BRACKET)
                 {
@@ -729,6 +728,7 @@ namespace ORchestra
                             return false;
                         }
 
+                        const uint16_t id = GetOrCreateVariableID(name);
                         instructions.emplace_back(Instruction{ OpCode::SET_IDENTIFIER_WITH_INDEX, id });
                     }
                     else
@@ -751,6 +751,7 @@ namespace ORchestra
                         const bool isLastRecursiveLevel = false;
                         if (CompileArray(instructions, arrayLength, MAX_DATASEQUENCE_LENGTH, isLastRecursiveLevel))
                         {
+                            const uint16_t id = GetOrCreateVariableID(name);
                             instructions.emplace_back(Instruction{ OpCode::CONSTANT, arrayLength });
                             instructions.emplace_back(Instruction{ OpCode::SET_IDENTIFIER_ARRAY, id });
                         }
@@ -771,6 +772,7 @@ namespace ORchestra
                         if (!CompileExpression(instructions))
                             return false;
 
+                        const uint16_t id = GetOrCreateVariableID(name);
                         instructions.emplace_back(Instruction{ OpCode::SET_IDENTIFIER_VALUE, id });
                         break;
                     }
@@ -780,6 +782,7 @@ namespace ORchestra
                         if (!CompileFunctionCall(instructions, eucFunctionName))
                             return false;
 
+                        const uint16_t id = GetOrCreateVariableID(name);
                         instructions.emplace_back(Instruction{ OpCode::SET_IDENTIFIER_ARRAY, id });
 
                         break;

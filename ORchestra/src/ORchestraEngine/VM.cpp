@@ -80,7 +80,17 @@ namespace ORchestra
             {
                 StepData value = stack.Pop();
                 std::vector<StepData> vectorData{ value };
-                mVariables.emplace_back(DataSequence{ vectorData });
+                
+                if(instruction.mId >= mVariables.size())
+                {
+                    mVariables.emplace_back(DataSequence{ vectorData });
+                }
+                else
+                {
+                    const std::string error = std::string("VM: Variable already defined, choose a new name");
+                    mErrorReporting.LogError(error);
+                    return false;
+                }
 
                 break;
             }
@@ -95,7 +105,18 @@ namespace ORchestra
                 }
 
                 std::vector<StepData> vectorData{ data, data + arrayLength };
-                mVariables.emplace_back(DataSequence{ vectorData });
+                
+                if(instruction.mId >= mVariables.size())
+                {
+                    mVariables.emplace_back(DataSequence{ vectorData });
+                }
+                else
+                {
+                    const std::string error = std::string("VM: Variable already defined, choose a new name");
+                    mErrorReporting.LogError(error);
+                    return false;
+                }
+
 
                 break;
             }
