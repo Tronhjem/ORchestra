@@ -43,7 +43,7 @@ namespace ORchestra
         bool CompileExpression(std::vector<Instruction>& instructions);
         bool CompileArray(
                 std::vector<Instruction>& instructions,
-                StepData& outLength,
+                DataUnit& outLength,
                 int maxLength,
                 bool isLastRecursiveLevel);
 

@@ -127,7 +127,7 @@ namespace ORchestra
             mErrorReporting.LogWarning(message);
         }
 
-        instructions.emplace_back(Instruction{ OpCode::CONSTANT, static_cast<StepData>(value) });
+        instructions.emplace_back(Instruction{ OpCode::CONSTANT, static_cast<DataUnit>(value) });
     }
 
     bool Compiler::MakeNoteIntoConstant(const ORchestraToken& token, std::vector<Instruction>& instructions)
@@ -202,7 +202,7 @@ namespace ORchestra
             mErrorReporting.LogWarning(message);
         }
 
-        instructions.emplace_back(Instruction{ OpCode::CONSTANT, static_cast<StepData>(value) });
+        instructions.emplace_back(Instruction{ OpCode::CONSTANT, static_cast<DataUnit>(value) });
 
         return true;
     }
@@ -330,7 +330,7 @@ namespace ORchestra
     }
 
     bool Compiler::CompileArray(std::vector<Instruction>& instructions,
-        StepData& outLength,
+        DataUnit& outLength,
         int maxLength,
         bool isLastRecursiveLevel)
     {
@@ -387,7 +387,7 @@ namespace ORchestra
                     return false;
                 }
 
-                StepData arrayLength;
+                DataUnit arrayLength;
                 const bool isNextRecursionLast = true;
                 if (CompileArray(instructions, arrayLength, MAX_SUB_DIVISION_LENGTH, isNextRecursionLast))
                 {
@@ -467,9 +467,7 @@ namespace ORchestra
             return false;
         }
 
-        // TODO: Find a way to make this nicer, maybe a operator overload for =
-        const DataUnit data[1] = { static_cast<DataUnit>(valueCounter) };
-        outLength.SetData(data, 1);
+        outLength = static_cast<DataUnit>(valueCounter);
 
         return true;
     }
@@ -747,7 +745,7 @@ namespace ORchestra
                         // Data Array
                     case ORchestraTokenType::LEFT_BRACKET:
                     {
-                        StepData arrayLength;
+                        DataUnit arrayLength;
                         const bool isLastRecursiveLevel = false;
                         if (CompileArray(instructions, arrayLength, MAX_DATASEQUENCE_LENGTH, isLastRecursiveLevel))
                         {
