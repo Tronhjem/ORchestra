@@ -14,7 +14,8 @@ namespace ORchestra
     {
         float x;
         float y;
-        float alpha;
+        float width;
+        float value;
     };
 
     class TriggerRectangleComponent : public juce::Component, public juce::Timer

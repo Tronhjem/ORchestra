@@ -8,6 +8,8 @@
 #include "Colors.h"
 #include "LookAndFeelConstants.h"
 
+constexpr float triggerStepMargin = 2.f;
+
 void Timeline::timerCallback()
 {
 #if _DEBUG
@@ -18,7 +20,9 @@ void Timeline::timerCallback()
         return;
     
     const int64_t timeInSamples = transportData.timeInSamples;
-    const double samplesPerStep = static_cast<double>(transportData.sampleRate) * (60.0 / (transportData.bpm * transportData.bpmDivision));
+    const double samplesPerStep = static_cast<double>(transportData.sampleRate) 
+                                    * (60.0 / (transportData.bpm * transportData.bpmDivision));
+
     const int currentStep = static_cast<int>(ceil(static_cast<double>(timeInSamples) / samplesPerStep));
     
     if (currentStep == mLastGlobalStep)
@@ -40,8 +44,10 @@ void Timeline::timerCallback()
     // Here we gather the unique pitches
     for (int index = 0; index < TIMELINE_STEPS_DRAWN; ++index)
     {
-        const int stepWrapped = (globalStepOffset + index) % STEP_BUFFER_SIZE;
-        const std::vector<SequenceStep>& sequenceSteps = mAudioProcessor->GetStepData()[static_cast<unsigned long>(stepWrapped)];
+        const unsigned long stepWrapped = 
+                static_cast<unsigned long>((globalStepOffset + index) & STEP_BUFFER_SIZE_MASK);
+
+        const std::vector<SequenceStep>& sequenceSteps = mAudioProcessor->GetStepData()[stepWrapped];
 
         for (const auto& step : sequenceSteps)
         {
@@ -69,39 +75,56 @@ void Timeline::timerCallback()
             
         }
     }
+    //=================================================================================================
 
     std::sort(mUniqueNoteValues.begin(), mUniqueNoteValues.end(), [](DataUnit a, DataUnit b) { return a > b; } );
     
     for (int index = 0; index < TIMELINE_STEPS_DRAWN; ++index)
     {
-        const int stepWrapped = (globalStepOffset + index) % STEP_BUFFER_SIZE;
-        const std::vector<SequenceStep>& sequenceSteps = mAudioProcessor->GetStepData()[static_cast<unsigned long>(stepWrapped)];
+        const unsigned long stepWrapped = 
+            static_cast<unsigned long>((globalStepOffset + index) & STEP_BUFFER_SIZE_MASK);
+
+        const std::vector<SequenceStep>& sequenceSteps = mAudioProcessor->GetStepData()[stepWrapped];
 
         for (const auto& step : sequenceSteps)
         {
-            const DataUnit noteValue = step.mFirst.GetValue(0);
-            int yIndex = 0;
-            for (const auto uniqueNoteValue : mUniqueNoteValues)
+            const int substepLength = step.mShouldTrigger.GetLength();
+            const float subDividedStepWidth = stepWidth / static_cast<float>(substepLength);
+            const float subStepDrawnWidth = drawnStepWidth / static_cast<float>(substepLength);
+            
+            for (int substepIndex = 0; substepIndex < substepLength; ++substepIndex)
             {
-                if (uniqueNoteValue == noteValue)
-                    break;
-
-                ++yIndex;
-            }
-
-            const float x = static_cast<float>(index) * stepWidth + 1.f;
-            const float y = static_cast<float>(yIndex) * stepHeight + 1.f;
-            const float velocityFloat = static_cast<float>(step.mSecond.GetValue(0));
-
-            if(step.mShouldTrigger.GetValue(0))
-            {
-                TriggerRectangle timelineRect {x, y, velocityFloat};
-                mTimelineTriggerRectangles.emplace_back(timelineRect);
-
-                if (index == 0)
+                if(step.mShouldTrigger.GetValue(substepIndex))
                 {
-                    TriggerRectangle triggerRect {x, y, 1.f};
-                    mTriggerRectangle.AddRectangle(triggerRect);
+                    const DataUnit noteValue = 
+                            step.mFirst.GetEquivalentValueAtIndex(substepIndex, substepLength);
+
+                    //TODO: Make a hashmap instead of searching linearly here.
+                    int yIndex = 0;
+                    for (const auto uniqueNoteValue : mUniqueNoteValues)
+                    {
+                        if (uniqueNoteValue == noteValue)
+                            break;
+
+                        ++yIndex;
+                    }
+
+                    const float x = (static_cast<float>(index) * stepWidth)
+                                    + (static_cast<float>((substepIndex)) * subDividedStepWidth)
+                                    + triggerStepMargin;
+                    
+                    const float y = static_cast<float>(yIndex) * stepHeight + triggerStepMargin;
+                    const float velocityFloat =
+                            static_cast<float>(step.mSecond.GetEquivalentValueAtIndex(substepIndex, substepLength));
+
+                    TriggerRectangle timelineRect {x, y, subStepDrawnWidth, velocityFloat};
+                    mTimelineTriggerRectangles.emplace_back(timelineRect);
+
+                    if (index == 0)
+                    {
+                        TriggerRectangle triggerRect {x, y, subStepDrawnWidth, 1.f};
+                        mTriggerRectangle.AddRectangle(triggerRect);
+                    }
                 }
             }
         }
@@ -114,9 +137,9 @@ void Timeline::paint(juce::Graphics& g)
 {
     for (const auto& rect : mTimelineTriggerRectangles)
     {
-        const juce::Colour colorToSet = GetStepColorFromVelocity(rect.alpha);
+        const juce::Colour colorToSet = GetStepColorFromVelocity(rect.value);
         g.setColour(colorToSet.withAlpha(1.f));
-        g.fillRoundedRectangle(rect.x, rect.y, drawnStepWidth,  drawnStepHeight, ROUNDED_CORNER_SIZE);
+        g.fillRoundedRectangle(rect.x, rect.y, rect.width,  drawnStepHeight, ROUNDED_CORNER_SIZE);
     }
 }
 

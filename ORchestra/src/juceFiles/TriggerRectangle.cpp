@@ -21,10 +21,10 @@ void TriggerRectangleComponent::timerCallback()
     
     for (auto& rect : triggerRectangles)
     {
-        rect.alpha -= alphaDecrementPerFrame;
+        rect.value -= alphaDecrementPerFrame;
         
-        if(rect.alpha < 0.f)
-            rect.alpha = 0.f;
+        if(rect.value < 0.f)
+            rect.value = 0.f;
     }
     
     repaint(getLocalBounds());
@@ -34,9 +34,9 @@ void TriggerRectangleComponent::paint(juce::Graphics &g)
 {
     for (auto& rect : triggerRectangles)
     {
-        const auto color = juce::Colour::fromFloatRGBA(1.f, 1.f, 1.f, rect.alpha);
+        const auto color = juce::Colour::fromFloatRGBA(1.f, 1.f, 1.f, rect.value);
         g.setColour(color);
         constexpr float triggerRectLineThickness = 4.f;
-        g.drawRoundedRectangle(rect.x, rect.y, drawnStepWidth, drawnStepHeight, ROUNDED_CORNER_SIZE, triggerRectLineThickness);
+        g.drawRoundedRectangle(rect.x, rect.y, rect.width, drawnStepHeight, ROUNDED_CORNER_SIZE, triggerRectLineThickness);
     }
 }
