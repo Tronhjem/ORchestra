@@ -40,7 +40,7 @@ void Timeline::timerCallback()
     
     const int64_t timeInSamples = transportData.timeInSamples;
     const double samplesPerStep = static_cast<double>(transportData.sampleRate) 
-                                    * (60.0 / (transportData.bpm * transportData.bpmDivision));
+                                  * (60.0 / (transportData.bpm * transportData.bpmDivision));
 
     const int currentStep = static_cast<int>(ceil(static_cast<double>(timeInSamples) / samplesPerStep));
     
