@@ -33,7 +33,7 @@ void TriggerRectangleComponent::timerCallback()
     if (!transportData.isPlaying || !mAudioProcessor->IsORchestraVMInit())
         return;
 
-    
+
     const float stepDurationInMiliSeconds = 60000.f / static_cast<float>(transportData.bpm * transportData.bpmDivision);
     const float framesPerStep = stepDurationInMiliSeconds * miliesecondsPerFrameInverse;
     const float alphaDecrementPerFrame = 1.f / framesPerStep;
@@ -41,7 +41,7 @@ void TriggerRectangleComponent::timerCallback()
     for (auto& rect : triggerRectangles)
     {
         rect.value -= alphaDecrementPerFrame;
-        
+            
         if(rect.value < 0.f)
             rect.value = 0.f;
     }

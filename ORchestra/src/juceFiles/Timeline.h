@@ -46,7 +46,6 @@ public:
                 mTriggerRectangle(triggerRectangle)
     {
         startTimerHz(40);
-        mUniqueNoteValues.reserve(8);
         mTimelineTriggerRectangles.reserve(TIMELINE_STEPS_DRAWN * 5);
     }
 
@@ -65,6 +64,5 @@ private:
     int mLastGlobalStep;
     int64_t mLastTimeInSamples;
     TriggerRectangleComponent& mTriggerRectangle;
-    std::vector<DataUnit> mUniqueNoteValues;
     std::vector<TriggerRectangle> mTimelineTriggerRectangles;
 };
