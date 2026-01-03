@@ -17,13 +17,13 @@
  * along with ORchestra. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <algorithm>
 #include <unordered_map>
 
 #include "Timeline.h"
 #include "Defines.h"
 #include "SequenceStep.h"
 #include "StepData.h"
+#include "TriggerRectangle.h"
 #include "Utility.h"
 #include "Colors.h"
 #include "LookAndFeelConstants.h"
@@ -37,6 +37,7 @@ void Timeline::timerCallback()
 #if _DEBUG
     assert(mAudioProcessor != nullptr);
 #endif
+
     const TransportData& transportData = mAudioProcessor->GetTransportData();
     if (!transportData.isPlaying || !mAudioProcessor->IsORchestraVMInit())
         return;
@@ -121,7 +122,6 @@ void Timeline::timerCallback()
             {
                 if(step.mShouldTrigger.GetValue(substepIndex))
                 {
-
                     const float x = (static_cast<float>(index) * stepWidth)
                                     + (static_cast<float>((substepIndex)) * subDividedStepWidth)
                                     + triggerStepMargin;
@@ -134,13 +134,11 @@ void Timeline::timerCallback()
                     const float velocityFloat =
                             static_cast<float>(step.mSecond.GetEquivalentValueAtIndex(substepIndex, substepLength));
 
-                    TriggerRectangle timelineRect {x, y, subStepDrawnWidth, velocityFloat};
-                    mTimelineTriggerRectangles.emplace_back(timelineRect);
+                    mTimelineTriggerRectangles.emplace_back(TriggerRectangle {x, y, subStepDrawnWidth, velocityFloat});
 
                     if (index == 0)
                     {
-                        TriggerRectangle triggerRect {x, y, subStepDrawnWidth, 1.f};
-                        mTriggerRectangle.AddRectangle(triggerRect);
+                        mTriggerRectangle.AddRectangle(TriggerRectangle {x, y, subStepDrawnWidth, 1.f});
                     }
                 }
             }
@@ -155,13 +153,13 @@ void Timeline::paint(juce::Graphics& g)
     for (const auto& rect : mTimelineTriggerRectangles)
     {
         const juce::Colour colorToSet = GetStepColorFromVelocity(rect.value);
-        g.setColour(colorToSet.withAlpha(1.f));
+        g.setColour(colorToSet);
         g.fillRoundedRectangle(rect.x, rect.y, rect.width,  drawnStepHeight, ROUNDED_CORNER_SIZE);
     }
 }
 
 juce::Colour Timeline::GetStepColorFromVelocity(const float velocity)
 {
-        return smoothstepColour(MinVelocityColor,
-                                MaxVelocityColor, velocity / 127.f);
+    return smoothstepColour(MinVelocityColor,
+                            MaxVelocityColor, velocity / 127.f);
 }

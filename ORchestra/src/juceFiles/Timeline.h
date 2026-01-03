@@ -46,7 +46,7 @@ public:
                 mTriggerRectangle(triggerRectangle)
     {
         startTimerHz(40);
-        mTimelineTriggerRectangles.reserve(TIMELINE_STEPS_DRAWN * 5);
+        mTimelineTriggerRectangles.reserve(TIMELINE_STEPS_DRAWN * TIMELINE_ROWS_DRAWN);
     }
 
     ~Timeline() override

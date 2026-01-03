@@ -24,7 +24,7 @@
 
 namespace ORchestra 
 {
-    StepData::StepData(const DataUnit *data, const int length)
+    StepData::StepData(const DataUnit* data, const int length)
         : mLength(length)
     {
 #if _DEBUG
@@ -59,8 +59,7 @@ namespace ORchestra
         if (mLength == 1)
             return mData[0];
 
-        const int equivalentIndex = static_cast<int>(floor((static_cast<float>(index) 
-                                    / static_cast<float>(otherLength)) 
+        const int equivalentIndex = static_cast<int>(floor((static_cast<float>(index) / static_cast<float>(otherLength)) 
                                     * static_cast<float>(mLength)));
 
 #if _DEBUG
@@ -70,7 +69,7 @@ namespace ORchestra
         return mData[equivalentIndex];
     }
 
-    void StepData::SetData(const DataUnit *data, const int length)
+    void StepData::SetData(const DataUnit* data, const int length)
     {
 #if _DEBUG
         assert(length <= MAX_SUB_DIVISION_LENGTH);
