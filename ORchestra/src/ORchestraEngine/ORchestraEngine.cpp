@@ -20,6 +20,7 @@
 #include <cmath>
 
 #include "ORchestraEngine.h"
+#include "Defines.h"
 #if _DEBUG
 #include "ScopedTimer.h"
 #endif
@@ -172,7 +173,7 @@ namespace ORchestra
                mLastStep = currentStep;
 
                mSamplesSinceLastStep = transportData.timeInSamples;
-               const int wrappedGlobalStep = currentStep % STEP_BUFFER_SIZE;
+               const int wrappedGlobalStep = currentStep & STEP_BUFFER_SIZE_MASK;
                const std::vector<SequenceStep>& currentData = mStepRingBuffer[static_cast<unsigned long>(wrappedGlobalStep)];
                for (const SequenceStep& step : currentData)
                {
@@ -193,7 +194,6 @@ namespace ORchestra
                        // TODO: Change to use step.mDuration
                        // ScheduledMidiMessage message {step.mType, firstByte, secondByte, channel, timeStamp, step.mDuration};
                        ScheduledMidiMessage message{ step.mType, firstByte, secondByte, channel, timeStamp, transportData.noteLengthInSamples };
-
                        mMidiScheduler.PostMidi(message);
                    }
                }
