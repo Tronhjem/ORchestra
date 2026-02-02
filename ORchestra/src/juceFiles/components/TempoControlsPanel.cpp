@@ -56,7 +56,6 @@ void TempoControlsPanel::resized()
 {
     auto bounds = getLocalBounds();
     
-    // First row: Labels
     auto labelBounds = bounds.removeFromTop(LABEL_HEIGHT);
     mTempoDivLabel.setBounds(labelBounds.removeFromLeft(COMBO_WIDTH));
     labelBounds.removeFromLeft(SPACING);
@@ -64,7 +63,6 @@ void TempoControlsPanel::resized()
     labelBounds.removeFromLeft(SPACING);
     mBpmLabel.setBounds(labelBounds.removeFromLeft(SLIDER_WIDTH));
     
-    // Second row: Controls
     mTempoDivisionSelectorBox.setBounds(bounds.removeFromLeft(COMBO_WIDTH));
     bounds.removeFromLeft(SPACING);
     mNoteLengthSelectorBox.setBounds(bounds.removeFromLeft(COMBO_WIDTH));

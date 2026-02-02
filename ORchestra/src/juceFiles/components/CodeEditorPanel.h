@@ -48,7 +48,7 @@ public:
     void setErrorBoxLookAndFeel(juce::LookAndFeel* laf);
     void applyDefaultStyling();
 
-    int getPreferredHeight() const { return 330; } // 300 for editor + 30 for error box
+    constexpr int getPreferredHeight() const { return 330; } // 300 for editor + 30 for error box
 
 private:
     ORchestra::ORchestraCodeEditorTokenizer mTokeniser;

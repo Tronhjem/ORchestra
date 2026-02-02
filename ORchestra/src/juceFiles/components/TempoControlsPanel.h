@@ -42,8 +42,8 @@ public:
 
     void setGeneralLookAndFeel(juce::LookAndFeel* laf);
 
-    constexpr int getPreferredWidth() const { return 325; }
-    constexpr int getPreferredHeight() const { return 40; }
+    constexpr int getPreferredWidth() const { return COMBO_WIDTH  * 2 + SLIDER_WIDTH + SPACING * 2; }
+    constexpr int getPreferredHeight() const { return 2 * CONTROL_HEIGHT; }
 
 private:
     juce::Label mTempoDivLabel{ "tempo", "Tempo Division" };

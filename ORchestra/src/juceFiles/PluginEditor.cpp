@@ -67,7 +67,7 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     xPos += tempoWidth + COMPONENT_MARGIN;
     const int fileOpsWidth = mFileOperationsToolbar.getPreferredWidth();
     const int fileOpsHeight = mFileOperationsToolbar.getPreferredHeight();
-    mFileOperationsToolbar.setBounds(xPos, yPos + ROW_SPACING, fileOpsWidth, fileOpsHeight);
+    mFileOperationsToolbar.setBounds(xPos, yPos + mTempoControlsPanel.LABEL_HEIGHT, fileOpsWidth, fileOpsHeight);
     
     // ==============================================================================
     // Row 2: CodeEditorPrnel

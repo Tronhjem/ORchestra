@@ -26,7 +26,6 @@ class FileOperationsToolbar : public juce::Component,
                               public juce::Button::Listener
 {
 public:
-    // Layout constants
     static constexpr int BUTTON_HEIGHT = 20;
     static constexpr int BUTTON_WIDTH = 60;
     static constexpr int BUTTON_SPACING = 15;
@@ -44,8 +43,8 @@ public:
 
     void setButtonLookAndFeel(juce::LookAndFeel* laf);
 
-    int getPreferredWidth() const { return 220; } // 3 buttons with spacing
-    int getPreferredHeight() const { return 20; }
+    constexpr int getPreferredWidth() const { return 3 * BUTTON_WIDTH + 3 * BUTTON_SPACING; }
+    constexpr int getPreferredHeight() const { return BUTTON_HEIGHT; }
 
 private:
     void buttonClicked(juce::Button* button) override;
