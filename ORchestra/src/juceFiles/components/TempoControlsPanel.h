@@ -27,7 +27,6 @@ typedef juce::AudioProcessorValueTreeState::ComboBoxAttachment ComboBoxAttachmen
 class TempoControlsPanel : public juce::Component
 {
 public:
-    // Layout constants
     static constexpr int CONTROL_HEIGHT = 20;
     static constexpr int COMBO_WIDTH = 75;
     static constexpr int SLIDER_WIDTH = 50;
@@ -43,8 +42,8 @@ public:
 
     void setGeneralLookAndFeel(juce::LookAndFeel* laf);
 
-    int getPreferredWidth() const { return 325; } // All controls with spacing
-    int getPreferredHeight() const { return 40; } // label row + control row
+    constexpr int getPreferredWidth() const { return 325; }
+    constexpr int getPreferredHeight() const { return 40; }
 
 private:
     juce::Label mTempoDivLabel{ "tempo", "Tempo Division" };

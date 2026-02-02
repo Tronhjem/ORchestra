@@ -28,7 +28,6 @@ class TransportControls : public juce::Component,
                           public juce::Button::Listener
 {
 public:
-    // Layout constants
     static constexpr int BUTTON_HEIGHT = 20;
     static constexpr int BUTTON_WIDTH = 50;
     static constexpr int LABEL_HEIGHT = 20;
@@ -45,10 +44,8 @@ public:
     void updatePlayButtonState(bool isPlaying);
     void setPlayButtonEnabled(bool enabled);
 
-    // Styling
     void setButtonLookAndFeel(juce::LookAndFeel* laf);
 
-    // Size queries
     static constexpr int getPreferredWidth() { return BUTTON_HEIGHT + SPACING + BUTTON_WIDTH; }
     static constexpr int getPreferredHeight() { return LABEL_HEIGHT + BUTTON_HEIGHT; }
 

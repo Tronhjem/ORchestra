@@ -21,9 +21,8 @@
 
 #include <JuceHeader.h>
 
-#include "ORchestraCodeEditorComponent.h"
-#include "ORchestraCodeEditorTokenizer.h"
 #include "PluginProcessor.h"
+
 #include "Timeline.h"
 #include "TriggerRectangle.h"
 #include "CodeEditorPanel.h"
