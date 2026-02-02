@@ -29,6 +29,7 @@
 #include "CodeEditorPanel.h"
 #include "FileOperationsToolbar.h"
 #include "TransportControls.h"
+#include "TempoControlsPanel.h"
 
 #include "GeneralLookAndFeel.h"
 #include "ButtonsLookAndFeel.h"
@@ -75,19 +76,8 @@ private:
     std::unique_ptr<TextEditorLookAndFeel> mTextEditorLookAndFeel;
 
     TransportControls mTransportControls;
+    TempoControlsPanel mTempoControlsPanel;
     FileOperationsToolbar mFileOperationsToolbar;
-    juce::Label mTempoDivLabel{ "tempo", "Tempo Division" };
-    juce::Label mBpmLabel{ "bpm","BPM" };
-    juce::Label mNoteLengthLabel{ "noteLength", "Note Length" };
-
-    juce::StringArray mNoteDivisions{ "1n", "2n","4n", "8n", "16n", "32n", "64n" };
-    juce::ComboBox mTempoDivisionSelectorBox;
-    juce::ComboBox mNoteLengtSelectorBox;
-    juce::Slider mBpmBox;
-
-    std::unique_ptr<SliderAttachment> mBpmSliderAttachment;
-    std::unique_ptr<ComboBoxAttachment> mTempoDivisionAttachment;
-    std::unique_ptr<ComboBoxAttachment> mNoteLengthAttachment;
 
     juce::FileChooser mFileChooser{ "Select a file to load...", juce::File{}, "*.txt" };
     int mFileChooserFlags = juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles;

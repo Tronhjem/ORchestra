@@ -44,7 +44,8 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
           audioProcessor(p),
           mTimeline(mTriggerRectangle),
           mCodeEditorPanel(this),
-          mTransportControls(p.GetValueTree())
+          mTransportControls(p.GetValueTree()),
+          mTempoControlsPanel(p.GetValueTree())
 {
     setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
 
@@ -58,13 +59,9 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     int buttonXStart = static_cast<int>(OUTER_MARGIN - 10);
     int nextLineY = 20;
 
-    mTempoDivLabel.setBounds(buttonXStart, nextLineY, static_cast<int>(buttonWidth * 2.f), buttonHeight);
-
-    buttonXStart += static_cast<int>(buttonWidth * 1.8f + COMPONENT_MARGIN);
-    mNoteLengthLabel.setBounds(buttonXStart, nextLineY, static_cast<int>(buttonWidth * 1.5f), buttonHeight);
-
-    buttonXStart += static_cast<int>(buttonWidth * 1.5f + COMPONENT_MARGIN);
-    mBpmLabel.setBounds(buttonXStart, nextLineY, static_cast<int>(buttonWidth * 1.5f), buttonHeight);
+    // Tempo controls panel spans across the top (labels + controls)
+    int tempoControlsWidth = static_cast<int>(buttonWidth * 6.5f);
+    mTempoControlsPanel.setBounds(buttonXStart, nextLineY, tempoControlsWidth, buttonHeight * 2);
 
     // ======== NEW LINE ============
     nextLineY += buttonHeight;
@@ -73,12 +70,6 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     mTransportControls.setBounds(buttonXStart, nextLineY, static_cast<int>(buttonWidth + buttonHeight + COMPONENT_MARGIN), buttonHeight * 2);
 
     buttonXStart += static_cast<int>(buttonWidth + buttonHeight + COMPONENT_MARGIN * 2);
-    mBpmBox.setBounds(buttonXStart, nextLineY, buttonWidth, buttonHeight);
-
-    buttonXStart += static_cast<int>(buttonWidth + COMPONENT_MARGIN);
-    mTempoDivisionSelectorBox.setBounds(buttonXStart, nextLineY, static_cast<int>(buttonWidth * 1.5f), buttonHeight);
-
-    buttonXStart += static_cast<int>(buttonWidth * 1.5f + COMPONENT_MARGIN);
     mFileOperationsToolbar.setBounds(buttonXStart, nextLineY, static_cast<int>(buttonWidth * 5.1f), buttonHeight);
 
     // ======== NEW LINE ============
@@ -90,25 +81,11 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     mTimeline.setBounds(OUTER_MARGIN, nextLineY, WINDOW_WIDTH - OUTER_MARGIN * 2, WINDOW_HEIGHT - nextLineY - OUTER_MARGIN);
     mTriggerRectangle.setBounds(OUTER_MARGIN, nextLineY, 100, WINDOW_HEIGHT - nextLineY - OUTER_MARGIN);
 
-    mBpmBox.setSliderStyle(Slider::SliderStyle::LinearBarVertical);
-    mBpmBox.setSliderSnapsToMousePosition(false);
-
-    mBpmBox.setColour(Slider::textBoxOutlineColourId, BackgroundColor);
-
-    mTempoDivLabel.setColour(juce::Label::textColourId, TextColor);
-    mBpmLabel.setColour(juce::Label::textColourId, TextColor);
-    mNoteLengthLabel.setColour(juce::Label::textColourId, TextColor);
-
-    mTempoDivisionSelectorBox.addItemList(mNoteDivisions, 3);
-    mNoteLengtSelectorBox.addItemList(mNoteDivisions, 3);
-
     juce::LookAndFeel::setDefaultLookAndFeel(mGeneralLookAndFeel.get());
 
     mTransportControls.setButtonLookAndFeel(mButtonLookAndFeel.get());
+    mTempoControlsPanel.setGeneralLookAndFeel(mGeneralLookAndFeel.get());
     mFileOperationsToolbar.setButtonLookAndFeel(mButtonLookAndFeel.get());
-    mTempoDivisionSelectorBox.setLookAndFeel(mGeneralLookAndFeel.get());
-    mNoteLengtSelectorBox.setLookAndFeel(mGeneralLookAndFeel.get());
-    mBpmBox.setLookAndFeel(mGeneralLookAndFeel.get());
 
     // Setup code editor panel styling
     mCodeEditorPanel.setEditorLookAndFeel(mTextEditorLookAndFeel.get());
@@ -127,27 +104,17 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     mFileOperationsToolbar.setExportCallback([this]() { handleExportFile(); });
     mFileOperationsToolbar.setCompileCallback([this]() { handleCompile(); });
 
-    addAndMakeVisible(mTempoDivLabel);
-    addAndMakeVisible(mBpmLabel);
-    addAndMakeVisible(mNoteLengthLabel);
+    addAndMakeVisible(mTempoControlsPanel);
     addAndMakeVisible(mTransportControls);
-    addAndMakeVisible(mFileOperationsToolbar);
-    addAndMakeVisible(mTempoDivisionSelectorBox);
-    addAndMakeVisible(mNoteLengtSelectorBox);
 
     addAndMakeVisible(mCodeEditorPanel);
 
     addAndMakeVisible(mTimeline);
     addAndMakeVisible(mTriggerRectangle);
-    addAndMakeVisible(mBpmBox);
 
     const std::string& data = audioProcessor.GetInstructionData();
     juce::String dataAsString{ data };
     mCodeEditorPanel.loadContent(dataAsString);
-
-    mBpmSliderAttachment.reset(new SliderAttachment(valueTree, bpmString, mBpmBox));
-    mTempoDivisionAttachment.reset(new ComboBoxAttachment(valueTree, tempoDivisionString, mTempoDivisionSelectorBox));
-    mNoteLengthAttachment.reset(new ComboBoxAttachment(valueTree, noteLengthString, mNoteLengtSelectorBox));
 
     setWantsKeyboardFocus(true);
 }
@@ -195,7 +162,7 @@ void ORchestraAudioProcessorEditor::handlePlayButton()
 void ORchestraAudioProcessorEditor::handleSyncToggle(bool shouldSync)
 {
     mTransportControls.setPlayButtonEnabled(!shouldSync);
-    mBpmBox.setEnabled(!shouldSync);
+    mTempoControlsPanel.setBpmEnabled(!shouldSync);
 
     if(shouldSync)
     {
