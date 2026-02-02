@@ -61,6 +61,7 @@ void Timeline::timerCallback()
  
     mTriggerRectangle.ClearRectangles();
     mTimelineTriggerRectangles.clear();
+    mBarLines.clear();
     
     //=================================================================================================
     //
@@ -77,10 +78,6 @@ void Timeline::timerCallback()
 
         for (const auto& step : sequenceSteps)
         {
-            //TODO: How should we draw CC?
-            // if (step.mType != MidiType::NoteOn)
-            //     continue;
-
             const int substepLength = step.mFirst.GetLength();
             for (int j = 0; j < substepLength; ++j)
             {
@@ -111,6 +108,12 @@ void Timeline::timerCallback()
             static_cast<unsigned long>((globalStepOffset + index) & STEP_BUFFER_SIZE_MASK);
 
         const std::vector<SequenceStep>& sequenceSteps = mAudioProcessor->GetStepData()[stepWrapped];
+        const float xOffset = static_cast<float>(index) * stepWidth + triggerStepMargin;
+
+        if ((globalStepOffset + index) % GetNoteDivisionWrapIndex(transportData.bpmDivision) == 0)
+        {
+            mBarLines.emplace_back(BarLine{xOffset - QAURTER_BAR_LINE_THICKNESS, 0, 500.f});
+        }
 
         for (const auto& step : sequenceSteps)
         {
@@ -122,23 +125,18 @@ void Timeline::timerCallback()
             {
                 if(step.mShouldTrigger.GetValue(substepIndex))
                 {
-                    const float x = (static_cast<float>(index) * stepWidth)
-                                    + (static_cast<float>((substepIndex)) * subDividedStepWidth)
-                                    + triggerStepMargin;
+                    const float triggerReactX = static_cast<float>((substepIndex)) * subDividedStepWidth + xOffset;
+                    const DataUnit noteValue = step.mFirst.GetEquivalentValueAtIndex(substepIndex, substepLength);
+                    const float triggerRectY = static_cast<float>(indexMap[noteValue]) * stepHeight + triggerStepMargin;
+                    const float velocityFloat = static_cast<float>(step.mSecond.GetEquivalentValueAtIndex(substepIndex, substepLength));
 
-                    const DataUnit noteValue = 
-                            step.mFirst.GetEquivalentValueAtIndex(substepIndex, substepLength);
-                    
-                    const float y = static_cast<float>(indexMap[noteValue]) * stepHeight + triggerStepMargin;
-
-                    const float velocityFloat =
-                            static_cast<float>(step.mSecond.GetEquivalentValueAtIndex(substepIndex, substepLength));
-
-                    mTimelineTriggerRectangles.emplace_back(TriggerRectangle {x, y, subStepDrawnWidth, velocityFloat});
+                    mTimelineTriggerRectangles.emplace_back(TriggerRectangle {triggerReactX, triggerRectY, 
+                                                                              subStepDrawnWidth, velocityFloat, step.mType});
 
                     if (index == 0)
                     {
-                        mTriggerRectangle.AddRectangle(TriggerRectangle {x, y, subStepDrawnWidth, 1.f});
+                        mTriggerRectangle.AddRectangle(TriggerRectangle {triggerReactX, triggerRectY, 
+                                                                         subStepDrawnWidth, 1.f, step.mType});
                     }
                 }
             }
@@ -148,18 +146,34 @@ void Timeline::timerCallback()
     repaint(getLocalBounds());
 }
 
+
 void Timeline::paint(juce::Graphics& g)
 {
+    g.setColour(BarLineColor);
+    for (const auto& barLine : mBarLines)
+    {
+        g.drawLine(barLine.x, barLine.startY, barLine.x, barLine.endY, BAR_LINE_THICKNESS);
+    }
+
     for (const auto& rect : mTimelineTriggerRectangles)
     {
-        const juce::Colour colorToSet = GetStepColorFromVelocity(rect.value);
+        const juce::Colour colorToSet = GetStepColorFromVelocity(rect.value, rect.midiType);
         g.setColour(colorToSet);
         g.fillRoundedRectangle(rect.x, rect.y, rect.width,  drawnStepHeight, ROUNDED_CORNER_SIZE);
     }
 }
 
-juce::Colour Timeline::GetStepColorFromVelocity(const float velocity)
+juce::Colour Timeline::GetStepColorFromVelocity(const float value, const MidiType midiType)
 {
-    return smoothstepColour(MinVelocityColor,
-                            MaxVelocityColor, velocity / 127.f);
+    const Colour& minColor = midiType == MidiType::CC ? MinCCValueColor : MinVelocityColor;
+    const Colour& maxColor = midiType == MidiType::CC ? MaxCCValueColor : MaxVelocityColor;
+
+    return smoothstepColour(minColor,
+                            maxColor, value / 127.f);
 }
+
+int Timeline::GetNoteDivisionWrapIndex(const float bpmDivision)
+{
+    return static_cast<int>(bpmDivision * 4.f);
+}
+

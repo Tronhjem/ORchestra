@@ -145,7 +145,9 @@ namespace ORchestra
     {
         if (transportData.isPlaying && mIsVMInit)
         {
-            const double samplesPerStep = static_cast<double>(transportData.sampleRate) * (60.0 / (transportData.bpm * transportData.bpmDivision));
+            const double samplesPerStep = static_cast<double>(transportData.sampleRate) 
+                                          * (60.0 / (transportData.bpm * transportData.bpmDivision));
+ 
             const int currentStep = static_cast<int>(ceil(static_cast<double>(transportData.timeInSamples) / samplesPerStep));
 
             // Check if we skipped count, to regenerate everything.

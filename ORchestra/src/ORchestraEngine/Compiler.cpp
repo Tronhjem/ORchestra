@@ -22,7 +22,6 @@
 
 #include "Compiler.h"
 #include "ErrorReporting.h"
-#include "StepData.h"
 #include "Defines.h"
 
 #if _DEBUG

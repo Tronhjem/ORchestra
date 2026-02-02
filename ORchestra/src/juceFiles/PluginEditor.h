@@ -26,6 +26,7 @@
 #include "PluginProcessor.h"
 #include "Timeline.h"
 #include "TriggerRectangle.h"
+#include "CodeEditorPanel.h"
 
 #include "GeneralLookAndFeel.h"
 #include "ButtonsLookAndFeel.h"
@@ -91,11 +92,7 @@ private:
 
     TriggerRectangleComponent mTriggerRectangle;
     Timeline mTimeline;
-    juce::TextEditor mErrorTextBox;
-
-    ORchestraCodeEditorTokenizer mTokeniser;
-    juce::CodeDocument mCodeDocument;
-    ORchestraCodeEditorComponent mCodeEditor;
+    CodeEditorPanel mCodeEditorPanel;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ORchestraAudioProcessorEditor)
 };

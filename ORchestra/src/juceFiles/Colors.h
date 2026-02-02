@@ -108,5 +108,10 @@ namespace ORchestra
 
     const Colour MinVelocityColor = Colour(ColorPalette::Lavender);
     const Colour MaxVelocityColor = Colour(ColorPalette::Red);
+
+    const Colour MinCCValueColor = Colour(ColorPalette::Sapphire);
+    const Colour MaxCCValueColor = Colour(ColorPalette::Teal);
+     
+    const Colour BarLineColor = Colour(ColorPalette::Surface0);
     
 } // namespace ORchestra
