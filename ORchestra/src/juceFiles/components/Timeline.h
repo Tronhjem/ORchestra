@@ -20,7 +20,6 @@
 #pragma once
 
 #include <JuceHeader.h>
-#include <vecLib/BNNS/bnns_constants.h>
 
 #include "Defines.h"
 #include "PluginProcessor.h"
