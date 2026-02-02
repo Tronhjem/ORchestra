@@ -43,7 +43,8 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
         : AudioProcessorEditor(&p),
           audioProcessor(p),
           mTimeline(mTriggerRectangle),
-          mCodeEditorPanel(this)
+          mCodeEditorPanel(this),
+          mTransportControls(p.GetValueTree())
 {
     setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
 
@@ -57,26 +58,21 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     int buttonXStart = static_cast<int>(OUTER_MARGIN - 10);
     int nextLineY = 20;
 
-    mSyncToggleLabel.setBounds(buttonXStart, nextLineY, static_cast<int>(buttonWidth), buttonHeight);
-
-    buttonXStart += static_cast<int>(buttonWidth * 2.f + COMPONENT_MARGIN);
-    mBpmLabel.setBounds(buttonXStart, nextLineY, static_cast<int>(buttonWidth * 1.5f), buttonHeight);
-
-    buttonXStart += static_cast<int>(buttonWidth - 20.f + COMPONENT_MARGIN);
     mTempoDivLabel.setBounds(buttonXStart, nextLineY, static_cast<int>(buttonWidth * 2.f), buttonHeight);
 
     buttonXStart += static_cast<int>(buttonWidth * 1.8f + COMPONENT_MARGIN);
     mNoteLengthLabel.setBounds(buttonXStart, nextLineY, static_cast<int>(buttonWidth * 1.5f), buttonHeight);
 
+    buttonXStart += static_cast<int>(buttonWidth * 1.5f + COMPONENT_MARGIN);
+    mBpmLabel.setBounds(buttonXStart, nextLineY, static_cast<int>(buttonWidth * 1.5f), buttonHeight);
+
     // ======== NEW LINE ============
     nextLineY += buttonHeight;
     buttonXStart = OUTER_MARGIN;
-    mSyncToggleBox.setBounds(buttonXStart, nextLineY, buttonHeight, buttonHeight);
+    
+    mTransportControls.setBounds(buttonXStart, nextLineY, static_cast<int>(buttonWidth + buttonHeight + COMPONENT_MARGIN), buttonHeight * 2);
 
-    buttonXStart += static_cast<int>(buttonHeight + COMPONENT_MARGIN);
-    mTogglePlayButton.setBounds(buttonXStart, nextLineY, buttonWidth, buttonHeight);
-
-    buttonXStart += static_cast<int>(buttonWidth + COMPONENT_MARGIN);
+    buttonXStart += static_cast<int>(buttonWidth + buttonHeight + COMPONENT_MARGIN * 2);
     mBpmBox.setBounds(buttonXStart, nextLineY, buttonWidth, buttonHeight);
 
     buttonXStart += static_cast<int>(buttonWidth + COMPONENT_MARGIN);
@@ -99,21 +95,16 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
 
     mBpmBox.setColour(Slider::textBoxOutlineColourId, BackgroundColor);
 
-    mSyncToggleLabel.setColour(juce::Label::textColourId, TextColor);
     mTempoDivLabel.setColour(juce::Label::textColourId, TextColor);
     mBpmLabel.setColour(juce::Label::textColourId, TextColor);
     mNoteLengthLabel.setColour(juce::Label::textColourId, TextColor);
-
-    mTogglePlayButton.addListener(this);
-    mSyncToggleBox.addListener(this);
 
     mTempoDivisionSelectorBox.addItemList(mNoteDivisions, 3);
     mNoteLengtSelectorBox.addItemList(mNoteDivisions, 3);
 
     juce::LookAndFeel::setDefaultLookAndFeel(mGeneralLookAndFeel.get());
 
-    mTogglePlayButton.setLookAndFeel(mButtonLookAndFeel.get());
-    mSyncToggleBox.setLookAndFeel(mButtonLookAndFeel.get());
+    mTransportControls.setButtonLookAndFeel(mButtonLookAndFeel.get());
     mFileOperationsToolbar.setButtonLookAndFeel(mButtonLookAndFeel.get());
     mTempoDivisionSelectorBox.setLookAndFeel(mGeneralLookAndFeel.get());
     mNoteLengtSelectorBox.setLookAndFeel(mGeneralLookAndFeel.get());
@@ -127,17 +118,19 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     mTimeline.SetProcessor(&audioProcessor);
     mTriggerRectangle.SetProcessor(&audioProcessor);
 
+    // Setup transport controls callbacks
+    mTransportControls.setPlayButtonCallback([this]() { handlePlayButton(); });
+    mTransportControls.setSyncToggleCallback([this](bool shouldSync) { handleSyncToggle(shouldSync); });
+
     // Setup file operations toolbar callbacks
     mFileOperationsToolbar.setImportCallback([this]() { handleImportFile(); });
     mFileOperationsToolbar.setExportCallback([this]() { handleExportFile(); });
     mFileOperationsToolbar.setCompileCallback([this]() { handleCompile(); });
 
-    addAndMakeVisible(mSyncToggleLabel);
     addAndMakeVisible(mTempoDivLabel);
     addAndMakeVisible(mBpmLabel);
     addAndMakeVisible(mNoteLengthLabel);
-    addAndMakeVisible(mTogglePlayButton);
-    addAndMakeVisible(mSyncToggleBox);
+    addAndMakeVisible(mTransportControls);
     addAndMakeVisible(mFileOperationsToolbar);
     addAndMakeVisible(mTempoDivisionSelectorBox);
     addAndMakeVisible(mNoteLengtSelectorBox);
@@ -155,16 +148,12 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     mBpmSliderAttachment.reset(new SliderAttachment(valueTree, bpmString, mBpmBox));
     mTempoDivisionAttachment.reset(new ComboBoxAttachment(valueTree, tempoDivisionString, mTempoDivisionSelectorBox));
     mNoteLengthAttachment.reset(new ComboBoxAttachment(valueTree, noteLengthString, mNoteLengtSelectorBox));
-    mToggleButtonAttachment.reset(new ButtonAttachment(valueTree, syncToggleString, mSyncToggleBox));
 
     setWantsKeyboardFocus(true);
 }
 
 ORchestraAudioProcessorEditor::~ORchestraAudioProcessorEditor()
 {
-    mTogglePlayButton.setLookAndFeel(nullptr);
-    mSyncToggleBox.setLookAndFeel(nullptr);
-
     audioProcessor.removeChangeListener(this);
 }
 
@@ -187,28 +176,31 @@ void ORchestraAudioProcessorEditor::CodeEditorHasChanged()
 
 void ORchestraAudioProcessorEditor::buttonClicked(juce::Button* button)
 {
-    if (button == &mTogglePlayButton)
-    {
-        if (mCodeEditorPanel.hasUnsavedChanges())
-            handleCompile();
-        
-        if (audioProcessor.IsORchestraVMInit())
-        {
-            audioProcessor.IsRunning = !audioProcessor.IsRunning;
-            mTogglePlayButton.setButtonText(audioProcessor.IsRunning ? "Stop" : "Play");
-        }
-    }
-    else if (button == &mSyncToggleBox)
-    {
-        const bool shouldSync = mSyncToggleBox.getToggleState();
-        mTogglePlayButton.setEnabled(!shouldSync);
-        mBpmBox.setEnabled(!shouldSync);
+    // All button handling now done via callbacks in components
+    UNUSED(button);
+}
 
-        if(shouldSync)
-        {
-            audioProcessor.IsRunning = false;
-            mTogglePlayButton.setButtonText("Play");
-        }
+void ORchestraAudioProcessorEditor::handlePlayButton()
+{
+    if (mCodeEditorPanel.hasUnsavedChanges())
+        handleCompile();
+    
+    if (audioProcessor.IsORchestraVMInit())
+    {
+        audioProcessor.IsRunning = !audioProcessor.IsRunning;
+        mTransportControls.updatePlayButtonState(audioProcessor.IsRunning);
+    }
+}
+
+void ORchestraAudioProcessorEditor::handleSyncToggle(bool shouldSync)
+{
+    mTransportControls.setPlayButtonEnabled(!shouldSync);
+    mBpmBox.setEnabled(!shouldSync);
+
+    if(shouldSync)
+    {
+        audioProcessor.IsRunning = false;
+        mTransportControls.updatePlayButtonState(false);
     }
 }
 
