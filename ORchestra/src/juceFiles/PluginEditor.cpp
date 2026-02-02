@@ -189,11 +189,10 @@ void ORchestraAudioProcessorEditor::handleImportFile()
             const std::string& data = audioProcessor.ImportFromFile(filePath);
             juce::String dataAsString{ data };
             mCodeEditorPanel.loadContent(dataAsString);
-
+            
+            handleCompile();
+            UpdateErrors();
         });
-
-    handleCompile();
-    UpdateErrors(); 
 }
 
 void ORchestraAudioProcessorEditor::handleExportFile()

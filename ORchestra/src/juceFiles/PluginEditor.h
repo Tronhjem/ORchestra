@@ -52,7 +52,6 @@ public:
     //==============================================================================
     void paint(juce::Graphics&) override;
     void resized() override;
-    void extracted();
     void CodeEditorHasChanged() override;
 
 private:
@@ -78,8 +77,8 @@ private:
     TempoControlsPanel mTempoControlsPanel;
     FileOperationsToolbar mFileOperationsToolbar;
     CodeEditorPanel mCodeEditorPanel;
-    Timeline mTimeline;
     TriggerRectangleComponent mTriggerRectangle;
+    Timeline mTimeline;
 
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ORchestraAudioProcessorEditor)
