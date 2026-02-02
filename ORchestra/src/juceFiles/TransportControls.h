@@ -28,6 +28,12 @@ class TransportControls : public juce::Component,
                           public juce::Button::Listener
 {
 public:
+    // Layout constants
+    static constexpr int BUTTON_HEIGHT = 20;
+    static constexpr int BUTTON_WIDTH = 50;
+    static constexpr int LABEL_HEIGHT = 20;
+    static constexpr int SPACING = 15;
+
     TransportControls(juce::AudioProcessorValueTreeState& valueTree);
     ~TransportControls() override;
 
@@ -43,8 +49,8 @@ public:
     void setButtonLookAndFeel(juce::LookAndFeel* laf);
 
     // Size queries
-    int getPreferredWidth() const { return 85; } // checkbox + button + spacing
-    int getPreferredHeight() const { return 40; } // label row + control row
+    static constexpr int getPreferredWidth() { return BUTTON_HEIGHT + SPACING + BUTTON_WIDTH; }
+    static constexpr int getPreferredHeight() { return LABEL_HEIGHT + BUTTON_HEIGHT; }
 
 private:
     void buttonClicked(juce::Button* button) override;

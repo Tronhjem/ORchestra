@@ -23,11 +23,6 @@
 
 using namespace ORchestra;
 
-constexpr int BUTTON_HEIGHT = 20;
-constexpr int BUTTON_WIDTH = 50;
-constexpr int LABEL_HEIGHT = 20;
-constexpr int SPACING = 15;
-
 TempoControlsPanel::TempoControlsPanel(juce::AudioProcessorValueTreeState& valueTree)
 {
     // Setup labels
@@ -63,18 +58,18 @@ void TempoControlsPanel::resized()
     
     // First row: Labels
     auto labelBounds = bounds.removeFromTop(LABEL_HEIGHT);
-    mTempoDivLabel.setBounds(labelBounds.removeFromLeft(static_cast<int>(BUTTON_WIDTH * 2.f)));
-    labelBounds.removeFromLeft(static_cast<int>(BUTTON_WIDTH - 20.f + SPACING));
-    mNoteLengthLabel.setBounds(labelBounds.removeFromLeft(static_cast<int>(BUTTON_WIDTH * 1.5f)));
+    mTempoDivLabel.setBounds(labelBounds.removeFromLeft(COMBO_WIDTH));
     labelBounds.removeFromLeft(SPACING);
-    mBpmLabel.setBounds(labelBounds.removeFromLeft(static_cast<int>(BUTTON_WIDTH * 1.5f)));
+    mNoteLengthLabel.setBounds(labelBounds.removeFromLeft(COMBO_WIDTH));
+    labelBounds.removeFromLeft(SPACING);
+    mBpmLabel.setBounds(labelBounds.removeFromLeft(SLIDER_WIDTH));
     
     // Second row: Controls
-    mTempoDivisionSelectorBox.setBounds(bounds.removeFromLeft(static_cast<int>(BUTTON_WIDTH * 1.5f)));
+    mTempoDivisionSelectorBox.setBounds(bounds.removeFromLeft(COMBO_WIDTH));
     bounds.removeFromLeft(SPACING);
-    mNoteLengthSelectorBox.setBounds(bounds.removeFromLeft(static_cast<int>(BUTTON_WIDTH * 1.5f)));
+    mNoteLengthSelectorBox.setBounds(bounds.removeFromLeft(COMBO_WIDTH));
     bounds.removeFromLeft(SPACING);
-    mBpmSlider.setBounds(bounds.removeFromLeft(BUTTON_WIDTH));
+    mBpmSlider.setBounds(bounds.removeFromLeft(SLIDER_WIDTH));
 }
 
 void TempoControlsPanel::setBpmEnabled(bool enabled)

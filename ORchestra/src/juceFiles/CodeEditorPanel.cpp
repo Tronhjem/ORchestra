@@ -50,8 +50,8 @@ void CodeEditorPanel::resized()
 {
     auto bounds = getLocalBounds();
     
-    // Error box at bottom (30px height)
-    auto errorBounds = bounds.removeFromBottom(30);
+    // Error box at bottom
+    auto errorBounds = bounds.removeFromBottom(ERROR_BOX_HEIGHT);
     mErrorTextBox.setBounds(errorBounds);
     
     // Code editor takes remaining space

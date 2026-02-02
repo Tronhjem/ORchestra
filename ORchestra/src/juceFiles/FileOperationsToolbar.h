@@ -26,6 +26,11 @@ class FileOperationsToolbar : public juce::Component,
                               public juce::Button::Listener
 {
 public:
+    // Layout constants
+    static constexpr int BUTTON_HEIGHT = 20;
+    static constexpr int BUTTON_WIDTH = 60;
+    static constexpr int BUTTON_SPACING = 15;
+
     FileOperationsToolbar();
     ~FileOperationsToolbar() override;
 

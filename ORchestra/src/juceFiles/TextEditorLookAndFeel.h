@@ -46,7 +46,6 @@ public:
         UNUSED(isMouseDown);
         UNUSED(thumbStartPosition);
 
-        // Background
         g.setColour(TextEditorBackgroundColor);
         g.fillRect(x, y, width, height);
 
@@ -63,7 +62,5 @@ public:
         UNUSED(width);
         UNUSED(height);
         UNUSED(ed);
-//        g.setColour(ButtonBackgroundColor);
-//        g.drawRect(0, 0, width, height, 2);
     }
 };

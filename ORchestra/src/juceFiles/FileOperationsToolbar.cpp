@@ -19,9 +19,6 @@
 
 #include "FileOperationsToolbar.h"
 
-constexpr int BUTTON_HEIGHT = 20;
-constexpr int BUTTON_SPACING = 15;
-
 FileOperationsToolbar::FileOperationsToolbar()
 {
     mImportButton.addListener(this);

@@ -23,11 +23,6 @@
 
 using namespace ORchestra;
 
-constexpr int BUTTON_HEIGHT = 20;
-constexpr int BUTTON_WIDTH = 50;
-constexpr int LABEL_HEIGHT = 20;
-constexpr int SPACING = 15;
-
 TransportControls::TransportControls(juce::AudioProcessorValueTreeState& valueTree)
 {
     mSyncToggleAttachment.reset(new ButtonAttachment(valueTree, syncToggleString, mSyncToggleBox));

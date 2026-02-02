@@ -22,9 +22,7 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
-#include "LookAndFeelConstants.h"
 #include "Colors.h"
-#include "ParamConstants.h"
 #include "Utility.h"
 #include "juce_audio_processors/juce_audio_processors.h"
 #include "juce_gui_extra/juce_gui_extra.h"
@@ -39,10 +37,10 @@ constexpr int ROW_SPACING = 10;
 ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProcessor& p)
         : AudioProcessorEditor(&p),
           audioProcessor(p),
-          mTimeline(mTriggerRectangle),
-          mCodeEditorPanel(this),
           mTransportControls(p.GetValueTree()),
-          mTempoControlsPanel(p.GetValueTree())
+          mTempoControlsPanel(p.GetValueTree()),
+          mCodeEditorPanel(this),
+          mTimeline(mTriggerRectangle)
 {
     setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
 
@@ -52,38 +50,41 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     mButtonLookAndFeel = std::make_unique<ButtonLookAndFeel>();
     mTextEditorLookAndFeel = std::make_unique<TextEditorLookAndFeel>();
 
-    // ===== LAYOUT COMPONENTS WITH DYNAMIC POSITIONING =====
-    // Row 1: TempoControlsPanel, TransportControls, and FileOperationsToolbar
     int xPos = OUTER_MARGIN;
     int yPos = OUTER_MARGIN;
     
-    int tempoWidth = mTempoControlsPanel.getPreferredWidth();
-    int tempoHeight = mTempoControlsPanel.getPreferredHeight();
-    mTempoControlsPanel.setBounds(xPos, yPos, tempoWidth, tempoHeight);
-    
-    xPos += tempoWidth + COMPONENT_MARGIN;
-    int transportWidth = mTransportControls.getPreferredWidth();
-    int transportHeight = mTransportControls.getPreferredHeight();
+    // ==============================================================================
+    // Row 1: button controls
+    const int transportWidth = mTransportControls.getPreferredWidth();
+    const int transportHeight = mTransportControls.getPreferredHeight();
     mTransportControls.setBounds(xPos, yPos, transportWidth, transportHeight);
     
     xPos += transportWidth + COMPONENT_MARGIN;
-    int fileOpsWidth = mFileOperationsToolbar.getPreferredWidth();
-    int fileOpsHeight = mFileOperationsToolbar.getPreferredHeight();
-    // Align file ops toolbar vertically with the second row of tempo/transport
+    const int tempoWidth = mTempoControlsPanel.getPreferredWidth();
+    const int tempoHeight = mTempoControlsPanel.getPreferredHeight();
+    mTempoControlsPanel.setBounds(xPos, yPos, tempoWidth, tempoHeight);
+    
+    xPos += tempoWidth + COMPONENT_MARGIN;
+    const int fileOpsWidth = mFileOperationsToolbar.getPreferredWidth();
+    const int fileOpsHeight = mFileOperationsToolbar.getPreferredHeight();
     mFileOperationsToolbar.setBounds(xPos, yPos + ROW_SPACING, fileOpsWidth, fileOpsHeight);
     
-    // Row 2: CodeEditorPanel
+    // ==============================================================================
+    // Row 2: CodeEditorPrnel
     yPos += std::max({tempoHeight, transportHeight, fileOpsHeight + ROW_SPACING}) + COMPONENT_MARGIN;
     int codeEditorWidth = WINDOW_WIDTH - 2 * OUTER_MARGIN;
     int codeEditorHeight = mCodeEditorPanel.getPreferredHeight();
     mCodeEditorPanel.setBounds(OUTER_MARGIN, yPos, codeEditorWidth, codeEditorHeight);
     
+    // ==============================================================================
     // Row 3: Timeline and TriggerRectangle
     yPos += codeEditorHeight + COMPONENT_MARGIN;
     int timelineHeight = WINDOW_HEIGHT - yPos - OUTER_MARGIN;
     mTimeline.setBounds(OUTER_MARGIN, yPos, WINDOW_WIDTH - OUTER_MARGIN * 2, timelineHeight);
     mTriggerRectangle.setBounds(OUTER_MARGIN, yPos, 100, timelineHeight);
 
+    // ==============================================================================
+    
     juce::LookAndFeel::setDefaultLookAndFeel(mGeneralLookAndFeel.get());
 
     mTransportControls.setButtonLookAndFeel(mButtonLookAndFeel.get());
