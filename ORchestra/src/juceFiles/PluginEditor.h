@@ -27,6 +27,7 @@
 #include "Timeline.h"
 #include "TriggerRectangle.h"
 #include "CodeEditorPanel.h"
+#include "FileOperationsToolbar.h"
 
 #include "GeneralLookAndFeel.h"
 #include "ButtonsLookAndFeel.h"
@@ -59,6 +60,10 @@ private:
     void buttonClicked(juce::Button* button) override;
     void changeListenerCallback(juce::ChangeBroadcaster* broadCaster) override;
 
+    void handleCompile();
+    void handleImportFile();
+    void handleExportFile();
+
     ORchestraAudioProcessor& audioProcessor;
     inline void UpdateErrors();
 
@@ -67,9 +72,7 @@ private:
     std::unique_ptr<TextEditorLookAndFeel> mTextEditorLookAndFeel;
 
     juce::TextButton mTogglePlayButton{ "Play" };
-    juce::TextButton mImportFileButton{ "Import" };
-    juce::TextButton mExportToFileButton{ "Export" };
-    juce::TextButton mCompileButton{ "Compile" };
+    FileOperationsToolbar mFileOperationsToolbar;
 
     juce::Label mSyncToggleLabel{ "sync", "Sync" };
     juce::Label mTempoDivLabel{ "tempo", "Tempo Division" };

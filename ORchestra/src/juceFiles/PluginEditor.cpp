@@ -83,16 +83,7 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     mTempoDivisionSelectorBox.setBounds(buttonXStart, nextLineY, static_cast<int>(buttonWidth * 1.5f), buttonHeight);
 
     buttonXStart += static_cast<int>(buttonWidth * 1.5f + COMPONENT_MARGIN);
-    mNoteLengtSelectorBox.setBounds(buttonXStart, nextLineY, static_cast<int>(buttonWidth * 1.5f), buttonHeight);
-
-    buttonXStart += static_cast<int>(buttonWidth * 1.5f + COMPONENT_MARGIN);
-    mExportToFileButton.setBounds(buttonXStart, nextLineY, static_cast<int>(buttonWidth * 1.2f), buttonHeight);
-
-    buttonXStart += static_cast<int>(buttonWidth * 1.2f + COMPONENT_MARGIN);
-    mImportFileButton.setBounds(buttonXStart, nextLineY, static_cast<int>(buttonWidth * 1.2f), buttonHeight);
-
-    buttonXStart += static_cast<int>(buttonWidth * 1.2f + COMPONENT_MARGIN);
-    mCompileButton.setBounds(buttonXStart, nextLineY, static_cast<int>(buttonWidth * 1.5f), buttonHeight);
+    mFileOperationsToolbar.setBounds(buttonXStart, nextLineY, static_cast<int>(buttonWidth * 5.1f), buttonHeight);
 
     // ======== NEW LINE ============
     nextLineY += buttonHeight + COMPONENT_MARGIN;
@@ -113,10 +104,6 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     mBpmLabel.setColour(juce::Label::textColourId, TextColor);
     mNoteLengthLabel.setColour(juce::Label::textColourId, TextColor);
 
-    mExportToFileButton.addListener(this);
-    mImportFileButton.addListener(this);
-    mCompileButton.addListener(this);
-
     mTogglePlayButton.addListener(this);
     mSyncToggleBox.addListener(this);
 
@@ -126,10 +113,8 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     juce::LookAndFeel::setDefaultLookAndFeel(mGeneralLookAndFeel.get());
 
     mTogglePlayButton.setLookAndFeel(mButtonLookAndFeel.get());
-    mExportToFileButton.setLookAndFeel(mButtonLookAndFeel.get());
-    mImportFileButton.setLookAndFeel(mButtonLookAndFeel.get());
     mSyncToggleBox.setLookAndFeel(mButtonLookAndFeel.get());
-    mCompileButton.setLookAndFeel(mButtonLookAndFeel.get());
+    mFileOperationsToolbar.setButtonLookAndFeel(mButtonLookAndFeel.get());
     mTempoDivisionSelectorBox.setLookAndFeel(mGeneralLookAndFeel.get());
     mNoteLengtSelectorBox.setLookAndFeel(mGeneralLookAndFeel.get());
     mBpmBox.setLookAndFeel(mGeneralLookAndFeel.get());
@@ -142,15 +127,18 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     mTimeline.SetProcessor(&audioProcessor);
     mTriggerRectangle.SetProcessor(&audioProcessor);
 
+    // Setup file operations toolbar callbacks
+    mFileOperationsToolbar.setImportCallback([this]() { handleImportFile(); });
+    mFileOperationsToolbar.setExportCallback([this]() { handleExportFile(); });
+    mFileOperationsToolbar.setCompileCallback([this]() { handleCompile(); });
+
     addAndMakeVisible(mSyncToggleLabel);
     addAndMakeVisible(mTempoDivLabel);
     addAndMakeVisible(mBpmLabel);
     addAndMakeVisible(mNoteLengthLabel);
     addAndMakeVisible(mTogglePlayButton);
     addAndMakeVisible(mSyncToggleBox);
-    addAndMakeVisible(mExportToFileButton);
-    addAndMakeVisible(mImportFileButton);
-    addAndMakeVisible(mCompileButton);
+    addAndMakeVisible(mFileOperationsToolbar);
     addAndMakeVisible(mTempoDivisionSelectorBox);
     addAndMakeVisible(mNoteLengtSelectorBox);
 
@@ -175,8 +163,6 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
 ORchestraAudioProcessorEditor::~ORchestraAudioProcessorEditor()
 {
     mTogglePlayButton.setLookAndFeel(nullptr);
-    mExportToFileButton.setLookAndFeel(nullptr);
-    mImportFileButton.setLookAndFeel(nullptr);
     mSyncToggleBox.setLookAndFeel(nullptr);
 
     audioProcessor.removeChangeListener(this);
@@ -195,30 +181,16 @@ void ORchestraAudioProcessorEditor::CodeEditorHasChanged()
 {
     if(mCodeEditorPanel.hasUnsavedChanges())
     {
-        mCompileButton.setEnabled(true);
+        mFileOperationsToolbar.setCompileButtonEnabled(true);
     }
 }
 
 void ORchestraAudioProcessorEditor::buttonClicked(juce::Button* button)
 {
-    auto processorReadAndCompile = [&]()
-    {
-        juce::String text = mCodeEditorPanel.getCodeDocument().getAllContent();
-        std::string utf8Text = text.toRawUTF8();
-        audioProcessor.Compile(utf8Text);
-        if (audioProcessor.IsORchestraVMInit())
-        {
-            mCodeEditorPanel.markSaved();
-            mCompileButton.setEnabled(false);
-        }
-        
-        UpdateErrors();
-    };
-
     if (button == &mTogglePlayButton)
     {
         if (mCodeEditorPanel.hasUnsavedChanges())
-            processorReadAndCompile();
+            handleCompile();
         
         if (audioProcessor.IsORchestraVMInit())
         {
@@ -226,45 +198,8 @@ void ORchestraAudioProcessorEditor::buttonClicked(juce::Button* button)
             mTogglePlayButton.setButtonText(audioProcessor.IsRunning ? "Stop" : "Play");
         }
     }
-    else if (button == &mExportToFileButton)
-    {
-        // TODO: Should we compile before saving?
-        // processorReadAndCompile();
-        
-        mFileChooser.launchAsync(mFileChooserFlags, [this](const juce::FileChooser& fc)
-            {
-                UNUSED(fc);
-                juce::File file = mFileChooser.getResult();
-                std::string filePath{ file.getFullPathName().toRawUTF8() };
-                audioProcessor.ExportToFile(filePath);
-            });
-
-        UpdateErrors();
-    }
-    else if (button == &mImportFileButton)
-    {
-        mFileChooser.launchAsync(mFileChooserFlags, [this](const juce::FileChooser& fc)
-             {
-                UNUSED(fc);
-                juce::File file = mFileChooser.getResult();
-                std::string filePath{ file.getFullPathName().toRawUTF8() };
-                const std::string& data = audioProcessor.ImportFromFile(filePath);
-                juce::String dataAsString{ data };
-                mCodeEditorPanel.loadContent(dataAsString);
-
-            });
-
-        processorReadAndCompile();
-        UpdateErrors(); 
-    }
-    else if (button == &mCompileButton)
-    {
-        if (mCodeEditorPanel.hasUnsavedChanges())
-            processorReadAndCompile();
-    }
     else if (button == &mSyncToggleBox)
     {
-        // TODO: This logic should probably be somewhere else.
         const bool shouldSync = mSyncToggleBox.getToggleState();
         mTogglePlayButton.setEnabled(!shouldSync);
         mBpmBox.setEnabled(!shouldSync);
@@ -277,6 +212,50 @@ void ORchestraAudioProcessorEditor::buttonClicked(juce::Button* button)
     }
 }
 
+void ORchestraAudioProcessorEditor::handleCompile()
+{
+    juce::String text = mCodeEditorPanel.getCodeDocument().getAllContent();
+    std::string utf8Text = text.toRawUTF8();
+    audioProcessor.Compile(utf8Text);
+    if (audioProcessor.IsORchestraVMInit())
+    {
+        mCodeEditorPanel.markSaved();
+        mFileOperationsToolbar.setCompileButtonEnabled(false);
+    }
+    
+    UpdateErrors();
+}
+
+void ORchestraAudioProcessorEditor::handleImportFile()
+{
+    mFileChooser.launchAsync(mFileChooserFlags, [this](const juce::FileChooser& fc)
+         {
+            UNUSED(fc);
+            juce::File file = mFileChooser.getResult();
+            std::string filePath{ file.getFullPathName().toRawUTF8() };
+            const std::string& data = audioProcessor.ImportFromFile(filePath);
+            juce::String dataAsString{ data };
+            mCodeEditorPanel.loadContent(dataAsString);
+
+        });
+
+    handleCompile();
+    UpdateErrors(); 
+}
+
+void ORchestraAudioProcessorEditor::handleExportFile()
+{
+    mFileChooser.launchAsync(mFileChooserFlags, [this](const juce::FileChooser& fc)
+        {
+            UNUSED(fc);
+            juce::File file = mFileChooser.getResult();
+            std::string filePath{ file.getFullPathName().toRawUTF8() };
+            audioProcessor.ExportToFile(filePath);
+        });
+
+    UpdateErrors();
+}
+
 void ORchestraAudioProcessorEditor::UpdateErrors()
 {
     const std::vector<LogEntry>& errors = audioProcessor.GetErrors();
@@ -287,7 +266,7 @@ void ORchestraAudioProcessorEditor::UpdateErrors()
 void ORchestraAudioProcessorEditor::paint(juce::Graphics& g)
 {
     g.fillAll(BackgroundColor);
-    mCompileButton.setEnabled(mCodeEditorPanel.hasUnsavedChanges());
+    mFileOperationsToolbar.setCompileButtonEnabled(mCodeEditorPanel.hasUnsavedChanges());
 }
 
 void ORchestraAudioProcessorEditor::resized()
