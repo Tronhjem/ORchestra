@@ -38,11 +38,15 @@ static_cast<DataUnit>(std::clamp(static_cast<int>(x), min, max))
         message.mChannel = CLAMP_TO_MIDI(message.mChannel, DATA_UNIT_MIN_VALUE, 16);
         mScheduledMidiMessages.emplace_back(message);
 
+        // Generate corresponding NoteOff for NoteOn
         if (message.mMessageType == MidiType::NoteOn)
         {
             const int timeStampOff = message.mScheduledTime + message.mDuration;
-            ScheduledMidiMessage messageOff{ MidiType::NoteOff, message.mFirstByte, 0, message.mChannel, timeStampOff, 0 };
-            mScheduledMidiMessages.emplace_back(messageOff);
+            mScheduledMidiMessages.emplace_back(ScheduledMidiMessage { MidiType::NoteOff, 
+                                                                       message.mFirstByte, 
+                                                                       0, message.mChannel, 
+                                                                       timeStampOff, 0 
+                                                                     });
         }
     }
 
@@ -104,6 +108,4 @@ static_cast<DataUnit>(std::clamp(static_cast<int>(x), min, max))
 
         mScheduledMidiMessages.clear();
     }
-
-
 } // namespace ORchestra

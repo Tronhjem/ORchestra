@@ -30,17 +30,10 @@
 #include "VM.h"
 #include "FileLoader.h"
 #include "ErrorReporting.h"
+#include "Defines.h"
 
-namespace ORchestra {
-
-    constexpr int STEP_BUFFER_SIZE = 32;
-    constexpr int STEP_BUFFER_SIZE_MASK = STEP_BUFFER_SIZE - 1;
-    constexpr int HALF_STEP_BUFFER_SIZE = STEP_BUFFER_SIZE / 2;
-
-    static_assert(STEP_BUFFER_SIZE > 0 && 
-                  (STEP_BUFFER_SIZE & (STEP_BUFFER_SIZE - 1)) == 0, 
-                  "STEP_BUFFER_SIZE must be a power of two");
-
+namespace ORchestra 
+{
     class ORchestraEngine
     {
     public:
@@ -53,7 +46,7 @@ namespace ORchestra {
 
         std::array<std::vector<SequenceStep>, STEP_BUFFER_SIZE>& GetStepData() { return mStepRingBuffer; }
         int GetGlobalStepCount() { return mCurrentGlobalStep.load(); }
-        const std::vector<LogEntry>& GetErrors() { return mVM->GetErrors(); }
+        const std::vector<LogEntry>& GetErrors() { return mVM.GetErrors(); }
         const std::string& GetInstructionData() { return mInstructionData; }
         void SetInstructionData(const std::string& data) { mInstructionData = data; }
         bool IsVMInit() { return mIsVMInit.load(); }
@@ -76,13 +69,13 @@ namespace ORchestra {
         std::mutex mCVMutex;
         std::condition_variable mCV;
         std::thread mWorkerThread;
-        std::unique_ptr<VM> mVM;
         std::unique_ptr<FileLoader> mFileLoader;
         std::array<std::vector<SequenceStep>, STEP_BUFFER_SIZE> mStepRingBuffer;
 
         std::string mInstructionData;
 
         MidiScheduler mMidiScheduler;
+        VM mVM;
     };
 
 

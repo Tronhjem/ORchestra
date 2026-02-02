@@ -22,9 +22,7 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
-#include "LookAndFeelConstants.h"
 #include "Colors.h"
-#include "ParamConstants.h"
 #include "Utility.h"
 #include "juce_audio_processors/juce_audio_processors.h"
 #include "juce_gui_extra/juce_gui_extra.h"
@@ -33,172 +31,96 @@ constexpr int WINDOW_WIDTH = 1000;
 constexpr int WINDOW_HEIGHT = 800;
 constexpr int COMPONENT_MARGIN = 15;
 constexpr int OUTER_MARGIN = 20;
-const int buttonWidth = 50;
-constexpr int buttonHeight = 20;
-constexpr int codeEditorWidth = WINDOW_WIDTH - 2 * OUTER_MARGIN;
-constexpr int codeEditorHeight = 300;
+constexpr int ROW_SPACING = 10;
 
 //==============================================================================
 ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProcessor& p)
         : AudioProcessorEditor(&p),
           audioProcessor(p),
-          mTimeline(mTriggerRectangle),
-          mCodeEditor(mCodeDocument, &mTokeniser)
+          mTransportControls(p.GetValueTree()),
+          mTempoControlsPanel(p.GetValueTree()),
+          mCodeEditorPanel(this),
+          mTimeline(mTriggerRectangle)
 {
     setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
 
     audioProcessor.addChangeListener(this);
-    juce::AudioProcessorValueTreeState& valueTree = audioProcessor.GetValueTree();
 
     mGeneralLookAndFeel = std::make_unique<GeneralLookAndFeel>();
     mButtonLookAndFeel = std::make_unique<ButtonLookAndFeel>();
     mTextEditorLookAndFeel = std::make_unique<TextEditorLookAndFeel>();
 
-    mCodeEditor.setTabSize(4, true);
-    mCodeEditor.setLineNumbersShown(true);
+    int xPos = OUTER_MARGIN;
+    int yPos = OUTER_MARGIN;
+    
+    // ==============================================================================
+    // Row 1: button controls
+    const int transportWidth = mTransportControls.getPreferredWidth();
+    const int transportHeight = mTransportControls.getPreferredHeight();
+    mTransportControls.setBounds(xPos, yPos, transportWidth, transportHeight);
+    
+    xPos += transportWidth + COMPONENT_MARGIN;
+    const int tempoWidth = mTempoControlsPanel.getPreferredWidth();
+    const int tempoHeight = mTempoControlsPanel.getPreferredHeight();
+    mTempoControlsPanel.setBounds(xPos, yPos, tempoWidth, tempoHeight);
+    
+    xPos += tempoWidth + COMPONENT_MARGIN;
+    const int fileOpsWidth = mFileOperationsToolbar.getPreferredWidth();
+    const int fileOpsHeight = mFileOperationsToolbar.getPreferredHeight();
+    mFileOperationsToolbar.setBounds(xPos, yPos + mTempoControlsPanel.LABEL_HEIGHT, fileOpsWidth, fileOpsHeight);
+    
+    // ==============================================================================
+    // Row 2: CodeEditorPrnel
+    yPos += std::max({tempoHeight, transportHeight, fileOpsHeight + ROW_SPACING}) + COMPONENT_MARGIN;
+    int codeEditorWidth = WINDOW_WIDTH - 2 * OUTER_MARGIN;
+    int codeEditorHeight = mCodeEditorPanel.getPreferredHeight();
+    mCodeEditorPanel.setBounds(OUTER_MARGIN, yPos, codeEditorWidth, codeEditorHeight);
+    
+    // ==============================================================================
+    // Row 3: Timeline and TriggerRectangle
+    yPos += codeEditorHeight + COMPONENT_MARGIN;
+    int timelineHeight = WINDOW_HEIGHT - yPos - OUTER_MARGIN;
+    mTimeline.setBounds(OUTER_MARGIN, yPos, WINDOW_WIDTH - OUTER_MARGIN * 2, timelineHeight);
+    mTriggerRectangle.setBounds(OUTER_MARGIN, yPos, 100, timelineHeight);
 
-    int buttonXStart = static_cast<int>(OUTER_MARGIN - 10);
-    int nextLineY = 20;
-
-    mSyncToggleLabel.setBounds(buttonXStart, nextLineY, static_cast<int>(buttonWidth), buttonHeight);
-
-    buttonXStart += static_cast<int>(buttonWidth * 2.f + COMPONENT_MARGIN);
-    mBpmLabel.setBounds(buttonXStart, nextLineY, static_cast<int>(buttonWidth * 1.5f), buttonHeight);
-
-    buttonXStart += static_cast<int>(buttonWidth - 20.f + COMPONENT_MARGIN);
-    mTempoDivLabel.setBounds(buttonXStart, nextLineY, static_cast<int>(buttonWidth * 2.f), buttonHeight);
-
-    buttonXStart += static_cast<int>(buttonWidth * 1.8f + COMPONENT_MARGIN);
-    mNoteLengthLabel.setBounds(buttonXStart, nextLineY, static_cast<int>(buttonWidth * 1.5f), buttonHeight);
-
-    // ======== NEW LINE ============
-    nextLineY += buttonHeight;
-    buttonXStart = OUTER_MARGIN;
-    mSyncToggleBox.setBounds(buttonXStart, nextLineY, buttonHeight, buttonHeight);
-
-    buttonXStart += static_cast<int>(buttonHeight + COMPONENT_MARGIN);
-    mTogglePlayButton.setBounds(buttonXStart, nextLineY, buttonWidth, buttonHeight);
-
-    buttonXStart += static_cast<int>(buttonWidth + COMPONENT_MARGIN);
-    mBpmBox.setBounds(buttonXStart, nextLineY, buttonWidth, buttonHeight);
-
-    buttonXStart += static_cast<int>(buttonWidth + COMPONENT_MARGIN);
-    mTempoDivisionSelectorBox.setBounds(buttonXStart, nextLineY, static_cast<int>(buttonWidth * 1.5f), buttonHeight);
-
-    buttonXStart += static_cast<int>(buttonWidth * 1.5f + COMPONENT_MARGIN);
-    mNoteLengtSelectorBox.setBounds(buttonXStart, nextLineY, static_cast<int>(buttonWidth * 1.5f), buttonHeight);
-
-    buttonXStart += static_cast<int>(buttonWidth * 1.5f + COMPONENT_MARGIN);
-    mExportToFileButton.setBounds(buttonXStart, nextLineY, static_cast<int>(buttonWidth * 1.2f), buttonHeight);
-
-    buttonXStart += static_cast<int>(buttonWidth * 1.2f + COMPONENT_MARGIN);
-    mImportFileButton.setBounds(buttonXStart, nextLineY, static_cast<int>(buttonWidth * 1.2f), buttonHeight);
-
-    buttonXStart += static_cast<int>(buttonWidth * 1.2f + COMPONENT_MARGIN);
-    mCompileButton.setBounds(buttonXStart, nextLineY, static_cast<int>(buttonWidth * 1.5f), buttonHeight);
-
-    // ======== NEW LINE ============
-    nextLineY += buttonHeight + COMPONENT_MARGIN;
-    mCodeEditor.setBounds(OUTER_MARGIN, nextLineY, codeEditorWidth, codeEditorHeight);
-
-    nextLineY += codeEditorHeight - 2;
-    mErrorTextBox.setBounds(OUTER_MARGIN, nextLineY, codeEditorWidth, 30);
-
-    // ======== NEW LINE ============
-    nextLineY += 30 + COMPONENT_MARGIN;
-    mTimeline.setBounds(OUTER_MARGIN, nextLineY, WINDOW_WIDTH - OUTER_MARGIN * 2, WINDOW_HEIGHT - nextLineY - OUTER_MARGIN);
-    mTriggerRectangle.setBounds(OUTER_MARGIN, nextLineY, 100, WINDOW_HEIGHT - nextLineY - OUTER_MARGIN);
-
-    mBpmBox.setSliderStyle(Slider::SliderStyle::LinearBarVertical);
-    mBpmBox.setSliderSnapsToMousePosition(false);
-
-    mBpmBox.setColour(Slider::textBoxOutlineColourId, BackgroundColor);
-
-    mSyncToggleLabel.setColour(juce::Label::textColourId, TextColor);
-    mTempoDivLabel.setColour(juce::Label::textColourId, TextColor);
-    mBpmLabel.setColour(juce::Label::textColourId, TextColor);
-    mNoteLengthLabel.setColour(juce::Label::textColourId, TextColor);
-
-    mTempoDivisionSelectorBox.addItemList(mNoteDivisions, 3);
-    mNoteLengtSelectorBox.addItemList(mNoteDivisions, 3);
-
-    mExportToFileButton.addListener(this);
-    mImportFileButton.addListener(this);
-    mCompileButton.addListener(this);
-
-    mTogglePlayButton.addListener(this);
-    mSyncToggleBox.addListener(this);
-    mCodeEditor.AddChangeListener(this);
-
+    // ==============================================================================
+    
     juce::LookAndFeel::setDefaultLookAndFeel(mGeneralLookAndFeel.get());
 
-    mTogglePlayButton.setLookAndFeel(mButtonLookAndFeel.get());
-    mExportToFileButton.setLookAndFeel(mButtonLookAndFeel.get());
-    mImportFileButton.setLookAndFeel(mButtonLookAndFeel.get());
-    mSyncToggleBox.setLookAndFeel(mButtonLookAndFeel.get());
-    mCompileButton.setLookAndFeel(mButtonLookAndFeel.get());
-    mErrorTextBox.setLookAndFeel(mTextEditorLookAndFeel.get());
-    mTempoDivisionSelectorBox.setLookAndFeel(mGeneralLookAndFeel.get());
-    mNoteLengtSelectorBox.setLookAndFeel(mGeneralLookAndFeel.get());
-    mBpmBox.setLookAndFeel(mGeneralLookAndFeel.get());
+    mTransportControls.setButtonLookAndFeel(mButtonLookAndFeel.get());
+    mTempoControlsPanel.setGeneralLookAndFeel(mGeneralLookAndFeel.get());
+    mFileOperationsToolbar.setButtonLookAndFeel(mButtonLookAndFeel.get());
 
-    mCodeEditor.setLookAndFeel(mTextEditorLookAndFeel.get());
-    
-    mCodeEditor.setFont(MONOSPACE_FONT_OPTIONS);
-    mCodeEditor.setColour(juce::CodeEditorComponent::ColourIds::backgroundColourId, TextEditorBackgroundColor);
-    mCodeEditor.setColour(juce::CodeEditorComponent::ColourIds::lineNumberBackgroundId, TextEditorBackgroundColor);
-    mCodeEditor.setColour(juce::CodeEditorComponent::ColourIds::highlightColourId, HighlightColor.withAlpha(0.3f));
-    mCodeEditor.setColour(juce::CodeEditorComponent::ColourIds::defaultTextColourId, TextColor);
-    mCodeEditor.setColour(juce::CodeEditorComponent::ColourIds::lineNumberTextId, TextColor);
-    mCodeEditor.setScrollbarThickness(4);
-
-    mErrorTextBox.setFont(MONOSPACE_FONT_OPTIONS);
-    mErrorTextBox.setColour(juce::TextEditor::textColourId, TextColor);
-    mErrorTextBox.setMultiLine(true);
-    mErrorTextBox.setEnabled(false);
+    mCodeEditorPanel.setEditorLookAndFeel(mTextEditorLookAndFeel.get());
+    mCodeEditorPanel.setErrorBoxLookAndFeel(mTextEditorLookAndFeel.get());
+    mCodeEditorPanel.applyDefaultStyling();
 
     mTimeline.SetProcessor(&audioProcessor);
     mTriggerRectangle.SetProcessor(&audioProcessor);
 
-    addAndMakeVisible(mSyncToggleLabel);
-    addAndMakeVisible(mTempoDivLabel);
-    addAndMakeVisible(mBpmLabel);
-    addAndMakeVisible(mNoteLengthLabel);
-    addAndMakeVisible(mTogglePlayButton);
-    addAndMakeVisible(mSyncToggleBox);
-    addAndMakeVisible(mExportToFileButton);
-    addAndMakeVisible(mImportFileButton);
-    addAndMakeVisible(mCompileButton);
-    addAndMakeVisible(mTempoDivisionSelectorBox);
-    addAndMakeVisible(mNoteLengtSelectorBox);
+    mTransportControls.setPlayButtonCallback([this]() { handlePlayButton(); });
+    mTransportControls.setSyncToggleCallback([this](bool shouldSync) { handleSyncToggle(shouldSync); });
 
-    addAndMakeVisible(mCodeEditor);
+    mFileOperationsToolbar.setImportCallback([this]() { handleImportFile(); });
+    mFileOperationsToolbar.setExportCallback([this]() { handleExportFile(); });
+    mFileOperationsToolbar.setCompileCallback([this]() { handleCompile(); });
 
-    addAndMakeVisible(mErrorTextBox);
+    addAndMakeVisible(mTempoControlsPanel);
+    addAndMakeVisible(mTransportControls);
+    addAndMakeVisible(mFileOperationsToolbar);
+    addAndMakeVisible(mCodeEditorPanel);
     addAndMakeVisible(mTimeline);
     addAndMakeVisible(mTriggerRectangle);
-    addAndMakeVisible(mBpmBox);
 
     const std::string& data = audioProcessor.GetInstructionData();
     juce::String dataAsString{ data };
-    mCodeDocument.insertText(0, dataAsString);
-
-    mBpmSliderAttachment.reset(new SliderAttachment(valueTree, bpmString, mBpmBox));
-    mTempoDivisionAttachment.reset(new ComboBoxAttachment(valueTree, tempoDivisionString, mTempoDivisionSelectorBox));
-    mNoteLengthAttachment.reset(new ComboBoxAttachment(valueTree, noteLengthString, mNoteLengtSelectorBox));
-    mToggleButtonAttachment.reset(new ButtonAttachment(valueTree, syncToggleString, mSyncToggleBox));
+    mCodeEditorPanel.loadContent(dataAsString);
 
     setWantsKeyboardFocus(true);
 }
 
 ORchestraAudioProcessorEditor::~ORchestraAudioProcessorEditor()
 {
-    mTogglePlayButton.setLookAndFeel(nullptr);
-    mExportToFileButton.setLookAndFeel(nullptr);
-    mImportFileButton.setLookAndFeel(nullptr);
-    mSyncToggleBox.setLookAndFeel(nullptr);
-    mCodeEditor.setLookAndFeel(nullptr);
-
     audioProcessor.removeChangeListener(this);
 }
 
@@ -208,109 +130,95 @@ void ORchestraAudioProcessorEditor::changeListenerCallback(juce::ChangeBroadcast
 
     const std::string& data = audioProcessor.GetInstructionData();
     const juce::String dataAsString{ data };
-    mCodeDocument.insertText(0, dataAsString);
+    mCodeEditorPanel.loadContent(dataAsString);
 }
 
 void ORchestraAudioProcessorEditor::CodeEditorHasChanged()
 {
-    if(mCodeDocument.hasChangedSinceSavePoint())
+    if(mCodeEditorPanel.hasUnsavedChanges())
     {
-        mCompileButton.setEnabled(true);
+        mFileOperationsToolbar.setCompileButtonEnabled(true);
     }
 }
 
-void ORchestraAudioProcessorEditor::buttonClicked(juce::Button* button)
+void ORchestraAudioProcessorEditor::handlePlayButton()
 {
-    auto processorReadAndCompile = [&]()
+    if (mCodeEditorPanel.hasUnsavedChanges())
+        handleCompile();
+    
+    if (audioProcessor.IsORchestraVMInit())
     {
-        juce::String text = mCodeDocument.getAllContent();
-        std::string utf8Text = text.toRawUTF8();
-        audioProcessor.Compile(utf8Text);
-        if (audioProcessor.IsORchestraVMInit())
+        audioProcessor.IsRunning = !audioProcessor.IsRunning;
+        mTransportControls.updatePlayButtonState(audioProcessor.IsRunning);
+    }
+}
+
+void ORchestraAudioProcessorEditor::handleSyncToggle(bool shouldSync)
+{
+    mTransportControls.setPlayButtonEnabled(!shouldSync);
+    mTempoControlsPanel.setBpmEnabled(!shouldSync);
+
+    if(shouldSync)
+    {
+        audioProcessor.IsRunning = false;
+        mTransportControls.updatePlayButtonState(false);
+    }
+}
+
+void ORchestraAudioProcessorEditor::handleCompile()
+{
+    juce::String text = mCodeEditorPanel.getCodeDocument().getAllContent();
+    std::string utf8Text = text.toRawUTF8();
+    audioProcessor.Compile(utf8Text);
+    if (audioProcessor.IsORchestraVMInit())
+    {
+        mCodeEditorPanel.markSaved();
+        mFileOperationsToolbar.setCompileButtonEnabled(false);
+    }
+    
+    UpdateErrors();
+}
+
+void ORchestraAudioProcessorEditor::handleImportFile()
+{
+    mFileChooser.launchAsync(mFileChooserFlags, [this](const juce::FileChooser& fc)
+         {
+            UNUSED(fc);
+            juce::File file = mFileChooser.getResult();
+            std::string filePath{ file.getFullPathName().toRawUTF8() };
+            const std::string& data = audioProcessor.ImportFromFile(filePath);
+            juce::String dataAsString{ data };
+            mCodeEditorPanel.loadContent(dataAsString);
+            
+            handleCompile();
+            UpdateErrors();
+        });
+}
+
+void ORchestraAudioProcessorEditor::handleExportFile()
+{
+    mFileChooser.launchAsync(mFileChooserFlags, [this](const juce::FileChooser& fc)
         {
-            mCodeDocument.setSavePoint();
-            mCompileButton.setEnabled(false);
-        }
-        
-        UpdateErrors();
-    };
+            UNUSED(fc);
+            juce::File file = mFileChooser.getResult();
+            std::string filePath{ file.getFullPathName().toRawUTF8() };
+            audioProcessor.ExportToFile(filePath);
+        });
 
-    if (button == &mTogglePlayButton)
-    {
-        if (mCodeDocument.hasChangedSinceSavePoint())
-            processorReadAndCompile();
-        
-        if (audioProcessor.IsORchestraVMInit())
-        {
-            audioProcessor.IsRunning = !audioProcessor.IsRunning;
-            mTogglePlayButton.setButtonText(audioProcessor.IsRunning ? "Stop" : "Play");
-        }
-    }
-    else if (button == &mExportToFileButton)
-    {
-        // TODO: Should we compile before saving?
-        // processorReadAndCompile();
-        
-        mFileChooser.launchAsync(mFileChooserFlags, [this](const juce::FileChooser& fc)
-            {
-                UNUSED(fc);
-                juce::File file = mFileChooser.getResult();
-                std::string filePath{ file.getFullPathName().toRawUTF8() };
-                audioProcessor.ExportToFile(filePath);
-            });
-
-        UpdateErrors();
-    }
-    else if (button == &mImportFileButton)
-    {
-        mFileChooser.launchAsync(mFileChooserFlags, [this](const juce::FileChooser& fc)
-             {
-                UNUSED(fc);
-                juce::File file = mFileChooser.getResult();
-                std::string filePath{ file.getFullPathName().toRawUTF8() };
-                const std::string& data = audioProcessor.ImportFromFile(filePath);
-                juce::String dataAsString{ data };
-                mCodeDocument.insertText(0, dataAsString);
-
-            });
-
-        processorReadAndCompile();
-        UpdateErrors(); 
-    }
-    else if (button == &mCompileButton)
-    {
-        if (mCodeDocument.hasChangedSinceSavePoint())
-            processorReadAndCompile();
-    }
-    else if (button == &mSyncToggleBox)
-    {
-        // TODO: This logic should probably be somewhere else.
-        const bool shouldSync = mSyncToggleBox.getToggleState();
-        mTogglePlayButton.setEnabled(!shouldSync);
-        mBpmBox.setEnabled(!shouldSync);
-
-        if(shouldSync)
-        {
-            audioProcessor.IsRunning = false;
-            mTogglePlayButton.setButtonText("Play");
-        }
-    }
+    UpdateErrors();
 }
 
 void ORchestraAudioProcessorEditor::UpdateErrors()
 {
     const std::vector<LogEntry>& errors = audioProcessor.GetErrors();
-    if (errors.size() > 0)
-        mErrorTextBox.setText(errors[0].mMessage);
-    else
-        mErrorTextBox.setText("Compiled successfully!");
+    mCodeEditorPanel.updateErrorDisplay(errors);
 }
 
 //==============================================================================
 void ORchestraAudioProcessorEditor::paint(juce::Graphics& g)
 {
     g.fillAll(BackgroundColor);
-    mCompileButton.setEnabled(mCodeDocument.hasChangedSinceSavePoint());
+    mFileOperationsToolbar.setCompileButtonEnabled(mCodeEditorPanel.hasUnsavedChanges());
 }
 
 void ORchestraAudioProcessorEditor::resized()

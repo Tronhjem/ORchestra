@@ -32,6 +32,7 @@ target_sources(ORchestra
 target_include_directories(ORchestra PRIVATE 
     ${CMAKE_CURRENT_SOURCE_DIR}/src/utils
     ${CMAKE_CURRENT_SOURCE_DIR}/src/juceFiles
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/juceFiles/components
     ${CMAKE_CURRENT_SOURCE_DIR}/src/ORchestraEngine
 )
 
@@ -78,6 +79,7 @@ target_sources(ORchestra_Standalone
 target_include_directories(ORchestra_Standalone PRIVATE 
     ${CMAKE_CURRENT_SOURCE_DIR}/src/utils
     ${CMAKE_CURRENT_SOURCE_DIR}/src/juceFiles
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/juceFiles/components
     ${CMAKE_CURRENT_SOURCE_DIR}/src/ORchestraEngine
 )
 

@@ -22,6 +22,7 @@
 #include <JuceHeader.h>
 #include <vector>
 
+#include "Defines.h"
 #include "PluginProcessor.h"
 
 constexpr int updateFrequency = 30;
@@ -33,7 +34,9 @@ namespace ORchestra
     {
         float x;
         float y;
-        float alpha;
+        float width;
+        float value;
+        MidiType midiType;
     };
 
     class TriggerRectangleComponent : public juce::Component, public juce::Timer

@@ -24,6 +24,7 @@
 
 #include "ORchestraEngine.h"
 #include "ErrorReporting.h"
+#include "Defines.h"
 
 using namespace ORchestra;
 enum class NoteDivision

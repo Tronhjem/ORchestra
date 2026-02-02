@@ -21,6 +21,7 @@
 
 #include <JuceHeader.h>
 
+#include "Defines.h"
 #include "PluginProcessor.h"
 #include "TriggerRectangle.h"
 
@@ -36,6 +37,13 @@ constexpr float stepMargin = 2.5f;
 constexpr float drawnStepHeight = stepHeight - stepMargin;
 constexpr float drawnStepWidth = stepWidth - stepMargin;
 
+struct BarLine
+{
+    float x;
+    float startY;
+    float endY;
+};
+
 class Timeline : public juce::Component, public juce::Timer
 {
 public:
@@ -46,8 +54,8 @@ public:
                 mTriggerRectangle(triggerRectangle)
     {
         startTimerHz(40);
-        mUniqueNoteValues.reserve(8);
-        mTimelineTriggerRectangles.reserve(TIMELINE_STEPS_DRAWN * 5);
+        mTimelineTriggerRectangles.reserve(TIMELINE_STEPS_DRAWN * TIMELINE_ROWS_DRAWN);
+        mBarLines.reserve(8);
     }
 
     ~Timeline() override
@@ -60,11 +68,12 @@ public:
     void paint(juce::Graphics& g) override;
 
 private:
-    inline juce::Colour GetStepColorFromVelocity(const float velocity);
+    inline int GetNoteDivisionWrapIndex(const float bpmDivision);
+    inline juce::Colour GetStepColorFromVelocity(const float value, const MidiType MidiType);
     ORchestraAudioProcessor* mAudioProcessor;
     int mLastGlobalStep;
     int64_t mLastTimeInSamples;
     TriggerRectangleComponent& mTriggerRectangle;
-    std::vector<DataUnit> mUniqueNoteValues;
     std::vector<TriggerRectangle> mTimelineTriggerRectangles;
+    std::vector<BarLine> mBarLines;
 };

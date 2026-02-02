@@ -9,6 +9,8 @@
 
 ORchestra is a powerful MIDI sequencer plugin that generates and combines sequences using euclidean algorithms or manual input. It features a custom scripting language for creating complex rhythmic patterns through logical operations.
 
+Disclaimer: AI has been used on this project to try out new features like github copilots agents on git, by implementing simple extensions of the lanugage, and writing unit tests etc. Majority of the code is still written by me and this is by no means a vibe coded project. 
+
 ### Key Features
 
 - **Euclidean Rhythm Generation**: Create rhythmic patterns using the euclidean algorithm
@@ -56,8 +58,9 @@ Before building ORchestra, ensure you have the following installed:
 
 ## Quick Start
 
-The fastest way to get started is using the provided setup script:
+You can run this wiht the Projucer, and generate a proejct and build it, which is by far the easiest if you do not want to deal with CMake.
 
+else, you can get started is using the provided setup script:
 ```bash
 ./setup.sh
 ```
@@ -155,20 +158,10 @@ You must declare variables before using them later in the script.
 Parentheses can be used to override precedence, just like in regular programming.
 All arithmetic operators take precedence over logical and comparison operators.
 
-- `+` - Addition
-- `-` - Subtraction
-- `*` - Multiplication
-- `/` - Division
-- `%` - Modulo (remainder after division)
-
 **Logical Operators**
 
 `|` `^` `&` evaluate logic operations on triggers (values > 0 are true).
 These operators always return 0 (false) or 1 (true).
-
-- `|` - OR operation
-- `^` - XOR operation  
-- `&` - AND operation
 
 **Comparison Operators**
 
@@ -688,5 +681,5 @@ Solution: Verify array indices are within range (0 to array length - 1)
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) file for details.
+AGPLv3 - see [LICENSE](LICENSE) file for details.
 

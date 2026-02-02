@@ -4,7 +4,7 @@
               addUsingNamespaceToJuceHeader="1" displaySplashScreen="1" jucerFormatVersion="1"
               pluginCharacteristicsValue="pluginEditorRequiresKeys,pluginProducesMidiOut"
               pluginManufacturer="SonoTron" pluginFormats="buildAU,buildStandalone,buildVST3"
-              headerPath="../../src/utils/&#10;../../src/ORchestraEngine/&#10;../../src/juceFiles/"
+              headerPath="../../src/utils/&#10;../../src/ORchestraEngine/&#10;../../src/juceFiles/&#10;../../src/juceFiles/components/"
               version="0.1" companyName="SonoTron" companyWebsite="tronhjem.com"
               companyEmail="ctronhjem@gmail.com" pluginManufacturerCode="SNTN"
               pluginCode="ORCS" pluginAUMainType="'aumi'" pluginVST3Category="Generator">
@@ -68,35 +68,48 @@
     </GROUP>
     <GROUP id="{F1896013-22DD-58BE-C991-2EA418BBF7AB}" name="Juce">
       <GROUP id="{490C3D54-058B-FDEF-7C7D-E3D8A995DFB4}" name="Components">
-        <FILE id="ZTopYG" name="ORchestraCodeEditorComponent.cpp" compile="1"
-              resource="0" file="src/juceFiles/ORchestraCodeEditorComponent.cpp"/>
-        <FILE id="JPWJkb" name="ORchestraCodeEditorComponent.h" compile="0"
-              resource="0" file="src/juceFiles/ORchestraCodeEditorComponent.h"/>
-        <FILE id="CnDUtK" name="ORchestraCodeEditorTokenizer.cpp" compile="1"
-              resource="0" file="src/juceFiles/ORchestraCodeEditorTokenizer.cpp"/>
-        <FILE id="GtRIxx" name="ORchestraCodeEditorTokenizer.h" compile="0"
-              resource="0" file="src/juceFiles/ORchestraCodeEditorTokenizer.h"/>
-        <FILE id="Q61vhU" name="TriggerRectangle.cpp" compile="1" resource="0"
-              file="src/juceFiles/TriggerRectangle.cpp"/>
-        <FILE id="KWuVSU" name="TriggerRectangle.h" compile="0" resource="0"
-              file="src/juceFiles/TriggerRectangle.h"/>
-        <FILE id="nxNzf8" name="TransportData.h" compile="0" resource="0" file="src/juceFiles/TransportData.h"/>
-        <FILE id="h2dHec" name="Timeline.cpp" compile="1" resource="0" file="src/juceFiles/Timeline.cpp"/>
-        <FILE id="inbwHe" name="Timeline.h" compile="0" resource="0" file="src/juceFiles/Timeline.h"/>
-        <FILE id="EQbYQ4" name="TitleBarComponent.h" compile="0" resource="0"
-              file="src/juceFiles/TitleBarComponent.h"/>
+        <FILE id="fz5xk9" name="ButtonsLookAndFeel.h" compile="0" resource="0"
+              file="src/juceFiles/components/ButtonsLookAndFeel.h"/>
+        <FILE id="nNUHSv" name="CodeEditorPanel.cpp" compile="1" resource="0"
+              file="src/juceFiles/components/CodeEditorPanel.cpp"/>
+        <FILE id="NMftiD" name="CodeEditorPanel.h" compile="0" resource="0"
+              file="src/juceFiles/components/CodeEditorPanel.h"/>
+        <FILE id="PGuZeA" name="FileOperationsToolbar.cpp" compile="1" resource="0"
+              file="src/juceFiles/components/FileOperationsToolbar.cpp"/>
+        <FILE id="LevhxL" name="FileOperationsToolbar.h" compile="0" resource="0"
+              file="src/juceFiles/components/FileOperationsToolbar.h"/>
+        <FILE id="X9d3ky" name="GeneralLookAndFeel.h" compile="0" resource="0"
+              file="src/juceFiles/components/GeneralLookAndFeel.h"/>
+        <FILE id="vkqSFn" name="LookAndFeelConstants.h" compile="0" resource="0"
+              file="src/juceFiles/components/LookAndFeelConstants.h"/>
+        <FILE id="vtdiQ8" name="ORchestraCodeEditorComponent.cpp" compile="1"
+              resource="0" file="src/juceFiles/components/ORchestraCodeEditorComponent.cpp"/>
+        <FILE id="yPdNL3" name="ORchestraCodeEditorComponent.h" compile="0"
+              resource="0" file="src/juceFiles/components/ORchestraCodeEditorComponent.h"/>
+        <FILE id="Grux1C" name="ORchestraCodeEditorTokenizer.cpp" compile="1"
+              resource="0" file="src/juceFiles/components/ORchestraCodeEditorTokenizer.cpp"/>
+        <FILE id="Sa88Rv" name="ORchestraCodeEditorTokenizer.h" compile="0"
+              resource="0" file="src/juceFiles/components/ORchestraCodeEditorTokenizer.h"/>
+        <FILE id="fk85Nj" name="TempoControlsPanel.cpp" compile="1" resource="0"
+              file="src/juceFiles/components/TempoControlsPanel.cpp"/>
+        <FILE id="Gjpr2k" name="TempoControlsPanel.h" compile="0" resource="0"
+              file="src/juceFiles/components/TempoControlsPanel.h"/>
+        <FILE id="ZMhNfE" name="TextEditorLookAndFeel.h" compile="0" resource="0"
+              file="src/juceFiles/components/TextEditorLookAndFeel.h"/>
+        <FILE id="oIMqY3" name="Timeline.cpp" compile="1" resource="0" file="src/juceFiles/components/Timeline.cpp"/>
+        <FILE id="KxeUBR" name="Timeline.h" compile="0" resource="0" file="src/juceFiles/components/Timeline.h"/>
+        <FILE id="s7YlxT" name="TitleBarComponent.h" compile="0" resource="0"
+              file="src/juceFiles/components/TitleBarComponent.h"/>
+        <FILE id="s4EYFy" name="TransportControls.cpp" compile="1" resource="0"
+              file="src/juceFiles/components/TransportControls.cpp"/>
+        <FILE id="xyhOlq" name="TransportControls.h" compile="0" resource="0"
+              file="src/juceFiles/components/TransportControls.h"/>
+        <FILE id="yUA9zH" name="TriggerRectangle.cpp" compile="1" resource="0"
+              file="src/juceFiles/components/TriggerRectangle.cpp"/>
+        <FILE id="DgGlAa" name="TriggerRectangle.h" compile="0" resource="0"
+              file="src/juceFiles/components/TriggerRectangle.h"/>
       </GROUP>
-      <GROUP id="{3B2E5272-9F24-BF92-C5AC-A4AEAEC2158F}" name="LookAndFeel">
-        <FILE id="NXV5aG" name="Colors.h" compile="0" resource="0" file="src/juceFiles/Colors.h"/>
-        <FILE id="CoDYBE" name="ButtonsLookAndFeel.h" compile="0" resource="0"
-              file="src/juceFiles/ButtonsLookAndFeel.h"/>
-        <FILE id="Xo6MSc" name="TextEditorLookAndFeel.h" compile="0" resource="0"
-              file="src/juceFiles/TextEditorLookAndFeel.h"/>
-        <FILE id="FkujPg" name="GeneralLookAndFeel.h" compile="0" resource="0"
-              file="src/juceFiles/GeneralLookAndFeel.h"/>
-        <FILE id="MwiVXx" name="LookAndFeelConstants.h" compile="0" resource="0"
-              file="src/juceFiles/LookAndFeelConstants.h"/>
-      </GROUP>
+      <FILE id="ZVN8td" name="Colors.h" compile="0" resource="0" file="src/juceFiles/Colors.h"/>
       <FILE id="zUx2S7" name="ParamConstants.h" compile="0" resource="0"
             file="src/juceFiles/ParamConstants.h"/>
       <FILE id="YiB9wD" name="PluginEditor.cpp" compile="1" resource="0"
@@ -106,6 +119,7 @@
             file="src/juceFiles/PluginProcessor.cpp"/>
       <FILE id="Q3KTRX" name="PluginProcessor.h" compile="0" resource="0"
             file="src/juceFiles/PluginProcessor.h"/>
+      <FILE id="pkoqwq" name="TransportData.h" compile="0" resource="0" file="src/juceFiles/TransportData.h"/>
     </GROUP>
   </MAINGROUP>
   <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1" JUCE_VST3_CAN_REPLACE_VST2="0"/>

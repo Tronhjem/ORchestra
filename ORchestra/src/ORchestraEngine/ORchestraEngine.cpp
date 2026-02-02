@@ -20,6 +20,7 @@
 #include <cmath>
 
 #include "ORchestraEngine.h"
+#include "Defines.h"
 #if _DEBUG
 #include "ScopedTimer.h"
 #endif
@@ -31,9 +32,9 @@ namespace ORchestra
         mCurrentProcessingStep(0),
         mIsVMInit(false),
         mShouldExit(false),
-        mHasWork(false)
+        mHasWork(false),
+        mVM()
     {
-        mVM = std::make_unique<VM>();
         mFileLoader = std::make_unique<FileLoader>();
         mWorkerThread = std::thread([this]() { WorkerThreadLoop(); });
 
@@ -73,9 +74,9 @@ namespace ORchestra
 
         mReadySteps.store(0, std::memory_order_release);
         mCurrentProcessingStep.store(mCurrentGlobalStep.load(), std::memory_order_release);
-        mVM->Reset();
+        mVM.Reset();
 
-        const bool innitSuccess = mVM->Prepare(&mInstructionData[0]);
+        const bool innitSuccess = mVM.Prepare(&mInstructionData[0]);
         mIsVMInit.store(innitSuccess);
         WakeWorker();
     }
@@ -129,7 +130,7 @@ namespace ORchestra
             std::vector<SequenceStep>& currentData = mStepRingBuffer[static_cast<unsigned long>(stepWrapped)];
             currentData.clear();
 
-            mVM->Tick(currentData, i);
+            mVM.Tick(currentData, i);
             mReadySteps.fetch_add(1, std::memory_order_acq_rel);
         }
 
@@ -144,7 +145,9 @@ namespace ORchestra
     {
         if (transportData.isPlaying && mIsVMInit)
         {
-            const double samplesPerStep = static_cast<double>(transportData.sampleRate) * (60.0 / (transportData.bpm * transportData.bpmDivision));
+            const double samplesPerStep = static_cast<double>(transportData.sampleRate) 
+                                          * (60.0 / (transportData.bpm * transportData.bpmDivision));
+ 
             const int currentStep = static_cast<int>(ceil(static_cast<double>(transportData.timeInSamples) / samplesPerStep));
 
             // Check if we skipped count, to regenerate everything.
@@ -172,7 +175,7 @@ namespace ORchestra
                mLastStep = currentStep;
 
                mSamplesSinceLastStep = transportData.timeInSamples;
-               const int wrappedGlobalStep = currentStep % STEP_BUFFER_SIZE;
+               const int wrappedGlobalStep = currentStep & STEP_BUFFER_SIZE_MASK;
                const std::vector<SequenceStep>& currentData = mStepRingBuffer[static_cast<unsigned long>(wrappedGlobalStep)];
                for (const SequenceStep& step : currentData)
                {
@@ -193,7 +196,6 @@ namespace ORchestra
                        // TODO: Change to use step.mDuration
                        // ScheduledMidiMessage message {step.mType, firstByte, secondByte, channel, timeStamp, step.mDuration};
                        ScheduledMidiMessage message{ step.mType, firstByte, secondByte, channel, timeStamp, transportData.noteLengthInSamples };
-
                        mMidiScheduler.PostMidi(message);
                    }
                }

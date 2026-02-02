@@ -208,6 +208,7 @@ namespace ORchestra
                 const StepData note = stack.Pop();
                 const StepData shouldTrigger = stack.Pop();
 
+                //TODO: Should be using a variable for note duration.
                 stepQueue.emplace_back(SequenceStep{ MidiType::NoteOn, shouldTrigger, note, vel, channel, DEFAULT_NOTE_DURATION });
 
                 break;
@@ -220,6 +221,7 @@ namespace ORchestra
                 const StepData ccNumber = stack.Pop();
                 const StepData shouldTrigger = stack.Pop();
 
+                //TODO: Should be using a variable for note duration.
                 stepQueue.emplace_back(SequenceStep{ MidiType::CC, shouldTrigger, ccNumber, ccValue, channel, DEFAULT_NOTE_DURATION });
 
                 break;
