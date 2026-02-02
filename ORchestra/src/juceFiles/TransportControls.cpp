@@ -30,13 +30,10 @@ constexpr int SPACING = 15;
 
 TransportControls::TransportControls(juce::AudioProcessorValueTreeState& valueTree)
 {
-    // Setup sync toggle with ValueTree attachment
     mSyncToggleAttachment.reset(new ButtonAttachment(valueTree, syncToggleString, mSyncToggleBox));
     
-    // Configure label
     mSyncToggleLabel.setColour(juce::Label::textColourId, TextColor);
     
-    // Setup listeners
     mPlayButton.addListener(this);
     mSyncToggleBox.addListener(this);
     
@@ -55,11 +52,9 @@ void TransportControls::resized()
 {
     auto bounds = getLocalBounds();
     
-    // First row: Sync label
     auto labelBounds = bounds.removeFromTop(LABEL_HEIGHT);
     mSyncToggleLabel.setBounds(labelBounds.removeFromLeft(BUTTON_WIDTH * 2));
     
-    // Second row: Sync checkbox + Play button
     mSyncToggleBox.setBounds(bounds.removeFromLeft(BUTTON_HEIGHT));
     bounds.removeFromLeft(SPACING);
     mPlayButton.setBounds(bounds.removeFromLeft(BUTTON_WIDTH));
@@ -93,14 +88,8 @@ void TransportControls::setPlayButtonEnabled(bool enabled)
     mPlayButton.setEnabled(enabled);
 }
 
-void TransportControls::setBpmControlsEnabled(bool enabled)
+void TransportControls::setButtonLookAndFeel(juce::LookAndFeel* lookAndFeel)
 {
-    // This is a placeholder for enabling/disabling BPM controls
-    // The actual BPM slider will be in TempoControlsPanel
-}
-
-void TransportControls::setButtonLookAndFeel(juce::LookAndFeel* laf)
-{
-    mPlayButton.setLookAndFeel(laf);
-    mSyncToggleBox.setLookAndFeel(laf);
+    mPlayButton.setLookAndFeel(lookAndFeel);
+    mSyncToggleBox.setLookAndFeel(lookAndFeel);
 }

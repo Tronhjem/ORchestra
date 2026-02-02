@@ -31,16 +31,16 @@ public:
 
     void resized() override;
 
-    // Callback setters
     void setImportCallback(std::function<void()> callback);
     void setExportCallback(std::function<void()> callback);
     void setCompileCallback(std::function<void()> callback);
 
-    // State management
     void setCompileButtonEnabled(bool enabled);
 
-    // Styling
     void setButtonLookAndFeel(juce::LookAndFeel* laf);
+
+    int getPreferredWidth() const { return 220; } // 3 buttons with spacing
+    int getPreferredHeight() const { return 20; }
 
 private:
     void buttonClicked(juce::Button* button) override;

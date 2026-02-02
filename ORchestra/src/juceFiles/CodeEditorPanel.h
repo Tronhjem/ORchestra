@@ -32,21 +32,19 @@ public:
 
     void resized() override;
 
-    // Access to code document
     juce::CodeDocument& getCodeDocument() { return mCodeDocument; }
     
-    // Error display
     void updateErrorDisplay(const std::vector<ORchestra::LogEntry>& errors);
     
-    // Content management
     void loadContent(const juce::String& content);
     bool hasUnsavedChanges() const;
     void markSaved();
     
-    // Styling
     void setEditorLookAndFeel(juce::LookAndFeel* laf);
     void setErrorBoxLookAndFeel(juce::LookAndFeel* laf);
     void applyDefaultStyling();
+
+    int getPreferredHeight() const { return 330; } // 300 for editor + 30 for error box
 
 private:
     ORchestra::ORchestraCodeEditorTokenizer mTokeniser;

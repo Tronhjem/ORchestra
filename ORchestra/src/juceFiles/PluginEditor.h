@@ -44,7 +44,6 @@ typedef juce::AudioProcessorValueTreeState::ComboBoxAttachment ComboBoxAttachmen
 /**
 */
 class ORchestraAudioProcessorEditor : public juce::AudioProcessorEditor,
-    public juce::Button::Listener,
     public juce::ChangeListener,
     public ORchestraCodeEditorChangeListener
 {
@@ -59,7 +58,6 @@ public:
     void CodeEditorHasChanged() override;
 
 private:
-    void buttonClicked(juce::Button* button) override;
     void changeListenerCallback(juce::ChangeBroadcaster* broadCaster) override;
 
     void handleCompile();
@@ -75,16 +73,16 @@ private:
     std::unique_ptr<ButtonLookAndFeel> mButtonLookAndFeel;
     std::unique_ptr<TextEditorLookAndFeel> mTextEditorLookAndFeel;
 
-    TransportControls mTransportControls;
-    TempoControlsPanel mTempoControlsPanel;
-    FileOperationsToolbar mFileOperationsToolbar;
-
     juce::FileChooser mFileChooser{ "Select a file to load...", juce::File{}, "*.txt" };
     int mFileChooserFlags = juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles;
 
-    TriggerRectangleComponent mTriggerRectangle;
+    TempoControlsPanel mTempoControlsPanel;
+    TransportControls mTransportControls;
+    FileOperationsToolbar mFileOperationsToolbar;
     Timeline mTimeline;
+    TriggerRectangleComponent mTriggerRectangle;
     CodeEditorPanel mCodeEditorPanel;
+
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ORchestraAudioProcessorEditor)
 };

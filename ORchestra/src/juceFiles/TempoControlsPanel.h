@@ -32,11 +32,12 @@ public:
 
     void resized() override;
 
-    // State management
     void setBpmEnabled(bool enabled);
 
-    // Styling
     void setGeneralLookAndFeel(juce::LookAndFeel* laf);
+
+    int getPreferredWidth() const { return 325; } // All controls with spacing
+    int getPreferredHeight() const { return 40; } // label row + control row
 
 private:
     juce::Label mTempoDivLabel{ "tempo", "Tempo Division" };

@@ -33,10 +33,7 @@ constexpr int WINDOW_WIDTH = 1000;
 constexpr int WINDOW_HEIGHT = 800;
 constexpr int COMPONENT_MARGIN = 15;
 constexpr int OUTER_MARGIN = 20;
-const int buttonWidth = 50;
-constexpr int buttonHeight = 20;
-constexpr int codeEditorWidth = WINDOW_WIDTH - 2 * OUTER_MARGIN;
-constexpr int codeEditorHeight = 300;
+constexpr int ROW_SPACING = 10;
 
 //==============================================================================
 ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProcessor& p)
@@ -50,36 +47,42 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
 
     audioProcessor.addChangeListener(this);
-    juce::AudioProcessorValueTreeState& valueTree = audioProcessor.GetValueTree();
 
     mGeneralLookAndFeel = std::make_unique<GeneralLookAndFeel>();
     mButtonLookAndFeel = std::make_unique<ButtonLookAndFeel>();
     mTextEditorLookAndFeel = std::make_unique<TextEditorLookAndFeel>();
 
-    int buttonXStart = static_cast<int>(OUTER_MARGIN - 10);
-    int nextLineY = 20;
-
-    // Tempo controls panel spans across the top (labels + controls)
-    int tempoControlsWidth = static_cast<int>(buttonWidth * 6.5f);
-    mTempoControlsPanel.setBounds(buttonXStart, nextLineY, tempoControlsWidth, buttonHeight * 2);
-
-    // ======== NEW LINE ============
-    nextLineY += buttonHeight;
-    buttonXStart = OUTER_MARGIN;
+    // ===== LAYOUT COMPONENTS WITH DYNAMIC POSITIONING =====
+    // Row 1: TempoControlsPanel, TransportControls, and FileOperationsToolbar
+    int xPos = OUTER_MARGIN;
+    int yPos = OUTER_MARGIN;
     
-    mTransportControls.setBounds(buttonXStart, nextLineY, static_cast<int>(buttonWidth + buttonHeight + COMPONENT_MARGIN), buttonHeight * 2);
-
-    buttonXStart += static_cast<int>(buttonWidth + buttonHeight + COMPONENT_MARGIN * 2);
-    mFileOperationsToolbar.setBounds(buttonXStart, nextLineY, static_cast<int>(buttonWidth * 5.1f), buttonHeight);
-
-    // ======== NEW LINE ============
-    nextLineY += buttonHeight + COMPONENT_MARGIN;
-    mCodeEditorPanel.setBounds(OUTER_MARGIN, nextLineY, codeEditorWidth, codeEditorHeight + 30 - 2);
-
-    // ======== NEW LINE ============
-    nextLineY += codeEditorHeight + 30 - 2 + COMPONENT_MARGIN;
-    mTimeline.setBounds(OUTER_MARGIN, nextLineY, WINDOW_WIDTH - OUTER_MARGIN * 2, WINDOW_HEIGHT - nextLineY - OUTER_MARGIN);
-    mTriggerRectangle.setBounds(OUTER_MARGIN, nextLineY, 100, WINDOW_HEIGHT - nextLineY - OUTER_MARGIN);
+    int tempoWidth = mTempoControlsPanel.getPreferredWidth();
+    int tempoHeight = mTempoControlsPanel.getPreferredHeight();
+    mTempoControlsPanel.setBounds(xPos, yPos, tempoWidth, tempoHeight);
+    
+    xPos += tempoWidth + COMPONENT_MARGIN;
+    int transportWidth = mTransportControls.getPreferredWidth();
+    int transportHeight = mTransportControls.getPreferredHeight();
+    mTransportControls.setBounds(xPos, yPos, transportWidth, transportHeight);
+    
+    xPos += transportWidth + COMPONENT_MARGIN;
+    int fileOpsWidth = mFileOperationsToolbar.getPreferredWidth();
+    int fileOpsHeight = mFileOperationsToolbar.getPreferredHeight();
+    // Align file ops toolbar vertically with the second row of tempo/transport
+    mFileOperationsToolbar.setBounds(xPos, yPos + ROW_SPACING, fileOpsWidth, fileOpsHeight);
+    
+    // Row 2: CodeEditorPanel
+    yPos += std::max({tempoHeight, transportHeight, fileOpsHeight + ROW_SPACING}) + COMPONENT_MARGIN;
+    int codeEditorWidth = WINDOW_WIDTH - 2 * OUTER_MARGIN;
+    int codeEditorHeight = mCodeEditorPanel.getPreferredHeight();
+    mCodeEditorPanel.setBounds(OUTER_MARGIN, yPos, codeEditorWidth, codeEditorHeight);
+    
+    // Row 3: Timeline and TriggerRectangle
+    yPos += codeEditorHeight + COMPONENT_MARGIN;
+    int timelineHeight = WINDOW_HEIGHT - yPos - OUTER_MARGIN;
+    mTimeline.setBounds(OUTER_MARGIN, yPos, WINDOW_WIDTH - OUTER_MARGIN * 2, timelineHeight);
+    mTriggerRectangle.setBounds(OUTER_MARGIN, yPos, 100, timelineHeight);
 
     juce::LookAndFeel::setDefaultLookAndFeel(mGeneralLookAndFeel.get());
 
@@ -87,7 +90,6 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     mTempoControlsPanel.setGeneralLookAndFeel(mGeneralLookAndFeel.get());
     mFileOperationsToolbar.setButtonLookAndFeel(mButtonLookAndFeel.get());
 
-    // Setup code editor panel styling
     mCodeEditorPanel.setEditorLookAndFeel(mTextEditorLookAndFeel.get());
     mCodeEditorPanel.setErrorBoxLookAndFeel(mTextEditorLookAndFeel.get());
     mCodeEditorPanel.applyDefaultStyling();
@@ -95,20 +97,17 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     mTimeline.SetProcessor(&audioProcessor);
     mTriggerRectangle.SetProcessor(&audioProcessor);
 
-    // Setup transport controls callbacks
     mTransportControls.setPlayButtonCallback([this]() { handlePlayButton(); });
     mTransportControls.setSyncToggleCallback([this](bool shouldSync) { handleSyncToggle(shouldSync); });
 
-    // Setup file operations toolbar callbacks
     mFileOperationsToolbar.setImportCallback([this]() { handleImportFile(); });
     mFileOperationsToolbar.setExportCallback([this]() { handleExportFile(); });
     mFileOperationsToolbar.setCompileCallback([this]() { handleCompile(); });
 
     addAndMakeVisible(mTempoControlsPanel);
     addAndMakeVisible(mTransportControls);
-
+    addAndMakeVisible(mFileOperationsToolbar);
     addAndMakeVisible(mCodeEditorPanel);
-
     addAndMakeVisible(mTimeline);
     addAndMakeVisible(mTriggerRectangle);
 
@@ -139,12 +138,6 @@ void ORchestraAudioProcessorEditor::CodeEditorHasChanged()
     {
         mFileOperationsToolbar.setCompileButtonEnabled(true);
     }
-}
-
-void ORchestraAudioProcessorEditor::buttonClicked(juce::Button* button)
-{
-    // All button handling now done via callbacks in components
-    UNUSED(button);
 }
 
 void ORchestraAudioProcessorEditor::handlePlayButton()

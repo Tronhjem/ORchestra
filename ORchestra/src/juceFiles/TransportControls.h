@@ -33,17 +33,18 @@ public:
 
     void resized() override;
 
-    // Callback setters
     void setPlayButtonCallback(std::function<void()> callback);
     void setSyncToggleCallback(std::function<void(bool)> callback);
 
-    // State management
     void updatePlayButtonState(bool isPlaying);
     void setPlayButtonEnabled(bool enabled);
-    void setBpmControlsEnabled(bool enabled);
 
     // Styling
     void setButtonLookAndFeel(juce::LookAndFeel* laf);
+
+    // Size queries
+    int getPreferredWidth() const { return 85; } // checkbox + button + spacing
+    int getPreferredHeight() const { return 40; } // label row + control row
 
 private:
     void buttonClicked(juce::Button* button) override;
