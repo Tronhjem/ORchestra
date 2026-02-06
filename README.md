@@ -22,7 +22,7 @@ The original prototype that sparked the idea can be found here: <https://github.
 - **Mathematical Operations**: Full arithmetic support with standard precedence
 - **Comparison Operators**: Compare values and create conditional patterns
 
-![ORchestraImg](https://github.com/Tronhjem/ORchestra/blop/main/img/ORchestra.gif)
+<img src="./img/ORchestra.gif" width="80%" height="80%"/>
 
 ---
 
