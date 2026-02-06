@@ -3,13 +3,14 @@
 [![Build](https://github.com/Tronhjem/ORchestra/actions/workflows/Build.yml/badge.svg)](https://github.com/Tronhjem/ORchestra/actions/workflows/Build.yml)
 [![Run Tests](https://github.com/Tronhjem/ORchestra/actions/workflows/RunTests.yml/badge.svg)](https://github.com/Tronhjem/ORchestra/actions/workflows/RunTests.yml)
 
-> **Note:** Project is still a work in progress.
-
 ## Overview
 
-ORchestra is a powerful MIDI sequencer plugin that generates and combines sequences using euclidean algorithms or manual input. It features a custom scripting language for creating complex rhythmic patterns through logical operations.
+ORchestra is a powerful MIDI sequencer plugin that generates and combines sequences using euclidean algorithms or manual input. It features a custom scripting language for creating complex rhythmic patterns through logical operations. The ORchestra language does not aim to be a completel programming language, and have been created to fit the need of the specific vision for ORchestra.
+There's many other live coding tools out there, and it's also not trying to replace these. Rather, this is my brain child and idea of what a fun experimental midi scripting lanaguage inside a DAW should do, and invites for experimenting with phasing loops to create semi algorithmic small compositions or patterns. 
 
-Disclaimer: AI has been used on this project to try out new features like github copilots agents on git, by implementing simple extensions of the lanugage, and writing unit tests etc. Majority of the code is still written by me and this is by no means a vibe coded project. 
+The original prototype that sparked the idea can be found here: <https://github.com/Tronhjem/EuclidsCombinator>
+
+> **Disclaimer:** AI has been used on this project to try out new features like github copilots agents on git, by implementing simple extensions of the lanugage, and writing unit tests etc. Majority of the code is still written by me and this is by no means a vibe coded project. 
 
 ### Key Features
 
@@ -21,7 +22,7 @@ Disclaimer: AI has been used on this project to try out new features like github
 - **Mathematical Operations**: Full arithmetic support with standard precedence
 - **Comparison Operators**: Compare values and create conditional patterns
 
-Original prototype that sparked the idea can be found here: <https://github.com/Tronhjem/EuclidsCombinator>
+![ORchestraImg](https://github.com/Tronhjem/ORchestra/img/ORchestra.gif)
 
 ---
 
@@ -237,32 +238,6 @@ z = [1, 0]
 x = [0, 1]
 y = z[0] & x[0]  // value is 0 (AND operation: 1 & 0 = 0)
 ```
-
-**Global count variable (`$`):**
-
-The special variable `$` provides access to the global count (tick number):
-- During `Prepare` (preprocessing), `$` evaluates to `0`
-- During `Tick` (runtime), `$` evaluates to the current `globalCount`
-
-This is useful for creating evolving patterns and time-based logic:
-```cpp
-// Simple counter that increments with each tick
-counter = $
-
-// Create a cycling pattern (0, 1, 2, 3, 0, 1, 2, 3...)
-pattern = $ % 4
-
-// Conditional trigger based on tick count
-trigger = $ > 10  // Becomes 1 after 10 ticks
-
-// Velocity that increases over time
-velocity = $ * 2 + 64
-
-// Use in array indexing for sequential access
-notes = [60, 62, 64, 65]
-note_value = notes[$ % 4]
-```
-
 ### Reserved Keywords
 
 The following words are reserved and cannot be used as variable names:
@@ -362,6 +337,31 @@ Step   Trigger    Note result
 ```
 
 The possibilites gets quite complex when combining trigger sequences of different lenght with logical operators as it can create quite long variations with simple patterns, because of this phasing functionality of the Global Step accessing.
+
+**Global count variable (`$`):**
+
+The special variable `$` provides access to the global count (tick number):
+- During `Prepare` (preprocessing), `$` evaluates to `0`
+- During `Tick` (runtime), `$` evaluates to the current `globalCount`
+
+This is useful for creating evolving patterns and time-based logic:
+```cpp
+// Simple counter that increments with each tick
+counter = $
+
+// Create a cycling pattern (0, 1, 2, 3, 0, 1, 2, 3...)
+pattern = $ % 4
+
+// Conditional trigger based on tick count
+trigger = $ > 10  // Becomes 1 after 10 ticks
+
+// Velocity that increases over time
+velocity = $ * 2 + 64
+
+// Use in array indexing for sequential access
+notes = [60, 62, 64, 65]
+note_value = notes[$ % 4]
+```
 
 ### Substeps / Sub-divisions
 
