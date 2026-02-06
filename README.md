@@ -9,7 +9,7 @@
 
 ORchestra is a powerful MIDI sequencer plugin that generates and combines sequences using euclidean algorithms or manual input. It features a custom scripting language for creating complex rhythmic patterns through logical operations.
 
-Disclaimer: AI has been used on this project to try out new features like github copilots agents on git, by implementing simple extensions of the lanugage, and writing unit tests etc. Majority of the code is still written by me and this is by no means a vibe coded project. 
+Disclaimer: AI has been used on this project to try out new features like GitHub Copilot's agents on Git, by implementing simple extensions of the language, and writing unit tests etc. The majority of the code is still written by me and this is by no means a vibe coded project. 
 
 ### Key Features
 
@@ -58,9 +58,9 @@ Before building ORchestra, ensure you have the following installed:
 
 ## Quick Start
 
-You can run this wiht the Projucer, and generate a proejct and build it, which is by far the easiest if you do not want to deal with CMake.
+You can run this with the Projucer, and generate a project and build it, which is by far the easiest if you do not want to deal with CMake.
 
-else, you can get started is using the provided setup script:
+Alternatively, you can get started using the provided setup script:
 ```bash
 ./setup.sh
 ```
@@ -322,7 +322,7 @@ note(a, b, 100, 1)    // Trigger: a, Notes: b, Velocity: 100, Channel: 1
 
 ### Global Step
 
-ORchestra has global count which is receives either from a daw, or calculating the position since start, based on tempo and note divison. 
+ORchestra has a global count which is received either from a DAW, or calculated as the position since start, based on tempo and note division. 
 This is used to determine which index of each Data Sequence it should pick from.
 Just setting a variable without any index will use the global step. This is how we use our Data Sequences with tracks as sequences for midi.
 Everything is wrapped around the length of the sequence, meaning even if the global count is at 5, and your sequence is 4 long, it will wrap around and be a position 0.
@@ -334,7 +334,7 @@ b = [64, 65, 66, 67]
 note(a, b, 100, 1)
 ```
 
-For Global Step **0** we have a trigger which is 1, and a note of 64 with a velocity of 100 and midi channel of 1 hardcoded. 
+For Global Step **0** we have a trigger which is 1, and a note of 64 with a velocity of 100 and MIDI channel of 1 hard-coded. 
 For Global Step **1**, we have a trigger that is 0 so this will not output any note.
 For Global Step **2**, we have a trigger again, and a note value of 65, with the same velocity, and Global Step **3** will result in nothing played again as we do not have a trigger.
 
@@ -361,13 +361,13 @@ Step   Trigger    Note result
  6        1           66           
 ```
 
-The possibilites gets quite complex when combining trigger sequences of different lenght with logical operators as it can create quite long variations with simple patterns, because of this phasing functionality of the Global Step accessing.
+The possibilities get quite complex when combining trigger sequences of different lengths with logical operators as it can create quite long variations with simple patterns, because of this phasing functionality of the Global Step accessing.
 
 ### Substeps / Sub-divisions
 
 Substeps allow you to subdivide individual steps in a sequence, creating more complex rhythmic patterns within a single step. This is achieved using nested arrays.
-The length ot the substep divides the step into equally length portions. 
-Sub steps works for all parameters of `note()` or `cc()`, however just like normally, a track is not triggered, it will not play sub divisions for example on notes or velocities.
+The length of the substep divides the step into equally length portions. 
+Substeps work for all parameters of `note()` or `cc()`, however just like normally, if a track is not triggered, it will not play subdivisions for example on notes or velocities.
 
 **Syntax:**
 
@@ -378,7 +378,7 @@ a = [[value1, value2, ...], normalValue, ...]
 
 **Key Points:**
 - Each step in a Data Sequence can be either a single value or a substep array
-- Substep arrays can contain up to 6 values / Sub divisions (MAX_SUB_DIVISION_LENGTH)
+- Substep arrays can contain up to 6 values / subdivisions (MAX_SUB_DIVISION_LENGTH)
 - When a substep is encountered, each value within it is played in sequence before moving to the next step
 - Substeps are useful for creating fills, rolls, or varying note patterns within a single beat
 - When using substeps with `note()` or `cc()`, the trigger must also use a substep to activate individual sub-divisions
