@@ -5,7 +5,7 @@
 
 ## Overview
 
-ORchestra is a powerful MIDI sequencer plugin that generates and combines sequences using euclidean algorithms or manual input. It features a custom scripting language for creating complex rhythmic patterns through logical operations. The ORchestra language does not aim to be a completel programming language, and have been created to fit the need of the specific vision for ORchestra.
+ORchestra is a powerful MIDI sequencer plugin that generates and combines sequences of notes or midi CC messages. It features a custom scripting language for creating complex rhythmic patterns through logical operations and phasing of different lengths of data. The ORchestra language does not aim to be a completel programming language, and have been created to fit the need of the specific vision for ORchestra.
 There's many other live coding tools out there, and it's also not trying to replace these. Rather, this is my brain child and idea of what a fun experimental midi scripting lanaguage inside a DAW should do, and invites for experimenting with phasing loops to create semi algorithmic small compositions or patterns. 
 
 The original prototype that sparked the idea can be found here: <https://github.com/Tronhjem/EuclidsCombinator>
@@ -59,7 +59,7 @@ Before building ORchestra, ensure you have the following installed:
 
 ## Quick Start
 
-You can run this wiht the Projucer, and generate a proejct and build it, which is by far the easiest if you do not want to deal with CMake.
+You can run this with the Projucer, and open the ORChestra.jucer file, and generate and build the project, which is by far the easiest if you do not want to deal with CMake. You'll find the jucer file in /ORchestra/ORChestra.jucer. Follow documentation for JUCE if you get stuck on how to run the project with the Projucer.
 
 else, you can get started is using the provided setup script:
 ```bash
