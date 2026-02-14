@@ -341,22 +341,21 @@ namespace ORchestra
 
         if (expectsValue)
         {
-            if (Previous().mTokenType == ORchestraTokenType::COMMA)
+            const bool trailingComma = Previous().mTokenType == ORchestraTokenType::COMMA;
+            if (trailingComma)
             {
                 ThrowUnexpectedTokenError(Previous());
-                return false;
             }
+            else
+            {
+                ThrowMissingParamCount(function.mNumOfParams, paramCounter);
+            }
+            return false;
         }
 
         if (function.mNumOfParams != paramCounter)
         {
             ThrowMissingParamCount(function.mNumOfParams, paramCounter);
-            return false;
-        }
-
-        if (Peek().mTokenType != ORchestraTokenType::RIGHT_PAREN)
-        {
-            ThrowMissingExpectedToken(")");
             return false;
         }
 
