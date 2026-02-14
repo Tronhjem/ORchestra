@@ -350,11 +350,10 @@ namespace ORchestra
             else if (paramCounter > 0)
             {
                 ThrowUnexpectedTokenError(Previous());
+                return false;
             }
-            else
-            {
-                ThrowMissingParamCount(function.mNumOfParams, paramCounter);
-            }
+
+            ThrowMissingParamCount(function.mNumOfParams, paramCounter);
             return false;
         }
 
