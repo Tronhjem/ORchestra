@@ -341,10 +341,9 @@ namespace ORchestra
 
         if (expectsValue)
         {
-            const ORchestraToken& previousToken = Previous();
-            if (previousToken.mTokenType == ORchestraTokenType::COMMA)
+            if (paramCounter > 0)
             {
-                ThrowUnexpectedTokenError(previousToken);
+                ThrowUnexpectedTokenError(Previous());
             }
             else
             {
@@ -502,7 +501,8 @@ namespace ORchestra
 
         if (expectsValue)
         {
-            ThrowUnexpectedTokenError(Peek());
+            const ORchestraToken& tokenForError = Previous().mTokenType == ORchestraTokenType::COMMA ? Previous() : Peek();
+            ThrowUnexpectedTokenError(tokenForError);
             return false;
         }
 
