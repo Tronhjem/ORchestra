@@ -341,19 +341,20 @@ namespace ORchestra
 
         if (expectsValue)
         {
-            if (paramCounter > 0 && paramCounter != function.mNumOfParams)
+            if (paramCounter == 0)
             {
                 ThrowMissingParamCount(function.mNumOfParams, paramCounter);
                 return false;
             }
 
-            else if (paramCounter > 0)
+            if (paramCounter != function.mNumOfParams)
             {
-                ThrowUnexpectedTokenError(Previous());
+                ThrowMissingParamCount(function.mNumOfParams, paramCounter);
                 return false;
             }
 
-            ThrowMissingParamCount(function.mNumOfParams, paramCounter);
+            // Trailing comma with correct parameter count
+            ThrowUnexpectedTokenError(Previous());
             return false;
         }
 
