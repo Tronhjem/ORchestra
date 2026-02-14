@@ -167,7 +167,7 @@ TEST_CASE("Error: Detects trailing comma in array 'a = [1,]' (compilation fails)
     REQUIRE(vm.Prepare(file) == false);
 }
 
-TEST_CASE("Error: Detects missing function argument 'note(1,,2,3,4)' (compilation fails)", "[Error]")
+TEST_CASE("Error: Detects empty function argument 'note(1,,2,3,4)' (compilation fails)", "[Error]")
 {
     std::string file{"note(1,,2,3,4) \n"};
     VM vm;

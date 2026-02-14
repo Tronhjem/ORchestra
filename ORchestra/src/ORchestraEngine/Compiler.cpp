@@ -337,17 +337,18 @@ namespace ORchestra
                 break;
             }
             }
-
-            if (paramCounter > function.mNumOfParams)
-            {
-                ThrowMissingParamCount(function.mNumOfParams, paramCounter);
-                return false;
-            }
         }
 
         if (expectsValue)
         {
-            ThrowMissingParamCount(function.mNumOfParams, paramCounter);
+            if (paramCounter < function.mNumOfParams)
+            {
+                ThrowMissingParamCount(function.mNumOfParams, paramCounter);
+            }
+            else
+            {
+                ThrowUnexpectedTokenError(Previous());
+            }
             return false;
         }
 
