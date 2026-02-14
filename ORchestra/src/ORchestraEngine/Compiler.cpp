@@ -341,10 +341,10 @@ namespace ORchestra
 
         if (expectsValue)
         {
-            const bool trailingComma = Previous().mTokenType == ORchestraTokenType::COMMA;
-            if (trailingComma)
+            const ORchestraToken& previousToken = Previous();
+            if (previousToken.mTokenType == ORchestraTokenType::COMMA)
             {
-                ThrowUnexpectedTokenError(Previous());
+                ThrowUnexpectedTokenError(previousToken);
             }
             else
             {
