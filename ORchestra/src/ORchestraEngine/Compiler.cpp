@@ -341,19 +341,12 @@ namespace ORchestra
 
         if (expectsValue)
         {
-            if (paramCounter == 0)
-            {
-                ThrowMissingParamCount(function.mNumOfParams, paramCounter);
-                return false;
-            }
-
             if (paramCounter != function.mNumOfParams)
             {
                 ThrowMissingParamCount(function.mNumOfParams, paramCounter);
                 return false;
             }
 
-            // Trailing comma with correct parameter count
             ThrowUnexpectedTokenError(Previous());
             return false;
         }
@@ -508,8 +501,8 @@ namespace ORchestra
         if (expectsValue)
         {
             const ORchestraToken& previousToken = Previous();
-            const ORchestraToken& tokenForError = previousToken.mTokenType == ORchestraTokenType::COMMA ? previousToken : Peek();
-            ThrowUnexpectedTokenError(tokenForError);
+            const ORchestraToken& unexpectedToken = previousToken.mTokenType == ORchestraTokenType::COMMA ? previousToken : Peek();
+            ThrowUnexpectedTokenError(unexpectedToken);
             return false;
         }
 
