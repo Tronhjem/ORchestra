@@ -292,16 +292,23 @@ namespace ORchestra
 
         Consume(); // For Left Parenteses
         int paramCounter = 0;
+        bool expectsValue = true;
 
-        while (paramCounter != function.mNumOfParams &&
-            Peek().mTokenType != ORchestraTokenType::RIGHT_PAREN)
+        while (Peek().mTokenType != ORchestraTokenType::RIGHT_PAREN)
         {
             const ORchestraToken& currentToken = Peek();
             switch (currentToken.mTokenType)
             {
             case ORchestraTokenType::COMMA:
             {
+                if (expectsValue)
+                {
+                    ThrowUnexpectedTokenError(currentToken);
+                    return false;
+                }
+
                 Consume();
+                expectsValue = true;
                 break;
             }
 
@@ -314,26 +321,45 @@ namespace ORchestra
 
             default:
             {
+                if (!expectsValue)
+                {
+                    ThrowUnexpectedTokenError(currentToken);
+                    return false;
+                }
+
                 if (!CompileExpression(instructions))
                 {
                     ThrowUnexpectedTokenError(Peek());
                     return false;
                 }
                 ++paramCounter;
+                expectsValue = false;
                 break;
             }
             }
+
+            if (paramCounter > function.mNumOfParams)
+            {
+                ThrowMissingParamCount(function.mNumOfParams, paramCounter);
+                return false;
+            }
         }
 
-        if (Peek().mTokenType != ORchestraTokenType::RIGHT_PAREN)
+        if (expectsValue)
         {
-            ThrowMissingExpectedToken(")");
+            ThrowMissingParamCount(function.mNumOfParams, paramCounter);
             return false;
         }
 
         if (function.mNumOfParams != paramCounter)
         {
             ThrowMissingParamCount(function.mNumOfParams, paramCounter);
+            return false;
+        }
+
+        if (Peek().mTokenType != ORchestraTokenType::RIGHT_PAREN)
+        {
+            ThrowMissingExpectedToken(")");
             return false;
         }
 
@@ -476,6 +502,12 @@ namespace ORchestra
                 return false;
             }
             }
+        }
+
+        if (expectsValue)
+        {
+            ThrowUnexpectedTokenError(Peek());
+            return false;
         }
 
         if (Consume().mTokenType != ORchestraTokenType::RIGHT_BRACKET)
