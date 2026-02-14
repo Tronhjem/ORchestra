@@ -157,7 +157,7 @@ TEST_CASE("Error: Detects unsupported character '@' (compilation fails)", "[Erro
 
     const auto& errors = vm.GetErrors();
     REQUIRE_FALSE(errors.empty());
-    REQUIRE(errors[0].mMessage.find("Unsupported character '@'") != std::string::npos);
+    REQUIRE(errors[0].mMessage.find("Unexpected Character '@'") != std::string::npos);
 }
 
 TEST_CASE("Error: Detects trailing comma in array 'a = [1,]' (compilation fails)", "[Error]")

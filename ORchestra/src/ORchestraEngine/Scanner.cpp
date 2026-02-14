@@ -36,7 +36,7 @@ namespace ORchestra
 #pragma clang diagnostic ignored "-Wswitch-enum"
 #endif
 
-    std::string_view ERROR_UNEXPECTED_CHAR = "Unsupported character '";
+    std::string_view ERROR_UNEXPECTED_CHAR = "Unexpected Character '";
 
     Scanner::Scanner(ErrorReporting& logger) : mErrorReporting(logger), mCurrentLine(1)
     {

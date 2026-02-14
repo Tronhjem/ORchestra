@@ -341,6 +341,12 @@ namespace ORchestra
 
         if (expectsValue)
         {
+            if (paramCounter > 0 && paramCounter != function.mNumOfParams)
+            {
+                ThrowMissingParamCount(function.mNumOfParams, paramCounter);
+                return false;
+            }
+
             if (paramCounter > 0)
             {
                 ThrowUnexpectedTokenError(Previous());
