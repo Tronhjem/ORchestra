@@ -341,13 +341,13 @@ namespace ORchestra
 
         if (expectsValue)
         {
-            if (paramCounter < function.mNumOfParams)
+            if (Previous().mTokenType == ORchestraTokenType::COMMA)
             {
-                ThrowMissingParamCount(function.mNumOfParams, paramCounter);
+                ThrowUnexpectedTokenError(Previous());
             }
             else
             {
-                ThrowUnexpectedTokenError(Previous());
+                ThrowMissingParamCount(function.mNumOfParams, paramCounter);
             }
             return false;
         }
