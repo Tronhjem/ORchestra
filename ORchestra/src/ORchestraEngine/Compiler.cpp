@@ -344,12 +344,8 @@ namespace ORchestra
             if (Previous().mTokenType == ORchestraTokenType::COMMA)
             {
                 ThrowUnexpectedTokenError(Previous());
+                return false;
             }
-            else
-            {
-                ThrowMissingParamCount(function.mNumOfParams, paramCounter);
-            }
-            return false;
         }
 
         if (function.mNumOfParams != paramCounter)

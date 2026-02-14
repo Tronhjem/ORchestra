@@ -165,6 +165,10 @@ TEST_CASE("Error: Detects trailing comma in array 'a = [1,]' (compilation fails)
     std::string file{"a = [1,] \n"};
     VM vm;
     REQUIRE(vm.Prepare(file) == false);
+
+    const auto& errors = vm.GetErrors();
+    REQUIRE_FALSE(errors.empty());
+    REQUIRE(errors[0].mMessage.find("Unexpected Character ']'") != std::string::npos);
 }
 
 TEST_CASE("Error: Detects consecutive commas in function call 'note(1,,2,3,4)' (compilation fails)", "[Error]")
@@ -172,4 +176,8 @@ TEST_CASE("Error: Detects consecutive commas in function call 'note(1,,2,3,4)' (
     std::string file{"note(1,,2,3,4) \n"};
     VM vm;
     REQUIRE(vm.Prepare(file) == false);
+
+    const auto& errors = vm.GetErrors();
+    REQUIRE_FALSE(errors.empty());
+    REQUIRE(errors[0].mMessage.find("Unexpected Character ','") != std::string::npos);
 }
