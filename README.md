@@ -5,7 +5,7 @@
 
 ## Overview
 
-ORchestra is a powerful MIDI sequencer plugin that generates and combines sequences of notes or midi CC messages. It features a custom scripting language for creating complex rhythmic patterns through logical operations and phasing of different lengths of data. The ORchestra language does not aim to be a completel programming language, and have been created to fit the need of the specific vision for ORchestra.
+ORchestra is a powerful MIDI sequencer plugin that generates and combines sequences of notes or midi CC messages. It features a custom scripting language for creating complex rhythmic patterns through logical operations and phasing of different lengths of data. The ORchestra language does not aim to be a complete programming language, and have been created to fit the need and specific vision for ORchestra.
 There's many other live coding tools out there, and it's also not trying to replace these. Rather, this is my brain child and idea of what a fun experimental midi scripting language inside a DAW could be, and invites for experimenting with phasing loops to create semi algorithmic compositions or patterns. 
 
 The original prototype that sparked the idea can be found here: <https://github.com/Tronhjem/EuclidsCombinator>
