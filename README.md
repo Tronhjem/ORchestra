@@ -3,6 +3,8 @@
 [![Build](https://github.com/Tronhjem/ORchestra/actions/workflows/Build.yml/badge.svg)](https://github.com/Tronhjem/ORchestra/actions/workflows/Build.yml)
 [![Run Tests](https://github.com/Tronhjem/ORchestra/actions/workflows/RunTests.yml/badge.svg)](https://github.com/Tronhjem/ORchestra/actions/workflows/RunTests.yml)
 
+> ORchestra is still in development, and not even in an alpha stage. A release will be made available, once it's ready. 
+
 ## Overview
 
 ORchestra is a powerful MIDI sequencer plugin that generates and combines sequences of notes or midi CC messages. It features a custom scripting language for creating complex rhythmic patterns through logical operations and phasing of different lengths of data. The ORchestra language does not aim to be a complete programming language, and have been created to fit the need and specific vision for ORchestra.
