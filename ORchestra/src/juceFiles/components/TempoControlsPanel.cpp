@@ -20,6 +20,7 @@
 #include "TempoControlsPanel.h"
 #include "Colors.h"
 #include "ParamConstants.h"
+#include "juce_graphics/juce_graphics.h"
 
 using namespace ORchestra;
 
@@ -58,10 +59,15 @@ void TempoControlsPanel::resized()
     
     auto labelBounds = bounds.removeFromTop(LABEL_HEIGHT);
     mTempoDivLabel.setBounds(labelBounds.removeFromLeft(COMBO_WIDTH));
+    mTempoDivLabel.setJustificationType(juce::Justification::centred);
+
     labelBounds.removeFromLeft(SPACING);
     mNoteLengthLabel.setBounds(labelBounds.removeFromLeft(COMBO_WIDTH));
+    mNoteLengthLabel.setJustificationType(juce::Justification::centred);
+
     labelBounds.removeFromLeft(SPACING);
     mBpmLabel.setBounds(labelBounds.removeFromLeft(SLIDER_WIDTH));
+    mBpmLabel.setJustificationType(juce::Justification::centred);
     
     mTempoDivisionSelectorBox.setBounds(bounds.removeFromLeft(COMBO_WIDTH));
     bounds.removeFromLeft(SPACING);

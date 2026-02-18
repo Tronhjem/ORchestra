@@ -20,6 +20,7 @@
 #include "TransportControls.h"
 #include "Colors.h"
 #include "ParamConstants.h"
+#include "juce_graphics/juce_graphics.h"
 
 using namespace ORchestra;
 
@@ -48,8 +49,11 @@ void TransportControls::resized()
     auto bounds = getLocalBounds();
     
     auto labelBounds = bounds.removeFromTop(LABEL_HEIGHT);
-    mSyncToggleLabel.setBounds(labelBounds.removeFromLeft(BUTTON_WIDTH * 2));
+
+    mSyncToggleLabel.setBounds(labelBounds.removeFromLeft(BUTTON_WIDTH));
+    mSyncToggleLabel.setJustificationType(juce::Justification::centred);
     
+    bounds.removeFromLeft((BUTTON_WIDTH / 2) - (BUTTON_HEIGHT / 2));
     mSyncToggleBox.setBounds(bounds.removeFromLeft(BUTTON_HEIGHT));
     bounds.removeFromLeft(SPACING);
     mPlayButton.setBounds(bounds.removeFromLeft(BUTTON_WIDTH));

@@ -28,7 +28,7 @@ class TempoControlsPanel : public juce::Component
 {
 public:
     static constexpr int CONTROL_HEIGHT = 20;
-    static constexpr int COMBO_WIDTH = 75;
+    static constexpr int COMBO_WIDTH = 78;
     static constexpr int SLIDER_WIDTH = 50;
     static constexpr int LABEL_HEIGHT = 20;
     static constexpr int SPACING = 15;

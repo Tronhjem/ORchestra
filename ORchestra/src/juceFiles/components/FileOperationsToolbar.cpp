@@ -42,13 +42,13 @@ void FileOperationsToolbar::resized()
     auto bounds = getLocalBounds();
     int buttonWidth = (bounds.getWidth() - 2 * BUTTON_SPACING) / 3;
 
-    mExportButton.setBounds(bounds.removeFromLeft(buttonWidth));
+    mCompileButton.setBounds(bounds.removeFromLeft(buttonWidth));
     bounds.removeFromLeft(BUTTON_SPACING);
 
     mImportButton.setBounds(bounds.removeFromLeft(buttonWidth));
     bounds.removeFromLeft(BUTTON_SPACING);
 
-    mCompileButton.setBounds(bounds);
+    mExportButton.setBounds(bounds);
 }
 
 void FileOperationsToolbar::buttonClicked(juce::Button* button)

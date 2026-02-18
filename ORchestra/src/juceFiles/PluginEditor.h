@@ -75,7 +75,6 @@ private:
 
     TransportControls mTransportControls;
     TempoControlsPanel mTempoControlsPanel;
-    FileOperationsToolbar mFileOperationsToolbar;
     CodeEditorPanel mCodeEditorPanel;
     TriggerRectangleComponent mTriggerRectangle;
     Timeline mTimeline;

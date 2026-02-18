@@ -27,7 +27,7 @@
 #include "juce_audio_processors/juce_audio_processors.h"
 #include "juce_gui_extra/juce_gui_extra.h"
 
-constexpr int WINDOW_WIDTH = 1000;
+constexpr int WINDOW_WIDTH = 1200;
 constexpr int WINDOW_HEIGHT = 800;
 constexpr int COMPONENT_MARGIN = 15;
 constexpr int OUTER_MARGIN = 20;
@@ -42,6 +42,7 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
           mCodeEditorPanel(this),
           mTimeline(mTriggerRectangle)
 {
+    setResizable(true, true);
     setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
 
     audioProcessor.addChangeListener(this);
@@ -50,7 +51,7 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     mButtonLookAndFeel = std::make_unique<ButtonLookAndFeel>();
     mTextEditorLookAndFeel = std::make_unique<TextEditorLookAndFeel>();
 
-    int xPos = OUTER_MARGIN;
+    int xPos = 10;
     int yPos = OUTER_MARGIN;
     
     // ==============================================================================
@@ -64,24 +65,22 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     const int tempoHeight = mTempoControlsPanel.getPreferredHeight();
     mTempoControlsPanel.setBounds(xPos, yPos, tempoWidth, tempoHeight);
     
-    xPos += tempoWidth + COMPONENT_MARGIN;
-    const int fileOpsWidth = mFileOperationsToolbar.getPreferredWidth();
-    const int fileOpsHeight = mFileOperationsToolbar.getPreferredHeight();
-    mFileOperationsToolbar.setBounds(xPos, yPos + mTempoControlsPanel.LABEL_HEIGHT, fileOpsWidth, fileOpsHeight);
     
     // ==============================================================================
     // Row 2: CodeEditorPrnel
-    yPos += std::max({tempoHeight, transportHeight, fileOpsHeight + ROW_SPACING}) + COMPONENT_MARGIN;
-    int codeEditorWidth = WINDOW_WIDTH - 2 * OUTER_MARGIN;
+    xPos = OUTER_MARGIN;
+    // yPos += std::max({tempoHeight, transportHeight, fileOpsHeight + ROW_SPACING}) + COMPONENT_MARGIN;
+    yPos += tempoHeight + ROW_SPACING;
+
+    int codeEditorWidth = static_cast<int>(static_cast<float>(WINDOW_WIDTH) / 2.5f + OUTER_MARGIN);
     int codeEditorHeight = mCodeEditorPanel.getPreferredHeight();
-    mCodeEditorPanel.setBounds(OUTER_MARGIN, yPos, codeEditorWidth, codeEditorHeight);
+    mCodeEditorPanel.setBounds(xPos, yPos, codeEditorWidth, codeEditorHeight);
+
+    xPos += codeEditorWidth + COMPONENT_MARGIN;
     
-    // ==============================================================================
-    // Row 3: Timeline and TriggerRectangle
-    yPos += codeEditorHeight + COMPONENT_MARGIN;
-    int timelineHeight = WINDOW_HEIGHT - yPos - OUTER_MARGIN;
-    mTimeline.setBounds(OUTER_MARGIN, yPos, WINDOW_WIDTH - OUTER_MARGIN * 2, timelineHeight);
-    mTriggerRectangle.setBounds(OUTER_MARGIN, yPos, 100, timelineHeight);
+    const int timelineHeight = WINDOW_HEIGHT - yPos - OUTER_MARGIN;
+    mTimeline.setBounds(xPos, yPos, WINDOW_WIDTH - OUTER_MARGIN * 2, timelineHeight);
+    mTriggerRectangle.setBounds(xPos, yPos, 100, timelineHeight);
 
     // ==============================================================================
     
@@ -89,10 +88,10 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
 
     mTransportControls.setButtonLookAndFeel(mButtonLookAndFeel.get());
     mTempoControlsPanel.setGeneralLookAndFeel(mGeneralLookAndFeel.get());
-    mFileOperationsToolbar.setButtonLookAndFeel(mButtonLookAndFeel.get());
 
     mCodeEditorPanel.setEditorLookAndFeel(mTextEditorLookAndFeel.get());
     mCodeEditorPanel.setErrorBoxLookAndFeel(mTextEditorLookAndFeel.get());
+    mCodeEditorPanel.setFileOperationButtonsLookAndFeel(mButtonLookAndFeel.get());
     mCodeEditorPanel.applyDefaultStyling();
 
     mTimeline.SetProcessor(&audioProcessor);
@@ -100,14 +99,12 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
 
     mTransportControls.setPlayButtonCallback([this]() { handlePlayButton(); });
     mTransportControls.setSyncToggleCallback([this](bool shouldSync) { handleSyncToggle(shouldSync); });
-
-    mFileOperationsToolbar.setImportCallback([this]() { handleImportFile(); });
-    mFileOperationsToolbar.setExportCallback([this]() { handleExportFile(); });
-    mFileOperationsToolbar.setCompileCallback([this]() { handleCompile(); });
+    mCodeEditorPanel.setCompileCallback([this]() { handleCompile(); });
+    mCodeEditorPanel.setExportCallback([this]() { handleExportFile(); });
+    mCodeEditorPanel.setImportCallback([this]() { handleImportFile(); });
 
     addAndMakeVisible(mTempoControlsPanel);
     addAndMakeVisible(mTransportControls);
-    addAndMakeVisible(mFileOperationsToolbar);
     addAndMakeVisible(mCodeEditorPanel);
     addAndMakeVisible(mTimeline);
     addAndMakeVisible(mTriggerRectangle);
@@ -137,7 +134,7 @@ void ORchestraAudioProcessorEditor::CodeEditorHasChanged()
 {
     if(mCodeEditorPanel.hasUnsavedChanges())
     {
-        mFileOperationsToolbar.setCompileButtonEnabled(true);
+        mCodeEditorPanel.setCompileButtonEnabled(true);
     }
 }
 
@@ -173,7 +170,7 @@ void ORchestraAudioProcessorEditor::handleCompile()
     if (audioProcessor.IsORchestraVMInit())
     {
         mCodeEditorPanel.markSaved();
-        mFileOperationsToolbar.setCompileButtonEnabled(false);
+        mCodeEditorPanel.setCompileButtonEnabled(false);
     }
     
     UpdateErrors();
@@ -218,7 +215,11 @@ void ORchestraAudioProcessorEditor::UpdateErrors()
 void ORchestraAudioProcessorEditor::paint(juce::Graphics& g)
 {
     g.fillAll(BackgroundColor);
-    mFileOperationsToolbar.setCompileButtonEnabled(mCodeEditorPanel.hasUnsavedChanges());
+    mCodeEditorPanel.setCompileButtonEnabled(mCodeEditorPanel.hasUnsavedChanges());
+
+    // float width = static_cast<float>(mCodeEditorPanel.getWidth() + COMPONENT_MARGIN + 10);
+    // g.setColour(juce::Colours::white);
+    // g.drawLine(width, 0, width, static_cast<float>(getHeight()), 2.f);
 }
 
 void ORchestraAudioProcessorEditor::resized()

@@ -20,27 +20,44 @@
 #include "CodeEditorPanel.h"
 #include "Colors.h"
 #include "LookAndFeelConstants.h"
+#include "juce_graphics/juce_graphics.h"
+#include "juce_gui_basics/juce_gui_basics.h"
 
 using namespace ORchestra;
 
 CodeEditorPanel::CodeEditorPanel(ORchestra::ORchestraCodeEditorChangeListener* changeListener)
     : mCodeEditor(mCodeDocument, &mTokeniser)
 {
-    // Configure code editor
     mCodeEditor.setTabSize(4, true);
     mCodeEditor.setLineNumbersShown(true);
     mCodeEditor.AddChangeListener(changeListener);
     
-    // Configure error text box
     mErrorTextBox.setFont(MONOSPACE_FONT_OPTIONS);
     mErrorTextBox.setColour(juce::TextEditor::textColourId, TextColor);
     mErrorTextBox.setMultiLine(true);
     mErrorTextBox.setEnabled(false);
     
+    addAndMakeVisible(mFileOperationsToolbar);
     addAndMakeVisible(mCodeEditor);
     addAndMakeVisible(mErrorTextBox);
+    mErrorTextBox.setText("Test test test setsetst ");
 }
 
+void CodeEditorPanel::setImportCallback(std::function<void()> callback)
+{
+    mFileOperationsToolbar.setImportCallback(std::move(callback));
+}
+
+void CodeEditorPanel::setExportCallback(std::function<void()> callback)
+{
+    mFileOperationsToolbar.setExportCallback(std::move(callback));
+}
+
+void CodeEditorPanel::setCompileCallback(std::function<void()> callback)
+{
+    mFileOperationsToolbar.setCompileCallback(std::move(callback));
+}
+    
 CodeEditorPanel::~CodeEditorPanel()
 {
     mCodeEditor.setLookAndFeel(nullptr);
@@ -50,12 +67,20 @@ void CodeEditorPanel::resized()
 {
     auto bounds = getLocalBounds();
     
-    // Error box at bottom
-    auto errorBounds = bounds.removeFromBottom(ERROR_BOX_HEIGHT);
+    mCodeEditor.setBounds(bounds.removeFromTop(CODE_EDITOR_HEIGHT));
+
+    const int fileOpsWidth = mFileOperationsToolbar.getPreferredWidth();
+    const int fileOpsHeight = mFileOperationsToolbar.getPreferredHeight();
+
+    bounds.removeFromTop(20);
+    auto buttonRow = bounds.removeFromTop(fileOpsHeight);
+
+    mFileOperationsToolbar.setBounds(buttonRow.removeFromLeft(fileOpsWidth));
+
+    bounds.removeFromTop(20);
+    auto errorBounds = bounds.removeFromTop(ERROR_BOX_HEIGHT);
     mErrorTextBox.setBounds(errorBounds);
-    
-    // Code editor takes remaining space
-    mCodeEditor.setBounds(bounds);
+    repaint();
 }
 
 void CodeEditorPanel::updateErrorDisplay(const std::vector<ORchestra::LogEntry>& errors)
@@ -89,6 +114,16 @@ void CodeEditorPanel::setEditorLookAndFeel(juce::LookAndFeel* laf)
 void CodeEditorPanel::setErrorBoxLookAndFeel(juce::LookAndFeel* laf)
 {
     mErrorTextBox.setLookAndFeel(laf);
+}
+
+void CodeEditorPanel::setFileOperationButtonsLookAndFeel(juce::LookAndFeel* laf)
+{
+    mFileOperationsToolbar.setButtonLookAndFeel(laf);
+}
+
+void CodeEditorPanel::setCompileButtonEnabled(bool enabled)
+{
+    mFileOperationsToolbar.setCompileButtonEnabled(enabled);
 }
 
 void CodeEditorPanel::applyDefaultStyling()
