@@ -77,12 +77,13 @@ namespace ORchestra
                   (STEP_BUFFER_SIZE & (STEP_BUFFER_SIZE_MASK)) == 0, 
                   "STEP_BUFFER_SIZE must be a power of two");
 
-    enum class MidiType : DataUnit
+    enum class SequenceStepType : DataUnit
     {
         NoteOn = 0,
         NoteOff = 1,
         CC = 2,
         BPM = 3,
-        NOTE_DIVISION = 4
+        NOTE_DIVISION = 4,
+        PRINT = 5
     };
 } // namespace ORchestra

@@ -69,7 +69,7 @@ public:
 
 private:
     inline int GetNoteDivisionWrapIndex(const float bpmDivision);
-    inline juce::Colour GetStepColorFromVelocity(const float value, const MidiType MidiType);
+    inline juce::Colour GetStepColorFromVelocity(const float value, const SequenceStepType MidiType);
     ORchestraAudioProcessor* mAudioProcessor;
     int mLastGlobalStep;
     int64_t mLastTimeInSamples;

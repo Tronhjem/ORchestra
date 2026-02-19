@@ -21,15 +21,13 @@
 
 #include <JuceHeader.h>
 #include <vector>
-
-#include "StepData.h"
 #include "Defines.h"
 
 namespace ORchestra {
 
     struct ScheduledMidiMessage
     {
-        MidiType mMessageType;
+        SequenceStepType mMessageType;
         DataUnit mFirstByte;
         DataUnit mSecondByte;
         DataUnit mChannel;
@@ -48,6 +46,5 @@ namespace ORchestra {
     private:
         std::vector<ScheduledMidiMessage> mScheduledMidiMessages;
     };
-
 
 } // namespace ORchestra

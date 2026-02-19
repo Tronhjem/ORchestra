@@ -862,9 +862,7 @@ namespace ORchestra
                 break;
             }
 
-#if _DEBUG
             case ORchestraTokenType::PRINT:
-#endif
             case ORchestraTokenType::NOTE:
             case ORchestraTokenType::CC:
             {

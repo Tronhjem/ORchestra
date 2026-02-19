@@ -74,16 +74,12 @@ namespace ORchestra
 
         mReadySteps.store(0, std::memory_order_release);
         mCurrentProcessingStep.store(mCurrentGlobalStep.load(), std::memory_order_release);
-<<<<<<< HEAD
-        mVM.Reset();
-=======
         
         // Reset script transport data to default values (0 means not set)
         mScriptTransportData.bpm = 0.0;
         mScriptTransportData.bpmDivision = 0.0f;
         
-        mVM->Reset();
->>>>>>> bpmAsFunction
+        mVM.Reset();
 
         const bool innitSuccess = mVM.Prepare(&mInstructionData[0]);
         mIsVMInit.store(innitSuccess);
@@ -103,8 +99,8 @@ namespace ORchestra
             { // Lock scope
                 std::unique_lock<std::mutex> lock(mCVMutex);
                 mCV.wait(lock, [this] {
-                        return mHasWork.load(std::memory_order_acquire) || mShouldExit.load(std::memory_order_acquire);
-                    });
+                    return mHasWork.load(std::memory_order_acquire) || mShouldExit.load(std::memory_order_acquire);
+                });
             } // end lock scope
                 
             if (!mShouldExit.load(std::memory_order_relaxed)) 
@@ -154,9 +150,6 @@ namespace ORchestra
     {
         if (transportData.isPlaying && mIsVMInit)
         {
-            const double samplesPerStep = static_cast<double>(transportData.sampleRate) 
-                                          * (60.0 / (transportData.bpm * transportData.bpmDivision));
- 
             // Use script-provided BPM and division if they were set, otherwise use the provided values
             const double bpm = mScriptTransportData.bpm > 0.0 ? mScriptTransportData.bpm : transportData.bpm;
             const float bpmDivision = mScriptTransportData.bpmDivision > 0.0f ? mScriptTransportData.bpmDivision : transportData.bpmDivision;
@@ -195,19 +188,26 @@ namespace ORchestra
                {
                    switch (step.mType)
                    {
-                       case ORchestra::MidiType::BPM:
+                       case ORchestra::SequenceStepType::BPM:
                        {
                            mScriptTransportData.bpm = step.mFirst.GetValue(0);
+                           std::cout << static_cast<int>(step.mFirst.GetValue(0)) << std::endl;
                            break;
                        }
-                       case ORchestra::MidiType::NOTE_DIVISION:
+                       case ORchestra::SequenceStepType::NOTE_DIVISION:
                        {
                            mScriptTransportData.bpmDivision = ToBpmDivision(step.mFirst.GetValue(0));
+                           std::cout << static_cast<int>(step.mFirst.GetValue(0)) << std::endl;
                            break;
                        }
-                       case ORchestra::MidiType::NoteOn:
-                       case ORchestra::MidiType::NoteOff:
-                       case ORchestra::MidiType::CC:
+                       case ORchestra::SequenceStepType::PRINT:
+                       {
+                           std::cout << static_cast<int>(step.mFirst.GetValue(0)) << std::endl;
+                           break;
+                       }
+                       case ORchestra::SequenceStepType::NoteOn:
+                       case ORchestra::SequenceStepType::NoteOff:
+                       case ORchestra::SequenceStepType::CC:
                        {
                            const int triggerLength = static_cast<int>(step.mShouldTrigger.GetLength());
                            for (int i = 0; i < triggerLength; ++i)
@@ -222,12 +222,6 @@ namespace ORchestra
                                const DataUnit channel = step.mChannel.GetEquivalentValueAtIndex(i, triggerLength);
                                const int timeStamp = nextStepInSamples + i * (static_cast<int>(samplesPerStep) / triggerLength);
 
-<<<<<<< HEAD
-                       // TODO: Change to use step.mDuration
-                       // ScheduledMidiMessage message {step.mType, firstByte, secondByte, channel, timeStamp, step.mDuration};
-                       ScheduledMidiMessage message{ step.mType, firstByte, secondByte, channel, timeStamp, transportData.noteLengthInSamples };
-                       mMidiScheduler.PostMidi(message);
-=======
                                // TODO: Change to use step.mDuration
                                // ScheduledMidiMessage message {step.mType, firstByte, secondByte, channel, timeStamp, step.mDuration};
                                ScheduledMidiMessage message{ step.mType, firstByte, secondByte, 
@@ -238,7 +232,6 @@ namespace ORchestra
 
                            break;
                        }
->>>>>>> bpmAsFunction
                    }
                }
 

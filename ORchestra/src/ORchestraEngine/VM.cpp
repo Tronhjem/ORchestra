@@ -164,15 +164,21 @@ namespace ORchestra
 
             case (OpCode::NOTE):
             case (OpCode::CC):
-                    stack.Pop();
-                    stack.Pop();
-                    stack.Pop();
-                    stack.Pop();
+            {
+                stack.Pop();
+                stack.Pop();
+                stack.Pop();
+                stack.Pop();
                 break;
+            }
+
             case (OpCode::SET_BPM):
             case (OpCode::SET_NOTE_DIVISION):
-                    stack.Pop();
+            case (OpCode::PRINT):
+            {
+                stack.Pop();
                 break;
+            }
 
             case (OpCode::END):
             {
@@ -220,7 +226,7 @@ namespace ORchestra
                 const StepData shouldTrigger = stack.Pop();
 
                 //TODO: Should be using a variable for note duration.
-                stepQueue.emplace_back(SequenceStep{ MidiType::NoteOn, shouldTrigger, note, vel, channel, DEFAULT_NOTE_DURATION });
+                stepQueue.emplace_back(SequenceStep{ SequenceStepType::NoteOn, shouldTrigger, note, vel, channel, DEFAULT_NOTE_DURATION });
 
                 break;
             }
@@ -233,7 +239,7 @@ namespace ORchestra
                 const StepData shouldTrigger = stack.Pop();
 
                 //TODO: Should be using a variable for note duration.
-                stepQueue.emplace_back(SequenceStep{ MidiType::CC, shouldTrigger, ccNumber, ccValue, channel, DEFAULT_NOTE_DURATION });
+                stepQueue.emplace_back(SequenceStep{ SequenceStepType::CC, shouldTrigger, ccNumber, ccValue, channel, DEFAULT_NOTE_DURATION });
 
                 break;
             }
@@ -241,7 +247,7 @@ namespace ORchestra
             case (OpCode::SET_BPM):
             {
                 const StepData bpmValue = stack.Pop();
-                stepQueue.emplace_back(SequenceStep{ MidiType::BPM, bpmValue, bpmValue, bpmValue, bpmValue, DEFAULT_NOTE_DURATION });
+                stepQueue.emplace_back(SequenceStep{ SequenceStepType::BPM, bpmValue, bpmValue, bpmValue, bpmValue, DEFAULT_NOTE_DURATION });
 
                 break;
             }
@@ -249,10 +255,18 @@ namespace ORchestra
             case (OpCode::SET_NOTE_DIVISION):
             {
                 const StepData noteDivValue = stack.Pop();
-                stepQueue.emplace_back(SequenceStep{ MidiType::NOTE_DIVISION, noteDivValue, 
+                stepQueue.emplace_back(SequenceStep{ SequenceStepType::NOTE_DIVISION, noteDivValue, 
                                 noteDivValue, noteDivValue, 
                                 noteDivValue, DEFAULT_NOTE_DURATION });
 
+                break;
+            }
+
+            case (OpCode::PRINT):
+            {
+                const StepData printValue = stack.Pop();
+                stepQueue.emplace_back(SequenceStep{ SequenceStepType::PRINT, printValue, printValue, 
+                                       printValue, printValue, DEFAULT_NOTE_DURATION });
                 break;
             }
 
@@ -512,18 +526,6 @@ namespace ORchestra
             break;
         }
 
-
-#if _DEBUG
-        case (OpCode::PRINT):
-        {
-            const DataUnit value = stack.Pop().GetValue(0);
-            const std::string message = "PRINT: " + std::to_string(static_cast<int>(value));
-            std::cout << message << std::endl;
-            mErrorReporting.LogMessage(message);
-
-            break;
-        }
-#endif
         default:
             const std::string err{ "Unexpected Operation code" };
             mErrorReporting.LogError(err);
