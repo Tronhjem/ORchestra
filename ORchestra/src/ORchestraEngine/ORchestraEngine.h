@@ -56,6 +56,7 @@ namespace ORchestra
         void WorkerThreadLoop();
         bool PreProcessSteps();
         inline void Initialize();
+        float ToBpmDivision(DataUnit divValue);
 
         int mLastStep = -1;
         int64_t mSamplesSinceLastStep = 0;
@@ -76,6 +77,8 @@ namespace ORchestra
 
         MidiScheduler mMidiScheduler;
         VM mVM;
+        
+        TransportData mScriptTransportData;
     };
 
 

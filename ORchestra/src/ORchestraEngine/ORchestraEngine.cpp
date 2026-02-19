@@ -74,7 +74,16 @@ namespace ORchestra
 
         mReadySteps.store(0, std::memory_order_release);
         mCurrentProcessingStep.store(mCurrentGlobalStep.load(), std::memory_order_release);
+<<<<<<< HEAD
         mVM.Reset();
+=======
+        
+        // Reset script transport data to default values (0 means not set)
+        mScriptTransportData.bpm = 0.0;
+        mScriptTransportData.bpmDivision = 0.0f;
+        
+        mVM->Reset();
+>>>>>>> bpmAsFunction
 
         const bool innitSuccess = mVM.Prepare(&mInstructionData[0]);
         mIsVMInit.store(innitSuccess);
@@ -148,6 +157,11 @@ namespace ORchestra
             const double samplesPerStep = static_cast<double>(transportData.sampleRate) 
                                           * (60.0 / (transportData.bpm * transportData.bpmDivision));
  
+            // Use script-provided BPM and division if they were set, otherwise use the provided values
+            const double bpm = mScriptTransportData.bpm > 0.0 ? mScriptTransportData.bpm : transportData.bpm;
+            const float bpmDivision = mScriptTransportData.bpmDivision > 0.0f ? mScriptTransportData.bpmDivision : transportData.bpmDivision;
+            
+            const double samplesPerStep = static_cast<double>(transportData.sampleRate) * (60.0 / (bpm * bpmDivision));
             const int currentStep = static_cast<int>(ceil(static_cast<double>(transportData.timeInSamples) / samplesPerStep));
 
             // Check if we skipped count, to regenerate everything.
@@ -179,24 +193,52 @@ namespace ORchestra
                const std::vector<SequenceStep>& currentData = mStepRingBuffer[static_cast<unsigned long>(wrappedGlobalStep)];
                for (const SequenceStep& step : currentData)
                {
-                   const int triggerLength = static_cast<int>(step.mShouldTrigger.GetLength());
-
-                   for (int i = 0; i < triggerLength; ++i)
+                   switch (step.mType)
                    {
-                       const DataUnit shouldTrigger = step.mShouldTrigger.GetValue(i);
+                       case ORchestra::MidiType::BPM:
+                       {
+                           mScriptTransportData.bpm = step.mFirst.GetValue(0);
+                           break;
+                       }
+                       case ORchestra::MidiType::NOTE_DIVISION:
+                       {
+                           mScriptTransportData.bpmDivision = ToBpmDivision(step.mFirst.GetValue(0));
+                           break;
+                       }
+                       case ORchestra::MidiType::NoteOn:
+                       case ORchestra::MidiType::NoteOff:
+                       case ORchestra::MidiType::CC:
+                       {
+                           const int triggerLength = static_cast<int>(step.mShouldTrigger.GetLength());
+                           for (int i = 0; i < triggerLength; ++i)
+                           {
+                               const DataUnit shouldTrigger = step.mShouldTrigger.GetValue(i);
 
-                       if (!shouldTrigger)
-                            continue;
+                               if (!shouldTrigger)
+                                    continue;
 
-                       const DataUnit firstByte = step.mFirst.GetEquivalentValueAtIndex(i, triggerLength);
-                       const DataUnit secondByte = step.mSecond.GetEquivalentValueAtIndex(i, triggerLength);
-                       const DataUnit channel = step.mChannel.GetEquivalentValueAtIndex(i, triggerLength);
-                       const int timeStamp = nextStepInSamples + i * (static_cast<int>(samplesPerStep) / triggerLength);
+                               const DataUnit firstByte = step.mFirst.GetEquivalentValueAtIndex(i, triggerLength);
+                               const DataUnit secondByte = step.mSecond.GetEquivalentValueAtIndex(i, triggerLength);
+                               const DataUnit channel = step.mChannel.GetEquivalentValueAtIndex(i, triggerLength);
+                               const int timeStamp = nextStepInSamples + i * (static_cast<int>(samplesPerStep) / triggerLength);
 
+<<<<<<< HEAD
                        // TODO: Change to use step.mDuration
                        // ScheduledMidiMessage message {step.mType, firstByte, secondByte, channel, timeStamp, step.mDuration};
                        ScheduledMidiMessage message{ step.mType, firstByte, secondByte, channel, timeStamp, transportData.noteLengthInSamples };
                        mMidiScheduler.PostMidi(message);
+=======
+                               // TODO: Change to use step.mDuration
+                               // ScheduledMidiMessage message {step.mType, firstByte, secondByte, channel, timeStamp, step.mDuration};
+                               ScheduledMidiMessage message{ step.mType, firstByte, secondByte, 
+                                                             channel, timeStamp, transportData.noteLengthInSamples };
+
+                               mMidiScheduler.PostMidi(message);
+                           }
+
+                           break;
+                       }
+>>>>>>> bpmAsFunction
                    }
                }
 
@@ -212,5 +254,37 @@ namespace ORchestra
         {
             mMidiScheduler.ClearAllData(midiMessages);
         }
+    }
+
+    float ORchestraEngine::ToBpmDivision(DataUnit divValue)
+    {
+        const int divIndex = std::clamp(static_cast<int>(divValue), 1, 7);
+        float bpmDivision = 1.0f;
+        switch (divIndex)
+        {
+        case 1:
+            bpmDivision = 0.25f;
+            break;
+        case 2:
+            bpmDivision = 0.5f;
+            break;
+        case 3:
+            bpmDivision = 1.0f;
+            break;
+        case 4:
+            bpmDivision = 2.0f;
+            break;
+        case 5:
+            bpmDivision = 4.0f;
+            break;
+        case 6:
+            bpmDivision = 8.0f;
+            break;
+        case 7:
+            bpmDivision = 16.0f;
+            break;
+        }
+        
+        return bpmDivision;
     }
 } // namespace ORchestra

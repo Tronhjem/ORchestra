@@ -64,6 +64,8 @@ namespace ORchestra
         GET_RANDOM_IN_RANGE,
         GET_GLOBAL_COUNT,
         PRINT,
+        SET_BPM,
+        SET_NOTE_DIVISION,
 
         //end
         END,

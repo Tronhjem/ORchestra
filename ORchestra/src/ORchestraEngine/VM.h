@@ -43,6 +43,8 @@ namespace ORchestra
     /// to populate the SequenceSteps for the ORChestra Engine and MidiScheduler.
     /// It's a simple stack based virtual machine that goes through all the OpCodes from the compiler
     /// and executes them.
+    struct TransportData;
+
     class VM
     {
     public:
@@ -77,7 +79,7 @@ namespace ORchestra
         std::vector<DataSequence> mVariables;
         std::vector<Instruction> mRuntimeInstructions;
         inline DataUnit RandomValue(const DataUnit low, const DataUnit high);
-
+        
         template <typename Operation>
         inline void PopDoOperationAndPush(Operation op, Stack<StepData>& stack)
         {

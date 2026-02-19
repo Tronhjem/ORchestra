@@ -81,6 +81,8 @@ namespace ORchestra
     {
         NoteOn = 0,
         NoteOff = 1,
-        CC = 2
+        CC = 2,
+        BPM = 3,
+        NOTE_DIVISION = 4
     };
 } // namespace ORchestra

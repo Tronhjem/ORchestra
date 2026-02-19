@@ -18,8 +18,11 @@
  */
 
 #include <algorithm>
+#include <new>
 
 #include "VM.h"
+#include "StepData.h"
+#include "TransportData.h"
 
 #if _DEBUG
 #include "ScopedTimer.h"
@@ -161,6 +164,14 @@ namespace ORchestra
 
             case (OpCode::NOTE):
             case (OpCode::CC):
+                    stack.Pop();
+                    stack.Pop();
+                    stack.Pop();
+                    stack.Pop();
+                break;
+            case (OpCode::SET_BPM):
+            case (OpCode::SET_NOTE_DIVISION):
+                    stack.Pop();
                 break;
 
             case (OpCode::END):
@@ -223,6 +234,24 @@ namespace ORchestra
 
                 //TODO: Should be using a variable for note duration.
                 stepQueue.emplace_back(SequenceStep{ MidiType::CC, shouldTrigger, ccNumber, ccValue, channel, DEFAULT_NOTE_DURATION });
+
+                break;
+            }
+
+            case (OpCode::SET_BPM):
+            {
+                const StepData bpmValue = stack.Pop();
+                stepQueue.emplace_back(SequenceStep{ MidiType::BPM, bpmValue, bpmValue, bpmValue, bpmValue, DEFAULT_NOTE_DURATION });
+
+                break;
+            }
+
+            case (OpCode::SET_NOTE_DIVISION):
+            {
+                const StepData noteDivValue = stack.Pop();
+                stepQueue.emplace_back(SequenceStep{ MidiType::NOTE_DIVISION, noteDivValue, 
+                                noteDivValue, noteDivValue, 
+                                noteDivValue, DEFAULT_NOTE_DURATION });
 
                 break;
             }
@@ -482,6 +511,7 @@ namespace ORchestra
 
             break;
         }
+
 
 #if _DEBUG
         case (OpCode::PRINT):
