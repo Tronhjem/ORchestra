@@ -34,7 +34,6 @@ namespace ORchestra
         SET_IDENTIFIER_WITH_INDEX,
 
         SET_SUBSTEP_ARRAY,
-
         GENERATE_EUCLID_SEQUENCE,
 
         // Math
@@ -64,10 +63,10 @@ namespace ORchestra
         CALL_FUNCTION,
         GET_RANDOM_IN_RANGE,
         GET_GLOBAL_COUNT,
+        PRINT,
+
+        //end
         END,
-#if _DEBUG
-        PRINT
-#endif
     };
 
     class Instruction
