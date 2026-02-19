@@ -118,7 +118,9 @@ void Timeline::timerCallback()
         for (const auto& step : sequenceSteps)
         {
             if (step.mType != SequenceStepType::NoteOn && step.mType != SequenceStepType::CC)
+            {
                 continue;
+            }
 
             const int substepLength = step.mShouldTrigger.GetLength();
             const float subDividedStepWidth = stepWidth / static_cast<float>(substepLength);

@@ -17,17 +17,15 @@
  * along with ORchestra. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "ErrorReporting.h"
 #include <algorithm>
-#include <new>
-
-#include "VM.h"
-#include "StepData.h"
-#include "TransportData.h"
 
 #if _DEBUG
 #include "ScopedTimer.h"
 #endif
 
+#include "VM.h"
+#include "StepData.h"
 #include "EuclideanGenerator.h"
 #include "Defines.h"
 
@@ -40,7 +38,7 @@ namespace ORchestra
 #endif
     unsigned int VM::mRanSeed = static_cast<unsigned int>(rand());
 
-    VM::VM() : mErrorReporting(),
+    VM::VM(ErrorReporting& errorReporting) : mErrorReporting(errorReporting),
         mScanner(mErrorReporting),
         mCompiler(mScanner.GetTokens(), mErrorReporting)
     {
@@ -66,16 +64,10 @@ namespace ORchestra
 
     void VM::Reset()
     {
-        mErrorReporting.Clear();
         mScanner.Reset();
         mCompiler.Reset();
         mVariables.clear();
         mRuntimeInstructions.clear();
-    }
-
-    const std::vector<LogEntry>& VM::GetErrors()
-    {
-        return mErrorReporting.GetErrors();
     }
 
     bool VM::ProcessOpCodes(std::vector<Instruction>& instructions)
@@ -87,10 +79,9 @@ namespace ORchestra
         Stack<StepData> stack;
 
         unsigned long currentIndex = 0;
-        auto consume = [&]() -> Instruction&
-            {
-                return instructions[currentIndex++];
-            };
+        auto consume = [&]() -> Instruction& {
+            return instructions[currentIndex++];
+        };
 
         for (;;)
         {
@@ -237,8 +228,6 @@ namespace ORchestra
                 const StepData ccValue = stack.Pop();
                 const StepData ccNumber = stack.Pop();
                 const StepData shouldTrigger = stack.Pop();
-
-                //TODO: Should be using a variable for note duration.
                 stepQueue.emplace_back(SequenceStep{ SequenceStepType::CC, shouldTrigger, ccNumber, ccValue, channel, DEFAULT_NOTE_DURATION });
 
                 break;

@@ -20,7 +20,6 @@
 #pragma once
 
 #include <vector>
-#include <unordered_map>
 #include <string>
 #include <cassert>
 
@@ -48,17 +47,19 @@ namespace ORchestra
     class VM
     {
     public:
-        VM();
+        VM(ErrorReporting& ErrorReporting);
+        ~VM() = default;
+
         bool Prepare(const std::string& data);
         bool Tick(std::vector<SequenceStep>& stepQueue, const int globalCount);
         void Reset();
-        const std::vector<LogEntry>& GetErrors();
 
 #if _TEST
         StepData GetTopStackValue() { return mTopStackValue; }
 #endif
 
     private:
+        VM() = delete;
 #if _TEST
         StepData mTopStackValue;
         
@@ -72,7 +73,7 @@ namespace ORchestra
         bool ProcessOpCodes(std::vector<Instruction>& setupInstructions);
         inline bool ProcessInstruction(const Instruction& instruction, const int stepCount, Stack<StepData>& mStack);
 
-        ErrorReporting mErrorReporting;
+        ErrorReporting& mErrorReporting;
         Scanner mScanner;
         Compiler mCompiler;
 

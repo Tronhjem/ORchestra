@@ -43,7 +43,7 @@ namespace ORchestra
         void LogWarning(const std::string& message);
         void LogMessage(const std::string& message);
         void Clear();
-        std::vector<LogEntry>& GetErrors() { return mLogEntries; }
+        const std::vector<LogEntry>& GetErrors() { return mLogEntries; }
 
     private:
         std::vector<LogEntry> mLogEntries;

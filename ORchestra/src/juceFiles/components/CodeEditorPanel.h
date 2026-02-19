@@ -29,7 +29,7 @@ class CodeEditorPanel : public juce::Component
 {
 public:
     static constexpr int CODE_EDITOR_HEIGHT = 400;
-    static constexpr int ERROR_BOX_HEIGHT = 100;
+    static constexpr int ERROR_BOX_HEIGHT = 300;
 
     CodeEditorPanel(ORchestra::ORchestraCodeEditorChangeListener* changeListener);
     ~CodeEditorPanel() override;

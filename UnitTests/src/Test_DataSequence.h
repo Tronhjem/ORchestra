@@ -22,6 +22,7 @@
 #include "catch.hpp"
 
 #include "VM.h"
+#include "ErrorReporting.h"
 #include "StepData.h"
 #include "Defines.h"
 
@@ -32,7 +33,8 @@ TEST_CASE("DataSequence: Evaluates ran(50,60) in array, result in range [50,60]"
 
     for (int i = 0; i < 40; ++i)
     {
-        VM vm;
+        ErrorReporting errorReporter;
+    VM vm(errorReporter);
         REQUIRE(vm.Prepare(file));
 
         StepData result = vm.GetTopStackValue();
@@ -44,7 +46,8 @@ TEST_CASE("DataSequence: Evaluates ran(50,60) in array, result in range [50,60]"
 TEST_CASE("DataSequence: Accesses array element 'a=[1,0,0], a[0]' correctly (result=1)", "[DataSequence]")
 {
     std::string file{"a = [1,0,0] \n test a[0]"};
-    VM vm;
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
     REQUIRE(vm.Prepare(file));
 
     StepData result = vm.GetTopStackValue();
@@ -61,7 +64,8 @@ TEST_CASE("DataSequence: StepData.GetValue(0) returns first element correctly", 
 TEST_CASE("DataSequence: Accesses nested array element [1,4,5], returns values correctly", "[DataSequence]")
 {
     std::string file{"a = [[1,4,5],0,0] \n test a[0]"};
-    VM vm;
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
     REQUIRE(vm.Prepare(file));
 
     StepData result = vm.GetTopStackValue();
@@ -73,7 +77,8 @@ TEST_CASE("DataSequence: Accesses nested array element [1,4,5], returns values c
 TEST_CASE("DataSequence: GetEquivalentValueAtIndex maps values to different sequence lengths (length=4)", "[DataSequence]")
 {
     std::string file{"a = [[60,64],0,0] \n test a[0]"};
-    VM vm;
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
     REQUIRE(vm.Prepare(file));
 
     StepData result = vm.GetTopStackValue();
@@ -87,7 +92,8 @@ TEST_CASE("DataSequence: GetEquivalentValueAtIndex maps values to different sequ
 TEST_CASE("DataSequence: GetEquivalentValueAtIndex maps values to different sequence lengths (length=3)", "[DataSequence]")
 {
     std::string file{"a = [[60,64],0,0] \n test a[0]"};
-    VM vm;
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
     REQUIRE(vm.Prepare(file));
 
     StepData result = vm.GetTopStackValue();
@@ -100,7 +106,8 @@ TEST_CASE("DataSequence: GetEquivalentValueAtIndex maps values to different sequ
 TEST_CASE("DataSequence: Accesses nested array element [1,1,0], returns values correctly", "[DataSequence]")
 {
     std::string file{"a = [[1,1,0],0,0] \n test a[0]"};
-    VM vm;
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
     REQUIRE(vm.Prepare(file));
 
     StepData result = vm.GetTopStackValue();
@@ -113,7 +120,8 @@ TEST_CASE("DataSequence: Accesses nested array element [1,1,0], returns values c
 TEST_CASE("DataSequence: Accesses nested array element [1,1,0] added with other, returns values correctly", "[DataSequence]")
 {
     std::string file{"a = [[1,1,0],0,0] \n b = [[1,1,0], 0 , 0] \n test a[0] + b[0]"};
-    VM vm;
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
     REQUIRE(vm.Prepare(file));
 
     StepData result = vm.GetTopStackValue();
@@ -126,7 +134,8 @@ TEST_CASE("DataSequence: Accesses nested array element [1,1,0] added with other,
 TEST_CASE("DataSequence: Accesses nested array element [1,2,0] subtractd with other, returns values correctly", "[DataSequence]")
 {
     std::string file{"a = [[1,2,0],0,0] \n b = [[1,1,0], 0 , 0] \n test a[0] - b[0]"};
-    VM vm;
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
     REQUIRE(vm.Prepare(file));
 
     StepData result = vm.GetTopStackValue();
@@ -139,7 +148,8 @@ TEST_CASE("DataSequence: Accesses nested array element [1,2,0] subtractd with ot
 TEST_CASE("DataSequence: Accesses nested array element [2,4,0] divided with other, returns values correctly", "[DataSequence]")
 {
     std::string file{"a = [[2,4,0],0,0] \n b = [[2,2,0], 0 , 0] \n test a[0] / b[0]"};
-    VM vm;
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
     REQUIRE(vm.Prepare(file));
 
     StepData result = vm.GetTopStackValue();
@@ -152,7 +162,8 @@ TEST_CASE("DataSequence: Accesses nested array element [2,4,0] divided with othe
 TEST_CASE("DataSequence: Accesses nested array element [2,4,0] mutiplied with other, returns values correctly", "[DataSequence]")
 {
     std::string file{"a = [[2,4,0],0,0] \n b = [[2,2,0], 0 , 0] \n test a[0] * b[0]"};
-    VM vm;
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
     REQUIRE(vm.Prepare(file));
 
     StepData result = vm.GetTopStackValue();
@@ -165,7 +176,8 @@ TEST_CASE("DataSequence: Accesses nested array element [2,4,0] mutiplied with ot
 TEST_CASE("DataSequence: Accesses nested array element [1,1,3] subtractd with other of different lengths, returns values correctly", "[DataSequence]")
 {
     std::string file{"a = [[1,2,3],0,0] \n b = [[1,1], 0 , 0] \n test a[0] - b[0]"};
-    VM vm;
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
     REQUIRE(vm.Prepare(file));
 
     StepData result = vm.GetTopStackValue();
@@ -179,7 +191,8 @@ TEST_CASE("DataSequence: Accesses nested array element [1,1,3] subtractd with ot
 TEST_CASE("DataSequence: Accesses nested array element [3,1] subtractd with other of different lengths, returns values correctly", "[DataSequence]")
 {
     std::string file{"a = [[1,2,3],0,0] \n b = [[3,1], 0 , 0] \n test b[0] - a[0]"};
-    VM vm;
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
     REQUIRE(vm.Prepare(file));
 
     StepData result = vm.GetTopStackValue();
@@ -193,7 +206,8 @@ TEST_CASE("DataSequence: Accesses nested array element [3,1] subtractd with othe
 TEST_CASE("DataSequence: Accesses nested array element [3,5] subtractd with other of different lengths, returns values correctly", "[DataSequence]")
 {
     std::string file{"a = [[1,2,3,4],0,0] \n b = [[3,5], 0 , 0] \n test b[0] - a[0]"};
-    VM vm;
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
     REQUIRE(vm.Prepare(file));
 
     StepData result = vm.GetTopStackValue();
@@ -208,7 +222,8 @@ TEST_CASE("DataSequence: Accesses nested array element [3,5] subtractd with othe
 TEST_CASE("DataSequence: Accesses nested array element [2,4,0] divided with other of different lengths, returns values correctly", "[DataSequence]")
 {
     std::string file{"a = [[2,4,0],0,0] \n b = [[2,2], 0 , 0] \n test a[0] / b[0]"};
-    VM vm;
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
     REQUIRE(vm.Prepare(file));
 
     StepData result = vm.GetTopStackValue();
@@ -380,7 +395,8 @@ TEST_CASE("DataSequence: Applies OR operation to sequences element-wise", "[Data
 TEST_CASE("DataSequence: Adds scalar to nested array sub-division correctly (a+10)", "[DataSequence]")
 {
     std::string file{"a = [[60,65,70], 0, 0] \n b = a + 10 \n test b[0]"};
-    VM vm;
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
     REQUIRE(vm.Prepare(file));
 
     StepData result = vm.GetTopStackValue();
@@ -392,7 +408,8 @@ TEST_CASE("DataSequence: Adds scalar to nested array sub-division correctly (a+1
 TEST_CASE("DataSequence: Adds scalar to nested array sub-division correctly (a[1]+10)", "[DataSequence]")
 {
     std::string file{"a = [[60,65,70], 5, 0] \n b = a[1] + 10 \n test b[1]"};
-    VM vm;
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
     REQUIRE(vm.Prepare(file));
 
     StepData result = vm.GetTopStackValue();

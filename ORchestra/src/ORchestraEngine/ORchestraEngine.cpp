@@ -18,6 +18,7 @@
  */
 
 #include <cmath>
+#include <string>
 
 #include "ORchestraEngine.h"
 #include "Defines.h"
@@ -33,7 +34,8 @@ namespace ORchestra
         mIsVMInit(false),
         mShouldExit(false),
         mHasWork(false),
-        mVM()
+        mErrorReporting(),
+        mVM(mErrorReporting)
     {
         mFileLoader = std::make_unique<FileLoader>();
         mWorkerThread = std::thread([this]() { WorkerThreadLoop(); });
@@ -82,6 +84,12 @@ namespace ORchestra
         mVM.Reset();
 
         const bool innitSuccess = mVM.Prepare(&mInstructionData[0]);
+        if (innitSuccess)
+        {
+            mErrorReporting.Clear(); // TODO: Should we clear here or somewhere else?
+            mErrorReporting.LogMessage("Compiled Successfully!");
+        }
+        
         mIsVMInit.store(innitSuccess);
         WakeWorker();
     }
@@ -191,18 +199,18 @@ namespace ORchestra
                        case ORchestra::SequenceStepType::BPM:
                        {
                            mScriptTransportData.bpm = step.mFirst.GetValue(0);
-                           std::cout << static_cast<int>(step.mFirst.GetValue(0)) << std::endl;
                            break;
                        }
                        case ORchestra::SequenceStepType::NOTE_DIVISION:
                        {
                            mScriptTransportData.bpmDivision = ToBpmDivision(step.mFirst.GetValue(0));
-                           std::cout << static_cast<int>(step.mFirst.GetValue(0)) << std::endl;
                            break;
                        }
                        case ORchestra::SequenceStepType::PRINT:
                        {
-                           std::cout << static_cast<int>(step.mFirst.GetValue(0)) << std::endl;
+                           const std::string mes = std::to_string(static_cast<int>(step.mFirst.GetValue(0)));
+                           mErrorReporting.LogMessage(mes);
+                           sendChangeMessage();
                            break;
                        }
                        case ORchestra::SequenceStepType::NoteOn:

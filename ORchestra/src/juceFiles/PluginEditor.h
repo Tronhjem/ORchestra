@@ -26,7 +26,6 @@
 #include "Timeline.h"
 #include "TriggerRectangle.h"
 #include "CodeEditorPanel.h"
-#include "FileOperationsToolbar.h"
 #include "TransportControls.h"
 #include "TempoControlsPanel.h"
 

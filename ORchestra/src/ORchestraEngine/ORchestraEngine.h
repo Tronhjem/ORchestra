@@ -46,7 +46,7 @@ namespace ORchestra
 
         std::array<std::vector<SequenceStep>, STEP_BUFFER_SIZE>& GetStepData() { return mStepRingBuffer; }
         int GetGlobalStepCount() { return mCurrentGlobalStep.load(); }
-        const std::vector<LogEntry>& GetErrors() { return mVM.GetErrors(); }
+        const std::vector<LogEntry>& GetErrors() { return mErrorReporting.GetErrors(); }
         const std::string& GetInstructionData() { return mInstructionData; }
         void SetInstructionData(const std::string& data) { mInstructionData = data; }
         bool IsVMInit() { return mIsVMInit.load(); }
@@ -76,10 +76,10 @@ namespace ORchestra
         std::string mInstructionData;
 
         MidiScheduler mMidiScheduler;
+        ErrorReporting mErrorReporting;
         VM mVM;
         
         TransportData mScriptTransportData;
     };
-
 
 } // namespace ORchestra

@@ -86,9 +86,16 @@ void CodeEditorPanel::resized()
 void CodeEditorPanel::updateErrorDisplay(const std::vector<ORchestra::LogEntry>& errors)
 {
     if (errors.size() > 0)
-        mErrorTextBox.setText(errors[0].mMessage);
-    else
-        mErrorTextBox.setText("Compiled successfully!");
+    {
+        juce::String mess;
+        for (const auto& error : errors)
+        {
+            mess.append(error.mMessage.data(), error.mMessage.size());
+            mess.append("\n", 2);
+        }
+
+        mErrorTextBox.setText(mess);
+    }
 }
 
 void CodeEditorPanel::loadContent(const juce::String& content)

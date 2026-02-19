@@ -62,7 +62,8 @@ TEST_CASE("Scanner: Tokenizes expression with $ correctly", "[GlobalCount]")
 
 TEST_CASE("VM: $ returns 0 in PreprocessOpCodes (Prepare)", "[GlobalCount]")
 {
-    VM vm;
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
     std::string script = "x = $";
     
     // This should succeed - $ evaluates to 0 during Prepare
@@ -71,7 +72,8 @@ TEST_CASE("VM: $ returns 0 in PreprocessOpCodes (Prepare)", "[GlobalCount]")
 
 TEST_CASE("VM: $ returns globalCount value in Tick", "[GlobalCount]")
 {
-    VM vm;
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
     std::string script = "x = $\ntest x";
     
     REQUIRE(vm.Prepare(script));
@@ -88,7 +90,8 @@ TEST_CASE("VM: $ returns globalCount value in Tick", "[GlobalCount]")
 
 TEST_CASE("VM: $ can be used in arithmetic expressions during Tick", "[GlobalCount]")
 {
-    VM vm;
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
     std::string script = "x = $ * 2\ntest x";
     
     REQUIRE(vm.Prepare(script));
@@ -105,7 +108,8 @@ TEST_CASE("VM: $ can be used in arithmetic expressions during Tick", "[GlobalCou
 
 TEST_CASE("VM: $ can be used in comparison expressions", "[GlobalCount]")
 {
-    VM vm;
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
     std::string script = "x = $ > 5\ntest x";
     
     REQUIRE(vm.Prepare(script));
@@ -122,7 +126,8 @@ TEST_CASE("VM: $ can be used in comparison expressions", "[GlobalCount]")
 
 TEST_CASE("VM: $ evaluates to different values on different Tick calls", "[GlobalCount]")
 {
-    VM vm;
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
     std::string script = "x = $\ntest x";
     
     REQUIRE(vm.Prepare(script));
@@ -145,7 +150,8 @@ TEST_CASE("VM: $ evaluates to different values on different Tick calls", "[Globa
 
 TEST_CASE("VM: $ can be used with modulo to create patterns", "[GlobalCount]")
 {
-    VM vm;
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
     std::string script = "x = $ % 4\ntest x";
     
     REQUIRE(vm.Prepare(script));
@@ -163,7 +169,8 @@ TEST_CASE("VM: $ can be used with modulo to create patterns", "[GlobalCount]")
 #if _TEST
 TEST_CASE("VM: $ resolves to globalCount value and can be retrieved", "[GlobalCount]")
 {
-    VM vm;
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
     std::string script = "test $";
     
     REQUIRE(vm.Prepare(script));
@@ -178,7 +185,8 @@ TEST_CASE("VM: $ resolves to globalCount value and can be retrieved", "[GlobalCo
 
 TEST_CASE("VM: $ in expression evaluates correctly", "[GlobalCount]")
 {
-    VM vm;
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
     std::string script = "test $ + 10";
     
     REQUIRE(vm.Prepare(script));
@@ -193,7 +201,8 @@ TEST_CASE("VM: $ in expression evaluates correctly", "[GlobalCount]")
 
 TEST_CASE("VM: $ in complex expression", "[GlobalCount]")
 {
-    VM vm;
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
     std::string script = "test $ * 2 + 5";
     
     REQUIRE(vm.Prepare(script));
@@ -208,7 +217,8 @@ TEST_CASE("VM: $ in complex expression", "[GlobalCount]")
 
 TEST_CASE("VM: $ evaluates to 0 during Prepare (ProcessOpCodes)", "[GlobalCount]")
 {
-    VM vm;
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
     std::string script = "test $";
     
     REQUIRE(vm.Prepare(script));

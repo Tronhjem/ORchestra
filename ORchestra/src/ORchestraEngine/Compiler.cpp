@@ -296,7 +296,7 @@ namespace ORchestra
             return false;
         }
 
-        StoredFunction& function = mFunctions[functionName];
+        const StoredFunction& function = mFunctions[functionName];
 
         Consume(); // For Left Parenteses
         int paramCounter = 0;
@@ -323,7 +323,8 @@ namespace ORchestra
             case ORchestraTokenType::END:
             case ORchestraTokenType::EOL:
             {
-                ThrowMissingParamCount(function.mNumOfParams, paramCounter);
+                const std::string missingRightParen = ")";
+                ThrowUnexpectedEnd(missingRightParen);
                 return false;
             }
 
@@ -356,6 +357,13 @@ namespace ORchestra
             }
 
             ThrowUnexpectedTokenError(Previous());
+            return false;
+        }
+
+        if(Peek().mTokenType != ORchestraTokenType::RIGHT_PAREN)
+        {
+            const std::string missingRightParen = ")";
+            ThrowUnexpectedEnd(missingRightParen);
             return false;
         }
 
@@ -866,7 +874,7 @@ namespace ORchestra
             case ORchestraTokenType::NOTE:
             case ORchestraTokenType::CC:
             {
-                std::string functionName = std::string(token.mStart, static_cast<unsigned long>(token.mLength));
+                const std::string functionName = std::string(token.mStart, static_cast<unsigned long>(token.mLength));
                 if (!CompileFunctionCall(instructions, functionName))
                     return false;
 
