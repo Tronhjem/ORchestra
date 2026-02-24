@@ -29,7 +29,8 @@ class CodeEditorPanel : public juce::Component
 {
 public:
     static constexpr int CODE_EDITOR_HEIGHT = 400;
-    static constexpr int ERROR_BOX_HEIGHT = 300;
+    static constexpr int ERROR_BOX_HEIGHT = 220;
+    static constexpr int COMPONENT_SPACING = 20;
 
     CodeEditorPanel(ORchestra::ORchestraCodeEditorChangeListener* changeListener);
     ~CodeEditorPanel() override;
@@ -53,15 +54,24 @@ public:
     void setImportCallback(std::function<void()> callback);
     void setExportCallback(std::function<void()> callback);
     void setCompileCallback(std::function<void()> callback);
+    void setClearLogCallback(std::function<void()> callback);
 
-    constexpr int getPreferredHeight() const { return CODE_EDITOR_HEIGHT + ERROR_BOX_HEIGHT; }
+    constexpr int getPreferredHeight() const { return CODE_EDITOR_HEIGHT 
+                                                  + ERROR_BOX_HEIGHT 
+                                                  + mFileOperationsToolbar.getPreferredHeight() 
+                                                  + mFileOperationsToolbar.BUTTON_HEIGHT
+                                                  + 3 * COMPONENT_SPACING; }
 
 private:
     ORchestra::ORchestraCodeEditorTokenizer mTokeniser;
     juce::CodeDocument mCodeDocument;
     ORchestra::ORchestraCodeEditorComponent mCodeEditor;
     juce::TextEditor mErrorTextBox;
+
+    juce::TextButton mClearLogButton;
     FileOperationsToolbar mFileOperationsToolbar;
+    
+    std::function<void()> mClearLogCallback;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CodeEditorPanel)
 };

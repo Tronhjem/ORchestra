@@ -102,6 +102,9 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     mCodeEditorPanel.setCompileCallback([this]() { handleCompile(); });
     mCodeEditorPanel.setExportCallback([this]() { handleExportFile(); });
     mCodeEditorPanel.setImportCallback([this]() { handleImportFile(); });
+    mCodeEditorPanel.setClearLogCallback([this]() { handleClearLog(); });
+    
+    audioProcessor.SetErrorListener(this);
 
     addAndMakeVisible(mTempoControlsPanel);
     addAndMakeVisible(mTransportControls);
@@ -112,6 +115,13 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     const std::string& data = audioProcessor.GetInstructionData();
     juce::String dataAsString{ data };
     mCodeEditorPanel.loadContent(dataAsString);
+    
+    if (audioProcessor.IsORchestraVMInit())
+    {
+        mCodeEditorPanel.markSaved();
+        mCodeEditorPanel.setCompileButtonEnabled(false);
+        UpdateErrors();
+    }
 
     setWantsKeyboardFocus(true);
 }
@@ -119,6 +129,7 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
 ORchestraAudioProcessorEditor::~ORchestraAudioProcessorEditor()
 {
     audioProcessor.removeChangeListener(this);
+    audioProcessor.SetErrorListener(nullptr);
 }
 
 void ORchestraAudioProcessorEditor::changeListenerCallback(juce::ChangeBroadcaster* broadCaster)
@@ -207,8 +218,22 @@ void ORchestraAudioProcessorEditor::handleExportFile()
 
 void ORchestraAudioProcessorEditor::UpdateErrors()
 {
-    const std::vector<LogEntry>& errors = audioProcessor.GetErrors();
-    mCodeEditorPanel.updateErrorDisplay(errors);
+    mCodeEditorPanel.updateErrorDisplay(audioProcessor.GetErrors());
+}
+
+void ORchestraAudioProcessorEditor::OnLogUpdated()
+{
+    triggerAsyncUpdate();
+}
+
+void ORchestraAudioProcessorEditor::handleAsyncUpdate()
+{
+    UpdateErrors();
+}
+
+void ORchestraAudioProcessorEditor::handleClearLog()
+{
+    audioProcessor.RequestClearErrors();
 }
 
 //==============================================================================

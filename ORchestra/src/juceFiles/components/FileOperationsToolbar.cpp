@@ -25,8 +25,8 @@ FileOperationsToolbar::FileOperationsToolbar()
     mExportButton.addListener(this);
     mCompileButton.addListener(this);
 
-    addAndMakeVisible(mExportButton);
-    addAndMakeVisible(mImportButton);
+    // addAndMakeVisible(mExportButton);
+    // addAndMakeVisible(mImportButton);
     addAndMakeVisible(mCompileButton);
 }
 

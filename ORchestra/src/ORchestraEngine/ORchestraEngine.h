@@ -46,10 +46,13 @@ namespace ORchestra
 
         std::array<std::vector<SequenceStep>, STEP_BUFFER_SIZE>& GetStepData() { return mStepRingBuffer; }
         int GetGlobalStepCount() { return mCurrentGlobalStep.load(); }
-        const std::vector<LogEntry>& GetErrors() { return mErrorReporting.GetErrors(); }
+        std::vector<LogEntry> GetErrors() { return mErrorReporting.GetErrors(); }
         const std::string& GetInstructionData() { return mInstructionData; }
         void SetInstructionData(const std::string& data) { mInstructionData = data; }
         bool IsVMInit() { return mIsVMInit.load(); }
+        
+        void SetErrorListener(ErrorReportingListener* listener) { mErrorReporting.SetListener(listener); }
+        void RequestClearErrors();
 
     private:
         void WakeWorker();
@@ -66,6 +69,7 @@ namespace ORchestra
         std::atomic<bool> mIsVMInit;
         std::atomic<bool> mShouldExit;
         std::atomic<bool> mHasWork;
+        std::atomic<bool> mIsRunning;
 
         std::mutex mCVMutex;
         std::condition_variable mCV;

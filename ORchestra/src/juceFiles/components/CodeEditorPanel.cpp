@@ -37,10 +37,16 @@ CodeEditorPanel::CodeEditorPanel(ORchestra::ORchestraCodeEditorChangeListener* c
     mErrorTextBox.setMultiLine(true);
     mErrorTextBox.setEnabled(false);
     
+    mClearLogButton.setButtonText("Clear");
+    mClearLogButton.onClick = [this]() {
+        if (mClearLogCallback)
+            mClearLogCallback();
+    };
+    
     addAndMakeVisible(mFileOperationsToolbar);
     addAndMakeVisible(mCodeEditor);
     addAndMakeVisible(mErrorTextBox);
-    mErrorTextBox.setText("Test test test setsetst ");
+    addAndMakeVisible(mClearLogButton);
 }
 
 void CodeEditorPanel::setImportCallback(std::function<void()> callback)
@@ -57,10 +63,16 @@ void CodeEditorPanel::setCompileCallback(std::function<void()> callback)
 {
     mFileOperationsToolbar.setCompileCallback(std::move(callback));
 }
+
+void CodeEditorPanel::setClearLogCallback(std::function<void()> callback)
+{
+    mClearLogCallback = std::move(callback);
+}
     
 CodeEditorPanel::~CodeEditorPanel()
 {
     mCodeEditor.setLookAndFeel(nullptr);
+    mErrorTextBox.setLookAndFeel(nullptr);
 }
 
 void CodeEditorPanel::resized()
@@ -78,24 +90,33 @@ void CodeEditorPanel::resized()
     mFileOperationsToolbar.setBounds(buttonRow.removeFromLeft(fileOpsWidth));
 
     bounds.removeFromTop(20);
-    auto errorBounds = bounds.removeFromTop(ERROR_BOX_HEIGHT);
+
+    const auto errorBounds = bounds.removeFromTop(ERROR_BOX_HEIGHT);
     mErrorTextBox.setBounds(errorBounds);
+    
+    bounds.removeFromTop(20);
+    const auto clearButtonBounds = bounds.removeFromTop(20).withWidth(60);
+    mClearLogButton.setBounds(clearButtonBounds);
+    
     repaint();
 }
 
 void CodeEditorPanel::updateErrorDisplay(const std::vector<ORchestra::LogEntry>& errors)
 {
-    if (errors.size() > 0)
+    juce::String mess;
+    // Iterate in reverse order so newest messages appear first
+    for (auto it = errors.rbegin(); it != errors.rend(); ++it)
     {
-        juce::String mess;
-        for (const auto& error : errors)
+        const auto& entry = *it;
+        // Add step count prefix if available (non-zero)
+        if (entry.mStepCount > 0)
         {
-            mess.append(error.mMessage.data(), error.mMessage.size());
-            mess.append("\n", 2);
+            mess += "[Step " + juce::String(entry.mStepCount) + "] ";
         }
-
-        mErrorTextBox.setText(mess);
+        mess.append(entry.mMessage.data(), entry.mMessage.size());
+        mess.append("\n", 1);
     }
+    mErrorTextBox.setText(mess);
 }
 
 void CodeEditorPanel::loadContent(const juce::String& content)

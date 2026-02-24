@@ -86,7 +86,6 @@ namespace ORchestra
         const bool innitSuccess = mVM.Prepare(&mInstructionData[0]);
         if (innitSuccess)
         {
-            mErrorReporting.Clear(); // TODO: Should we clear here or somewhere else?
             mErrorReporting.LogMessage("Compiled Successfully!");
         }
         
@@ -156,6 +155,8 @@ namespace ORchestra
         const int bufferLength,
         juce::MidiBuffer& midiMessages)
     {
+        mIsRunning.store(transportData.isPlaying);
+
         if (transportData.isPlaying && mIsVMInit)
         {
             // Use script-provided BPM and division if they were set, otherwise use the provided values
@@ -209,8 +210,7 @@ namespace ORchestra
                        case ORchestra::SequenceStepType::PRINT:
                        {
                            const std::string mes = std::to_string(static_cast<int>(step.mFirst.GetValue(0)));
-                           mErrorReporting.LogMessage(mes);
-                           sendChangeMessage();
+                           mErrorReporting.LogMessage(mes, mCurrentGlobalStep.load());
                            break;
                        }
                        case ORchestra::SequenceStepType::NoteOn:
@@ -255,6 +255,14 @@ namespace ORchestra
         {
             mMidiScheduler.ClearAllData(midiMessages);
         }
+    }
+
+    void ORchestraEngine::RequestClearErrors()
+    { 
+        if (mIsRunning.load())
+            mErrorReporting.RequestClear();
+        else
+            mErrorReporting.Clear();
     }
 
     float ORchestraEngine::ToBpmDivision(DataUnit divValue)

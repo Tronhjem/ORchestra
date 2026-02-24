@@ -82,8 +82,11 @@ public:
     const std::string& GetInstructionData() { return mORchestraEngine->GetInstructionData(); }
     int GetGlobalStepCount() { return mORchestraEngine->GetGlobalStepCount(); }
     std::array<std::vector<SequenceStep>, STEP_BUFFER_SIZE>& GetStepData() { return mORchestraEngine->GetStepData(); }
-    const std::vector<LogEntry>& GetErrors() { return mORchestraEngine->GetErrors(); }
+    std::vector<LogEntry> GetErrors() { return mORchestraEngine->GetErrors(); }
     bool IsORchestraVMInit() { return mORchestraEngine->IsVMInit(); }
+    
+    void SetErrorListener(ErrorReportingListener* listener) { mORchestraEngine->SetErrorListener(listener); }
+    void RequestClearErrors() { mORchestraEngine->RequestClearErrors(); }
 
     bool IsRunning = false;
     double mSampleRate = 44100;

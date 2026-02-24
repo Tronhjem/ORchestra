@@ -56,6 +56,11 @@ public:
             g.fillRoundedRectangle(static_cast<float>(thumbStartPosition), static_cast<float>(y), static_cast<float>(width), static_cast<float>(height), ROUNDED_CORNER_SIZE);
     }
 
+    int getDefaultScrollbarWidth() override 
+    {
+        return 4;
+    }
+
     void drawTextEditorOutline(juce::Graphics& g, int width, int height, juce::TextEditor& ed) override
     {
         UNUSED(g);
