@@ -965,6 +965,12 @@ namespace ORchestra
         }
         
         mVariableIDMap[varName] = mVariableIdCounter++;
+
+        if (mVariableIdCounter > 255)
+        {
+            mErrorReporting.LogWarning("Only 255 unique variables are supported");
+        }
+
         return mVariableIDMap[varName];
     }
 
