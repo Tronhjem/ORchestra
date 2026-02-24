@@ -74,14 +74,19 @@ namespace ORchestra
     class Instruction
     {
     public:
-        Instruction() : opCode(OpCode::CONSTANT), mOperand(0) {}
-        explicit Instruction(OpCode code) : opCode(code), mOperand(0) {}
-        explicit Instruction(OpCode code, uint16_t operand) : opCode(code), mOperand(operand) {}
+        // This is tested to be faster, and not just to be fancy.
+        // We pack OpCode and operand together to save some space. 
+        Instruction() : mEncoded(0) {}
+        explicit Instruction(OpCode code) 
+            : mEncoded(static_cast<uint16_t>(static_cast<uint16_t>(static_cast<DataUnit>(code)) << 8)) {}
+        explicit Instruction(OpCode code, DataUnit operand) 
+            : mEncoded(static_cast<uint16_t>((static_cast<uint16_t>(static_cast<DataUnit>(code)) << 8) | operand)) {}
 
-        OpCode opCode;
-        //TODO: could consider setting this to even smaller, uint8 but probably not worth it.
-        // Or moving it out completely to have an instruction be either a value or Code
-        uint16_t mOperand;
+        OpCode GetOpCode() const { return static_cast<OpCode>(mEncoded >> 8); }
+        DataUnit GetOperand() const { return static_cast<DataUnit>(mEncoded & 0xFF); }
+
+    private:
+        uint16_t mEncoded;  // Upper 8 bits = OpCode, Lower 8 bits = operand
     };
 
 } // namespace ORchestra
