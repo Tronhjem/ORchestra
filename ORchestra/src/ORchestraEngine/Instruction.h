@@ -74,14 +74,14 @@ namespace ORchestra
     class Instruction
     {
     public:
-        Instruction() : opCode(OpCode::CONSTANT) {}
-        explicit Instruction(OpCode code) : opCode(code) {}
-        explicit Instruction(OpCode code, DataUnit value) : opCode(code), mDataValue(value) {}
-        explicit Instruction(OpCode code, uint16_t id) : opCode(code), mId(id) {}
+        Instruction() : opCode(OpCode::CONSTANT), mOperand(0) {}
+        explicit Instruction(OpCode code) : opCode(code), mOperand(0) {}
+        explicit Instruction(OpCode code, uint16_t operand) : opCode(code), mOperand(operand) {}
 
         OpCode opCode;
-        DataUnit mDataValue;
-        uint16_t mId;
+        //TODO: could consider setting this to even smaller, uint8 but probably not worth it.
+        // Or moving it out completely to have an instruction be either a value or Code
+        uint16_t mOperand;
     };
 
 } // namespace ORchestra

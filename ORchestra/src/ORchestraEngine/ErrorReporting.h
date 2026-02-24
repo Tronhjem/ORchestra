@@ -62,9 +62,9 @@ namespace ORchestra
         std::vector<LogEntry> GetErrors() { return mLogEntries; }
         
         void SetListener(ErrorReportingListener* listener) { mListener = listener; }
+        void CheckAndClear();
 
     private:
-        void CheckAndClear();
         void TrimOldEntries();
         void NotifyListener();
 

@@ -94,7 +94,7 @@ namespace ORchestra
                 StepData value = stack.Pop();
                 std::vector<StepData> vectorData{ value };
                 
-                if(instruction.mId >= mVariables.size())
+                if(instruction.mOperand >= mVariables.size())
                 {
                     mVariables.emplace_back(DataSequence{ vectorData });
                 }
@@ -119,7 +119,7 @@ namespace ORchestra
 
                 std::vector<StepData> vectorData{ data, data + arrayLength };
                 
-                if(instruction.mId >= mVariables.size())
+                if(instruction.mOperand >= mVariables.size())
                 {
                     mVariables.emplace_back(DataSequence{ vectorData });
                 }
@@ -139,9 +139,9 @@ namespace ORchestra
                 const StepData value = stack.Pop();
                 const int index = stack.Pop().GetValue(0);
                 
-                if (instruction.mId < mVariables.size())
+                if (instruction.mOperand < mVariables.size())
                 {
-                    mVariables[instruction.mId].SetValue(index, value);
+                    mVariables[instruction.mOperand].SetValue(index, value);
                 }
                 else
                 {
@@ -298,7 +298,7 @@ namespace ORchestra
         {
         case (OpCode::CONSTANT):
         {
-            StepData value {instruction.mDataValue};
+            StepData value {static_cast<DataUnit>(instruction.mOperand)};
             stack.Push(value);
 
             break;
@@ -307,7 +307,7 @@ namespace ORchestra
         case (OpCode::SET_IDENTIFIER_VALUE):
         {
             const StepData value = stack.Pop();
-            mVariables[instruction.mId].SetValue(0, value);
+            mVariables[instruction.mOperand].SetValue(0, value);
 
             break;
         }
@@ -318,7 +318,7 @@ namespace ORchestra
 
             for (int i = arrayLength - 1; i >= 0; --i)
             {
-                mVariables[instruction.mId].SetValue(i, stack.Pop());
+                mVariables[instruction.mOperand].SetValue(i, stack.Pop());
             }
 
             break;
@@ -329,9 +329,9 @@ namespace ORchestra
             const StepData value = stack.Pop();
             const int index = stack.Pop().GetValue(0);
             
-            if (instruction.mId < mVariables.size())
+            if (instruction.mOperand < mVariables.size())
             {
-                mVariables[instruction.mId].SetValue(index, value);
+                mVariables[instruction.mOperand].SetValue(index, value);
             }
             else
             {
@@ -380,9 +380,9 @@ namespace ORchestra
 
         case (OpCode::GET_IDENTIFIER_VALUE):
         {
-            if (instruction.mId < mVariables.size())
+            if (instruction.mOperand < mVariables.size())
             {
-                const StepData value = mVariables[instruction.mId].GetValue(stepCount);
+                const StepData value = mVariables[instruction.mOperand].GetValue(stepCount);
                 stack.Push(value);
             }
             else
@@ -397,11 +397,11 @@ namespace ORchestra
 
         case (OpCode::GET_IDENTIFIER_WITH_INDEX):
         {
-            if (instruction.mId < mVariables.size())
+            if (instruction.mOperand < mVariables.size())
             {
                 const int index = stack.Pop().GetValue(0);
                 // GetValue is done with modulo inside, so no need to worry about out of bounds value
-                const StepData value = mVariables[instruction.mId].GetValue(index);
+                const StepData value = mVariables[instruction.mOperand].GetValue(index);
                 stack.Push(value);
             }
             else

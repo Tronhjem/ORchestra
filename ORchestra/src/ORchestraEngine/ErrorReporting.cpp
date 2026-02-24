@@ -50,7 +50,6 @@ namespace ORchestra
 
     void ErrorReporting::LogError(const int line, std::string& message)
     {
-        CheckAndClear();
         message = message + ", at line " + std::to_string(line) + "\n";
         mLogEntries.emplace_back(LogEntry{ EntryType::Error, line, 0, std::move(message) });
         TrimOldEntries();
@@ -60,7 +59,6 @@ namespace ORchestra
 
     void ErrorReporting::LogError(const std::string& message)
     {
-        CheckAndClear();
         mLogEntries.emplace_back(LogEntry{ EntryType::Error, 0, 0, std::move(message) });
         TrimOldEntries();
         NotifyListener();
@@ -69,7 +67,6 @@ namespace ORchestra
 
     void ErrorReporting::LogWarning(const int line, std::string& message)
     {
-        CheckAndClear();
         message = message + ", at line " + std::to_string(line) + "\n";
         mLogEntries.emplace_back(LogEntry{ EntryType::Warning, line, 0, std::move(message) });
         TrimOldEntries();
@@ -79,7 +76,6 @@ namespace ORchestra
 
     void ErrorReporting::LogWarning(const std::string& message)
     {
-        CheckAndClear();
         mLogEntries.emplace_back(LogEntry{ EntryType::Warning, 0, 0, std::move(message) });
         TrimOldEntries();
         NotifyListener();
@@ -88,7 +84,6 @@ namespace ORchestra
 
     void ErrorReporting::LogMessage(const std::string& message)
     {
-        CheckAndClear();
         mLogEntries.emplace_back(LogEntry{ EntryType::Messasge, 0, 0, std::move(message) });
         TrimOldEntries();
         NotifyListener();
@@ -97,7 +92,6 @@ namespace ORchestra
 
     void ErrorReporting::LogMessage(const std::string& message, int stepCount)
     {
-        CheckAndClear();
         mLogEntries.emplace_back(LogEntry{ EntryType::Messasge, 0, stepCount, std::move(message) });
         TrimOldEntries();
         NotifyListener();

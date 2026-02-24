@@ -157,6 +157,8 @@ namespace ORchestra
     {
         mIsRunning.store(transportData.isPlaying);
 
+        mErrorReporting.CheckAndClear();
+
         if (transportData.isPlaying && mIsVMInit)
         {
             // Use script-provided BPM and division if they were set, otherwise use the provided values
@@ -193,8 +195,10 @@ namespace ORchestra
                mSamplesSinceLastStep = transportData.timeInSamples;
                const int wrappedGlobalStep = currentStep & STEP_BUFFER_SIZE_MASK;
                const std::vector<SequenceStep>& currentData = mStepRingBuffer[static_cast<unsigned long>(wrappedGlobalStep)];
+                
                for (const SequenceStep& step : currentData)
                {
+                   
                    switch (step.mType)
                    {
                        case ORchestra::SequenceStepType::BPM:
