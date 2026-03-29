@@ -62,7 +62,7 @@ namespace ORchestra
                 const int newValue = operationLambda(
                         static_cast<int>(this->GetEquivalentValueAtIndex(i, newLength)),
                         static_cast<int>(otherSequence.GetEquivalentValueAtIndex(i, newLength)));
-                newStep.mData[i] = static_cast<DataUnit>(std::clamp(newValue, 0, 127));
+                newStep.mData[i] = static_cast<DataUnit>(std::clamp(newValue, DATA_UNIT_MIN_VALUE, DATA_UNIT_MAX_VALUE));
             }
 
             return newStep;

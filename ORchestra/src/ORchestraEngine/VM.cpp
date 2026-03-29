@@ -289,7 +289,7 @@ namespace ORchestra
 
         const int value = fast_rand() % calculatedRange;
         const int result = value + static_cast<int>(low);
-        return static_cast<DataUnit>(std::clamp(result, 0, DATA_UNIT_MAX_VALUE));
+        return static_cast<DataUnit>(std::clamp(result, DATA_UNIT_MIN_VALUE, DATA_UNIT_MAX_VALUE));
     }
 
     bool VM::ProcessInstruction(const Instruction& instruction, const int stepCount, Stack<StepData>& stack)
@@ -372,7 +372,7 @@ namespace ORchestra
                 stack.Push(data[i]);
             }
 
-            const int clampedLength = std::clamp(length, 0, DATA_UNIT_MAX_VALUE);
+            const int clampedLength = std::clamp(length, DATA_UNIT_MIN_VALUE, DATA_UNIT_MAX_VALUE);
             stack.Push(StepData{ clampedLength });
 
             break;
