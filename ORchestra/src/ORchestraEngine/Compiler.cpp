@@ -143,7 +143,7 @@ namespace ORchestra
         if (value > DATA_UNIT_MAX_VALUE)
         {
             value = DATA_UNIT_MAX_VALUE;
-            const std::string message = std::string("Value can't be greater than 127, correcting to 127");
+            const std::string message = std::string("Value can't be greater than 255, correcting to 255");
             mErrorReporting.LogWarning(message);
         }
         if (value < DATA_UNIT_MIN_VALUE)

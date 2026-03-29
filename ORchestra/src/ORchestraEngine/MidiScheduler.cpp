@@ -18,14 +18,13 @@
  */
 
 #include "MidiScheduler.h"
+#include "Defines.h"
 #include <algorithm>
 
 namespace ORchestra {
 
-    using juce::MidiMessage;
-
-#define CLAMP_TO_MIDI(x, min, max) \
-static_cast<DataUnit>(std::clamp(static_cast<int>(x), min, max))
+    #define CLAMP_TO_MIDI(x, min, max) \
+    static_cast<DataUnit>(std::clamp(static_cast<int>(x), min, max))
 
     MidiScheduler::MidiScheduler()
     {
@@ -33,9 +32,9 @@ static_cast<DataUnit>(std::clamp(static_cast<int>(x), min, max))
 
     void MidiScheduler::PostMidi(ScheduledMidiMessage& message)
     {
-        message.mFirstByte = CLAMP_TO_MIDI(message.mFirstByte, DATA_UNIT_MIN_VALUE, DATA_UNIT_MAX_VALUE);
-        message.mSecondByte = CLAMP_TO_MIDI(message.mSecondByte, DATA_UNIT_MIN_VALUE, DATA_UNIT_MAX_VALUE);
-        message.mChannel = CLAMP_TO_MIDI(message.mChannel, DATA_UNIT_MIN_VALUE, 16);
+        message.mFirstByte = CLAMP_TO_MIDI(message.mFirstByte, DATA_UNIT_MIN_VALUE, MIDI_MAX_VALUE);
+        message.mSecondByte = CLAMP_TO_MIDI(message.mSecondByte, DATA_UNIT_MIN_VALUE, MIDI_MAX_VALUE);
+        message.mChannel = CLAMP_TO_MIDI(message.mChannel, DATA_UNIT_MIN_VALUE, MAX_MIDI_CHANNEL_NUMBER);
         mScheduledMidiMessages.emplace_back(message);
 
         // Generate corresponding NoteOff for NoteOn
