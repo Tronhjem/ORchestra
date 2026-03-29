@@ -18,14 +18,13 @@
  */
 
 #include "MidiScheduler.h"
+#include "Defines.h"
 #include <algorithm>
 
 namespace ORchestra {
 
-    using juce::MidiMessage;
-
-#define CLAMP_TO_MIDI(x, min, max) \
-static_cast<DataUnit>(std::clamp(static_cast<int>(x), min, max))
+    #define CLAMP_TO_MIDI(x, min, max) \
+    static_cast<DataUnit>(std::clamp(static_cast<int>(x), min, max))
 
     MidiScheduler::MidiScheduler()
     {
@@ -33,16 +32,16 @@ static_cast<DataUnit>(std::clamp(static_cast<int>(x), min, max))
 
     void MidiScheduler::PostMidi(ScheduledMidiMessage& message)
     {
-        message.mFirstByte = CLAMP_TO_MIDI(message.mFirstByte, DATA_UNIT_MIN_VALUE, DATA_UNIT_MAX_VALUE);
-        message.mSecondByte = CLAMP_TO_MIDI(message.mSecondByte, DATA_UNIT_MIN_VALUE, DATA_UNIT_MAX_VALUE);
-        message.mChannel = CLAMP_TO_MIDI(message.mChannel, DATA_UNIT_MIN_VALUE, 16);
+        message.mFirstByte = CLAMP_TO_MIDI(message.mFirstByte, DATA_UNIT_MIN_VALUE, MIDI_MAX_VALUE);
+        message.mSecondByte = CLAMP_TO_MIDI(message.mSecondByte, DATA_UNIT_MIN_VALUE, MIDI_MAX_VALUE);
+        message.mChannel = CLAMP_TO_MIDI(message.mChannel, DATA_UNIT_MIN_VALUE, MAX_MIDI_CHANNEL_NUMBER);
         mScheduledMidiMessages.emplace_back(message);
 
         // Generate corresponding NoteOff for NoteOn
-        if (message.mMessageType == MidiType::NoteOn)
+        if (message.mMessageType == SequenceStepType::NoteOn)
         {
             const int timeStampOff = message.mScheduledTime + message.mDuration;
-            mScheduledMidiMessages.emplace_back(ScheduledMidiMessage { MidiType::NoteOff, 
+            mScheduledMidiMessages.emplace_back(ScheduledMidiMessage { SequenceStepType::NoteOff, 
                                                                        message.mFirstByte, 
                                                                        0, message.mChannel, 
                                                                        timeStampOff, 0 
@@ -64,7 +63,7 @@ static_cast<DataUnit>(std::clamp(static_cast<int>(x), min, max))
 
                 switch (message.mMessageType)
                 {
-                case MidiType::NoteOn:
+                case SequenceStepType::NoteOn:
                 {
                     midiMessages.addEvent(juce::MidiMessage::noteOn(static_cast<int>(message.mChannel),
                         static_cast<int>(message.mFirstByte),
@@ -72,7 +71,7 @@ static_cast<DataUnit>(std::clamp(static_cast<int>(x), min, max))
                     break;
                 }
 
-                case MidiType::NoteOff:
+                case SequenceStepType::NoteOff:
                 {
                     midiMessages.addEvent(juce::MidiMessage::noteOff(static_cast<int>(message.mChannel),
                         static_cast<int>(message.mFirstByte),
@@ -80,7 +79,7 @@ static_cast<DataUnit>(std::clamp(static_cast<int>(x), min, max))
                     break;
                 }
 
-                case MidiType::CC:
+                case SequenceStepType::CC:
                 {
                     midiMessages.addEvent(juce::MidiMessage::controllerEvent(static_cast<int>(message.mChannel),
                         static_cast<int>(message.mFirstByte),
@@ -102,7 +101,7 @@ static_cast<DataUnit>(std::clamp(static_cast<int>(x), min, max))
     {
         for (const ScheduledMidiMessage& message : mScheduledMidiMessages)
         {
-            if (message.mMessageType == MidiType::NoteOn || message.mMessageType == MidiType::NoteOff)
+            if (message.mMessageType == SequenceStepType::NoteOn || message.mMessageType == SequenceStepType::NoteOff)
                 midiMessages.addEvent(juce::MidiMessage::noteOff(message.mChannel, message.mFirstByte, static_cast<uint8_t>(0)), 0);
         }
 

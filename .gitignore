@@ -8,4 +8,5 @@ build/
 _codeql_build_dir/
 .cache/
 _codeql_detected_source_root
+AGENTS.md
 

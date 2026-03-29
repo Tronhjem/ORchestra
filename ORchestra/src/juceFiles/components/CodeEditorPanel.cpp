@@ -20,50 +20,103 @@
 #include "CodeEditorPanel.h"
 #include "Colors.h"
 #include "LookAndFeelConstants.h"
+#include "juce_graphics/juce_graphics.h"
+#include "juce_gui_basics/juce_gui_basics.h"
 
 using namespace ORchestra;
 
 CodeEditorPanel::CodeEditorPanel(ORchestra::ORchestraCodeEditorChangeListener* changeListener)
     : mCodeEditor(mCodeDocument, &mTokeniser)
 {
-    // Configure code editor
     mCodeEditor.setTabSize(4, true);
     mCodeEditor.setLineNumbersShown(true);
     mCodeEditor.AddChangeListener(changeListener);
     
-    // Configure error text box
     mErrorTextBox.setFont(MONOSPACE_FONT_OPTIONS);
     mErrorTextBox.setColour(juce::TextEditor::textColourId, TextColor);
     mErrorTextBox.setMultiLine(true);
     mErrorTextBox.setEnabled(false);
     
+    mClearLogButton.setButtonText("Clear");
+    mClearLogButton.onClick = [this]() {
+        if (mClearLogCallback)
+            mClearLogCallback();
+    };
+    
+    addAndMakeVisible(mFileOperationsToolbar);
     addAndMakeVisible(mCodeEditor);
     addAndMakeVisible(mErrorTextBox);
+    addAndMakeVisible(mClearLogButton);
 }
 
+void CodeEditorPanel::setImportCallback(std::function<void()> callback)
+{
+    mFileOperationsToolbar.setImportCallback(std::move(callback));
+}
+
+void CodeEditorPanel::setExportCallback(std::function<void()> callback)
+{
+    mFileOperationsToolbar.setExportCallback(std::move(callback));
+}
+
+void CodeEditorPanel::setCompileCallback(std::function<void()> callback)
+{
+    mFileOperationsToolbar.setCompileCallback(std::move(callback));
+}
+
+void CodeEditorPanel::setClearLogCallback(std::function<void()> callback)
+{
+    mClearLogCallback = std::move(callback);
+}
+    
 CodeEditorPanel::~CodeEditorPanel()
 {
     mCodeEditor.setLookAndFeel(nullptr);
+    mErrorTextBox.setLookAndFeel(nullptr);
 }
 
 void CodeEditorPanel::resized()
 {
     auto bounds = getLocalBounds();
     
-    // Error box at bottom
-    auto errorBounds = bounds.removeFromBottom(ERROR_BOX_HEIGHT);
+    mCodeEditor.setBounds(bounds.removeFromTop(CODE_EDITOR_HEIGHT));
+
+    const int fileOpsWidth = mFileOperationsToolbar.getPreferredWidth();
+    const int fileOpsHeight = mFileOperationsToolbar.getPreferredHeight();
+
+    bounds.removeFromTop(20);
+    auto buttonRow = bounds.removeFromTop(fileOpsHeight);
+
+    mFileOperationsToolbar.setBounds(buttonRow.removeFromLeft(fileOpsWidth));
+
+    bounds.removeFromTop(20);
+
+    const auto errorBounds = bounds.removeFromTop(ERROR_BOX_HEIGHT);
     mErrorTextBox.setBounds(errorBounds);
     
-    // Code editor takes remaining space
-    mCodeEditor.setBounds(bounds);
+    bounds.removeFromTop(20);
+    const auto clearButtonBounds = bounds.removeFromTop(20).withWidth(60);
+    mClearLogButton.setBounds(clearButtonBounds);
+    
+    repaint();
 }
 
 void CodeEditorPanel::updateErrorDisplay(const std::vector<ORchestra::LogEntry>& errors)
 {
-    if (errors.size() > 0)
-        mErrorTextBox.setText(errors[0].mMessage);
-    else
-        mErrorTextBox.setText("Compiled successfully!");
+    juce::String mess;
+    // Iterate in reverse order so newest messages appear first
+    for (auto it = errors.rbegin(); it != errors.rend(); ++it)
+    {
+        const auto& entry = *it;
+        // Add step count prefix if available (non-zero)
+        if (entry.mStepCount > 0)
+        {
+            mess += "[Step " + juce::String(entry.mStepCount) + "] ";
+        }
+        mess.append(entry.mMessage.data(), entry.mMessage.size());
+        mess.append("\n", 1);
+    }
+    mErrorTextBox.setText(mess);
 }
 
 void CodeEditorPanel::loadContent(const juce::String& content)
@@ -89,6 +142,16 @@ void CodeEditorPanel::setEditorLookAndFeel(juce::LookAndFeel* laf)
 void CodeEditorPanel::setErrorBoxLookAndFeel(juce::LookAndFeel* laf)
 {
     mErrorTextBox.setLookAndFeel(laf);
+}
+
+void CodeEditorPanel::setFileOperationButtonsLookAndFeel(juce::LookAndFeel* laf)
+{
+    mFileOperationsToolbar.setButtonLookAndFeel(laf);
+}
+
+void CodeEditorPanel::setCompileButtonEnabled(bool enabled)
+{
+    mFileOperationsToolbar.setCompileButtonEnabled(enabled);
 }
 
 void CodeEditorPanel::applyDefaultStyling()

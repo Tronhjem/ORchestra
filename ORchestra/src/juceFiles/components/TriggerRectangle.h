@@ -36,7 +36,7 @@ namespace ORchestra
         float y;
         float width;
         float value;
-        MidiType midiType;
+        SequenceStepType midiType;
     };
 
     class TriggerRectangleComponent : public juce::Component, public juce::Timer

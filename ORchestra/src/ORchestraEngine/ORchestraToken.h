@@ -62,6 +62,7 @@ namespace ORchestra {
         LESS_EQUAL,
 
         // Keywords.
+        PRINT,
         RANDOM,
         EUCLIDEAN,
         PARSE_ERROR,
@@ -76,11 +77,6 @@ namespace ORchestra {
         EOL, // End Of Line
         END,
 
-        // DEBUGGING
-
-#if _DEBUG
-        PRINT,
-#endif
 #if _TEST
         TEST_KEYWORD,
 #endif

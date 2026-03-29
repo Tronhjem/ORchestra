@@ -17,14 +17,15 @@
  * along with ORchestra. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "ErrorReporting.h"
 #include <algorithm>
-
-#include "VM.h"
 
 #if _DEBUG
 #include "ScopedTimer.h"
 #endif
 
+#include "VM.h"
+#include "StepData.h"
 #include "EuclideanGenerator.h"
 #include "Defines.h"
 
@@ -37,7 +38,7 @@ namespace ORchestra
 #endif
     unsigned int VM::mRanSeed = static_cast<unsigned int>(rand());
 
-    VM::VM() : mErrorReporting(),
+    VM::VM(ErrorReporting& errorReporting) : mErrorReporting(errorReporting),
         mScanner(mErrorReporting),
         mCompiler(mScanner.GetTokens(), mErrorReporting)
     {
@@ -63,16 +64,10 @@ namespace ORchestra
 
     void VM::Reset()
     {
-        mErrorReporting.Clear();
         mScanner.Reset();
         mCompiler.Reset();
         mVariables.clear();
         mRuntimeInstructions.clear();
-    }
-
-    const std::vector<LogEntry>& VM::GetErrors()
-    {
-        return mErrorReporting.GetErrors();
     }
 
     bool VM::ProcessOpCodes(std::vector<Instruction>& instructions)
@@ -84,23 +79,22 @@ namespace ORchestra
         Stack<StepData> stack;
 
         unsigned long currentIndex = 0;
-        auto consume = [&]() -> Instruction&
-            {
-                return instructions[currentIndex++];
-            };
+        auto consume = [&]() -> Instruction& {
+            return instructions[currentIndex++];
+        };
 
         for (;;)
         {
             const Instruction& instruction = consume();
 
-            switch (instruction.opCode)
+            switch (instruction.GetOpCode())
             {
             case (OpCode::SET_IDENTIFIER_VALUE):
             {
                 StepData value = stack.Pop();
                 std::vector<StepData> vectorData{ value };
                 
-                if(instruction.mId >= mVariables.size())
+                if(instruction.GetOperand() >= mVariables.size())
                 {
                     mVariables.emplace_back(DataSequence{ vectorData });
                 }
@@ -125,7 +119,7 @@ namespace ORchestra
 
                 std::vector<StepData> vectorData{ data, data + arrayLength };
                 
-                if(instruction.mId >= mVariables.size())
+                if(instruction.GetOperand() >= mVariables.size())
                 {
                     mVariables.emplace_back(DataSequence{ vectorData });
                 }
@@ -145,9 +139,9 @@ namespace ORchestra
                 const StepData value = stack.Pop();
                 const int index = stack.Pop().GetValue(0);
                 
-                if (instruction.mId < mVariables.size())
+                if (instruction.GetOperand() < mVariables.size())
                 {
-                    mVariables[instruction.mId].SetValue(index, value);
+                    mVariables[instruction.GetOperand()].SetValue(index, value);
                 }
                 else
                 {
@@ -161,7 +155,21 @@ namespace ORchestra
 
             case (OpCode::NOTE):
             case (OpCode::CC):
+            {
+                stack.Pop();
+                stack.Pop();
+                stack.Pop();
+                stack.Pop();
                 break;
+            }
+
+            case (OpCode::SET_BPM):
+            case (OpCode::SET_NOTE_DIVISION):
+            case (OpCode::PRINT):
+            {
+                stack.Pop();
+                break;
+            }
 
             case (OpCode::END):
             {
@@ -199,7 +207,7 @@ namespace ORchestra
         {
             const Instruction& instruction = consume();
 
-            switch (instruction.opCode)
+            switch (instruction.GetOpCode())
             {
             case (OpCode::NOTE):
             {
@@ -209,7 +217,7 @@ namespace ORchestra
                 const StepData shouldTrigger = stack.Pop();
 
                 //TODO: Should be using a variable for note duration.
-                stepQueue.emplace_back(SequenceStep{ MidiType::NoteOn, shouldTrigger, note, vel, channel, DEFAULT_NOTE_DURATION });
+                stepQueue.emplace_back(SequenceStep{ SequenceStepType::NoteOn, shouldTrigger, note, vel, channel, DEFAULT_NOTE_DURATION });
 
                 break;
             }
@@ -220,10 +228,34 @@ namespace ORchestra
                 const StepData ccValue = stack.Pop();
                 const StepData ccNumber = stack.Pop();
                 const StepData shouldTrigger = stack.Pop();
+                stepQueue.emplace_back(SequenceStep{ SequenceStepType::CC, shouldTrigger, ccNumber, ccValue, channel, DEFAULT_NOTE_DURATION });
 
-                //TODO: Should be using a variable for note duration.
-                stepQueue.emplace_back(SequenceStep{ MidiType::CC, shouldTrigger, ccNumber, ccValue, channel, DEFAULT_NOTE_DURATION });
+                break;
+            }
 
+            case (OpCode::SET_BPM):
+            {
+                const StepData bpmValue = stack.Pop();
+                stepQueue.emplace_back(SequenceStep{ SequenceStepType::BPM, bpmValue, bpmValue, bpmValue, bpmValue, DEFAULT_NOTE_DURATION });
+
+                break;
+            }
+
+            case (OpCode::SET_NOTE_DIVISION):
+            {
+                const StepData noteDivValue = stack.Pop();
+                stepQueue.emplace_back(SequenceStep{ SequenceStepType::NOTE_DIVISION, noteDivValue, 
+                                noteDivValue, noteDivValue, 
+                                noteDivValue, DEFAULT_NOTE_DURATION });
+
+                break;
+            }
+
+            case (OpCode::PRINT):
+            {
+                const StepData printValue = stack.Pop();
+                stepQueue.emplace_back(SequenceStep{ SequenceStepType::PRINT, printValue, printValue, 
+                                       printValue, printValue, DEFAULT_NOTE_DURATION });
                 break;
             }
 
@@ -262,11 +294,11 @@ namespace ORchestra
 
     bool VM::ProcessInstruction(const Instruction& instruction, const int stepCount, Stack<StepData>& stack)
     {
-        switch (instruction.opCode)
+        switch (instruction.GetOpCode())
         {
         case (OpCode::CONSTANT):
         {
-            StepData value {instruction.mDataValue};
+            StepData value {instruction.GetOperand()};
             stack.Push(value);
 
             break;
@@ -275,7 +307,7 @@ namespace ORchestra
         case (OpCode::SET_IDENTIFIER_VALUE):
         {
             const StepData value = stack.Pop();
-            mVariables[instruction.mId].SetValue(0, value);
+            mVariables[instruction.GetOperand()].SetValue(0, value);
 
             break;
         }
@@ -286,7 +318,7 @@ namespace ORchestra
 
             for (int i = arrayLength - 1; i >= 0; --i)
             {
-                mVariables[instruction.mId].SetValue(i, stack.Pop());
+                mVariables[instruction.GetOperand()].SetValue(i, stack.Pop());
             }
 
             break;
@@ -297,9 +329,9 @@ namespace ORchestra
             const StepData value = stack.Pop();
             const int index = stack.Pop().GetValue(0);
             
-            if (instruction.mId < mVariables.size())
+            if (instruction.GetOperand() < mVariables.size())
             {
-                mVariables[instruction.mId].SetValue(index, value);
+                mVariables[instruction.GetOperand()].SetValue(index, value);
             }
             else
             {
@@ -348,9 +380,9 @@ namespace ORchestra
 
         case (OpCode::GET_IDENTIFIER_VALUE):
         {
-            if (instruction.mId < mVariables.size())
+            if (instruction.GetOperand() < mVariables.size())
             {
-                const StepData value = mVariables[instruction.mId].GetValue(stepCount);
+                const StepData value = mVariables[instruction.GetOperand()].GetValue(stepCount);
                 stack.Push(value);
             }
             else
@@ -365,11 +397,11 @@ namespace ORchestra
 
         case (OpCode::GET_IDENTIFIER_WITH_INDEX):
         {
-            if (instruction.mId < mVariables.size())
+            if (instruction.GetOperand() < mVariables.size())
             {
                 const int index = stack.Pop().GetValue(0);
                 // GetValue is done with modulo inside, so no need to worry about out of bounds value
-                const StepData value = mVariables[instruction.mId].GetValue(index);
+                const StepData value = mVariables[instruction.GetOperand()].GetValue(index);
                 stack.Push(value);
             }
             else
@@ -483,17 +515,6 @@ namespace ORchestra
             break;
         }
 
-#if _DEBUG
-        case (OpCode::PRINT):
-        {
-            const DataUnit value = stack.Pop().GetValue(0);
-            const std::string message = "PRINT: " + std::to_string(static_cast<int>(value));
-            std::cout << message << std::endl;
-            mErrorReporting.LogMessage(message);
-
-            break;
-        }
-#endif
         default:
             const std::string err{ "Unexpected Operation code" };
             mErrorReporting.LogError(err);

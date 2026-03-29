@@ -46,7 +46,9 @@ public:
 
     void setButtonLookAndFeel(juce::LookAndFeel* laf);
 
-    constexpr int getPreferredWidth() { return BUTTON_HEIGHT + SPACING + BUTTON_WIDTH; }
+    constexpr int getPreferredWidth() { return (BUTTON_WIDTH / 2) - (BUTTON_HEIGHT / 2) 
+                                        + BUTTON_HEIGHT + BUTTON_WIDTH + SPACING; }
+
     constexpr int getPreferredHeight() { return LABEL_HEIGHT + BUTTON_HEIGHT; }
 
 private:

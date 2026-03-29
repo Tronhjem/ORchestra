@@ -23,40 +23,89 @@
 
 namespace ORchestra 
 {
+    void ErrorReporting::CheckAndClear()
+    {
+        if (mShouldClear.exchange(false))
+        {
+            mLogEntries.clear();
+            NotifyListener();
+        }
+    }
+
+    void ErrorReporting::TrimOldEntries()
+    {
+        while (mLogEntries.size() > MAX_LOG_ENTRIES)
+        {
+            mLogEntries.erase(mLogEntries.begin());
+        }
+    }
+
+    void ErrorReporting::NotifyListener()
+    {
+        if (mListener)
+        {
+            mListener->OnLogUpdated();
+        }
+    }
+
     void ErrorReporting::LogError(const int line, std::string& message)
     {
         message = message + ", at line " + std::to_string(line) + "\n";
-        mLogEntries.emplace_back(LogEntry{ EntryType::Error, line, std::move(message) });
+        mLogEntries.emplace_back(LogEntry{ EntryType::Error, line, 0, std::move(message) });
+        TrimOldEntries();
+        NotifyListener();
         std::cout << message << std::endl;
     }
 
     void ErrorReporting::LogError(const std::string& message)
     {
-        mLogEntries.emplace_back(LogEntry{ EntryType::Error, 0, std::move(message) });
+        mLogEntries.emplace_back(LogEntry{ EntryType::Error, 0, 0, std::move(message) });
+        TrimOldEntries();
+        NotifyListener();
         std::cout << message << std::endl;
     }
 
     void ErrorReporting::LogWarning(const int line, std::string& message)
     {
         message = message + ", at line " + std::to_string(line) + "\n";
-        mLogEntries.emplace_back(LogEntry{ EntryType::Warning, line, std::move(message) });
+        mLogEntries.emplace_back(LogEntry{ EntryType::Warning, line, 0, std::move(message) });
+        TrimOldEntries();
+        NotifyListener();
         std::cout << message << std::endl;
     }
 
     void ErrorReporting::LogWarning(const std::string& message)
     {
-        mLogEntries.emplace_back(LogEntry{ EntryType::Warning, 0, std::move(message) });
+        mLogEntries.emplace_back(LogEntry{ EntryType::Warning, 0, 0, std::move(message) });
+        TrimOldEntries();
+        NotifyListener();
         std::cout << message << std::endl;
     }
 
     void ErrorReporting::LogMessage(const std::string& message)
     {
-        mLogEntries.emplace_back(LogEntry{ EntryType::Messasge, 0, std::move(message) });
+        mLogEntries.emplace_back(LogEntry{ EntryType::Messasge, 0, 0, std::move(message) });
+        TrimOldEntries();
+        NotifyListener();
         std::cout << message << std::endl;
+    }
+
+    void ErrorReporting::LogMessage(const std::string& message, int stepCount)
+    {
+        mLogEntries.emplace_back(LogEntry{ EntryType::Messasge, 0, stepCount, std::move(message) });
+        TrimOldEntries();
+        NotifyListener();
+        std::cout << "[Step " << stepCount << "] " << message << std::endl;
     }
 
     void ErrorReporting::Clear()
     {
         mLogEntries.clear();
+        NotifyListener();
+    }
+
+    void ErrorReporting::RequestClear()
+    {
+        mShouldClear.store(true);
     }
 } // namespace ORchestra

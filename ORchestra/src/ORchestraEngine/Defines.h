@@ -19,6 +19,8 @@
 
 #pragma once
 
+#include <algorithm>
+#include <limits>
 namespace ORchestra 
 {
     // DataSequence Operation Lambdas
@@ -57,12 +59,14 @@ namespace ORchestra
     constexpr int MAX_DATASEQUENCE_LENGTH = 32;
     constexpr int DEFAULT_NOTE_DURATION = 11050;
     constexpr int MAX_SUB_DIVISION_LENGTH = 6;
+
+    constexpr int MIDI_MAX_VALUE = 127;
     constexpr int MAX_MIDI_CHANNEL_NUMBER = 16;
 
     typedef unsigned char DataUnit;
     static_assert(sizeof(DataUnit) == 1);
 
-    constexpr int DATA_UNIT_MAX_VALUE = 127;
+    constexpr int DATA_UNIT_MAX_VALUE = std::numeric_limits<DataUnit>::max();
     constexpr int DATA_UNIT_MIN_VALUE = 0;
 
     constexpr int STEP_BUFFER_SIZE = 32;
@@ -77,10 +81,13 @@ namespace ORchestra
                   (STEP_BUFFER_SIZE & (STEP_BUFFER_SIZE_MASK)) == 0, 
                   "STEP_BUFFER_SIZE must be a power of two");
 
-    enum class MidiType : DataUnit
+    enum class SequenceStepType : DataUnit
     {
         NoteOn = 0,
         NoteOff = 1,
-        CC = 2
+        CC = 2,
+        BPM = 3,
+        NOTE_DIVISION = 4,
+        PRINT = 5
     };
 } // namespace ORchestra

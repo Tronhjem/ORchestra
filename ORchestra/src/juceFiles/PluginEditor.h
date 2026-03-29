@@ -26,13 +26,13 @@
 #include "Timeline.h"
 #include "TriggerRectangle.h"
 #include "CodeEditorPanel.h"
-#include "FileOperationsToolbar.h"
 #include "TransportControls.h"
 #include "TempoControlsPanel.h"
 
 #include "GeneralLookAndFeel.h"
 #include "ButtonsLookAndFeel.h"
 #include "TextEditorLookAndFeel.h"
+#include "ErrorReporting.h"
 #include "juce_gui_basics/juce_gui_basics.h"
 
 typedef juce::AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
@@ -43,7 +43,9 @@ typedef juce::AudioProcessorValueTreeState::ComboBoxAttachment ComboBoxAttachmen
 */
 class ORchestraAudioProcessorEditor : public juce::AudioProcessorEditor,
     public juce::ChangeListener,
-    public ORchestraCodeEditorChangeListener
+    public ORchestraCodeEditorChangeListener,
+    public ORchestra::ErrorReportingListener,
+    private juce::AsyncUpdater
 {
 public:
     ORchestraAudioProcessorEditor(ORchestraAudioProcessor&);
@@ -53,8 +55,13 @@ public:
     void paint(juce::Graphics&) override;
     void resized() override;
     void CodeEditorHasChanged() override;
+    
+    // ErrorReportingListener - called from audio thread
+    void OnLogUpdated() override;
 
 private:
+    // AsyncUpdater - called on message thread
+    void handleAsyncUpdate() override;
     void changeListenerCallback(juce::ChangeBroadcaster* broadCaster) override;
 
     void handleCompile();
@@ -62,6 +69,7 @@ private:
     void handleExportFile();
     void handlePlayButton();
     void handleSyncToggle(bool shouldSync);
+    void handleClearLog();
 
     ORchestraAudioProcessor& audioProcessor;
     inline void UpdateErrors();
@@ -75,7 +83,6 @@ private:
 
     TransportControls mTransportControls;
     TempoControlsPanel mTempoControlsPanel;
-    FileOperationsToolbar mFileOperationsToolbar;
     CodeEditorPanel mCodeEditorPanel;
     TriggerRectangleComponent mTriggerRectangle;
     Timeline mTimeline;

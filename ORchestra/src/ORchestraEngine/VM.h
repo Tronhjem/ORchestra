@@ -20,7 +20,6 @@
 #pragma once
 
 #include <vector>
-#include <unordered_map>
 #include <string>
 #include <cassert>
 
@@ -43,20 +42,24 @@ namespace ORchestra
     /// to populate the SequenceSteps for the ORChestra Engine and MidiScheduler.
     /// It's a simple stack based virtual machine that goes through all the OpCodes from the compiler
     /// and executes them.
+    struct TransportData;
+
     class VM
     {
     public:
-        VM();
+        VM(ErrorReporting& ErrorReporting);
+        ~VM() = default;
+
         bool Prepare(const std::string& data);
         bool Tick(std::vector<SequenceStep>& stepQueue, const int globalCount);
         void Reset();
-        const std::vector<LogEntry>& GetErrors();
 
 #if _TEST
         StepData GetTopStackValue() { return mTopStackValue; }
 #endif
 
     private:
+        VM() = delete;
 #if _TEST
         StepData mTopStackValue;
         
@@ -70,14 +73,14 @@ namespace ORchestra
         bool ProcessOpCodes(std::vector<Instruction>& setupInstructions);
         inline bool ProcessInstruction(const Instruction& instruction, const int stepCount, Stack<StepData>& mStack);
 
-        ErrorReporting mErrorReporting;
+        ErrorReporting& mErrorReporting;
         Scanner mScanner;
         Compiler mCompiler;
 
         std::vector<DataSequence> mVariables;
         std::vector<Instruction> mRuntimeInstructions;
         inline DataUnit RandomValue(const DataUnit low, const DataUnit high);
-
+        
         template <typename Operation>
         inline void PopDoOperationAndPush(Operation op, Stack<StepData>& stack)
         {

@@ -22,13 +22,15 @@
 #include "catch.hpp"
 
 #include "VM.h"
+#include "ErrorReporting.h"
 
 
 using namespace ORchestra;
 TEST_CASE("NoteNumbers: Converts 'C#0' to MIDI note 13 correctly", "[NoteNumbers]")
 {
     std::string file{"a = C#0 \n test a"};
-    VM vm;
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
     REQUIRE(vm.Prepare(&file[0]));
 
     StepData result = vm.GetTopStackValue();
@@ -39,7 +41,8 @@ TEST_CASE("NoteNumbers: Converts 'C#0' to MIDI note 13 correctly", "[NoteNumbers
 TEST_CASE("NoteNumbers: Converts 'Db3' to MIDI note 49 correctly", "[NoteNumbers]")
 {
     std::string file{"a = Db3 \n test a"};
-    VM vm;
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
     REQUIRE(vm.Prepare(&file[0]));
 
     StepData result = vm.GetTopStackValue();
@@ -50,7 +53,8 @@ TEST_CASE("NoteNumbers: Converts 'Db3' to MIDI note 49 correctly", "[NoteNumbers
 TEST_CASE("NoteNumbers: Parses note in array '[G#5, G#5]' as MIDI 80 correctly", "[NoteNumbers]")
 {
     std::string file{"a = [G#5, G#5] \n test a"};
-    VM vm;
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
     REQUIRE(vm.Prepare(&file[0]));
 
     StepData result = vm.GetTopStackValue();
@@ -61,7 +65,8 @@ TEST_CASE("NoteNumbers: Parses note in array '[G#5, G#5]' as MIDI 80 correctly",
 TEST_CASE("NoteNumbers: Evaluates 'C0 + 1' in array correctly (result=13)", "[NoteNumbers]")
 {
     std::string file{"a = [C0 + 1, 0] \n test a"};
-    VM vm;
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
     REQUIRE(vm.Prepare(&file[0]));
 
     StepData result = vm.GetTopStackValue();
@@ -72,13 +77,15 @@ TEST_CASE("NoteNumbers: Evaluates 'C0 + 1' in array correctly (result=13)", "[No
 TEST_CASE("NoteNumbers: Rejects invalid note 'Dw21312' (compilation fails)", "[NoteNumbers]")
 {
     std::string file{"a = Dw21312 \n test a"};
-    VM vm;
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
     REQUIRE(vm.Prepare(&file[0]) == false);
 }
 
 TEST_CASE("NoteNumbers: Rejects incomplete note 'C' without octave (compilation fails)", "[NoteNumbers]")
 {
     std::string file{"a = C \n test a"};
-    VM vm;
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
     REQUIRE(vm.Prepare(&file[0]) == false);
 }

@@ -27,7 +27,7 @@ namespace ORchestra
     class SequenceStep
     {
     public:
-        SequenceStep( MidiType midiType,
+        SequenceStep( SequenceStepType midiType,
                       StepData shouldTrigger,
                       const StepData firstData,
                       const StepData secondData,
@@ -43,7 +43,7 @@ namespace ORchestra
         {
         }
 
-        MidiType mType;
+        SequenceStepType mType;
         StepData mShouldTrigger;
         StepData mFirst;
         StepData mSecond;

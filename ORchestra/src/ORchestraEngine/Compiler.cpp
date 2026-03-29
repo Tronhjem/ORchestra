@@ -38,6 +38,8 @@ namespace ORchestra
 
     static const std::string ranFunctionName = "ran";
     static const std::string eucFunctionName = "euc";
+    static const std::string bpmFunctionName = "bpm";
+    static const std::string noteDivFunctionName = "noteDiv";
 
     Compiler::Compiler(const std::vector<ORchestraToken>& tokens, ErrorReporting& log) :
             mVariableIdCounter(0),
@@ -47,11 +49,9 @@ namespace ORchestra
         mVariableIDMap.reserve(8); // Magic number for size of variables estimated as a good start.
 
         // populate built in functions
-#if _DEBUG
         std::vector<Instruction> printInstructions;
         printInstructions.emplace_back(Instruction{ OpCode::PRINT });
         mFunctions["print"] = StoredFunction(1, printInstructions);
-#endif
 
         std::vector<Instruction> noteInstructions;
         noteInstructions.emplace_back(Instruction{ OpCode::NOTE });
@@ -68,6 +68,14 @@ namespace ORchestra
         std::vector<Instruction> eucInstructions;
         eucInstructions.emplace_back(Instruction{ OpCode::GENERATE_EUCLID_SEQUENCE });
         mFunctions[eucFunctionName] = StoredFunction(2, eucInstructions);
+
+        std::vector<Instruction> bpmInstructions;
+        bpmInstructions.emplace_back(Instruction{ OpCode::SET_BPM });
+        mFunctions[bpmFunctionName] = StoredFunction(1, bpmInstructions);
+
+        std::vector<Instruction> noteDivInstructions;
+        noteDivInstructions.emplace_back(Instruction{ OpCode::SET_NOTE_DIVISION });
+        mFunctions[noteDivFunctionName] = StoredFunction(1, noteDivInstructions);
     }
 
     void Compiler::Reset()
@@ -102,7 +110,7 @@ namespace ORchestra
     bool Compiler::MakeIdentifierGetter(const ORchestraToken& token, std::vector<Instruction>& instructions)
     {
         const std::string name = std::string(token.mStart, static_cast<unsigned long>(token.mLength));
-        const uint16_t id = GetOrCreateVariableID(name);
+        const DataUnit id = GetOrCreateVariableID(name);
 
         if (Peek().mTokenType == ORchestraTokenType::LEFT_BRACKET)
         {
@@ -135,7 +143,7 @@ namespace ORchestra
         if (value > DATA_UNIT_MAX_VALUE)
         {
             value = DATA_UNIT_MAX_VALUE;
-            const std::string message = std::string("Value can't be greater than 127, correcting to 127");
+            const std::string message = std::string("Value can't be greater than 255, correcting to 255");
             mErrorReporting.LogWarning(message);
         }
         if (value < DATA_UNIT_MIN_VALUE)
@@ -288,7 +296,7 @@ namespace ORchestra
             return false;
         }
 
-        StoredFunction& function = mFunctions[functionName];
+        const StoredFunction& function = mFunctions[functionName];
 
         Consume(); // For Left Parenteses
         int paramCounter = 0;
@@ -315,7 +323,8 @@ namespace ORchestra
             case ORchestraTokenType::END:
             case ORchestraTokenType::EOL:
             {
-                ThrowMissingParamCount(function.mNumOfParams, paramCounter);
+                const std::string missingRightParen = ")";
+                ThrowUnexpectedEnd(missingRightParen);
                 return false;
             }
 
@@ -348,6 +357,13 @@ namespace ORchestra
             }
 
             ThrowUnexpectedTokenError(Previous());
+            return false;
+        }
+
+        if(Peek().mTokenType != ORchestraTokenType::RIGHT_PAREN)
+        {
+            const std::string missingRightParen = ")";
+            ThrowUnexpectedEnd(missingRightParen);
             return false;
         }
 
@@ -772,7 +788,7 @@ namespace ORchestra
                             return false;
                         }
 
-                        const uint16_t id = GetOrCreateVariableID(name);
+                        const DataUnit id = GetOrCreateVariableID(name);
                         instructions.emplace_back(Instruction{ OpCode::SET_IDENTIFIER_WITH_INDEX, id });
                     }
                     else
@@ -795,7 +811,7 @@ namespace ORchestra
                         const bool isLastRecursiveLevel = false;
                         if (CompileArray(instructions, arrayLength, MAX_DATASEQUENCE_LENGTH, isLastRecursiveLevel))
                         {
-                            const uint16_t id = GetOrCreateVariableID(name);
+                            const DataUnit id = GetOrCreateVariableID(name);
                             instructions.emplace_back(Instruction{ OpCode::CONSTANT, arrayLength });
                             instructions.emplace_back(Instruction{ OpCode::SET_IDENTIFIER_ARRAY, id });
                         }
@@ -816,7 +832,7 @@ namespace ORchestra
                         if (!CompileExpression(instructions))
                             return false;
 
-                        const uint16_t id = GetOrCreateVariableID(name);
+                        const DataUnit id = GetOrCreateVariableID(name);
                         instructions.emplace_back(Instruction{ OpCode::SET_IDENTIFIER_VALUE, id });
                         break;
                     }
@@ -826,7 +842,7 @@ namespace ORchestra
                         if (!CompileFunctionCall(instructions, eucFunctionName))
                             return false;
 
-                        const uint16_t id = GetOrCreateVariableID(name);
+                        const DataUnit id = GetOrCreateVariableID(name);
                         instructions.emplace_back(Instruction{ OpCode::SET_IDENTIFIER_ARRAY, id });
 
                         break;
@@ -854,13 +870,11 @@ namespace ORchestra
                 break;
             }
 
-#if _DEBUG
             case ORchestraTokenType::PRINT:
-#endif
             case ORchestraTokenType::NOTE:
             case ORchestraTokenType::CC:
             {
-                std::string functionName = std::string(token.mStart, static_cast<unsigned long>(token.mLength));
+                const std::string functionName = std::string(token.mStart, static_cast<unsigned long>(token.mLength));
                 if (!CompileFunctionCall(instructions, functionName))
                     return false;
 
@@ -943,7 +957,7 @@ namespace ORchestra
         mErrorReporting.LogError(Peek().mLine, message);
     }
 
-    uint16_t Compiler::GetOrCreateVariableID(const std::string& varName)
+    DataUnit Compiler::GetOrCreateVariableID(const std::string& varName)
     {
         if (mVariableIDMap.find(varName) != mVariableIDMap.end())
         {
@@ -951,6 +965,12 @@ namespace ORchestra
         }
         
         mVariableIDMap[varName] = mVariableIdCounter++;
+
+        if (mVariableIdCounter > 255)
+        {
+            mErrorReporting.LogWarning("Only 255 unique variables are supported");
+        }
+
         return mVariableIDMap[varName];
     }
 

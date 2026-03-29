@@ -117,6 +117,11 @@ void Timeline::timerCallback()
 
         for (const auto& step : sequenceSteps)
         {
+            if (step.mType != SequenceStepType::NoteOn && step.mType != SequenceStepType::CC)
+            {
+                continue;
+            }
+
             const int substepLength = step.mShouldTrigger.GetLength();
             const float subDividedStepWidth = stepWidth / static_cast<float>(substepLength);
             const float subStepDrawnWidth = drawnStepWidth / static_cast<float>(substepLength);
@@ -163,10 +168,10 @@ void Timeline::paint(juce::Graphics& g)
     }
 }
 
-juce::Colour Timeline::GetStepColorFromVelocity(const float value, const MidiType midiType)
+juce::Colour Timeline::GetStepColorFromVelocity(const float value, const SequenceStepType midiType)
 {
-    const Colour& minColor = midiType == MidiType::CC ? MinCCValueColor : MinVelocityColor;
-    const Colour& maxColor = midiType == MidiType::CC ? MaxCCValueColor : MaxVelocityColor;
+    const Colour& minColor = midiType == SequenceStepType::CC ? MinCCValueColor : MinVelocityColor;
+    const Colour& maxColor = midiType == SequenceStepType::CC ? MaxCCValueColor : MaxVelocityColor;
 
     return smoothstepColour(minColor,
                             maxColor, value / 127.f);

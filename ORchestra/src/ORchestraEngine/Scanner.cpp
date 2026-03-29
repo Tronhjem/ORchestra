@@ -1,4 +1,4 @@
-/*
+/*scanner.cpp
  * Copyright (C) 2026 Christian Tronhjem
  *
  * This file is part of ORchestra.
@@ -283,14 +283,12 @@ namespace ORchestra
         // Checking if any of these are reserved words.
         switch (mStart[0])
         {
-#if _DEBUG
-        case 'p':
-            return checkKeyword(1, 4, "rint", ORchestraTokenType::PRINT);
-#endif
 #if _TEST
         case 't':
             return checkKeyword(1, 3, "est", ORchestraTokenType::TEST_KEYWORD);
 #endif
+        case 'p':
+            return checkKeyword(1, 4, "rint", ORchestraTokenType::PRINT);
         case 'r':
             return checkKeyword(1, 2, "an", ORchestraTokenType::RANDOM);
         case 'e':

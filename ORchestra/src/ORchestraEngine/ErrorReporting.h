@@ -21,16 +21,30 @@
 
 #include <string>
 #include <vector>
+#include <atomic>
 
 namespace ORchestra 
 {
+    constexpr int MAX_LOG_ENTRIES = 100;
+
     enum class EntryType { Messasge, Warning, Error };
 
     struct LogEntry
     {
         EntryType mEntryType;
         int mLine;
+        int mStepCount;
         std::string mMessage;
+    };
+
+    /// Listener interface for ErrorReporting updates.
+    /// Called when log entries are added or cleared.
+    /// Note: OnLogUpdated() may be called from the audio thread.
+    class ErrorReportingListener
+    {
+    public:
+        virtual ~ErrorReportingListener() = default;
+        virtual void OnLogUpdated() = 0;
     };
 
     //TODO: make this take line and position as well for reporting properly syntax erros
@@ -42,10 +56,20 @@ namespace ORchestra
         void LogWarning(const int line, std::string& message);
         void LogWarning(const std::string& message);
         void LogMessage(const std::string& message);
+        void LogMessage(const std::string& message, int stepCount);
         void Clear();
-        std::vector<LogEntry>& GetErrors() { return mLogEntries; }
+        void RequestClear();
+        std::vector<LogEntry> GetErrors() { return mLogEntries; }
+        
+        void SetListener(ErrorReportingListener* listener) { mListener = listener; }
+        void CheckAndClear();
 
     private:
+        void TrimOldEntries();
+        void NotifyListener();
+
         std::vector<LogEntry> mLogEntries;
+        ErrorReportingListener* mListener = nullptr;
+        std::atomic<bool> mShouldClear{false};
     };
 } // namespace ORchestra
