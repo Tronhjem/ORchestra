@@ -25,6 +25,7 @@
 #include "ErrorReporting.h"
 #include "StepData.h"
 #include "Defines.h"
+#include <limits>
 
 using namespace ORchestra;
 TEST_CASE("DataSequence: Evaluates ran(50,60) in array, result in range [50,60]", "[DataSequence]")
@@ -267,10 +268,10 @@ TEST_CASE("DataSequence: Adds sequences of length 2 and 3, result has length 3",
     REQUIRE(added.GetValue(2) == 2);
 }
 
-TEST_CASE("DataSequence: Clamps addition overflow to max 127", "[DataSequence]")
+TEST_CASE("DataSequence: Clamps addition overflow to max value of DataUnit", "[DataSequence]")
 {
-    DataUnit dataOne[2]{127, 127};
-    DataUnit dataTwo[4]{127, 0, 127, 0};
+    DataUnit dataOne[2]{130, 130};
+    DataUnit dataTwo[4]{130, 0, 130, 0};
 
     StepData dataStepOne{dataOne, 2};
     StepData dataStepTwo{dataTwo, 4};
@@ -278,10 +279,11 @@ TEST_CASE("DataSequence: Clamps addition overflow to max 127", "[DataSequence]")
     StepData added = dataStepOne.ApplySequenceWithOperation(dataStepTwo, Add);
     REQUIRE(added.GetLength() == 4);
 
-    REQUIRE(added.GetValue(0) == 127);
-    REQUIRE(added.GetValue(1) == 127);
-    REQUIRE(added.GetValue(2) == 127);
-    REQUIRE(added.GetValue(3) == 127);
+    const DataUnit maxValue = std::numeric_limits<DataUnit>::max();
+    REQUIRE(added.GetValue(0) == maxValue);
+    REQUIRE(added.GetValue(1) == 130);
+    REQUIRE(added.GetValue(2) == maxValue);
+    REQUIRE(added.GetValue(3) == 130);
 }
 
 TEST_CASE("DataSequence: Subtracts sequences element-wise correctly", "[DataSequence]")

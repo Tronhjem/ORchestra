@@ -23,6 +23,7 @@
 
 #include "VM.h"
 #include "ErrorReporting.h"
+#include <limits>
 
 using namespace ORchestra;
 TEST_CASE("Compiler: Compiles nested array [[1,2],[3,4]], accessing a[0] returns [1,2]", "[Compiler]")
@@ -135,16 +136,17 @@ TEST_CASE("Compiler: Clamps negative result '0 - 10' to minimum (result=0)", "[C
     REQUIRE(result.GetValue(0) == 0); // Result is clamped to 0-127
 }
 
-TEST_CASE("Compiler: Clamps overflow '100 + 100' to maximum (result=127)", "[Compiler]")
+TEST_CASE("Compiler: Clamps overflow '150 + 150' to maximum of DataUnit(result=300)", "[Compiler]")
 {
 
-    std::string file = "a = 100 + 100\ntest a";
+    std::string file = "a = 150 + 150\ntest a";
     ErrorReporting errorReporter;
     VM vm(errorReporter);
     REQUIRE(vm.Prepare(file));
 
     StepData result = vm.GetTopStackValue();
-    REQUIRE(result.GetValue(0) == 127); // Clamped to max
+    const int maxValue = std::numeric_limits<DataUnit>::max();
+    REQUIRE(result.GetValue(0) == maxValue); // Clamped to max
 }
 
 TEST_CASE("Compiler: Accesses array element 'a=[10,20,30], b=a[1]' (result=20)", "[Compiler]")
