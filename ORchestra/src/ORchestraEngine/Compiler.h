@@ -32,6 +32,15 @@ namespace ORchestra
 {
     class ErrorReporting;
 
+    enum class Precedence
+    {
+        NONE = 0,
+        ASSIGNMENT,   // lowest: used as minimum for full expression parsing
+        COMPARISON,   // > >= < <= == != & | ^
+        TERM,         // + -
+        FACTOR,       // * / %
+    };
+
     class Compiler
     {
     public:
@@ -44,7 +53,6 @@ namespace ORchestra
 
         inline const ORchestraToken& Consume();
         inline const ORchestraToken& Peek();
-        inline const ORchestraToken& PeekNext();
         inline const ORchestraToken& Previous();
 
         inline void ThrowUnexpectedTokenError(const ORchestraToken& tokenForError);
@@ -59,6 +67,18 @@ namespace ORchestra
         bool MakeNoteIntoConstant(const ORchestraToken& token, std::vector<Instruction>& instructions);
         inline void MakeOperation(ORchestraTokenType tokenType, std::vector<Instruction>& instructions);
 
+        // Pratt parser
+        struct ParseRule;
+        static ParseRule GetRule(ORchestraTokenType type);
+        bool ParsePrecedence(Precedence minPrecedence, std::vector<Instruction>& instructions);
+        bool ParseNumber(std::vector<Instruction>& instructions);
+        bool ParseNoteIdentifier(std::vector<Instruction>& instructions);
+        bool ParseIdentifier(std::vector<Instruction>& instructions);
+        bool ParseGrouping(std::vector<Instruction>& instructions);
+        bool ParseDollar(std::vector<Instruction>& instructions);
+        bool ParseRandom(std::vector<Instruction>& instructions);
+        bool ParseBinary(std::vector<Instruction>& instructions);
+
         bool CompileExpression(std::vector<Instruction>& instructions);
         bool CompileArray(
                 std::vector<Instruction>& instructions,
@@ -67,9 +87,9 @@ namespace ORchestra
                 bool isLastRecursiveLevel);
 
         bool CompileFunctionCall(std::vector<Instruction>& instructions, const std::string& functionName);
-        
+
         inline DataUnit GetOrCreateVariableID(const std::string& varName);
-        
+
         DataUnit mVariableIdCounter;
         unsigned long mCurrentIndex = 0;
         const std::vector<ORchestraToken>& mTokens;

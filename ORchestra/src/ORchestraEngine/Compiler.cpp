@@ -18,7 +18,6 @@
  */
 
 #include <string>
-#include <stack>
 
 #include "Compiler.h"
 #include "ErrorReporting.h"
@@ -534,215 +533,135 @@ namespace ORchestra
         return true;
     }
 
-    bool Compiler::CompileExpression(std::vector<Instruction>& instructions)
+    // Pratt parser: parse rule table
+    struct Compiler::ParseRule
     {
-        auto isOperator = [&](const ORchestraTokenType t) -> bool
-            {
-                return t == ORchestraTokenType::PLUS ||
-                    t == ORchestraTokenType::MINUS ||
-                    t == ORchestraTokenType::STAR ||
-                    t == ORchestraTokenType::SLASH ||
-                    t == ORchestraTokenType::PERCENT ||
-                    t == ORchestraTokenType::AND ||
-                    t == ORchestraTokenType::OR ||
-                    t == ORchestraTokenType::XOR ||
-                    t == ORchestraTokenType::GREATER ||
-                    t == ORchestraTokenType::GREATER_EQUAL ||
-                    t == ORchestraTokenType::LESS ||
-                    t == ORchestraTokenType::LESS_EQUAL ||
-                    t == ORchestraTokenType::EQUAL_EQUAL ||
-                    t == ORchestraTokenType::BANG_EQUAL;
-            };
+        using PrefixFn = bool (Compiler::*)(std::vector<Instruction>&);
+        using InfixFn = bool (Compiler::*)(std::vector<Instruction>&);
 
-        auto precedence = [&](const ORchestraTokenType t) -> int
-            {
-                if (t == ORchestraTokenType::PLUS || t == ORchestraTokenType::MINUS)
-                    return 1;
-                if (t == ORchestraTokenType::STAR || t == ORchestraTokenType::SLASH || t == ORchestraTokenType::PERCENT)
-                    return 2;
+        PrefixFn prefix;
+        InfixFn infix;
+        Precedence precedence;
+    };
 
-                return 0;
-            };
-
-        std::stack<ORchestraTokenType> ops;
-
-        bool expectsValue = Peek().mTokenType != ORchestraTokenType::LEFT_PAREN;
-        int leftParen = 0;
-        int rightParen = 0;
-
-        while (Peek().mTokenType != ORchestraTokenType::EOL &&
-            Peek().mTokenType != ORchestraTokenType::END &&
-            Peek().mTokenType != ORchestraTokenType::COMMA &&
-            Peek().mTokenType != ORchestraTokenType::RIGHT_BRACKET &&
-            Peek().mTokenType != ORchestraTokenType::RIGHT_BRACE)
+    Compiler::ParseRule Compiler::GetRule(ORchestraTokenType type)
+    {
+        switch (type)
         {
-            // We assume this means we found the end of a function parenteses.
-            if (Peek().mTokenType == ORchestraTokenType::RIGHT_PAREN &&
-                rightParen == leftParen)
-                break;
+        case ORchestraTokenType::NUMBER:          return { &Compiler::ParseNumber,         nullptr,                 Precedence::NONE };
+        case ORchestraTokenType::IDENTIFIER:      return { &Compiler::ParseIdentifier,     nullptr,                 Precedence::NONE };
+        case ORchestraTokenType::NOTE_IDENTIFIER: return { &Compiler::ParseNoteIdentifier, nullptr,                 Precedence::NONE };
+        case ORchestraTokenType::DOLLAR:          return { &Compiler::ParseDollar,         nullptr,                 Precedence::NONE };
+        case ORchestraTokenType::RANDOM:          return { &Compiler::ParseRandom,         nullptr,                 Precedence::NONE };
+        case ORchestraTokenType::LEFT_PAREN:      return { &Compiler::ParseGrouping,       nullptr,                 Precedence::NONE };
 
-            const ORchestraToken& currentToken = Consume();
-            const ORchestraTokenType tType = currentToken.mTokenType;
+        case ORchestraTokenType::PLUS:            return { nullptr, &Compiler::ParseBinary, Precedence::TERM };
+        case ORchestraTokenType::MINUS:           return { nullptr, &Compiler::ParseBinary, Precedence::TERM };
+        case ORchestraTokenType::STAR:            return { nullptr, &Compiler::ParseBinary, Precedence::FACTOR };
+        case ORchestraTokenType::SLASH:           return { nullptr, &Compiler::ParseBinary, Precedence::FACTOR };
+        case ORchestraTokenType::PERCENT:         return { nullptr, &Compiler::ParseBinary, Precedence::FACTOR };
 
-            // For nested parenteses where there can be more left parens after each other.
-            if (tType == ORchestraTokenType::LEFT_PAREN)
-                expectsValue = false;
+        case ORchestraTokenType::AND:             return { nullptr, &Compiler::ParseBinary, Precedence::COMPARISON };
+        case ORchestraTokenType::OR:              return { nullptr, &Compiler::ParseBinary, Precedence::COMPARISON };
+        case ORchestraTokenType::XOR:             return { nullptr, &Compiler::ParseBinary, Precedence::COMPARISON };
+        case ORchestraTokenType::GREATER:         return { nullptr, &Compiler::ParseBinary, Precedence::COMPARISON };
+        case ORchestraTokenType::GREATER_EQUAL:   return { nullptr, &Compiler::ParseBinary, Precedence::COMPARISON };
+        case ORchestraTokenType::LESS:            return { nullptr, &Compiler::ParseBinary, Precedence::COMPARISON };
+        case ORchestraTokenType::LESS_EQUAL:      return { nullptr, &Compiler::ParseBinary, Precedence::COMPARISON };
+        case ORchestraTokenType::EQUAL_EQUAL:     return { nullptr, &Compiler::ParseBinary, Precedence::COMPARISON };
+        case ORchestraTokenType::BANG_EQUAL:       return { nullptr, &Compiler::ParseBinary, Precedence::COMPARISON };
 
-            if (tType == ORchestraTokenType::IDENTIFIER)
-            {
-                if (!expectsValue)
-                {
-                    ThrowUnexpectedTokenError(currentToken);
-                    return false;
-                }
-
-                if (!MakeIdentifierGetter(currentToken, instructions))
-                    return false;
-
-                expectsValue = false;
-            }
-
-            else if (tType == ORchestraTokenType::NUMBER)
-            {
-                if (!expectsValue)
-                {
-                    ThrowUnexpectedTokenError(currentToken);
-                    return false;
-                }
-
-                MakeConstant(currentToken, instructions);
-                expectsValue = false;
-            }
-            else if (tType == ORchestraTokenType::NOTE_IDENTIFIER)
-            {
-                if (!expectsValue)
-                {
-                    ThrowUnexpectedTokenError(currentToken);
-                    return false;
-                }
-
-                if (!MakeNoteIntoConstant(currentToken, instructions))
-                {
-                    ThrowUnexpectedTokenError(currentToken);
-                    return false;
-                }
-
-                expectsValue = false;
-            }
-
-            else if (tType == ORchestraTokenType::RANDOM)
-            {
-                CompileFunctionCall(instructions, ranFunctionName);
-                expectsValue = false;
-            }
-
-            else if (tType == ORchestraTokenType::DOLLAR)
-            {
-                if (!expectsValue)
-                {
-                    ThrowUnexpectedTokenError(currentToken);
-                    return false;
-                }
-
-                instructions.emplace_back(Instruction{ OpCode::GET_GLOBAL_COUNT });
-                expectsValue = false;
-            }
-
-            else if (isOperator(tType))
-            {
-                if (expectsValue)
-                {
-                    ThrowUnexpectedTokenError(currentToken);
-                    return false;
-                }
-
-                while (!ops.empty() && isOperator(ops.top()))
-                {
-                    ORchestraTokenType top = ops.top();
-
-                    if ((precedence(top) > precedence(tType)) ||
-                        (precedence(top) == precedence(tType)))
-                    {
-                        MakeOperation(top, instructions);
-                        ops.pop();
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-
-                expectsValue = true;
-                ops.push(tType);
-            }
-
-            else if (tType == ORchestraTokenType::LEFT_PAREN)
-            {
-                if (expectsValue)
-                {
-                    ThrowUnexpectedTokenError(currentToken);
-                    return false;
-                }
-                ops.push(tType);
-                expectsValue = true;
-                ++leftParen;
-            }
-
-            else if (tType == ORchestraTokenType::RIGHT_PAREN)
-            {
-                if (expectsValue)
-                {
-                    ThrowUnexpectedTokenError(currentToken);
-                    return false;
-                }
-
-                while (!ops.empty() && ops.top() != ORchestraTokenType::LEFT_PAREN)
-                {
-                    MakeOperation(ops.top(), instructions);
-                    ops.pop();
-                }
-                if (!ops.empty() && ops.top() == ORchestraTokenType::LEFT_PAREN)
-                {
-                    ops.pop(); // discard left paren
-                }
-
-                expectsValue = false;
-                ++rightParen;
-            }
-            else
-            {
-                ThrowUnexpectedTokenError(currentToken);
-                return false;
-            }
+        default:                                   return { nullptr, nullptr, Precedence::NONE };
         }
+    }
 
-        if (expectsValue)
+    // Pratt parser core: parse at given minimum precedence level
+    bool Compiler::ParsePrecedence(Precedence minPrecedence, std::vector<Instruction>& instructions)
+    {
+        Consume();
+        const ORchestraToken& prefixToken = Previous();
+        ParseRule rule = GetRule(prefixToken.mTokenType);
+
+        if (!rule.prefix)
         {
-            ThrowUnexpectedTokenError(Peek());
+            ThrowUnexpectedTokenError(prefixToken);
             return false;
         }
 
-        if (leftParen > rightParen)
+        if (!(this->*rule.prefix)(instructions))
+            return false;
+
+        while (minPrecedence <= GetRule(Peek().mTokenType).precedence)
+        {
+            Consume();
+            ParseRule infixRule = GetRule(Previous().mTokenType);
+            if (!(this->*infixRule.infix)(instructions))
+                return false;
+        }
+
+        return true;
+    }
+
+    bool Compiler::ParseNumber(std::vector<Instruction>& instructions)
+    {
+        MakeConstant(Previous(), instructions);
+        return true;
+    }
+
+    bool Compiler::ParseNoteIdentifier(std::vector<Instruction>& instructions)
+    {
+        return MakeNoteIntoConstant(Previous(), instructions);
+    }
+
+    bool Compiler::ParseIdentifier(std::vector<Instruction>& instructions)
+    {
+        return MakeIdentifierGetter(Previous(), instructions);
+    }
+
+    bool Compiler::ParseGrouping(std::vector<Instruction>& instructions)
+    {
+        if (!ParsePrecedence(Precedence::ASSIGNMENT, instructions))
+            return false;
+
+        if (Peek().mTokenType != ORchestraTokenType::RIGHT_PAREN)
         {
             std::string missingToken{ ")" };
             ThrowMissingExpectedToken(missingToken);
             return false;
         }
 
-        if (rightParen > leftParen)
-        {
-            std::string missingToken{ "(" };
-            ThrowMissingExpectedToken(missingToken);
-            return false;
-        }
-
-        while (!ops.empty())
-        {
-            MakeOperation(ops.top(), instructions);
-            ops.pop();
-        }
-
+        Consume();
         return true;
+    }
+
+    bool Compiler::ParseDollar(std::vector<Instruction>& instructions)
+    {
+        instructions.emplace_back(Instruction{ OpCode::GET_GLOBAL_COUNT });
+        return true;
+    }
+
+    bool Compiler::ParseRandom(std::vector<Instruction>& instructions)
+    {
+        return CompileFunctionCall(instructions, ranFunctionName);
+    }
+
+    bool Compiler::ParseBinary(std::vector<Instruction>& instructions)
+    {
+        ORchestraTokenType operatorType = Previous().mTokenType;
+        ParseRule rule = GetRule(operatorType);
+
+        // +1 for left-associativity: parse right operand at one level higher
+        Precedence nextPrecedence = static_cast<Precedence>(static_cast<int>(rule.precedence) + 1);
+        if (!ParsePrecedence(nextPrecedence, instructions))
+            return false;
+
+        MakeOperation(operatorType, instructions);
+        return true;
+    }
+
+    bool Compiler::CompileExpression(std::vector<Instruction>& instructions)
+    {
+        return ParsePrecedence(Precedence::ASSIGNMENT, instructions);
     }
 
     bool Compiler::Compile(std::vector<Instruction>& instructions)
