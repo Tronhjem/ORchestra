@@ -73,6 +73,10 @@ namespace ORchestra {
         NOTE,
         CC,
 
+        // Function definition
+        FN,
+        END_FN,
+
         // ENDS
         EOL, // End Of Line
         END,

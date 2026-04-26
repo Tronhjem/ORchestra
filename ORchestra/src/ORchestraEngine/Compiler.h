@@ -86,7 +86,13 @@ namespace ORchestra
                 int maxLength,
                 bool isLastRecursiveLevel);
 
+        inline void BuildFunctions();
         bool CompileFunctionCall(std::vector<Instruction>& instructions, const std::string& functionName);
+
+        enum class StatementResult { SUCCESS, END_OF_INPUT, END_OF_FUNCTION, ERROR };
+        StatementResult CompileStatement(std::vector<Instruction>& instructions);
+        bool CompileFunctionDefinition();
+        bool mInsideFunctionDefinition = false;
 
         inline DataUnit GetOrCreateVariableID(const std::string& varName);
 

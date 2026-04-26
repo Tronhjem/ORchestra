@@ -292,7 +292,14 @@ namespace ORchestra
         case 'r':
             return checkKeyword(1, 2, "an", ORchestraTokenType::RANDOM);
         case 'e':
-            return checkKeyword(1, 2, "uc", ORchestraTokenType::EUCLIDEAN);
+        {
+            auto result = checkKeyword(1, 2, "uc", ORchestraTokenType::EUCLIDEAN);
+            if (result != ORchestraTokenType::IDENTIFIER)
+                return result;
+            return checkKeyword(1, 2, "nd", ORchestraTokenType::END_FN);
+        }
+        case 'f':
+            return checkKeyword(1, 1, "n", ORchestraTokenType::FN);
         case 'n':
             return checkKeyword(1, 3, "ote", ORchestraTokenType::NOTE);
         case 'c':

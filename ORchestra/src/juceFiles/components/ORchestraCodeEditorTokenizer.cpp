@@ -27,10 +27,10 @@ namespace ORchestra
         static bool isReservedKeyword (String::CharPointerType token, const int tokenLength) noexcept
         {
             static const char* const keywords2Char[] =
-                { "cc", nullptr };
+                { "cc", "fn", nullptr };
 
             static const char* const keywords3Char[] =
-                { "euc", "ran",  "bpm", "div", nullptr };
+                { "euc", "ran",  "bpm", "div", "end", nullptr };
 
             static const char* const keywords4Char[] =
                 { "note",  nullptr };

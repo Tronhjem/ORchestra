@@ -94,15 +94,17 @@ namespace ORchestra
                 StepData value = stack.Pop();
                 std::vector<StepData> vectorData{ value };
                 
-                if(instruction.GetOperand() >= mVariables.size())
+                auto op = (int)instruction.GetOperand();
+                if(op >= mVariables.size())
                 {
                     mVariables.emplace_back(DataSequence{ vectorData });
                 }
                 else
                 {
-                    const std::string error = std::string("VM: Variable already defined, choose a new name");
-                    mErrorReporting.LogError(error);
-                    return false;
+                    mVariables[op] = DataSequence{ vectorData };
+//                    const std::string error = std::string("VM: Variable already defined, choose a new name");
+//                    mErrorReporting.LogError(error);
+//                    return false;
                 }
 
                 break;

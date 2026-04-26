@@ -47,6 +47,11 @@ namespace ORchestra
     {
         mVariableIDMap.reserve(8); // Magic number for size of variables estimated as a good start.
 
+        BuildFunctions();
+    }
+
+    void Compiler::BuildFunctions()
+    {
         // populate built in functions
         std::vector<Instruction> printInstructions;
         printInstructions.emplace_back(Instruction{ OpCode::PRINT });
@@ -81,7 +86,12 @@ namespace ORchestra
     {
         mCurrentIndex = 0;
         mVariableIDMap.clear();
+        
+        mFunctions.clear();
+        BuildFunctions();
+        
         mVariableIdCounter = 0;
+        mInsideFunctionDefinition = false;
     }
 
     const ORchestraToken& Compiler::Consume()
@@ -347,15 +357,9 @@ namespace ORchestra
             }
         }
 
-        if (expectsValue)
+        if (expectsValue && paramCounter != function.mNumOfParams)
         {
-            if (paramCounter != function.mNumOfParams)
-            {
-                ThrowMissingParamCount(function.mNumOfParams, paramCounter);
-                return false;
-            }
-
-            ThrowUnexpectedTokenError(Previous());
+            ThrowMissingParamCount(function.mNumOfParams, paramCounter);
             return false;
         }
 
@@ -548,30 +552,50 @@ namespace ORchestra
     {
         switch (type)
         {
-        case ORchestraTokenType::NUMBER:          return { &Compiler::ParseNumber,         nullptr,                 Precedence::NONE };
-        case ORchestraTokenType::IDENTIFIER:      return { &Compiler::ParseIdentifier,     nullptr,                 Precedence::NONE };
-        case ORchestraTokenType::NOTE_IDENTIFIER: return { &Compiler::ParseNoteIdentifier, nullptr,                 Precedence::NONE };
-        case ORchestraTokenType::DOLLAR:          return { &Compiler::ParseDollar,         nullptr,                 Precedence::NONE };
-        case ORchestraTokenType::RANDOM:          return { &Compiler::ParseRandom,         nullptr,                 Precedence::NONE };
-        case ORchestraTokenType::LEFT_PAREN:      return { &Compiler::ParseGrouping,       nullptr,                 Precedence::NONE };
+        case ORchestraTokenType::NUMBER:          
+            return { &Compiler::ParseNumber, nullptr, Precedence::NONE };
+        case ORchestraTokenType::IDENTIFIER:      
+            return { &Compiler::ParseIdentifier, nullptr, Precedence::NONE };
+        case ORchestraTokenType::NOTE_IDENTIFIER: 
+            return { &Compiler::ParseNoteIdentifier, nullptr, Precedence::NONE };
+        case ORchestraTokenType::DOLLAR:          
+            return { &Compiler::ParseDollar, nullptr, Precedence::NONE };
+        case ORchestraTokenType::RANDOM:          
+            return { &Compiler::ParseRandom, nullptr, Precedence::NONE };
+        case ORchestraTokenType::LEFT_PAREN:      
+            return { &Compiler::ParseGrouping, nullptr, Precedence::NONE };
 
-        case ORchestraTokenType::PLUS:            return { nullptr, &Compiler::ParseBinary, Precedence::TERM };
-        case ORchestraTokenType::MINUS:           return { nullptr, &Compiler::ParseBinary, Precedence::TERM };
-        case ORchestraTokenType::STAR:            return { nullptr, &Compiler::ParseBinary, Precedence::FACTOR };
-        case ORchestraTokenType::SLASH:           return { nullptr, &Compiler::ParseBinary, Precedence::FACTOR };
-        case ORchestraTokenType::PERCENT:         return { nullptr, &Compiler::ParseBinary, Precedence::FACTOR };
+        case ORchestraTokenType::PLUS:            
+            return { nullptr, &Compiler::ParseBinary, Precedence::TERM };
+        case ORchestraTokenType::MINUS:           
+            return { nullptr, &Compiler::ParseBinary, Precedence::TERM };
+        case ORchestraTokenType::STAR:            
+            return { nullptr, &Compiler::ParseBinary, Precedence::FACTOR };
+        case ORchestraTokenType::SLASH:           
+            return { nullptr, &Compiler::ParseBinary, Precedence::FACTOR };
+        case ORchestraTokenType::PERCENT:         
+            return { nullptr, &Compiler::ParseBinary, Precedence::FACTOR };
 
-        case ORchestraTokenType::AND:             return { nullptr, &Compiler::ParseBinary, Precedence::COMPARISON };
-        case ORchestraTokenType::OR:              return { nullptr, &Compiler::ParseBinary, Precedence::COMPARISON };
-        case ORchestraTokenType::XOR:             return { nullptr, &Compiler::ParseBinary, Precedence::COMPARISON };
-        case ORchestraTokenType::GREATER:         return { nullptr, &Compiler::ParseBinary, Precedence::COMPARISON };
-        case ORchestraTokenType::GREATER_EQUAL:   return { nullptr, &Compiler::ParseBinary, Precedence::COMPARISON };
-        case ORchestraTokenType::LESS:            return { nullptr, &Compiler::ParseBinary, Precedence::COMPARISON };
-        case ORchestraTokenType::LESS_EQUAL:      return { nullptr, &Compiler::ParseBinary, Precedence::COMPARISON };
-        case ORchestraTokenType::EQUAL_EQUAL:     return { nullptr, &Compiler::ParseBinary, Precedence::COMPARISON };
-        case ORchestraTokenType::BANG_EQUAL:       return { nullptr, &Compiler::ParseBinary, Precedence::COMPARISON };
-
-        default:                                   return { nullptr, nullptr, Precedence::NONE };
+        case ORchestraTokenType::AND:             
+            return { nullptr, &Compiler::ParseBinary, Precedence::COMPARISON };
+        case ORchestraTokenType::OR:              
+            return { nullptr, &Compiler::ParseBinary, Precedence::COMPARISON };
+        case ORchestraTokenType::XOR:             
+            return { nullptr, &Compiler::ParseBinary, Precedence::COMPARISON };
+        case ORchestraTokenType::GREATER:         
+            return { nullptr, &Compiler::ParseBinary, Precedence::COMPARISON };
+        case ORchestraTokenType::GREATER_EQUAL:   
+            return { nullptr, &Compiler::ParseBinary, Precedence::COMPARISON };
+        case ORchestraTokenType::LESS:            
+            return { nullptr, &Compiler::ParseBinary, Precedence::COMPARISON };
+        case ORchestraTokenType::LESS_EQUAL:      
+            return { nullptr, &Compiler::ParseBinary, Precedence::COMPARISON };
+        case ORchestraTokenType::EQUAL_EQUAL:     
+            return { nullptr, &Compiler::ParseBinary, Precedence::COMPARISON };
+        case ORchestraTokenType::BANG_EQUAL:       
+            return { nullptr, &Compiler::ParseBinary, Precedence::COMPARISON };
+        default:                                   
+            return { nullptr, nullptr, Precedence::NONE };
         }
     }
 
@@ -664,6 +688,178 @@ namespace ORchestra
         return ParsePrecedence(Precedence::ASSIGNMENT, instructions);
     }
 
+    Compiler::StatementResult Compiler::CompileStatement(std::vector<Instruction>& instructions)
+    {
+        const ORchestraToken& token = Consume();
+
+        switch (token.mTokenType)
+        {
+        case ORchestraTokenType::IDENTIFIER:
+        {
+            const std::string name = std::string(token.mStart, static_cast<unsigned long>(token.mLength));
+
+            if (Peek().mTokenType == ORchestraTokenType::LEFT_BRACKET)
+            {
+                Consume();
+
+                if (!CompileExpression(instructions))
+                {
+                    return StatementResult::ERROR;
+                }
+
+                if (Peek().mTokenType != ORchestraTokenType::RIGHT_BRACKET)
+                {
+                    std::string missingBracket = "]";
+                    ThrowMissingExpectedToken(missingBracket);
+                    return StatementResult::ERROR;
+                }
+
+                Consume();
+
+                if (Peek().mTokenType == ORchestraTokenType::EQUAL)
+                {
+                    Consume();
+
+                    if (!CompileExpression(instructions))
+                    {
+                        return StatementResult::ERROR;
+                    }
+
+                    const DataUnit id = GetOrCreateVariableID(name);
+                    instructions.emplace_back(Instruction{ OpCode::SET_IDENTIFIER_WITH_INDEX, id });
+                }
+                else
+                {
+                    ThrowUnexpectedTokenError(Peek());
+                    return StatementResult::ERROR;
+                }
+            }
+            else if (Peek().mTokenType == ORchestraTokenType::EQUAL)
+            {
+                Consume();
+
+                ORchestraTokenType tokenType = Peek().mTokenType;
+                switch (tokenType)
+                {
+                    // Data Array
+                case ORchestraTokenType::LEFT_BRACKET:
+                {
+                    DataUnit arrayLength;
+                    const bool isLastRecursiveLevel = false;
+                    if (CompileArray(instructions, arrayLength, MAX_DATASEQUENCE_LENGTH, isLastRecursiveLevel))
+                    {
+                        const DataUnit id = GetOrCreateVariableID(name);
+                        instructions.emplace_back(Instruction{ OpCode::CONSTANT, arrayLength });
+                        instructions.emplace_back(Instruction{ OpCode::SET_IDENTIFIER_ARRAY, id });
+                    }
+                    else
+                    {
+                        return StatementResult::ERROR;
+                    }
+
+                    break;
+                }
+                case ORchestraTokenType::NUMBER:
+                case ORchestraTokenType::NOTE_IDENTIFIER:
+                case ORchestraTokenType::IDENTIFIER:
+                case ORchestraTokenType::LEFT_PAREN:
+                case ORchestraTokenType::RANDOM:
+                case ORchestraTokenType::DOLLAR:
+                {
+                    if (!CompileExpression(instructions))
+                        return StatementResult::ERROR;
+
+                    const DataUnit id = GetOrCreateVariableID(name);
+                    instructions.emplace_back(Instruction{ OpCode::SET_IDENTIFIER_VALUE, id });
+                    break;
+                }
+                case ORchestraTokenType::EUCLIDEAN:
+                {
+                    Consume();
+                    if (!CompileFunctionCall(instructions, eucFunctionName))
+                        return StatementResult::ERROR;
+
+                    const DataUnit id = GetOrCreateVariableID(name);
+                    instructions.emplace_back(Instruction{ OpCode::SET_IDENTIFIER_ARRAY, id });
+
+                    break;
+                }
+
+                default:
+                {
+                    ThrowUnexpectedTokenError(Peek());
+                    return StatementResult::ERROR;
+                }
+                }
+            }
+            // For Functions
+            else if (Peek().mTokenType == ORchestraTokenType::LEFT_PAREN)
+            {
+                if (!CompileFunctionCall(instructions, name))
+                    return StatementResult::ERROR;
+            }
+            else
+            {
+                ThrowUnexpectedTokenError(Peek());
+                return StatementResult::ERROR;
+            }
+
+            break;
+        }
+
+        case ORchestraTokenType::PRINT:
+        case ORchestraTokenType::NOTE:
+        case ORchestraTokenType::CC:
+        {
+            const std::string functionName = std::string(token.mStart, static_cast<unsigned long>(token.mLength));
+            if (!CompileFunctionCall(instructions, functionName))
+                return StatementResult::ERROR;
+
+            break;
+        }
+
+        case ORchestraTokenType::FN:
+        {
+            if (!CompileFunctionDefinition())
+                return StatementResult::ERROR;
+            break;
+        }
+
+#if _TEST
+        case ORchestraTokenType::TEST_KEYWORD:
+        {
+            if (Peek().mTokenType == ORchestraTokenType::IDENTIFIER ||
+                Peek().mTokenType == ORchestraTokenType::NUMBER ||
+                Peek().mTokenType == ORchestraTokenType::DOLLAR)
+            {
+                CompileExpression(instructions);
+            }
+            else
+            {
+                ThrowUnexpectedTokenError(Peek());
+                return StatementResult::ERROR;
+            }
+            break;
+        }
+#endif
+
+        case ORchestraTokenType::END_FN:
+            return StatementResult::END_OF_FUNCTION;
+
+        case ORchestraTokenType::END:
+            return StatementResult::END_OF_INPUT;
+
+        case ORchestraTokenType::EOL:
+            break;
+
+        default:
+            ThrowUnexpectedTokenError(token);
+            return StatementResult::ERROR;
+        }
+
+        return StatementResult::SUCCESS;
+    }
+
     bool Compiler::Compile(std::vector<Instruction>& instructions)
     {
 #if _DEBUG
@@ -672,161 +868,88 @@ namespace ORchestra
 
         for (;;)
         {
-            const ORchestraToken& token = Consume();
-
-            switch (token.mTokenType)
+            StatementResult result = CompileStatement(instructions);
+            switch (result)
             {
-            case ORchestraTokenType::IDENTIFIER:
-            {
-                const std::string name = std::string(token.mStart, static_cast<unsigned long>(token.mLength));
-                
-                if (Peek().mTokenType == ORchestraTokenType::LEFT_BRACKET)
-                {
-                    Consume();
-
-                    if (!CompileExpression(instructions))
-                    {
-                        return false;
-                    }
-
-                    if (Peek().mTokenType != ORchestraTokenType::RIGHT_BRACKET)
-                    {
-                        std::string missingBracket = "]";
-                        ThrowMissingExpectedToken(missingBracket);
-                        return false;
-                    }
-
-                    Consume();
-
-                    if (Peek().mTokenType == ORchestraTokenType::EQUAL)
-                    {
-                        Consume();
-
-                        if (!CompileExpression(instructions))
-                        {
-                            return false;
-                        }
-
-                        const DataUnit id = GetOrCreateVariableID(name);
-                        instructions.emplace_back(Instruction{ OpCode::SET_IDENTIFIER_WITH_INDEX, id });
-                    }
-                    else
-                    {
-                        ThrowUnexpectedTokenError(Peek());
-                        return false;
-                    }
-                }
-                else if (Peek().mTokenType == ORchestraTokenType::EQUAL)
-                {
-                    Consume();
-
-                    ORchestraTokenType tokenType = Peek().mTokenType;
-                    switch (tokenType)
-                    {
-                        // Data Array
-                    case ORchestraTokenType::LEFT_BRACKET:
-                    {
-                        DataUnit arrayLength;
-                        const bool isLastRecursiveLevel = false;
-                        if (CompileArray(instructions, arrayLength, MAX_DATASEQUENCE_LENGTH, isLastRecursiveLevel))
-                        {
-                            const DataUnit id = GetOrCreateVariableID(name);
-                            instructions.emplace_back(Instruction{ OpCode::CONSTANT, arrayLength });
-                            instructions.emplace_back(Instruction{ OpCode::SET_IDENTIFIER_ARRAY, id });
-                        }
-                        else
-                        {
-                            return false;
-                        }
-
-                        break;
-                    }
-                    case ORchestraTokenType::NUMBER:
-                    case ORchestraTokenType::NOTE_IDENTIFIER:
-                    case ORchestraTokenType::IDENTIFIER:
-                    case ORchestraTokenType::LEFT_PAREN:
-                    case ORchestraTokenType::RANDOM:
-                    case ORchestraTokenType::DOLLAR:
-                    {
-                        if (!CompileExpression(instructions))
-                            return false;
-
-                        const DataUnit id = GetOrCreateVariableID(name);
-                        instructions.emplace_back(Instruction{ OpCode::SET_IDENTIFIER_VALUE, id });
-                        break;
-                    }
-                    case ORchestraTokenType::EUCLIDEAN:
-                    {
-                        Consume();
-                        if (!CompileFunctionCall(instructions, eucFunctionName))
-                            return false;
-
-                        const DataUnit id = GetOrCreateVariableID(name);
-                        instructions.emplace_back(Instruction{ OpCode::SET_IDENTIFIER_ARRAY, id });
-
-                        break;
-                    }
-
-                    default:
-                    {
-                        ThrowUnexpectedTokenError(Peek());
-                        return false;
-                    }
-                    }
-                }
-                // For Functions
-                else if (Peek().mTokenType == ORchestraTokenType::LEFT_PAREN)
-                {
-                    if (!CompileFunctionCall(instructions, name))
-                        return false;
-                }
-                else
-                {
-                    ThrowUnexpectedTokenError(Peek());
-                    return false;
-                }
-
-                break;
-            }
-
-            case ORchestraTokenType::PRINT:
-            case ORchestraTokenType::NOTE:
-            case ORchestraTokenType::CC:
-            {
-                const std::string functionName = std::string(token.mStart, static_cast<unsigned long>(token.mLength));
-                if (!CompileFunctionCall(instructions, functionName))
-                    return false;
-
-                break;
-            }
-
-#if _TEST
-            case ORchestraTokenType::TEST_KEYWORD:
-            {
-                if (Peek().mTokenType == ORchestraTokenType::IDENTIFIER || 
-                    Peek().mTokenType == ORchestraTokenType::NUMBER ||
-                    Peek().mTokenType == ORchestraTokenType::DOLLAR)
-                {
-                    CompileExpression(instructions);
-                }
-                else
-                {
-                    ThrowUnexpectedTokenError(Peek());
-                    return false;
-                }
-                break;
-            }
-#endif
-
-            case ORchestraTokenType::END:
+            case StatementResult::SUCCESS:
+                continue;
+            case StatementResult::END_OF_INPUT:
                 instructions.emplace_back(Instruction{ OpCode::END });
                 return true;
+            case StatementResult::END_OF_FUNCTION:
+                ThrowUnexpectedTokenError(Previous());
+                return false;
+            case StatementResult::ERROR:
+                return false;
+            }
+        }
+    }
 
-            case ORchestraTokenType::EOL:
-                break;
+    bool Compiler::CompileFunctionDefinition()
+    {
+        if (mInsideFunctionDefinition)
+        {
+            std::string message = "Cannot define a function inside another function";
+            mErrorReporting.LogError(Peek().mLine, message);
+            return false;
+        }
 
-            default:
-                ThrowUnexpectedTokenError(token);
+        if (Peek().mTokenType != ORchestraTokenType::IDENTIFIER)
+        {
+            ThrowUnexpectedTokenError(Peek());
+            return false;
+        }
+
+        const ORchestraToken& nameToken = Consume();
+        const std::string name = std::string(nameToken.mStart, static_cast<unsigned long>(nameToken.mLength));
+        const int fnLine = nameToken.mLine;
+
+        //Check that it doesn't already have a function of this name
+        if (mFunctions.find(name) != mFunctions.end())
+        {
+            std::string message = std::string("Function '") + name + std::string("' is already defined");
+            mErrorReporting.LogError(fnLine, message);
+            return false;
+        }
+
+        // Check that it doesn't clash with a variable
+        if (mVariableIDMap.find(name) != mVariableIDMap.end())
+        {
+            std::string message = std::string("'") + name + std::string("' is already used as a variable name");
+            mErrorReporting.LogError(fnLine, message);
+            return false;
+        }
+
+        if (Peek().mTokenType != ORchestraTokenType::EOL)
+        {
+            ThrowUnexpectedTokenError(Peek());
+            return false;
+        }
+        Consume(); // consume EOL
+
+        mInsideFunctionDefinition = true;
+        std::vector<Instruction> bodyInstructions;
+
+        for (;;)
+        {
+            StatementResult result = CompileStatement(bodyInstructions);
+            switch (result)
+            {
+            case StatementResult::SUCCESS:
+                continue;
+            case StatementResult::END_OF_FUNCTION:
+                mInsideFunctionDefinition = false;
+                mFunctions[name] = StoredFunction(0, bodyInstructions);
+                return true;
+            case StatementResult::END_OF_INPUT:
+            {
+                mInsideFunctionDefinition = false;
+                std::string message = "Unexpected end, you're missing a end";
+                mErrorReporting.LogError(fnLine, message);
+                return false;
+            }
+            case StatementResult::ERROR:
+                mInsideFunctionDefinition = false;
                 return false;
             }
         }
