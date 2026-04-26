@@ -116,17 +116,13 @@ namespace ORchestra
 
                 std::vector<StepData> vectorData{ data, data + arrayLength };
                 
-                if(instruction.GetOperand() >= mVariables.size())
-                {
+                // If the Id doesn't exist yet create a new variable
+                // else fetch the variable based on the id
+                const int operandId = static_cast<int>(instruction.GetOperand());
+                if(operandId >= mVariables.size())
                     mVariables.emplace_back(DataSequence{ vectorData });
-                }
                 else
-                {
-                    const std::string error = std::string("VM: Variable already defined, choose a new name");
-                    mErrorReporting.LogError(error);
-                    return false;
-                }
-
+                    mVariables[operandId] = DataSequence{ vectorData };
 
                 break;
             }
@@ -312,11 +308,21 @@ namespace ORchestra
         case (OpCode::SET_IDENTIFIER_ARRAY):
         {
             const int arrayLength = std::clamp(static_cast<int>(stack.Pop().GetValue(0)), 0, MAX_DATASEQUENCE_LENGTH);
-
+            StepData data[MAX_DATASEQUENCE_LENGTH];
             for (int i = arrayLength - 1; i >= 0; --i)
             {
-                mVariables[instruction.GetOperand()].SetValue(i, stack.Pop());
+                data[i] = stack.Pop();
             }
+
+            std::vector<StepData> vectorData{ data, data + arrayLength };
+            
+            // If the Id doesn't exist yet create a new variable
+            // else fetch the variable based on the id
+            const int operandId = static_cast<int>(instruction.GetOperand());
+            if(operandId >= mVariables.size())
+                mVariables.emplace_back(DataSequence{ vectorData });
+            else
+                mVariables[operandId] = DataSequence{ vectorData };
 
             break;
         }
