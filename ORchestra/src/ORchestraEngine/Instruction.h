@@ -67,6 +67,9 @@ namespace ORchestra
         SET_BPM,
         SET_NOTE_DIVISION,
 
+        UPDATE_IDENTIFIER_VALUE,
+        EXEC_FUNC_ARRAY,
+
         //end
         END,
     };

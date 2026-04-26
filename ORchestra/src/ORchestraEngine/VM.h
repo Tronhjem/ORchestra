@@ -72,6 +72,8 @@ namespace ORchestra
 
         bool ProcessOpCodes(std::vector<Instruction>& setupInstructions);
         inline bool ProcessInstruction(const Instruction& instruction, const int stepCount, Stack<StepData>& mStack);
+        bool ExecuteTickInstruction(const Instruction& instruction, const int globalCount,
+                                    Stack<StepData>& stack, std::vector<SequenceStep>& stepQueue);
 
         ErrorReporting& mErrorReporting;
         Scanner mScanner;
@@ -79,6 +81,7 @@ namespace ORchestra
 
         std::vector<DataSequence> mVariables;
         std::vector<Instruction> mRuntimeInstructions;
+        std::vector<std::vector<std::vector<Instruction>>> mFunctionArrays;
         inline DataUnit RandomValue(const DataUnit low, const DataUnit high);
         
         template <typename Operation>

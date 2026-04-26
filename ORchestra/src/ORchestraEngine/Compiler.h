@@ -47,6 +47,7 @@ namespace ORchestra
         Compiler(const std::vector<ORchestraToken>& tokens, ErrorReporting& log);
         bool Compile(std::vector<Instruction>& runtimeInstructions);
         void Reset();
+        const auto& GetFunctionArrays() const { return mFunctionArrays; }
 
     private:
         Compiler() = delete;
@@ -88,10 +89,12 @@ namespace ORchestra
 
         inline void BuildFunctions();
         bool CompileFunctionCall(std::vector<Instruction>& instructions, const std::string& functionName);
+        bool CompileFunctionArray(const std::string& name);
+        bool CompileFunctionArrayCall(std::vector<Instruction>& instructions, DataUnit arrayId);
 
         enum class StatementResult { SUCCESS, END_OF_INPUT, END_OF_FUNCTION, ERROR };
         StatementResult CompileStatement(std::vector<Instruction>& instructions);
-        bool CompileFunctionDefinition();
+        bool CompileFunctionDefinition(std::vector<Instruction>& mainInstructions);
         bool mInsideFunctionDefinition = false;
 
         inline DataUnit GetOrCreateVariableID(const std::string& varName);
@@ -102,5 +105,7 @@ namespace ORchestra
         ErrorReporting& mErrorReporting;
         std::unordered_map<std::string, StoredFunction> mFunctions;
         std::unordered_map<std::string, DataUnit> mVariableIDMap;
+        std::vector<std::vector<std::vector<Instruction>>> mFunctionArrays;
+        std::unordered_map<std::string, DataUnit> mFunctionArrayNames;
     };
 } // namespace ORchestra
