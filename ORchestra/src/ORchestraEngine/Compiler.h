@@ -47,7 +47,7 @@ namespace ORchestra
         Compiler(const std::vector<ORchestraToken>& tokens, ErrorReporting& log);
         bool Compile(std::vector<Instruction>& runtimeInstructions);
         void Reset();
-        const auto& GetFunctionArrays() const { return mFunctionArrays; }
+        const std::vector<std::vector<std::vector<Instruction>>>& GetFunctionArrays() const { return mFunctionArrays; }
         std::vector<std::string> GetVariableNames() const;
 
     private:
