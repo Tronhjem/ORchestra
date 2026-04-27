@@ -48,13 +48,7 @@ namespace ORchestra
         bool Compile(std::vector<Instruction>& runtimeInstructions);
         void Reset();
         const auto& GetFunctionArrays() const { return mFunctionArrays; }
-        std::vector<std::string> GetVariableNames() const
-        {
-            std::vector<std::string> names(mVariableIDMap.size());
-            for (const auto& [name, id] : mVariableIDMap)
-                names[id] = name;
-            return names;
-        }
+        std::vector<std::string> GetVariableNames() const;
 
     private:
         Compiler() = delete;

@@ -82,6 +82,14 @@ namespace ORchestra
         mFunctions[noteDivFunctionName] = StoredFunction(1, noteDivInstructions);
     }
 
+    std::vector<std::string> Compiler::GetVariableNames() const
+    {
+        std::vector<std::string> names(mVariableIDMap.size());
+        for (const auto& pair : mVariableIDMap)
+            names[pair.second] = pair.first;
+        return names;
+    }
+
     void Compiler::Reset()
     {
         mCurrentIndex = 0;
