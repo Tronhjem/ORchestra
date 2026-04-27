@@ -215,9 +215,9 @@ TEST_CASE("UserFunction: Parameterized function called from another function bod
     REQUIRE(result.GetValue(0) == 77);
 }
 
-TEST_CASE("UserFunction: Function array selects function by index via Tick", "[UserFunction]")
+TEST_CASE("Pattern array selects pattern by index via Tick", "[UserFunction]")
 {
-    std::string file = "a = [0]\nfn setA10\na[0] = 10\nend\nfn setA20\na[0] = 20\nend\npattern = [setA10, setA20]\npattern($)\ntest a[0]";
+    std::string file = "a = [0]\nptn setA10\na[0] = 10\nend\nptn setA20\na[0] = 20\nend\npattern = [setA10, setA20]\npattern($)\ntest a[0]";
     ErrorReporting errorReporter;
     VM vm(errorReporter);
     REQUIRE(vm.Prepare(file));
@@ -233,9 +233,9 @@ TEST_CASE("UserFunction: Function array selects function by index via Tick", "[U
     REQUIRE(result1.GetValue(0) == 20);
 }
 
-TEST_CASE("UserFunction: Function array wraps index with modulo", "[UserFunction]")
+TEST_CASE("Pattern array wraps index with modulo", "[UserFunction]")
 {
-    std::string file = "a = [0]\nfn setA10\na[0] = 10\nend\nfn setA20\na[0] = 20\nend\npattern = [setA10, setA20]\npattern($)\ntest a[0]";
+    std::string file = "a = [0]\nptn setA10\na[0] = 10\nend\nptn setA20\na[0] = 20\nend\npattern = [setA10, setA20]\npattern($)\ntest a[0]";
     ErrorReporting errorReporter;
     VM vm(errorReporter);
     REQUIRE(vm.Prepare(file));
@@ -246,9 +246,9 @@ TEST_CASE("UserFunction: Function array wraps index with modulo", "[UserFunction
     REQUIRE(result.GetValue(0) == 10);
 }
 
-TEST_CASE("UserFunction: Function array with NOTE output differs per index", "[UserFunction]")
+TEST_CASE("Pattern array with NOTE output differs per index", "[UserFunction]")
 {
-    std::string file = "fn verse\nnote(1, C4, 100, 1)\nend\nfn chorus\nnote(1, E4, 127, 1)\nend\npattern = [verse, chorus]\npattern($)";
+    std::string file = "ptn verse\nnote(1, C4, 100, 1)\nend\nptn chorus\nnote(1, E4, 127, 1)\nend\npattern = [verse, chorus]\npattern($)";
     ErrorReporting errorReporter;
     VM vm(errorReporter);
     REQUIRE(vm.Prepare(file));
@@ -266,9 +266,9 @@ TEST_CASE("UserFunction: Function array with NOTE output differs per index", "[U
     REQUIRE(steps1[0].mSecond.GetValue(0) == 127);
 }
 
-TEST_CASE("UserFunction: Function array with expression as index", "[UserFunction]")
+TEST_CASE("Pattern array with expression as index", "[UserFunction]")
 {
-    std::string file = "a = [0]\nfn setA10\na[0] = 10\nend\nfn setA20\na[0] = 20\nend\npattern = [setA10, setA20]\npattern($ + 1)\ntest a[0]";
+    std::string file = "a = [0]\nptn setA10\na[0] = 10\nend\nptn setA20\na[0] = 20\nend\npattern = [setA10, setA20]\npattern($ + 1)\ntest a[0]";
     ErrorReporting errorReporter;
     VM vm(errorReporter);
     REQUIRE(vm.Prepare(file));
@@ -279,9 +279,9 @@ TEST_CASE("UserFunction: Function array with expression as index", "[UserFunctio
     REQUIRE(result.GetValue(0) == 20);  // index = 0 + 1 = 1, selects setA20
 }
 
-TEST_CASE("UserFunction: Multiple function arrays in one script", "[UserFunction]")
+TEST_CASE("Multiple pattern arrays in one script", "[UserFunction]")
 {
-    std::string file = "a = [0]\nb = [0]\nfn setA1\na[0] = 1\nend\nfn setA2\na[0] = 2\nend\nfn setB1\nb[0] = 10\nend\nfn setB2\nb[0] = 20\nend\npatternA = [setA1, setA2]\npatternB = [setB1, setB2]\npatternA($)\npatternB($)\ntest a[0]";
+    std::string file = "a = [0]\nb = [0]\nptn setA1\na[0] = 1\nend\nptn setA2\na[0] = 2\nend\nptn setB1\nb[0] = 10\nend\nptn setB2\nb[0] = 20\nend\npatternA = [setA1, setA2]\npatternB = [setB1, setB2]\npatternA($)\npatternB($)\ntest a[0]";
     ErrorReporting errorReporter;
     VM vm(errorReporter);
     REQUIRE(vm.Prepare(file));
@@ -292,7 +292,7 @@ TEST_CASE("UserFunction: Multiple function arrays in one script", "[UserFunction
     REQUIRE(resultA.GetValue(0) == 1);
 }
 
-TEST_CASE("UserFunction: Error - unknown function name in function array", "[UserFunction]")
+TEST_CASE("Pattern: Error - unknown identifier in pattern array fails at runtime", "[UserFunction]")
 {
     std::string file = "pattern = [undefinedFunc]";
     ErrorReporting errorReporter;
@@ -309,4 +309,115 @@ TEST_CASE("UserFunction: Non-function identifier in array falls through to norma
 
     StepData result = vm.GetTopStackValue();
     REQUIRE(result.GetValue(0) == 5);
+}
+
+TEST_CASE("Pattern: Error - pattern cannot be called directly", "[UserFunction]")
+{
+    std::string file = "ptn myPat\nprint(1)\nend\nmyPat()";
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    REQUIRE(vm.Prepare(file) == false);
+}
+
+TEST_CASE("Pattern: Error - nested pattern definition fails", "[UserFunction]")
+{
+    std::string file = "ptn outer\nptn inner\nend\nend\n";
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    REQUIRE(vm.Prepare(file) == false);
+}
+
+TEST_CASE("Pattern: Error - unterminated pattern body", "[UserFunction]")
+{
+    std::string file = "ptn myPat\nprint(1)\n";
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    REQUIRE(vm.Prepare(file) == false);
+}
+
+TEST_CASE("Pattern: Error - name collision with function", "[UserFunction]")
+{
+    std::string file = "fn myFunc\nend\nptn myFunc\nend\n";
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    REQUIRE(vm.Prepare(file) == false);
+}
+
+TEST_CASE("Pattern: Error - fn function cannot be used in pattern array", "[UserFunction]")
+{
+    std::string file = "fn myFunc\nprint(1)\nend\npattern = [myFunc]";
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    REQUIRE(vm.Prepare(file) == false);
+}
+
+TEST_CASE("UserFunction: Function returns value used in assignment", "[UserFunction]")
+{
+    std::string file = "fn double(x)\nreturn x * 2\nend\na = double(5)\ntest a";
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    REQUIRE(vm.Prepare(file));
+
+    StepData result = vm.GetTopStackValue();
+    REQUIRE(result.GetValue(0) == 10);
+}
+
+TEST_CASE("UserFunction: Function return value used in expression with operators", "[UserFunction]")
+{
+    std::string file = "fn add1(x)\nreturn x + 1\nend\na = add1(5) * 2\ntest a";
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    REQUIRE(vm.Prepare(file));
+
+    StepData result = vm.GetTopStackValue();
+    REQUIRE(result.GetValue(0) == 12);
+}
+
+TEST_CASE("UserFunction: Function return value used in array", "[UserFunction]")
+{
+    std::string file = "fn triple(x)\nreturn x * 3\nend\na = [triple(1), triple(2), triple(3)]\ntest a[1]";
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    REQUIRE(vm.Prepare(file));
+
+    StepData result = vm.GetTopStackValue();
+    REQUIRE(result.GetValue(0) == 6);
+}
+
+TEST_CASE("UserFunction: Function with multiple statements and return", "[UserFunction]")
+{
+    std::string file = "b = 0\nfn compute(x)\nb = x * 2\nreturn b + 1\nend\na = compute(5)\ntest a";
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    REQUIRE(vm.Prepare(file));
+
+    StepData result = vm.GetTopStackValue();
+    REQUIRE(result.GetValue(0) == 11);
+}
+
+TEST_CASE("UserFunction: Nested function calls in expressions", "[UserFunction]")
+{
+    std::string file = "fn double(x)\nreturn x * 2\nend\nfn addOne(x)\nreturn x + 1\nend\na = double(addOne(4))\ntest a";
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    REQUIRE(vm.Prepare(file));
+
+    StepData result = vm.GetTopStackValue();
+    REQUIRE(result.GetValue(0) == 10);
+}
+
+TEST_CASE("UserFunction: Function return used as argument to built-in", "[UserFunction]")
+{
+    std::string file = "fn getVel(x)\nreturn x * 10\nend\nnote(1, C4, getVel(10), 1)";
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    REQUIRE(vm.Prepare(file));
+}
+
+TEST_CASE("UserFunction: Error - return outside function body", "[UserFunction]")
+{
+    std::string file = "return 5";
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    REQUIRE(vm.Prepare(file) == false);
 }

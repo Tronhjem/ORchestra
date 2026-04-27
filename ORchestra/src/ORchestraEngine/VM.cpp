@@ -55,6 +55,7 @@ namespace ORchestra
             success = mCompiler.Compile(mRuntimeInstructions);
             if (success)
             {
+                mVariableNames = mCompiler.GetVariableNames();
                 success = ProcessOpCodes(mRuntimeInstructions);
                 mFunctionArrays = mCompiler.GetFunctionArrays();
             }
@@ -68,6 +69,7 @@ namespace ORchestra
         mScanner.Reset();
         mCompiler.Reset();
         mVariables.clear();
+        mVariableNames.clear();
         mRuntimeInstructions.clear();
         mFunctionArrays.clear();
     }
@@ -98,7 +100,7 @@ namespace ORchestra
                 
                 // If the Id doesn't exist yet create a new variable
                 // else fetch the variable based on the id
-                const int operandId = static_cast<int>(instruction.GetOperand());
+                const size_t operandId = static_cast<size_t>(instruction.GetOperand());
                 if(operandId >= mVariables.size())
                     mVariables.emplace_back(DataSequence{ vectorData });
                 else
@@ -117,10 +119,10 @@ namespace ORchestra
                 }
 
                 std::vector<StepData> vectorData{ data, data + arrayLength };
-                
+
                 // If the Id doesn't exist yet create a new variable
                 // else fetch the variable based on the id
-                const int operandId = static_cast<int>(instruction.GetOperand());
+                const size_t operandId = static_cast<size_t>(instruction.GetOperand());
                 if(operandId >= mVariables.size())
                     mVariables.emplace_back(DataSequence{ vectorData });
                 else
@@ -140,8 +142,7 @@ namespace ORchestra
                 }
                 else
                 {
-                    const std::string error = std::string("VM: Variable not defined");
-                    mErrorReporting.LogError(error);
+                    mErrorReporting.LogError("VM: Variable '" + VariableName(instruction.GetOperand()) + "' is not defined");
                     return false;
                 }
 
@@ -170,7 +171,7 @@ namespace ORchestra
             {
                 StepData value = stack.Pop();
                 std::vector<StepData> vectorData{ value };
-                const int operandId = static_cast<int>(instruction.GetOperand());
+                const size_t operandId = static_cast<size_t>(instruction.GetOperand());
                 if (operandId >= mVariables.size())
                     mVariables.emplace_back(DataSequence{ vectorData });
                 else
@@ -259,7 +260,7 @@ namespace ORchestra
         {
             const DataUnit arrayId = instruction.GetOperand();
             const auto& funcArray = mFunctionArrays[arrayId];
-            const int index = stack.Pop().GetValue(0) % static_cast<int>(funcArray.size());
+            const size_t index = static_cast<size_t>(stack.Pop().GetValue(0)) % funcArray.size();
             const auto& block = funcArray[index];
 
             for (const Instruction& blockInstr : block)
@@ -357,7 +358,7 @@ namespace ORchestra
             
             // If the Id doesn't exist yet create a new variable
             // else fetch the variable based on the id
-            const int operandId = static_cast<int>(instruction.GetOperand());
+            const size_t operandId = static_cast<size_t>(instruction.GetOperand());
             if(operandId >= mVariables.size())
                 mVariables.emplace_back(DataSequence{ vectorData });
             else
@@ -377,8 +378,7 @@ namespace ORchestra
             }
             else
             {
-                const std::string error = std::string("VM: Variable not defined");
-                mErrorReporting.LogError(error);
+                mErrorReporting.LogError("VM: Variable '" + VariableName(instruction.GetOperand()) + "' is not defined");
                 return false;
             }
 
@@ -436,8 +436,7 @@ namespace ORchestra
             }
             else
             {
-                const std::string error = std::string("VM: Variable not defined");
-                mErrorReporting.LogError(error);
+                mErrorReporting.LogError("VM: Variable '" + VariableName(instruction.GetOperand()) + "' is not defined");
                 return false;
             }
 
@@ -455,8 +454,7 @@ namespace ORchestra
             }
             else
             {
-                const std::string error = std::string("VM: Variable not defined");
-                mErrorReporting.LogError(error);
+                mErrorReporting.LogError("VM: Variable '" + VariableName(instruction.GetOperand()) + "' is not defined");
                 return false;
             }
 
@@ -565,8 +563,7 @@ namespace ORchestra
         }
 
         default:
-            const std::string err{ "Unexpected Operation code" };
-            mErrorReporting.LogError(err);
+            mErrorReporting.LogError("VM: Unexpected opcode " + std::to_string(static_cast<int>(instruction.GetOpCode())));
 #if _TEST
             SafeSetTopStackValue(stack);
 #endif

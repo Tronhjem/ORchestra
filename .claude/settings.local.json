@@ -4,7 +4,9 @@
       "WebFetch(domain:craftinginterpreters.com)",
       "Bash(ls *)",
       "Bash(make ORchestraTests)",
-      "Bash(./UnitTests/ORchestraTests *)"
+      "Bash(./UnitTests/ORchestraTests *)",
+      "Bash(make clean *)",
+      "Bash(make)"
     ]
   }
 }

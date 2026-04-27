@@ -30,18 +30,17 @@ namespace ORchestra
                 { "cc", "fn", nullptr };
 
             static const char* const keywords3Char[] =
-                { "euc", "ran",  "bpm", "div", "end", nullptr };
+                { "euc", "ran",  "bpm", "div", "end", "ptn", nullptr };
 
             static const char* const keywords4Char[] =
                 { "note",  nullptr };
 
             // static const char* const keywords5Char[] =
             //     {  "false", "local", "until", "while", "break", nullptr };
-            //
-            // static const char* const keywords6Char[] =
-            //     { "repeat", "return", "elseif", nullptr};
-            //
-            
+
+            static const char* const keywords6Char[] =
+                { "return", nullptr };
+
             static const char* const keywordsOther[] =
                 { "function", "@interface", "@end", "@synthesize", "@dynamic", "@public",
                   "@private", "@property", "@protected", "@class", nullptr };
@@ -54,7 +53,7 @@ namespace ORchestra
                 case 3:   k = keywords3Char; break;
                 case 4:   k = keywords4Char; break;
                 // case 5:   k = keywords5Char; break;
-                // case 6:   k = keywords6Char; break;
+                case 6:   k = keywords6Char; break;
 
                 default:
                     if (tokenLength < 2 || tokenLength > 16)

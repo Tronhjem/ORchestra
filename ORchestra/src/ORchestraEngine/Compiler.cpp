@@ -91,6 +91,7 @@ namespace ORchestra
         BuildFunctions();
         
         mVariableIdCounter = 0;
+        mPatterns.clear();
         mFunctionArrays.clear();
         mFunctionArrayNames.clear();
         mInsideFunctionDefinition = false;
@@ -379,9 +380,9 @@ namespace ORchestra
         }
 
         // Bind parameters in reverse order (stack is LIFO)
-        for (int i = static_cast<int>(function.mParamIds.size()) - 1; i >= 0; --i)
+        for (size_t i = function.mParamIds.size(); i > 0; --i)
         {
-            instructions.emplace_back(Instruction{ OpCode::UPDATE_IDENTIFIER_VALUE, function.mParamIds[i] });
+            instructions.emplace_back(Instruction{ OpCode::UPDATE_IDENTIFIER_VALUE, function.mParamIds[i - 1] });
         }
 
         for (const Instruction& funcInstruction : function.mInstructions)
@@ -647,7 +648,16 @@ namespace ORchestra
 
     bool Compiler::ParseIdentifier(std::vector<Instruction>& instructions)
     {
-        return MakeIdentifierGetter(Previous(), instructions);
+        const ORchestraToken& token = Previous();
+        const std::string name = std::string(token.mStart, static_cast<unsigned long>(token.mLength));
+
+        if (Peek().mTokenType == ORchestraTokenType::LEFT_PAREN &&
+            mFunctions.find(name) != mFunctions.end())
+        {
+            return CompileFunctionCall(instructions, name);
+        }
+
+        return MakeIdentifierGetter(token, instructions);
     }
 
     bool Compiler::ParseGrouping(std::vector<Instruction>& instructions)
@@ -752,13 +762,13 @@ namespace ORchestra
                     // Data Array
                 case ORchestraTokenType::LEFT_BRACKET:
                 {
-                    // Check if this is a function array
+                    // Check if this is a pattern array
                     if (mCurrentIndex + 1 < mTokens.size() &&
                         mTokens[mCurrentIndex + 1].mTokenType == ORchestraTokenType::IDENTIFIER)
                     {
                         std::string firstName(mTokens[mCurrentIndex + 1].mStart,
                                               static_cast<unsigned long>(mTokens[mCurrentIndex + 1].mLength));
-                        if (mFunctions.find(firstName) != mFunctions.end())
+                        if (mPatterns.find(firstName) != mPatterns.end())
                         {
                             if (!CompileFunctionArray(name))
                                 return StatementResult::ERROR;
@@ -853,6 +863,26 @@ namespace ORchestra
             break;
         }
 
+        case ORchestraTokenType::PTN:
+        {
+            if (!CompilePatternDefinition())
+                return StatementResult::ERROR;
+            break;
+        }
+
+        case ORchestraTokenType::RETURN:
+        {
+            if (!mInsideFunctionDefinition)
+            {
+                std::string message = "return can only be used inside a function body";
+                mErrorReporting.LogError(token.mLine, message);
+                return StatementResult::ERROR;
+            }
+            if (!CompileExpression(instructions))
+                return StatementResult::ERROR;
+            break;
+        }
+
 #if _TEST
         case ORchestraTokenType::TEST_KEYWORD:
         {
@@ -930,21 +960,15 @@ namespace ORchestra
             const ORchestraToken& funcToken = Consume();
             const std::string funcName = std::string(funcToken.mStart, static_cast<unsigned long>(funcToken.mLength));
 
-            auto it = mFunctions.find(funcName);
-            if (it == mFunctions.end())
+            auto it = mPatterns.find(funcName);
+            if (it == mPatterns.end())
             {
-                ThrowUnknownFunctionOrVariable(funcName);
-                return false;
-            }
-
-            const StoredFunction& func = it->second;
-            if (func.mNumOfParams != 0)
-            {
-                std::string message = std::string("Function '") + funcName + std::string("' has parameters and cannot be used in a function array");
+                std::string message = std::string("'") + funcName + std::string("' is not a defined pattern");
                 mErrorReporting.LogError(funcToken.mLine, message);
                 return false;
             }
 
+            const StoredFunction& func = it->second;
             funcBlocks.push_back(func.mInstructions);
 
             if (Peek().mTokenType == ORchestraTokenType::COMMA)
@@ -993,6 +1017,81 @@ namespace ORchestra
         return true;
     }
 
+    bool Compiler::CompilePatternDefinition()
+    {
+        if (mInsideFunctionDefinition)
+        {
+            std::string message = "Cannot define a pattern inside a function or pattern";
+            mErrorReporting.LogError(Peek().mLine, message);
+            return false;
+        }
+
+        if (Peek().mTokenType != ORchestraTokenType::IDENTIFIER)
+        {
+            ThrowUnexpectedTokenError(Peek());
+            return false;
+        }
+
+        const ORchestraToken& nameToken = Consume();
+        const std::string name = std::string(nameToken.mStart, static_cast<unsigned long>(nameToken.mLength));
+        const int ptnLine = nameToken.mLine;
+
+        if (mFunctions.find(name) != mFunctions.end())
+        {
+            std::string message = std::string("'") + name + std::string("' is already defined as a function");
+            mErrorReporting.LogError(ptnLine, message);
+            return false;
+        }
+
+        if (mPatterns.find(name) != mPatterns.end())
+        {
+            std::string message = std::string("Pattern '") + name + std::string("' is already defined");
+            mErrorReporting.LogError(ptnLine, message);
+            return false;
+        }
+
+        if (mVariableIDMap.find(name) != mVariableIDMap.end())
+        {
+            std::string message = std::string("'") + name + std::string("' is already used as a variable name");
+            mErrorReporting.LogError(ptnLine, message);
+            return false;
+        }
+
+        if (Peek().mTokenType != ORchestraTokenType::EOL)
+        {
+            ThrowUnexpectedTokenError(Peek());
+            return false;
+        }
+        Consume(); // consume EOL
+
+        mInsideFunctionDefinition = true;
+        std::vector<Instruction> bodyInstructions;
+
+        for (;;)
+        {
+            StatementResult result = CompileStatement(bodyInstructions);
+            switch (result)
+            {
+            case StatementResult::SUCCESS:
+                continue;
+            case StatementResult::END_OF_FUNCTION:
+                mInsideFunctionDefinition = false;
+                mPatterns[name] = StoredFunction(0, bodyInstructions);
+                return true;
+            case StatementResult::END_OF_INPUT:
+            {
+                mInsideFunctionDefinition = false;
+                std::string message = "Unexpected end, you're missing a end";
+                mErrorReporting.LogError(ptnLine, message);
+                return false;
+            }
+            case StatementResult::ERROR:
+                mInsideFunctionDefinition = false;
+                return false;
+            }
+        }
+    }
+
     bool Compiler::CompileFunctionDefinition(std::vector<Instruction>& mainInstructions)
     {
         if (mInsideFunctionDefinition)
@@ -1024,6 +1123,14 @@ namespace ORchestra
         if (mVariableIDMap.find(name) != mVariableIDMap.end())
         {
             std::string message = std::string("'") + name + std::string("' is already used as a variable name");
+            mErrorReporting.LogError(fnLine, message);
+            return false;
+        }
+
+        // Check that it doesn't clash with a pattern
+        if (mPatterns.find(name) != mPatterns.end())
+        {
+            std::string message = std::string("'") + name + std::string("' is already defined as a pattern");
             mErrorReporting.LogError(fnLine, message);
             return false;
         }

@@ -43,6 +43,8 @@ The original prototype that sparked the idea can be found here: <https://github.
   - [Note Values](#note-values)
   - [Tracks](#tracks)
   - [Built-in Functions](#built-in-functions)
+  - [User-Defined Functions](#user-defined-functions)
+  - [Patterns and Pattern Arrays](#patterns-and-pattern-arrays)
 - [Examples](#examples)
 - [Troubleshooting](#troubleshooting)
 
@@ -250,6 +252,10 @@ The following words are reserved and cannot be used as variable names:
 - `euc` - Euclidean sequence generator function
 - `bpm` - Sets the BPM (tempo) for the sequencer
 - `noteDiv` - Sets the note division (timing resolution)
+- `fn` - Defines a user function
+- `end` - Ends a function or pattern definition
+- `ptn` - Defines a pattern for use in pattern arrays
+- `return` - Returns a value from a function
 
 **Note:** The keywords `print` and `test` are reserved for debugging purposes but are only available in debug builds.
 
@@ -543,6 +549,136 @@ pattern = euc(3, 8)
 note(pattern, C4, 100, 1)  // Triggers on 8th notes at 120 BPM
 ```
 
+### User-Defined Functions
+
+You can define reusable functions with the `fn` keyword. Functions are inlined at the call site (their body is copied into the instruction stream).
+
+**Syntax:**
+```cpp
+fn functionName
+  // body
+end
+
+fn functionName(param1, param2)
+  // body using param1, param2
+end
+```
+
+**Calling functions:**
+```cpp
+functionName()
+functionName(arg1, arg2)
+```
+
+**Returning values:**
+
+Use the `return` keyword to leave a value on the stack so the function can be used inside expressions:
+```cpp
+fn functionName(param)
+  return param * 2
+end
+
+a = functionName(5)        // a == 10
+b = functionName(3) + 1    // b == 7
+```
+
+**Key Points:**
+- Functions must be defined before they are called
+- Parameters become global variables -- they persist after the call
+- Functions can call other previously defined functions and built-in functions
+- Nested function definitions are not allowed
+- Function names cannot collide with built-in function names, variable names, or pattern names
+- `return` leaves the result on the stack. Calling a returning function as a statement (not in an expression) will leak one stack value -- prefer using the return value when a function has `return`
+
+**Using functions in expressions:**
+
+Functions that use `return` can appear anywhere an expression is valid -- assignments, arrays, and as arguments to other functions:
+```cpp
+fn scale(x)
+  return x * 2
+end
+
+a = scale(10)              // a == 20
+b = scale(5) + scale(3)   // b == 16
+c = [scale(1), scale(2)]   // c == [2, 4]
+note(1, scale(C4), 100, 1) // use return value as note pitch
+```
+
+**Examples:**
+```cpp
+// Simple function with no parameters
+a = [0]
+fn setA
+  a[0] = 99
+end
+setA()
+
+// Function with parameters
+fn playChord(root, vel)
+  note(1, root, vel, 1)
+  note(1, root + 4, vel, 1)
+  note(1, root + 7, vel, 1)
+end
+playChord(C4, 100)
+playChord(E4, 80)
+
+// Function that returns a value
+fn transpose(note, semitones)
+  return note + semitones
+end
+
+melody = [transpose(C4, 0), transpose(C4, 4), transpose(C4, 7)]
+note(1, melody, 100, 1)  // plays C4, E4, G4 in sequence
+```
+
+### Patterns and Pattern Arrays
+
+Patterns are code blocks defined with the `ptn` keyword. Unlike functions, patterns cannot be called directly -- they can only be grouped into pattern arrays for runtime dispatch based on an index.
+
+**Defining patterns:**
+```cpp
+ptn patternName
+  // body
+end
+```
+
+**Creating a pattern array:**
+```cpp
+arrayName = [pattern1, pattern2, pattern3]
+```
+
+**Calling a pattern array:**
+```cpp
+arrayName($)           // use global count as index
+arrayName($ % 4)       // any expression works
+arrayName(someVar)     // variables work too
+```
+
+**Key Points:**
+- Patterns have no parameters and no parentheses in their definition
+- Pattern arrays select which pattern to execute using `index % array_length`
+- Patterns must be defined before being used in an array
+- Only `ptn` definitions can be used in pattern arrays (not `fn` functions)
+- Pattern names cannot collide with function names, variable names, or other pattern names
+
+**Example:**
+```cpp
+// Define two patterns with different note sequences
+ptn verse
+  note(1, C4, 100, 1)
+  note(1, E4, 80, 1)
+end
+
+ptn chorus
+  note(1, G4, 127, 1)
+  note(1, C5, 127, 1)
+end
+
+// Create pattern array -- alternates between verse and chorus
+song = [verse, chorus]
+song($)  // verse on even ticks, chorus on odd ticks
+```
+
 ---
 
 ## Examples
@@ -663,6 +799,105 @@ note(1, notes, 100, 1)
 counter = [[0, 1, 2, 3], 4, 5, 6]
 everyOther = counter % 2  // Creates pattern: [[0,1,0,1], 0, 1, 0]
 note(everyOther, C4, 100, 1)
+```
+
+### User-Defined Functions
+
+```cpp
+// Helper that builds a chord from a root note
+fn chord(root, vel)
+  note(1, root, vel, 1)
+  note(1, root + 4, vel, 1)
+  note(1, root + 7, vel, 1)
+end
+
+chord(C4, 100)   // C major chord
+chord(F4, 80)    // F major chord
+chord(G4, 90)    // G major chord
+```
+
+```cpp
+// Function that computes a value used in an expression
+fn clampedVelocity(v)
+  return v % 64 + 64   // keep velocity between 64-127
+end
+
+trigger = euc(4, 8)
+note(trigger, C4, clampedVelocity($), 1)  // velocity changes each tick
+```
+
+```cpp
+// Reusable melody transposer
+fn up(n)
+  return n + 12
+end
+
+base = [C4, D4, E4, G4]
+high = [up(C4), up(D4), up(E4), up(G4)]  // one octave up
+
+trigger = euc(4, 8)
+note(trigger, base, 100, 1)
+note(trigger, high, 70, 2)   // doubled an octave up on channel 2
+```
+
+### Patterns and Pattern Arrays
+
+```cpp
+// Two patterns that alternate each tick
+ptn verse
+  note(1, C4, 100, 1)
+  note(1, E4, 80, 1)
+end
+
+ptn chorus
+  note(1, G4, 127, 1)
+  note(1, C5, 127, 1)
+  note(1, E5, 110, 1)
+end
+
+song = [verse, chorus]
+song($)   // verse on even ticks, chorus on odd ticks
+```
+
+```cpp
+// Four patterns cycling every 4 ticks
+ptn intro
+  note(1, C4, 80, 1)
+end
+
+ptn build
+  note(1, C4, 100, 1)
+  note(1, G4, 90, 1)
+end
+
+ptn drop
+  note(1, C4, 127, 1)
+  note(1, E4, 127, 1)
+  note(1, G4, 127, 1)
+end
+
+ptn break
+  note(0, C4, 0, 1)  // silence
+end
+
+arrangement = [intro, build, drop, break]
+arrangement($ % 4)
+```
+
+```cpp
+// Patterns using euclidean rhythms, switched by section
+ptn sparse
+  trigger = euc(3, 8)
+  note(trigger, C4, 90, 1)
+end
+
+ptn dense
+  trigger = euc(7, 8)
+  note(trigger, C4, 100, 1)
+end
+
+groove = [sparse, dense]
+groove($ / 8)  // switch pattern every 8 ticks
 ```
 
 ### Using Global Count (`$`) for Evolving Patterns

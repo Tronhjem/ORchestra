@@ -77,6 +77,10 @@ namespace ORchestra {
         FN,
         END_FN,
 
+        // Pattern definition
+        PTN,
+        RETURN,
+
         // ENDS
         EOL, // End Of Line
         END,
