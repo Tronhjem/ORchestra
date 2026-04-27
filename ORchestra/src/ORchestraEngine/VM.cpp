@@ -55,7 +55,9 @@ namespace ORchestra
             success = mCompiler.Compile(mRuntimeInstructions);
             if (success)
             {
+                mVariableNames = mCompiler.GetVariableNames();
                 success = ProcessOpCodes(mRuntimeInstructions);
+                mFunctionArrays = mCompiler.GetFunctionArrays();
             }
         }
 
@@ -67,7 +69,9 @@ namespace ORchestra
         mScanner.Reset();
         mCompiler.Reset();
         mVariables.clear();
+        mVariableNames.clear();
         mRuntimeInstructions.clear();
+        mFunctionArrays.clear();
     }
 
     bool VM::ProcessOpCodes(std::vector<Instruction>& instructions)
@@ -94,16 +98,13 @@ namespace ORchestra
                 StepData value = stack.Pop();
                 std::vector<StepData> vectorData{ value };
                 
-                if(instruction.GetOperand() >= mVariables.size())
-                {
+                // If the Id doesn't exist yet create a new variable
+                // else fetch the variable based on the id
+                const size_t operandId = static_cast<size_t>(instruction.GetOperand());
+                if(operandId >= mVariables.size())
                     mVariables.emplace_back(DataSequence{ vectorData });
-                }
                 else
-                {
-                    const std::string error = std::string("VM: Variable already defined, choose a new name");
-                    mErrorReporting.LogError(error);
-                    return false;
-                }
+                    mVariables[operandId] = DataSequence{ vectorData };
 
                 break;
             }
@@ -118,18 +119,14 @@ namespace ORchestra
                 }
 
                 std::vector<StepData> vectorData{ data, data + arrayLength };
-                
-                if(instruction.GetOperand() >= mVariables.size())
-                {
-                    mVariables.emplace_back(DataSequence{ vectorData });
-                }
-                else
-                {
-                    const std::string error = std::string("VM: Variable already defined, choose a new name");
-                    mErrorReporting.LogError(error);
-                    return false;
-                }
 
+                // If the Id doesn't exist yet create a new variable
+                // else fetch the variable based on the id
+                const size_t operandId = static_cast<size_t>(instruction.GetOperand());
+                if(operandId >= mVariables.size())
+                    mVariables.emplace_back(DataSequence{ vectorData });
+                else
+                    mVariables[operandId] = DataSequence{ vectorData };
 
                 break;
             }
@@ -145,8 +142,7 @@ namespace ORchestra
                 }
                 else
                 {
-                    const std::string error = std::string("VM: Variable not defined");
-                    mErrorReporting.LogError(error);
+                    mErrorReporting.LogError("VM: Variable '" + VariableName(instruction.GetOperand()) + "' is not defined");
                     return false;
                 }
 
@@ -166,6 +162,24 @@ namespace ORchestra
             case (OpCode::SET_BPM):
             case (OpCode::SET_NOTE_DIVISION):
             case (OpCode::PRINT):
+            {
+                stack.Pop();
+                break;
+            }
+
+            case (OpCode::UPDATE_IDENTIFIER_VALUE):
+            {
+                StepData value = stack.Pop();
+                std::vector<StepData> vectorData{ value };
+                const size_t operandId = static_cast<size_t>(instruction.GetOperand());
+                if (operandId >= mVariables.size())
+                    mVariables.emplace_back(DataSequence{ vectorData });
+                else
+                    mVariables[operandId].SetValue(0, value);
+                break;
+            }
+
+            case (OpCode::EXEC_FUNC_ARRAY):
             {
                 stack.Pop();
                 break;
@@ -193,6 +207,77 @@ namespace ORchestra
         }
     }
 
+    bool VM::ExecuteTickInstruction(const Instruction& instruction, const int globalCount,
+                                    Stack<StepData>& stack, std::vector<SequenceStep>& stepQueue)
+    {
+        switch (instruction.GetOpCode())
+        {
+        case (OpCode::NOTE):
+        {
+            const StepData channel = stack.Pop();
+            const StepData vel = stack.Pop();
+            const StepData note = stack.Pop();
+            const StepData shouldTrigger = stack.Pop();
+            stepQueue.emplace_back(SequenceStep{ SequenceStepType::NoteOn, shouldTrigger, note, vel, channel, DEFAULT_NOTE_DURATION });
+            break;
+        }
+
+        case (OpCode::CC):
+        {
+            const StepData channel = stack.Pop();
+            const StepData ccValue = stack.Pop();
+            const StepData ccNumber = stack.Pop();
+            const StepData shouldTrigger = stack.Pop();
+            stepQueue.emplace_back(SequenceStep{ SequenceStepType::CC, shouldTrigger, ccNumber, ccValue, channel, DEFAULT_NOTE_DURATION });
+            break;
+        }
+
+        case (OpCode::SET_BPM):
+        {
+            const StepData bpmValue = stack.Pop();
+            stepQueue.emplace_back(SequenceStep{ SequenceStepType::BPM, bpmValue, bpmValue, bpmValue, bpmValue, DEFAULT_NOTE_DURATION });
+            break;
+        }
+
+        case (OpCode::SET_NOTE_DIVISION):
+        {
+            const StepData noteDivValue = stack.Pop();
+            stepQueue.emplace_back(SequenceStep{ SequenceStepType::NOTE_DIVISION, noteDivValue,
+                            noteDivValue, noteDivValue,
+                            noteDivValue, DEFAULT_NOTE_DURATION });
+            break;
+        }
+
+        case (OpCode::PRINT):
+        {
+            const StepData printValue = stack.Pop();
+            stepQueue.emplace_back(SequenceStep{ SequenceStepType::PRINT, printValue, printValue,
+                                   printValue, printValue, DEFAULT_NOTE_DURATION });
+            break;
+        }
+
+        case (OpCode::EXEC_FUNC_ARRAY):
+        {
+            const DataUnit arrayId = instruction.GetOperand();
+            const auto& funcArray = mFunctionArrays[arrayId];
+            const size_t index = static_cast<size_t>(stack.Pop().GetValue(0)) % funcArray.size();
+            const auto& block = funcArray[index];
+
+            for (const Instruction& blockInstr : block)
+            {
+                if (!ExecuteTickInstruction(blockInstr, globalCount, stack, stepQueue))
+                    return false;
+            }
+            break;
+        }
+
+        default:
+            return ProcessInstruction(instruction, globalCount, stack);
+        }
+
+        return true;
+    }
+
     bool VM::Tick(std::vector<SequenceStep>& stepQueue, const int globalCount)
     {
         Stack<StepData> stack;
@@ -207,72 +292,20 @@ namespace ORchestra
         {
             const Instruction& instruction = consume();
 
-            switch (instruction.GetOpCode())
+            if (instruction.GetOpCode() == OpCode::END)
             {
-            case (OpCode::NOTE):
-            {
-                const StepData channel = stack.Pop();
-                const StepData vel = stack.Pop();
-                const StepData note = stack.Pop();
-                const StepData shouldTrigger = stack.Pop();
-
-                //TODO: Should be using a variable for note duration.
-                stepQueue.emplace_back(SequenceStep{ SequenceStepType::NoteOn, shouldTrigger, note, vel, channel, DEFAULT_NOTE_DURATION });
-
-                break;
-            }
-
-            case (OpCode::CC):
-            {
-                const StepData channel = stack.Pop();
-                const StepData ccValue = stack.Pop();
-                const StepData ccNumber = stack.Pop();
-                const StepData shouldTrigger = stack.Pop();
-                stepQueue.emplace_back(SequenceStep{ SequenceStepType::CC, shouldTrigger, ccNumber, ccValue, channel, DEFAULT_NOTE_DURATION });
-
-                break;
-            }
-
-            case (OpCode::SET_BPM):
-            {
-                const StepData bpmValue = stack.Pop();
-                stepQueue.emplace_back(SequenceStep{ SequenceStepType::BPM, bpmValue, bpmValue, bpmValue, bpmValue, DEFAULT_NOTE_DURATION });
-
-                break;
-            }
-
-            case (OpCode::SET_NOTE_DIVISION):
-            {
-                const StepData noteDivValue = stack.Pop();
-                stepQueue.emplace_back(SequenceStep{ SequenceStepType::NOTE_DIVISION, noteDivValue, 
-                                noteDivValue, noteDivValue, 
-                                noteDivValue, DEFAULT_NOTE_DURATION });
-
-                break;
-            }
-
-            case (OpCode::PRINT):
-            {
-                const StepData printValue = stack.Pop();
-                stepQueue.emplace_back(SequenceStep{ SequenceStepType::PRINT, printValue, printValue, 
-                                       printValue, printValue, DEFAULT_NOTE_DURATION });
-                break;
-            }
-
-            case (OpCode::END):
 #if _TEST
                 SafeSetTopStackValue(stack);
 #endif
                 return true;
+            }
 
-            default:
-                if (!ProcessInstruction(instruction, globalCount, stack))
-                {
+            if (!ExecuteTickInstruction(instruction, globalCount, stack, stepQueue))
+            {
 #if _TEST
-                    SafeSetTopStackValue(stack);
+                SafeSetTopStackValue(stack);
 #endif
-                    return false;
-                }
+                return false;
             }
         }
     }
@@ -315,11 +348,21 @@ namespace ORchestra
         case (OpCode::SET_IDENTIFIER_ARRAY):
         {
             const int arrayLength = std::clamp(static_cast<int>(stack.Pop().GetValue(0)), 0, MAX_DATASEQUENCE_LENGTH);
-
+            StepData data[MAX_DATASEQUENCE_LENGTH];
             for (int i = arrayLength - 1; i >= 0; --i)
             {
-                mVariables[instruction.GetOperand()].SetValue(i, stack.Pop());
+                data[i] = stack.Pop();
             }
+
+            std::vector<StepData> vectorData{ data, data + arrayLength };
+            
+            // If the Id doesn't exist yet create a new variable
+            // else fetch the variable based on the id
+            const size_t operandId = static_cast<size_t>(instruction.GetOperand());
+            if(operandId >= mVariables.size())
+                mVariables.emplace_back(DataSequence{ vectorData });
+            else
+                mVariables[operandId] = DataSequence{ vectorData };
 
             break;
         }
@@ -328,18 +371,24 @@ namespace ORchestra
         {
             const StepData value = stack.Pop();
             const int index = stack.Pop().GetValue(0);
-            
+
             if (instruction.GetOperand() < mVariables.size())
             {
                 mVariables[instruction.GetOperand()].SetValue(index, value);
             }
             else
             {
-                const std::string error = std::string("VM: Variable not defined");
-                mErrorReporting.LogError(error);
+                mErrorReporting.LogError("VM: Variable '" + VariableName(instruction.GetOperand()) + "' is not defined");
                 return false;
             }
 
+            break;
+        }
+
+        case (OpCode::UPDATE_IDENTIFIER_VALUE):
+        {
+            const StepData value = stack.Pop();
+            mVariables[instruction.GetOperand()].SetValue(0, value);
             break;
         }
 
@@ -387,8 +436,7 @@ namespace ORchestra
             }
             else
             {
-                const std::string error = std::string("VM: Variable not defined");
-                mErrorReporting.LogError(error);
+                mErrorReporting.LogError("VM: Variable '" + VariableName(instruction.GetOperand()) + "' is not defined");
                 return false;
             }
 
@@ -406,8 +454,7 @@ namespace ORchestra
             }
             else
             {
-                const std::string error = std::string("VM: Variable not defined");
-                mErrorReporting.LogError(error);
+                mErrorReporting.LogError("VM: Variable '" + VariableName(instruction.GetOperand()) + "' is not defined");
                 return false;
             }
 
@@ -516,8 +563,7 @@ namespace ORchestra
         }
 
         default:
-            const std::string err{ "Unexpected Operation code" };
-            mErrorReporting.LogError(err);
+            mErrorReporting.LogError("VM: Unexpected opcode " + std::to_string(static_cast<int>(instruction.GetOpCode())));
 #if _TEST
             SafeSetTopStackValue(stack);
 #endif

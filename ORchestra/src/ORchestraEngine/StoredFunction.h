@@ -33,8 +33,13 @@ namespace ORchestra
 			mInstructions(instructions)
 		{
 		}
+		StoredFunction(int numOfParams, std::vector<DataUnit>& paramIds, std::vector<Instruction>& instructions)
+			: mNumOfParams(numOfParams), mParamIds(paramIds), mInstructions(instructions)
+		{
+		}
 
 		int mNumOfParams;
+		std::vector<DataUnit> mParamIds {};
 		std::vector<Instruction> mInstructions {};
 	};
 } // namespace ORchestra

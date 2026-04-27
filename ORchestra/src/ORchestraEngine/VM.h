@@ -72,13 +72,23 @@ namespace ORchestra
 
         bool ProcessOpCodes(std::vector<Instruction>& setupInstructions);
         inline bool ProcessInstruction(const Instruction& instruction, const int stepCount, Stack<StepData>& mStack);
+        bool ExecuteTickInstruction(const Instruction& instruction, const int globalCount,
+                                    Stack<StepData>& stack, std::vector<SequenceStep>& stepQueue);
 
         ErrorReporting& mErrorReporting;
         Scanner mScanner;
         Compiler mCompiler;
 
+        const std::string& VariableName(DataUnit id) const
+        {
+            static const std::string unknown = "<unknown>";
+            return (id < mVariableNames.size()) ? mVariableNames[id] : unknown;
+        }
+
         std::vector<DataSequence> mVariables;
+        std::vector<std::string> mVariableNames;
         std::vector<Instruction> mRuntimeInstructions;
+        std::vector<std::vector<std::vector<Instruction>>> mFunctionArrays;
         inline DataUnit RandomValue(const DataUnit low, const DataUnit high);
         
         template <typename Operation>

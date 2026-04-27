@@ -288,11 +288,28 @@ namespace ORchestra
             return checkKeyword(1, 3, "est", ORchestraTokenType::TEST_KEYWORD);
 #endif
         case 'p':
-            return checkKeyword(1, 4, "rint", ORchestraTokenType::PRINT);
+        {
+            auto result = checkKeyword(1, 4, "rint", ORchestraTokenType::PRINT);
+            if (result != ORchestraTokenType::IDENTIFIER)
+                return result;
+            return checkKeyword(1, 2, "tn", ORchestraTokenType::PTN);
+        }
         case 'r':
-            return checkKeyword(1, 2, "an", ORchestraTokenType::RANDOM);
+        {
+            auto result = checkKeyword(1, 2, "an", ORchestraTokenType::RANDOM);
+            if (result != ORchestraTokenType::IDENTIFIER)
+                return result;
+            return checkKeyword(1, 5, "eturn", ORchestraTokenType::RETURN);
+        }
         case 'e':
-            return checkKeyword(1, 2, "uc", ORchestraTokenType::EUCLIDEAN);
+        {
+            auto result = checkKeyword(1, 2, "uc", ORchestraTokenType::EUCLIDEAN);
+            if (result != ORchestraTokenType::IDENTIFIER)
+                return result;
+            return checkKeyword(1, 2, "nd", ORchestraTokenType::END_FN);
+        }
+        case 'f':
+            return checkKeyword(1, 1, "n", ORchestraTokenType::FN);
         case 'n':
             return checkKeyword(1, 3, "ote", ORchestraTokenType::NOTE);
         case 'c':

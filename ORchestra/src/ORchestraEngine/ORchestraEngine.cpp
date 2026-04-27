@@ -90,7 +90,9 @@ namespace ORchestra
         }
         
         mIsVMInit.store(innitSuccess);
-        WakeWorker();
+        
+        if (innitSuccess)
+            WakeWorker();
     }
 
     void ORchestraEngine::WakeWorker()
@@ -175,6 +177,7 @@ namespace ORchestra
             if (stepDifference > 1 || stepDifference < 0)
             {
                 // TODO: should it be 1 or 0?
+                // TODO: Should we clear hanging notes?
                 // Do we want to move it entirely down to 0 or still keep the current step we might trigger?
                 mReadySteps.store(1, std::memory_order_release);
                 mCurrentProcessingStep.store(currentStep, std::memory_order_release);

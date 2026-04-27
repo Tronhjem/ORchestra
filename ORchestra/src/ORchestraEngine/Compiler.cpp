@@ -18,7 +18,6 @@
  */
 
 #include <string>
-#include <stack>
 
 #include "Compiler.h"
 #include "ErrorReporting.h"
@@ -48,6 +47,11 @@ namespace ORchestra
     {
         mVariableIDMap.reserve(8); // Magic number for size of variables estimated as a good start.
 
+        BuildFunctions();
+    }
+
+    void Compiler::BuildFunctions()
+    {
         // populate built in functions
         std::vector<Instruction> printInstructions;
         printInstructions.emplace_back(Instruction{ OpCode::PRINT });
@@ -78,11 +82,27 @@ namespace ORchestra
         mFunctions[noteDivFunctionName] = StoredFunction(1, noteDivInstructions);
     }
 
+    std::vector<std::string> Compiler::GetVariableNames() const
+    {
+        std::vector<std::string> names(mVariableIDMap.size());
+        for (const auto& pair : mVariableIDMap)
+            names[pair.second] = pair.first;
+        return names;
+    }
+
     void Compiler::Reset()
     {
         mCurrentIndex = 0;
         mVariableIDMap.clear();
+        
+        mFunctions.clear();
+        BuildFunctions();
+        
         mVariableIdCounter = 0;
+        mPatterns.clear();
+        mFunctionArrays.clear();
+        mFunctionArrayNames.clear();
+        mInsideFunctionDefinition = false;
     }
 
     const ORchestraToken& Compiler::Consume()
@@ -348,15 +368,9 @@ namespace ORchestra
             }
         }
 
-        if (expectsValue)
+        if (expectsValue && paramCounter != function.mNumOfParams)
         {
-            if (paramCounter != function.mNumOfParams)
-            {
-                ThrowMissingParamCount(function.mNumOfParams, paramCounter);
-                return false;
-            }
-
-            ThrowUnexpectedTokenError(Previous());
+            ThrowMissingParamCount(function.mNumOfParams, paramCounter);
             return false;
         }
 
@@ -371,6 +385,12 @@ namespace ORchestra
         {
             ThrowMissingParamCount(function.mNumOfParams, paramCounter);
             return false;
+        }
+
+        // Bind parameters in reverse order (stack is LIFO)
+        for (size_t i = function.mParamIds.size(); i > 0; --i)
+        {
+            instructions.emplace_back(Instruction{ OpCode::UPDATE_IDENTIFIER_VALUE, function.mParamIds[i - 1] });
         }
 
         for (const Instruction& funcInstruction : function.mInstructions)
@@ -534,215 +554,376 @@ namespace ORchestra
         return true;
     }
 
-    bool Compiler::CompileExpression(std::vector<Instruction>& instructions)
+    // Pratt parser: parse rule table
+    struct Compiler::ParseRule
     {
-        auto isOperator = [&](const ORchestraTokenType t) -> bool
-            {
-                return t == ORchestraTokenType::PLUS ||
-                    t == ORchestraTokenType::MINUS ||
-                    t == ORchestraTokenType::STAR ||
-                    t == ORchestraTokenType::SLASH ||
-                    t == ORchestraTokenType::PERCENT ||
-                    t == ORchestraTokenType::AND ||
-                    t == ORchestraTokenType::OR ||
-                    t == ORchestraTokenType::XOR ||
-                    t == ORchestraTokenType::GREATER ||
-                    t == ORchestraTokenType::GREATER_EQUAL ||
-                    t == ORchestraTokenType::LESS ||
-                    t == ORchestraTokenType::LESS_EQUAL ||
-                    t == ORchestraTokenType::EQUAL_EQUAL ||
-                    t == ORchestraTokenType::BANG_EQUAL;
-            };
+        using PrefixFn = bool (Compiler::*)(std::vector<Instruction>&);
+        using InfixFn = bool (Compiler::*)(std::vector<Instruction>&);
 
-        auto precedence = [&](const ORchestraTokenType t) -> int
-            {
-                if (t == ORchestraTokenType::PLUS || t == ORchestraTokenType::MINUS)
-                    return 1;
-                if (t == ORchestraTokenType::STAR || t == ORchestraTokenType::SLASH || t == ORchestraTokenType::PERCENT)
-                    return 2;
+        PrefixFn prefix;
+        InfixFn infix;
+        Precedence precedence;
+    };
 
-                return 0;
-            };
-
-        std::stack<ORchestraTokenType> ops;
-
-        bool expectsValue = Peek().mTokenType != ORchestraTokenType::LEFT_PAREN;
-        int leftParen = 0;
-        int rightParen = 0;
-
-        while (Peek().mTokenType != ORchestraTokenType::EOL &&
-            Peek().mTokenType != ORchestraTokenType::END &&
-            Peek().mTokenType != ORchestraTokenType::COMMA &&
-            Peek().mTokenType != ORchestraTokenType::RIGHT_BRACKET &&
-            Peek().mTokenType != ORchestraTokenType::RIGHT_BRACE)
+    Compiler::ParseRule Compiler::GetRule(ORchestraTokenType type)
+    {
+        switch (type)
         {
-            // We assume this means we found the end of a function parenteses.
-            if (Peek().mTokenType == ORchestraTokenType::RIGHT_PAREN &&
-                rightParen == leftParen)
-                break;
+        case ORchestraTokenType::NUMBER:          
+            return { &Compiler::ParseNumber, nullptr, Precedence::NONE };
+        case ORchestraTokenType::IDENTIFIER:      
+            return { &Compiler::ParseIdentifier, nullptr, Precedence::NONE };
+        case ORchestraTokenType::NOTE_IDENTIFIER: 
+            return { &Compiler::ParseNoteIdentifier, nullptr, Precedence::NONE };
+        case ORchestraTokenType::DOLLAR:          
+            return { &Compiler::ParseDollar, nullptr, Precedence::NONE };
+        case ORchestraTokenType::RANDOM:          
+            return { &Compiler::ParseRandom, nullptr, Precedence::NONE };
+        case ORchestraTokenType::LEFT_PAREN:      
+            return { &Compiler::ParseGrouping, nullptr, Precedence::NONE };
 
-            const ORchestraToken& currentToken = Consume();
-            const ORchestraTokenType tType = currentToken.mTokenType;
+        case ORchestraTokenType::PLUS:            
+            return { nullptr, &Compiler::ParseBinary, Precedence::TERM };
+        case ORchestraTokenType::MINUS:           
+            return { nullptr, &Compiler::ParseBinary, Precedence::TERM };
+        case ORchestraTokenType::STAR:            
+            return { nullptr, &Compiler::ParseBinary, Precedence::FACTOR };
+        case ORchestraTokenType::SLASH:           
+            return { nullptr, &Compiler::ParseBinary, Precedence::FACTOR };
+        case ORchestraTokenType::PERCENT:         
+            return { nullptr, &Compiler::ParseBinary, Precedence::FACTOR };
 
-            // For nested parenteses where there can be more left parens after each other.
-            if (tType == ORchestraTokenType::LEFT_PAREN)
-                expectsValue = false;
-
-            if (tType == ORchestraTokenType::IDENTIFIER)
-            {
-                if (!expectsValue)
-                {
-                    ThrowUnexpectedTokenError(currentToken);
-                    return false;
-                }
-
-                if (!MakeIdentifierGetter(currentToken, instructions))
-                    return false;
-
-                expectsValue = false;
-            }
-
-            else if (tType == ORchestraTokenType::NUMBER)
-            {
-                if (!expectsValue)
-                {
-                    ThrowUnexpectedTokenError(currentToken);
-                    return false;
-                }
-
-                MakeConstant(currentToken, instructions);
-                expectsValue = false;
-            }
-            else if (tType == ORchestraTokenType::NOTE_IDENTIFIER)
-            {
-                if (!expectsValue)
-                {
-                    ThrowUnexpectedTokenError(currentToken);
-                    return false;
-                }
-
-                if (!MakeNoteIntoConstant(currentToken, instructions))
-                {
-                    ThrowUnexpectedTokenError(currentToken);
-                    return false;
-                }
-
-                expectsValue = false;
-            }
-
-            else if (tType == ORchestraTokenType::RANDOM)
-            {
-                CompileFunctionCall(instructions, ranFunctionName);
-                expectsValue = false;
-            }
-
-            else if (tType == ORchestraTokenType::DOLLAR)
-            {
-                if (!expectsValue)
-                {
-                    ThrowUnexpectedTokenError(currentToken);
-                    return false;
-                }
-
-                instructions.emplace_back(Instruction{ OpCode::GET_GLOBAL_COUNT });
-                expectsValue = false;
-            }
-
-            else if (isOperator(tType))
-            {
-                if (expectsValue)
-                {
-                    ThrowUnexpectedTokenError(currentToken);
-                    return false;
-                }
-
-                while (!ops.empty() && isOperator(ops.top()))
-                {
-                    ORchestraTokenType top = ops.top();
-
-                    if ((precedence(top) > precedence(tType)) ||
-                        (precedence(top) == precedence(tType)))
-                    {
-                        MakeOperation(top, instructions);
-                        ops.pop();
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-
-                expectsValue = true;
-                ops.push(tType);
-            }
-
-            else if (tType == ORchestraTokenType::LEFT_PAREN)
-            {
-                if (expectsValue)
-                {
-                    ThrowUnexpectedTokenError(currentToken);
-                    return false;
-                }
-                ops.push(tType);
-                expectsValue = true;
-                ++leftParen;
-            }
-
-            else if (tType == ORchestraTokenType::RIGHT_PAREN)
-            {
-                if (expectsValue)
-                {
-                    ThrowUnexpectedTokenError(currentToken);
-                    return false;
-                }
-
-                while (!ops.empty() && ops.top() != ORchestraTokenType::LEFT_PAREN)
-                {
-                    MakeOperation(ops.top(), instructions);
-                    ops.pop();
-                }
-                if (!ops.empty() && ops.top() == ORchestraTokenType::LEFT_PAREN)
-                {
-                    ops.pop(); // discard left paren
-                }
-
-                expectsValue = false;
-                ++rightParen;
-            }
-            else
-            {
-                ThrowUnexpectedTokenError(currentToken);
-                return false;
-            }
+        case ORchestraTokenType::AND:             
+            return { nullptr, &Compiler::ParseBinary, Precedence::COMPARISON };
+        case ORchestraTokenType::OR:              
+            return { nullptr, &Compiler::ParseBinary, Precedence::COMPARISON };
+        case ORchestraTokenType::XOR:             
+            return { nullptr, &Compiler::ParseBinary, Precedence::COMPARISON };
+        case ORchestraTokenType::GREATER:         
+            return { nullptr, &Compiler::ParseBinary, Precedence::COMPARISON };
+        case ORchestraTokenType::GREATER_EQUAL:   
+            return { nullptr, &Compiler::ParseBinary, Precedence::COMPARISON };
+        case ORchestraTokenType::LESS:            
+            return { nullptr, &Compiler::ParseBinary, Precedence::COMPARISON };
+        case ORchestraTokenType::LESS_EQUAL:      
+            return { nullptr, &Compiler::ParseBinary, Precedence::COMPARISON };
+        case ORchestraTokenType::EQUAL_EQUAL:     
+            return { nullptr, &Compiler::ParseBinary, Precedence::COMPARISON };
+        case ORchestraTokenType::BANG_EQUAL:       
+            return { nullptr, &Compiler::ParseBinary, Precedence::COMPARISON };
+        default:                                   
+            return { nullptr, nullptr, Precedence::NONE };
         }
+    }
 
-        if (expectsValue)
+    // Pratt parser core: parse at given minimum precedence level
+    bool Compiler::ParsePrecedence(Precedence minPrecedence, std::vector<Instruction>& instructions)
+    {
+        Consume();
+        const ORchestraToken& prefixToken = Previous();
+        ParseRule rule = GetRule(prefixToken.mTokenType);
+
+        if (!rule.prefix)
         {
-            ThrowUnexpectedTokenError(Peek());
+            ThrowUnexpectedTokenError(prefixToken);
             return false;
         }
 
-        if (leftParen > rightParen)
+        if (!(this->*rule.prefix)(instructions))
+            return false;
+
+        while (minPrecedence <= GetRule(Peek().mTokenType).precedence)
+        {
+            Consume();
+            ParseRule infixRule = GetRule(Previous().mTokenType);
+            if (!(this->*infixRule.infix)(instructions))
+                return false;
+        }
+
+        return true;
+    }
+
+    bool Compiler::ParseNumber(std::vector<Instruction>& instructions)
+    {
+        MakeConstant(Previous(), instructions);
+        return true;
+    }
+
+    bool Compiler::ParseNoteIdentifier(std::vector<Instruction>& instructions)
+    {
+        return MakeNoteIntoConstant(Previous(), instructions);
+    }
+
+    bool Compiler::ParseIdentifier(std::vector<Instruction>& instructions)
+    {
+        const ORchestraToken& token = Previous();
+        const std::string name = std::string(token.mStart, static_cast<unsigned long>(token.mLength));
+
+        if (Peek().mTokenType == ORchestraTokenType::LEFT_PAREN &&
+            mFunctions.find(name) != mFunctions.end())
+        {
+            return CompileFunctionCall(instructions, name);
+        }
+
+        return MakeIdentifierGetter(token, instructions);
+    }
+
+    bool Compiler::ParseGrouping(std::vector<Instruction>& instructions)
+    {
+        if (!ParsePrecedence(Precedence::ASSIGNMENT, instructions))
+            return false;
+
+        if (Peek().mTokenType != ORchestraTokenType::RIGHT_PAREN)
         {
             std::string missingToken{ ")" };
             ThrowMissingExpectedToken(missingToken);
             return false;
         }
 
-        if (rightParen > leftParen)
-        {
-            std::string missingToken{ "(" };
-            ThrowMissingExpectedToken(missingToken);
-            return false;
-        }
-
-        while (!ops.empty())
-        {
-            MakeOperation(ops.top(), instructions);
-            ops.pop();
-        }
-
+        Consume();
         return true;
+    }
+
+    bool Compiler::ParseDollar(std::vector<Instruction>& instructions)
+    {
+        instructions.emplace_back(Instruction{ OpCode::GET_GLOBAL_COUNT });
+        return true;
+    }
+
+    bool Compiler::ParseRandom(std::vector<Instruction>& instructions)
+    {
+        return CompileFunctionCall(instructions, ranFunctionName);
+    }
+
+    bool Compiler::ParseBinary(std::vector<Instruction>& instructions)
+    {
+        ORchestraTokenType operatorType = Previous().mTokenType;
+        ParseRule rule = GetRule(operatorType);
+
+        // +1 for left-associativity: parse right operand at one level higher
+        Precedence nextPrecedence = static_cast<Precedence>(static_cast<int>(rule.precedence) + 1);
+        if (!ParsePrecedence(nextPrecedence, instructions))
+            return false;
+
+        MakeOperation(operatorType, instructions);
+        return true;
+    }
+
+    bool Compiler::CompileExpression(std::vector<Instruction>& instructions)
+    {
+        return ParsePrecedence(Precedence::ASSIGNMENT, instructions);
+    }
+
+    Compiler::StatementResult Compiler::CompileStatement(std::vector<Instruction>& instructions)
+    {
+        const ORchestraToken& token = Consume();
+
+        switch (token.mTokenType)
+        {
+        case ORchestraTokenType::IDENTIFIER:
+        {
+            const std::string name = std::string(token.mStart, static_cast<unsigned long>(token.mLength));
+
+            if (Peek().mTokenType == ORchestraTokenType::LEFT_BRACKET)
+            {
+                Consume();
+
+                if (!CompileExpression(instructions))
+                {
+                    return StatementResult::COMPILE_ERROR;
+                }
+
+                if (Peek().mTokenType != ORchestraTokenType::RIGHT_BRACKET)
+                {
+                    std::string missingBracket = "]";
+                    ThrowMissingExpectedToken(missingBracket);
+                    return StatementResult::COMPILE_ERROR;
+                }
+
+                Consume();
+
+                if (Peek().mTokenType == ORchestraTokenType::EQUAL)
+                {
+                    Consume();
+
+                    if (!CompileExpression(instructions))
+                    {
+                        return StatementResult::COMPILE_ERROR;
+                    }
+
+                    const DataUnit id = GetOrCreateVariableID(name);
+                    instructions.emplace_back(Instruction{ OpCode::SET_IDENTIFIER_WITH_INDEX, id });
+                }
+                else
+                {
+                    ThrowUnexpectedTokenError(Peek());
+                    return StatementResult::COMPILE_ERROR;
+                }
+            }
+            else if (Peek().mTokenType == ORchestraTokenType::EQUAL)
+            {
+                Consume();
+
+                ORchestraTokenType tokenType = Peek().mTokenType;
+                switch (tokenType)
+                {
+                    // Data Array
+                case ORchestraTokenType::LEFT_BRACKET:
+                {
+                    // Check if this is a pattern array
+                    if (mCurrentIndex + 1 < mTokens.size() &&
+                        mTokens[mCurrentIndex + 1].mTokenType == ORchestraTokenType::IDENTIFIER)
+                    {
+                        std::string firstName(mTokens[mCurrentIndex + 1].mStart,
+                                              static_cast<unsigned long>(mTokens[mCurrentIndex + 1].mLength));
+                        if (mPatterns.find(firstName) != mPatterns.end())
+                        {
+                            if (!CompileFunctionArray(name))
+                                return StatementResult::COMPILE_ERROR;
+                            break;
+                        }
+                    }
+
+                    DataUnit arrayLength;
+                    const bool isLastRecursiveLevel = false;
+                    if (CompileArray(instructions, arrayLength, MAX_DATASEQUENCE_LENGTH, isLastRecursiveLevel))
+                    {
+                        const DataUnit id = GetOrCreateVariableID(name);
+                        instructions.emplace_back(Instruction{ OpCode::CONSTANT, arrayLength });
+                        instructions.emplace_back(Instruction{ OpCode::SET_IDENTIFIER_ARRAY, id });
+                    }
+                    else
+                    {
+                        return StatementResult::COMPILE_ERROR;
+                    }
+
+                    break;
+                }
+                case ORchestraTokenType::NUMBER:
+                case ORchestraTokenType::NOTE_IDENTIFIER:
+                case ORchestraTokenType::IDENTIFIER:
+                case ORchestraTokenType::LEFT_PAREN:
+                case ORchestraTokenType::RANDOM:
+                case ORchestraTokenType::DOLLAR:
+                {
+                    if (!CompileExpression(instructions))
+                        return StatementResult::COMPILE_ERROR;
+
+                    const DataUnit id = GetOrCreateVariableID(name);
+                    instructions.emplace_back(Instruction{ OpCode::SET_IDENTIFIER_VALUE, id });
+                    break;
+                }
+                case ORchestraTokenType::EUCLIDEAN:
+                {
+                    Consume();
+                    if (!CompileFunctionCall(instructions, eucFunctionName))
+                        return StatementResult::COMPILE_ERROR;
+
+                    const DataUnit id = GetOrCreateVariableID(name);
+                    instructions.emplace_back(Instruction{ OpCode::SET_IDENTIFIER_ARRAY, id });
+
+                    break;
+                }
+
+                default:
+                {
+                    ThrowUnexpectedTokenError(Peek());
+                    return StatementResult::COMPILE_ERROR;
+                }
+                }
+            }
+            // For Functions
+            else if (Peek().mTokenType == ORchestraTokenType::LEFT_PAREN)
+            {
+                auto funcArrayIt = mFunctionArrayNames.find(name);
+                if (funcArrayIt != mFunctionArrayNames.end())
+                {
+                    if (!CompileFunctionArrayCall(instructions, funcArrayIt->second))
+                        return StatementResult::COMPILE_ERROR;
+                }
+                else if (!CompileFunctionCall(instructions, name))
+                    return StatementResult::COMPILE_ERROR;
+            }
+            else
+            {
+                ThrowUnexpectedTokenError(Peek());
+                return StatementResult::COMPILE_ERROR;
+            }
+
+            break;
+        }
+
+        case ORchestraTokenType::PRINT:
+        case ORchestraTokenType::NOTE:
+        case ORchestraTokenType::CC:
+        {
+            const std::string functionName = std::string(token.mStart, static_cast<unsigned long>(token.mLength));
+            if (!CompileFunctionCall(instructions, functionName))
+                return StatementResult::COMPILE_ERROR;
+
+            break;
+        }
+
+        case ORchestraTokenType::FN:
+        {
+            if (!CompileFunctionDefinition(instructions))
+                return StatementResult::COMPILE_ERROR;
+            break;
+        }
+
+        case ORchestraTokenType::PTN:
+        {
+            if (!CompilePatternDefinition())
+                return StatementResult::COMPILE_ERROR;
+            break;
+        }
+
+        case ORchestraTokenType::RETURN:
+        {
+            if (!mInsideFunctionDefinition)
+            {
+                std::string message = "return can only be used inside a function body";
+                mErrorReporting.LogError(token.mLine, message);
+                return StatementResult::COMPILE_ERROR;
+            }
+            if (!CompileExpression(instructions))
+                return StatementResult::COMPILE_ERROR;
+            break;
+        }
+
+#if _TEST
+        case ORchestraTokenType::TEST_KEYWORD:
+        {
+            if (Peek().mTokenType == ORchestraTokenType::IDENTIFIER ||
+                Peek().mTokenType == ORchestraTokenType::NUMBER ||
+                Peek().mTokenType == ORchestraTokenType::DOLLAR)
+            {
+                CompileExpression(instructions);
+            }
+            else
+            {
+                ThrowUnexpectedTokenError(Peek());
+                return StatementResult::COMPILE_ERROR;
+            }
+            break;
+        }
+#endif
+
+        case ORchestraTokenType::END_FN:
+            return StatementResult::END_OF_FUNCTION;
+
+        case ORchestraTokenType::END:
+            return StatementResult::END_OF_INPUT;
+
+        case ORchestraTokenType::EOL:
+            break;
+
+        default:
+            ThrowUnexpectedTokenError(token);
+            return StatementResult::COMPILE_ERROR;
+        }
+
+        return StatementResult::SUCCESS;
     }
 
     bool Compiler::Compile(std::vector<Instruction>& instructions)
@@ -753,161 +934,288 @@ namespace ORchestra
 
         for (;;)
         {
-            const ORchestraToken& token = Consume();
-
-            switch (token.mTokenType)
+            StatementResult result = CompileStatement(instructions);
+            switch (result)
             {
-            case ORchestraTokenType::IDENTIFIER:
-            {
-                const std::string name = std::string(token.mStart, static_cast<unsigned long>(token.mLength));
-                
-                if (Peek().mTokenType == ORchestraTokenType::LEFT_BRACKET)
-                {
-                    Consume();
-
-                    if (!CompileExpression(instructions))
-                    {
-                        return false;
-                    }
-
-                    if (Peek().mTokenType != ORchestraTokenType::RIGHT_BRACKET)
-                    {
-                        std::string missingBracket = "]";
-                        ThrowMissingExpectedToken(missingBracket);
-                        return false;
-                    }
-
-                    Consume();
-
-                    if (Peek().mTokenType == ORchestraTokenType::EQUAL)
-                    {
-                        Consume();
-
-                        if (!CompileExpression(instructions))
-                        {
-                            return false;
-                        }
-
-                        const DataUnit id = GetOrCreateVariableID(name);
-                        instructions.emplace_back(Instruction{ OpCode::SET_IDENTIFIER_WITH_INDEX, id });
-                    }
-                    else
-                    {
-                        ThrowUnexpectedTokenError(Peek());
-                        return false;
-                    }
-                }
-                else if (Peek().mTokenType == ORchestraTokenType::EQUAL)
-                {
-                    Consume();
-
-                    ORchestraTokenType tokenType = Peek().mTokenType;
-                    switch (tokenType)
-                    {
-                        // Data Array
-                    case ORchestraTokenType::LEFT_BRACKET:
-                    {
-                        DataUnit arrayLength;
-                        const bool isLastRecursiveLevel = false;
-                        if (CompileArray(instructions, arrayLength, MAX_DATASEQUENCE_LENGTH, isLastRecursiveLevel))
-                        {
-                            const DataUnit id = GetOrCreateVariableID(name);
-                            instructions.emplace_back(Instruction{ OpCode::CONSTANT, arrayLength });
-                            instructions.emplace_back(Instruction{ OpCode::SET_IDENTIFIER_ARRAY, id });
-                        }
-                        else
-                        {
-                            return false;
-                        }
-
-                        break;
-                    }
-                    case ORchestraTokenType::NUMBER:
-                    case ORchestraTokenType::NOTE_IDENTIFIER:
-                    case ORchestraTokenType::IDENTIFIER:
-                    case ORchestraTokenType::LEFT_PAREN:
-                    case ORchestraTokenType::RANDOM:
-                    case ORchestraTokenType::DOLLAR:
-                    {
-                        if (!CompileExpression(instructions))
-                            return false;
-
-                        const DataUnit id = GetOrCreateVariableID(name);
-                        instructions.emplace_back(Instruction{ OpCode::SET_IDENTIFIER_VALUE, id });
-                        break;
-                    }
-                    case ORchestraTokenType::EUCLIDEAN:
-                    {
-                        Consume();
-                        if (!CompileFunctionCall(instructions, eucFunctionName))
-                            return false;
-
-                        const DataUnit id = GetOrCreateVariableID(name);
-                        instructions.emplace_back(Instruction{ OpCode::SET_IDENTIFIER_ARRAY, id });
-
-                        break;
-                    }
-
-                    default:
-                    {
-                        ThrowUnexpectedTokenError(Peek());
-                        return false;
-                    }
-                    }
-                }
-                // For Functions
-                else if (Peek().mTokenType == ORchestraTokenType::LEFT_PAREN)
-                {
-                    if (!CompileFunctionCall(instructions, name))
-                        return false;
-                }
-                else
-                {
-                    ThrowUnexpectedTokenError(Peek());
-                    return false;
-                }
-
-                break;
-            }
-
-            case ORchestraTokenType::PRINT:
-            case ORchestraTokenType::NOTE:
-            case ORchestraTokenType::CC:
-            {
-                const std::string functionName = std::string(token.mStart, static_cast<unsigned long>(token.mLength));
-                if (!CompileFunctionCall(instructions, functionName))
-                    return false;
-
-                break;
-            }
-
-#if _TEST
-            case ORchestraTokenType::TEST_KEYWORD:
-            {
-                if (Peek().mTokenType == ORchestraTokenType::IDENTIFIER || 
-                    Peek().mTokenType == ORchestraTokenType::NUMBER ||
-                    Peek().mTokenType == ORchestraTokenType::DOLLAR)
-                {
-                    CompileExpression(instructions);
-                }
-                else
-                {
-                    ThrowUnexpectedTokenError(Peek());
-                    return false;
-                }
-                break;
-            }
-#endif
-
-            case ORchestraTokenType::END:
+            case StatementResult::SUCCESS:
+                continue;
+            case StatementResult::END_OF_INPUT:
                 instructions.emplace_back(Instruction{ OpCode::END });
                 return true;
+            case StatementResult::END_OF_FUNCTION:
+                ThrowUnexpectedTokenError(Previous());
+                return false;
+            case StatementResult::COMPILE_ERROR:
+                return false;
+            }
+        }
+    }
 
-            case ORchestraTokenType::EOL:
-                break;
+    bool Compiler::CompileFunctionArray(const std::string& name)
+    {
+        Consume(); // consume '['
 
-            default:
-                ThrowUnexpectedTokenError(token);
+        std::vector<std::vector<Instruction>> funcBlocks;
+
+        for (;;)
+        {
+            if (Peek().mTokenType != ORchestraTokenType::IDENTIFIER)
+            {
+                ThrowUnexpectedTokenError(Peek());
+                return false;
+            }
+
+            const ORchestraToken& funcToken = Consume();
+            const std::string funcName = std::string(funcToken.mStart, static_cast<unsigned long>(funcToken.mLength));
+
+            auto it = mPatterns.find(funcName);
+            if (it == mPatterns.end())
+            {
+                std::string message = std::string("'") + funcName + std::string("' is not a defined pattern");
+                mErrorReporting.LogError(funcToken.mLine, message);
+                return false;
+            }
+
+            const StoredFunction& func = it->second;
+            funcBlocks.push_back(func.mInstructions);
+
+            if (Peek().mTokenType == ORchestraTokenType::COMMA)
+            {
+                Consume();
+                continue;
+            }
+            break;
+        }
+
+        if (Peek().mTokenType != ORchestraTokenType::RIGHT_BRACKET)
+        {
+            std::string missingToken{ "]" };
+            ThrowMissingExpectedToken(missingToken);
+            return false;
+        }
+        Consume(); // consume ']'
+
+        const DataUnit arrayId = static_cast<DataUnit>(mFunctionArrays.size());
+        mFunctionArrays.push_back(funcBlocks);
+        mFunctionArrayNames[name] = arrayId;
+
+        return true;
+    }
+
+    bool Compiler::CompileFunctionArrayCall(std::vector<Instruction>& instructions, DataUnit arrayId)
+    {
+        Consume(); // consume '('
+
+        if (!CompileExpression(instructions))
+        {
+            ThrowUnexpectedTokenError(Peek());
+            return false;
+        }
+
+        if (Peek().mTokenType != ORchestraTokenType::RIGHT_PAREN)
+        {
+            std::string missingToken{ ")" };
+            ThrowMissingExpectedToken(missingToken);
+            return false;
+        }
+        Consume(); // consume ')'
+
+        instructions.emplace_back(Instruction{ OpCode::EXEC_FUNC_ARRAY, arrayId });
+
+        return true;
+    }
+
+    bool Compiler::CompilePatternDefinition()
+    {
+        if (mInsideFunctionDefinition)
+        {
+            std::string message = "Cannot define a pattern inside a function or pattern";
+            mErrorReporting.LogError(Peek().mLine, message);
+            return false;
+        }
+
+        if (Peek().mTokenType != ORchestraTokenType::IDENTIFIER)
+        {
+            ThrowUnexpectedTokenError(Peek());
+            return false;
+        }
+
+        const ORchestraToken& nameToken = Consume();
+        const std::string name = std::string(nameToken.mStart, static_cast<unsigned long>(nameToken.mLength));
+        const int ptnLine = nameToken.mLine;
+
+        if (mFunctions.find(name) != mFunctions.end())
+        {
+            std::string message = std::string("'") + name + std::string("' is already defined as a function");
+            mErrorReporting.LogError(ptnLine, message);
+            return false;
+        }
+
+        if (mPatterns.find(name) != mPatterns.end())
+        {
+            std::string message = std::string("Pattern '") + name + std::string("' is already defined");
+            mErrorReporting.LogError(ptnLine, message);
+            return false;
+        }
+
+        if (mVariableIDMap.find(name) != mVariableIDMap.end())
+        {
+            std::string message = std::string("'") + name + std::string("' is already used as a variable name");
+            mErrorReporting.LogError(ptnLine, message);
+            return false;
+        }
+
+        if (Peek().mTokenType != ORchestraTokenType::EOL)
+        {
+            ThrowUnexpectedTokenError(Peek());
+            return false;
+        }
+        Consume(); // consume EOL
+
+        mInsideFunctionDefinition = true;
+        std::vector<Instruction> bodyInstructions;
+
+        for (;;)
+        {
+            StatementResult result = CompileStatement(bodyInstructions);
+            switch (result)
+            {
+            case StatementResult::SUCCESS:
+                continue;
+            case StatementResult::END_OF_FUNCTION:
+                mInsideFunctionDefinition = false;
+                mPatterns[name] = StoredFunction(0, bodyInstructions);
+                return true;
+            case StatementResult::END_OF_INPUT:
+            {
+                mInsideFunctionDefinition = false;
+                std::string message = "Unexpected end, you're missing a end";
+                mErrorReporting.LogError(ptnLine, message);
+                return false;
+            }
+            case StatementResult::COMPILE_ERROR:
+                mInsideFunctionDefinition = false;
+                return false;
+            }
+        }
+    }
+
+    bool Compiler::CompileFunctionDefinition(std::vector<Instruction>& mainInstructions)
+    {
+        if (mInsideFunctionDefinition)
+        {
+            std::string message = "Cannot define a function inside another function";
+            mErrorReporting.LogError(Peek().mLine, message);
+            return false;
+        }
+
+        if (Peek().mTokenType != ORchestraTokenType::IDENTIFIER)
+        {
+            ThrowUnexpectedTokenError(Peek());
+            return false;
+        }
+
+        const ORchestraToken& nameToken = Consume();
+        const std::string name = std::string(nameToken.mStart, static_cast<unsigned long>(nameToken.mLength));
+        const int fnLine = nameToken.mLine;
+
+        //Check that it doesn't already have a function of this name
+        if (mFunctions.find(name) != mFunctions.end())
+        {
+            std::string message = std::string("Function '") + name + std::string("' is already defined");
+            mErrorReporting.LogError(fnLine, message);
+            return false;
+        }
+
+        // Check that it doesn't clash with a variable
+        if (mVariableIDMap.find(name) != mVariableIDMap.end())
+        {
+            std::string message = std::string("'") + name + std::string("' is already used as a variable name");
+            mErrorReporting.LogError(fnLine, message);
+            return false;
+        }
+
+        // Check that it doesn't clash with a pattern
+        if (mPatterns.find(name) != mPatterns.end())
+        {
+            std::string message = std::string("'") + name + std::string("' is already defined as a pattern");
+            mErrorReporting.LogError(fnLine, message);
+            return false;
+        }
+
+        // Parse optional parameter list
+        std::vector<DataUnit> paramIds;
+        if (Peek().mTokenType == ORchestraTokenType::LEFT_PAREN)
+        {
+            Consume(); // consume '('
+
+            if (Peek().mTokenType != ORchestraTokenType::RIGHT_PAREN)
+            {
+                for (;;)
+                {
+                    if (Peek().mTokenType != ORchestraTokenType::IDENTIFIER)
+                    {
+                        ThrowUnexpectedTokenError(Peek());
+                        return false;
+                    }
+
+                    const ORchestraToken& paramToken = Consume();
+                    const std::string paramName = std::string(paramToken.mStart, static_cast<unsigned long>(paramToken.mLength));
+                    const DataUnit paramId = GetOrCreateVariableID(paramName);
+                    paramIds.push_back(paramId);
+
+                    // Emit initialization into main instruction stream
+                    mainInstructions.emplace_back(Instruction{ OpCode::CONSTANT, 0 });
+                    mainInstructions.emplace_back(Instruction{ OpCode::SET_IDENTIFIER_VALUE, paramId });
+
+                    if (Peek().mTokenType == ORchestraTokenType::COMMA)
+                    {
+                        Consume(); // consume ','
+                        continue;
+                    }
+                    break;
+                }
+            }
+
+            if (Peek().mTokenType != ORchestraTokenType::RIGHT_PAREN)
+            {
+                std::string missingParen = ")";
+                ThrowMissingExpectedToken(missingParen);
+                return false;
+            }
+            Consume(); // consume ')'
+        }
+
+        if (Peek().mTokenType != ORchestraTokenType::EOL)
+        {
+            ThrowUnexpectedTokenError(Peek());
+            return false;
+        }
+        Consume(); // consume EOL
+
+        mInsideFunctionDefinition = true;
+        std::vector<Instruction> bodyInstructions;
+
+        for (;;)
+        {
+            StatementResult result = CompileStatement(bodyInstructions);
+            switch (result)
+            {
+            case StatementResult::SUCCESS:
+                continue;
+            case StatementResult::END_OF_FUNCTION:
+                mInsideFunctionDefinition = false;
+                mFunctions[name] = StoredFunction(static_cast<int>(paramIds.size()), paramIds, bodyInstructions);
+                return true;
+            case StatementResult::END_OF_INPUT:
+            {
+                mInsideFunctionDefinition = false;
+                std::string message = "Unexpected end, you're missing a end";
+                mErrorReporting.LogError(fnLine, message);
+                return false;
+            }
+            case StatementResult::COMPILE_ERROR:
+                mInsideFunctionDefinition = false;
                 return false;
             }
         }
