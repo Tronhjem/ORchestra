@@ -730,14 +730,14 @@ namespace ORchestra
 
                 if (!CompileExpression(instructions))
                 {
-                    return StatementResult::ERROR;
+                    return StatementResult::COMPILE_ERROR;
                 }
 
                 if (Peek().mTokenType != ORchestraTokenType::RIGHT_BRACKET)
                 {
                     std::string missingBracket = "]";
                     ThrowMissingExpectedToken(missingBracket);
-                    return StatementResult::ERROR;
+                    return StatementResult::COMPILE_ERROR;
                 }
 
                 Consume();
@@ -748,7 +748,7 @@ namespace ORchestra
 
                     if (!CompileExpression(instructions))
                     {
-                        return StatementResult::ERROR;
+                        return StatementResult::COMPILE_ERROR;
                     }
 
                     const DataUnit id = GetOrCreateVariableID(name);
@@ -757,7 +757,7 @@ namespace ORchestra
                 else
                 {
                     ThrowUnexpectedTokenError(Peek());
-                    return StatementResult::ERROR;
+                    return StatementResult::COMPILE_ERROR;
                 }
             }
             else if (Peek().mTokenType == ORchestraTokenType::EQUAL)
@@ -779,7 +779,7 @@ namespace ORchestra
                         if (mPatterns.find(firstName) != mPatterns.end())
                         {
                             if (!CompileFunctionArray(name))
-                                return StatementResult::ERROR;
+                                return StatementResult::COMPILE_ERROR;
                             break;
                         }
                     }
@@ -794,7 +794,7 @@ namespace ORchestra
                     }
                     else
                     {
-                        return StatementResult::ERROR;
+                        return StatementResult::COMPILE_ERROR;
                     }
 
                     break;
@@ -807,7 +807,7 @@ namespace ORchestra
                 case ORchestraTokenType::DOLLAR:
                 {
                     if (!CompileExpression(instructions))
-                        return StatementResult::ERROR;
+                        return StatementResult::COMPILE_ERROR;
 
                     const DataUnit id = GetOrCreateVariableID(name);
                     instructions.emplace_back(Instruction{ OpCode::SET_IDENTIFIER_VALUE, id });
@@ -817,7 +817,7 @@ namespace ORchestra
                 {
                     Consume();
                     if (!CompileFunctionCall(instructions, eucFunctionName))
-                        return StatementResult::ERROR;
+                        return StatementResult::COMPILE_ERROR;
 
                     const DataUnit id = GetOrCreateVariableID(name);
                     instructions.emplace_back(Instruction{ OpCode::SET_IDENTIFIER_ARRAY, id });
@@ -828,7 +828,7 @@ namespace ORchestra
                 default:
                 {
                     ThrowUnexpectedTokenError(Peek());
-                    return StatementResult::ERROR;
+                    return StatementResult::COMPILE_ERROR;
                 }
                 }
             }
@@ -839,15 +839,15 @@ namespace ORchestra
                 if (funcArrayIt != mFunctionArrayNames.end())
                 {
                     if (!CompileFunctionArrayCall(instructions, funcArrayIt->second))
-                        return StatementResult::ERROR;
+                        return StatementResult::COMPILE_ERROR;
                 }
                 else if (!CompileFunctionCall(instructions, name))
-                    return StatementResult::ERROR;
+                    return StatementResult::COMPILE_ERROR;
             }
             else
             {
                 ThrowUnexpectedTokenError(Peek());
-                return StatementResult::ERROR;
+                return StatementResult::COMPILE_ERROR;
             }
 
             break;
@@ -859,7 +859,7 @@ namespace ORchestra
         {
             const std::string functionName = std::string(token.mStart, static_cast<unsigned long>(token.mLength));
             if (!CompileFunctionCall(instructions, functionName))
-                return StatementResult::ERROR;
+                return StatementResult::COMPILE_ERROR;
 
             break;
         }
@@ -867,14 +867,14 @@ namespace ORchestra
         case ORchestraTokenType::FN:
         {
             if (!CompileFunctionDefinition(instructions))
-                return StatementResult::ERROR;
+                return StatementResult::COMPILE_ERROR;
             break;
         }
 
         case ORchestraTokenType::PTN:
         {
             if (!CompilePatternDefinition())
-                return StatementResult::ERROR;
+                return StatementResult::COMPILE_ERROR;
             break;
         }
 
@@ -884,10 +884,10 @@ namespace ORchestra
             {
                 std::string message = "return can only be used inside a function body";
                 mErrorReporting.LogError(token.mLine, message);
-                return StatementResult::ERROR;
+                return StatementResult::COMPILE_ERROR;
             }
             if (!CompileExpression(instructions))
-                return StatementResult::ERROR;
+                return StatementResult::COMPILE_ERROR;
             break;
         }
 
@@ -903,7 +903,7 @@ namespace ORchestra
             else
             {
                 ThrowUnexpectedTokenError(Peek());
-                return StatementResult::ERROR;
+                return StatementResult::COMPILE_ERROR;
             }
             break;
         }
@@ -920,7 +920,7 @@ namespace ORchestra
 
         default:
             ThrowUnexpectedTokenError(token);
-            return StatementResult::ERROR;
+            return StatementResult::COMPILE_ERROR;
         }
 
         return StatementResult::SUCCESS;
@@ -945,7 +945,7 @@ namespace ORchestra
             case StatementResult::END_OF_FUNCTION:
                 ThrowUnexpectedTokenError(Previous());
                 return false;
-            case StatementResult::ERROR:
+            case StatementResult::COMPILE_ERROR:
                 return false;
             }
         }
@@ -1093,7 +1093,7 @@ namespace ORchestra
                 mErrorReporting.LogError(ptnLine, message);
                 return false;
             }
-            case StatementResult::ERROR:
+            case StatementResult::COMPILE_ERROR:
                 mInsideFunctionDefinition = false;
                 return false;
             }
@@ -1214,7 +1214,7 @@ namespace ORchestra
                 mErrorReporting.LogError(fnLine, message);
                 return false;
             }
-            case StatementResult::ERROR:
+            case StatementResult::COMPILE_ERROR:
                 mInsideFunctionDefinition = false;
                 return false;
             }

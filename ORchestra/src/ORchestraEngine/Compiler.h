@@ -94,7 +94,7 @@ namespace ORchestra
         bool CompileFunctionArray(const std::string& name);
         bool CompileFunctionArrayCall(std::vector<Instruction>& instructions, DataUnit arrayId);
 
-        enum class StatementResult { SUCCESS, END_OF_INPUT, END_OF_FUNCTION, ERROR };
+        enum class StatementResult { SUCCESS, END_OF_INPUT, END_OF_FUNCTION, COMPILE_ERROR };
         StatementResult CompileStatement(std::vector<Instruction>& instructions);
         bool CompileFunctionDefinition(std::vector<Instruction>& mainInstructions);
         bool mInsideFunctionDefinition = false;
