@@ -63,6 +63,10 @@ namespace ORchestra
 
         int mLastStep = -1;
         int64_t mSamplesSinceLastStep = 0;
+        double mSamplesPerStep = 0.0;
+        int64_t mStepOriginInSamples = 0;
+        double mLastBpm = 0.0;
+        float mLastBpmDivision = 0.0f;
         std::atomic<int> mReadySteps;
         std::atomic<int> mCurrentGlobalStep;
         std::atomic<int> mCurrentProcessingStep;

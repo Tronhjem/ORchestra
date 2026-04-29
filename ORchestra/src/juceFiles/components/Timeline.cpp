@@ -42,19 +42,12 @@ void Timeline::timerCallback()
     if (!transportData.isPlaying || !mAudioProcessor->IsORchestraVMInit())
         return;
 
-    const int64_t timeInSamples = transportData.timeInSamples;
-    const double samplesPerStep = static_cast<double>(transportData.sampleRate)
-                                  * (60.0 / (transportData.bpmFromScript * transportData.bpmDivision));
+    const int currentStep = mAudioProcessor->GetGlobalStepCount();
 
-    const int currentStep = static_cast<int>(ceil(static_cast<double>(timeInSamples) / samplesPerStep));
-    
     if (currentStep == mLastGlobalStep)
-    {
         return;
-    }
 
     mLastGlobalStep = currentStep;
-    mLastTimeInSamples = timeInSamples;
     // We start behind the global step, as it's always one ahead and we
     // want to paint the current step being triggered.
     const int globalStepOffset = mLastGlobalStep - 1 + STEP_BUFFER_SIZE;

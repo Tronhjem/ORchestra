@@ -51,7 +51,6 @@ public:
     Timeline(TriggerRectangleComponent& triggerRectangle) :
                 mAudioProcessor(nullptr),
                 mLastGlobalStep(-1),
-                mLastTimeInSamples(0),
                 mTriggerRectangle(triggerRectangle)
     {
         startTimerHz(40);
@@ -73,7 +72,6 @@ private:
     inline juce::Colour GetStepColorFromVelocity(const float value, const SequenceStepType MidiType);
     ORchestraAudioProcessor* mAudioProcessor;
     int mLastGlobalStep;
-    int64_t mLastTimeInSamples;
     TriggerRectangleComponent& mTriggerRectangle;
     std::vector<TriggerRectangle> mTimelineTriggerRectangles;
     std::vector<BarLine> mBarLines;
