@@ -25,10 +25,10 @@ namespace ORchestra
 {
     struct TransportData
     {
-        double bpm = 0.0;
+        double bpm = 0.0;          // filled from host/DAW via FillPositionData
+        double bpmFromScript = 0.0; // set by script; 0 = not set, engine falls back to bpm
         double sampleRate = 0;
-        float bpmDivision = 2.f;
-        int noteLengthInSamples = 0;
+        float bpmDivision = 1.0f;
         int64_t timeInSamples = 0;
         bool isPlaying = false;
         int transposeOffset = 0;

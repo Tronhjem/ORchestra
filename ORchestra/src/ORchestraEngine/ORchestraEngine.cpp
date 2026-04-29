@@ -77,11 +77,6 @@ namespace ORchestra
         mReadySteps.store(0, std::memory_order_release);
         mCurrentProcessingStep.store(mCurrentGlobalStep.load(), std::memory_order_release);
         
-        // Reset script transport data to default values (0 means not set)
-        mScriptTransportData.bpm = 0.0;
-        mScriptTransportData.bpmDivision = 0.0f;
-        mScriptTransportData.transposeOffset = 0;
-        
         mVM.Reset();
 
         const bool innitSuccess = mVM.Prepare(&mInstructionData[0]);
@@ -154,7 +149,7 @@ namespace ORchestra
         return true;
     }
 
-    void ORchestraEngine::Tick(const TransportData& transportData,
+    void ORchestraEngine::Tick(TransportData& transportData,
         const int bufferLength,
         juce::MidiBuffer& midiMessages)
     {
@@ -164,12 +159,16 @@ namespace ORchestra
 
         if (transportData.isPlaying && mIsVMInit)
         {
-            // Use script-provided BPM and division if they were set, otherwise use the provided values
-            const double bpm = mScriptTransportData.bpm > 0.0 ? mScriptTransportData.bpm : transportData.bpm;
-            const float bpmDivision = mScriptTransportData.bpmDivision > 0.0f ? mScriptTransportData.bpmDivision : transportData.bpmDivision;
-            
-            const double samplesPerStep = static_cast<double>(transportData.sampleRate) * (60.0 / (bpm * bpmDivision));
-            const int currentStep = static_cast<int>(ceil(static_cast<double>(transportData.timeInSamples) / samplesPerStep));
+            // If the script hasn't set a BPM, use the host BPM as the active value.
+            if (transportData.bpmFromScript == 0.0)
+                transportData.bpmFromScript = transportData.bpm;
+
+            const double samplesPerStep =
+                static_cast<double>(transportData.sampleRate)
+                * (60.0 / (transportData.bpmFromScript * transportData.bpmDivision));
+
+            const int currentStep = 
+                static_cast<int>(ceil(static_cast<double>(transportData.timeInSamples) / samplesPerStep));
 
             // Check if we skipped count, to regenerate everything.
             const int stepDifference = currentStep - mCurrentGlobalStep.load();
@@ -207,12 +206,12 @@ namespace ORchestra
                    {
                        case ORchestra::SequenceStepType::BPM:
                        {
-                           mScriptTransportData.bpm = step.mFirst.GetValue(0);
+                           transportData.bpmFromScript = step.mFirst.GetValue(0);
                            break;
                        }
                        case ORchestra::SequenceStepType::BPM_DIVISION:
                        {
-                           mScriptTransportData.bpmDivision = ToBpmDivision(step.mFirst.GetValue(0));
+                           transportData.bpmDivision = ToBpmDivision(step.mFirst.GetValue(0));
                            break;
                        }
                        case ORchestra::SequenceStepType::PRINT:
@@ -223,7 +222,7 @@ namespace ORchestra
                        }
                        case ORchestra::SequenceStepType::TRANSPOSE:
                        {
-                           mScriptTransportData.transposeOffset = static_cast<int>(step.mFirst.GetValue(0));
+                           transportData.transposeOffset = static_cast<int>(step.mFirst.GetValue(0));
                            break;
                        }
                        case ORchestra::SequenceStepType::NoteOn:
@@ -240,17 +239,18 @@ namespace ORchestra
 
                                const int rawFirstByte = static_cast<int>(step.mFirst.GetEquivalentValueAtIndex(i, triggerLength));
                                const int transposedFirstByte = (step.mType == ORchestra::SequenceStepType::NoteOn)
-                                   ? rawFirstByte + mScriptTransportData.transposeOffset
+                                   ? rawFirstByte + transportData.transposeOffset
                                    : rawFirstByte;
                                const DataUnit firstByte = static_cast<DataUnit>(transposedFirstByte);
                                const DataUnit secondByte = step.mSecond.GetEquivalentValueAtIndex(i, triggerLength);
                                const DataUnit channel = step.mChannel.GetEquivalentValueAtIndex(i, triggerLength);
                                const int timeStamp = nextStepInSamples + i * (static_cast<int>(samplesPerStep) / triggerLength);
 
-                               // TODO: Change to use step.mDuration
-                               // ScheduledMidiMessage message {step.mType, firstByte, secondByte, channel, timeStamp, step.mDuration};
+                               const float noteDivFloat = ToBpmDivision(static_cast<DataUnit>(step.mDuration));
+                               const int noteDurationSamples = static_cast<int>(
+                                   static_cast<double>(transportData.sampleRate) * (60.0 / (transportData.bpmFromScript * noteDivFloat)));
                                ScheduledMidiMessage message{ step.mType, firstByte, secondByte,
-                                                             channel, timeStamp, transportData.noteLengthInSamples };
+                                                             channel, timeStamp, noteDurationSamples };
 
                                mMidiScheduler.PostMidi(message);
                            }

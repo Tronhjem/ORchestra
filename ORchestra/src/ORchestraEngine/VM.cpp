@@ -215,11 +215,13 @@ namespace ORchestra
         {
         case (OpCode::NOTE):
         {
-            const StepData channel = stack.Pop();
-            const StepData vel = stack.Pop();
-            const StepData note = stack.Pop();
+            const StepData channel       = stack.Pop();
+            const StepData duration      = stack.Pop();
+            const StepData vel           = stack.Pop();
+            const StepData note          = stack.Pop();
             const StepData shouldTrigger = stack.Pop();
-            stepQueue.emplace_back(SequenceStep{ SequenceStepType::NoteOn, shouldTrigger, note, vel, channel, DEFAULT_NOTE_DURATION });
+            stepQueue.emplace_back(SequenceStep{ SequenceStepType::NoteOn, shouldTrigger, note, vel, channel,
+                static_cast<int>(duration.GetValue(0)) });
             break;
         }
 

@@ -27,17 +27,6 @@
 #include "Defines.h"
 
 using namespace ORchestra;
-enum class BpmDivision
-{
-    n1,
-    n2,
-    n4,
-    n8,
-    n16,
-    n32,
-    n64
-};
-
 class ORchestraAudioProcessor : public juce::AudioProcessor, public juce::ChangeBroadcaster
 #if JucePlugin_Enable_ARA
   ,
@@ -77,7 +66,11 @@ public:
 
     const std::string& ImportFromFile(const std::string& filePath) { return mORchestraEngine->ImportFromFile(filePath); }
     void ExportToFile(const std::string& data) { mORchestraEngine->ExportToFile(data); }
-    void Compile(const std::string& data) { mORchestraEngine->Compile(data); }
+    void Compile(const std::string& data)
+    {
+        mTransportData.bpmFromScript = 0.0;
+        mORchestraEngine->Compile(data);
+    }
     void SetInstructionData(const std::string& data) { mORchestraEngine->SetInstructionData(data); }
     const std::string& GetInstructionData() { return mORchestraEngine->GetInstructionData(); }
     int GetGlobalStepCount() { return mORchestraEngine->GetGlobalStepCount(); }
@@ -95,17 +88,10 @@ private:
     void FillPositionData(TransportData& data);
     TransportData mTransportData;
     std::unique_ptr<ORchestraEngine> mORchestraEngine;
-    inline float GetBpmDivision(float noteDiv);
-    inline int GetNoteLength(float noteDiv);
 
     int mLocalTimeInSamples = 0;
-    std::atomic<float>* mBpm;
-    std::atomic<float>* mTempoDivision;
-    std::atomic<float>* mNoteLength;
-    std::atomic<float>* mShouldSync;
 
     juce::String mSavedFilePath{ "" };
-    juce::StringArray mBpmDivisionsStrings{ "1n", "2n", "4n", "8n", "16n", "32n", "64n" };
     juce::AudioProcessorValueTreeState mValueTree;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ORchestraAudioProcessor)

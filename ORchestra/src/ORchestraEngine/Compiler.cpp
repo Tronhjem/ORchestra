@@ -61,7 +61,7 @@ namespace ORchestra
 
         std::vector<Instruction> noteInstructions;
         noteInstructions.emplace_back(Instruction{ OpCode::NOTE });
-        mFunctions["note"] = StoredFunction(4, noteInstructions);
+        mFunctions["note"] = StoredFunction(5, noteInstructions);
 
         std::vector<Instruction> ccInstructions;
         ccInstructions.emplace_back(Instruction{ OpCode::CC });

@@ -39,7 +39,7 @@ namespace ORchestra
     public:
         ORchestraEngine();
         ~ORchestraEngine();
-        void Tick(const TransportData& transportData, const int bufferLength, juce::MidiBuffer& midiMessages);
+        void Tick(TransportData& transportData, const int bufferLength, juce::MidiBuffer& midiMessages);
         void Compile(const std::string& data);
         const std::string& ImportFromFile(const std::string& filePath);
         void ExportToFile(const std::string& filePath);
@@ -82,8 +82,6 @@ namespace ORchestra
         MidiScheduler mMidiScheduler;
         ErrorReporting mErrorReporting;
         VM mVM;
-        
-        TransportData mScriptTransportData;
     };
 
 } // namespace ORchestra

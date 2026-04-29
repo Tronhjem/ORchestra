@@ -37,8 +37,7 @@ constexpr int ROW_SPACING = 10;
 ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProcessor& p)
         : AudioProcessorEditor(&p),
           audioProcessor(p),
-          mTransportControls(p.GetValueTree()),
-          mTempoControlsPanel(p.GetValueTree()),
+          mTransportControls(),
           mCodeEditorPanel(this),
           mTimeline(mTriggerRectangle)
 {
@@ -60,17 +59,10 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     const int transportHeight = mTransportControls.getPreferredHeight();
     mTransportControls.setBounds(xPos, yPos, transportWidth, transportHeight);
     
-    xPos += transportWidth + COMPONENT_MARGIN;
-    const int tempoWidth = mTempoControlsPanel.getPreferredWidth();
-    const int tempoHeight = mTempoControlsPanel.getPreferredHeight();
-    mTempoControlsPanel.setBounds(xPos, yPos, tempoWidth, tempoHeight);
-    
-    
     // ==============================================================================
-    // Row 2: CodeEditorPrnel
+    // Row 2: CodeEditorPanel
     xPos = OUTER_MARGIN;
-    // yPos += std::max({tempoHeight, transportHeight, fileOpsHeight + ROW_SPACING}) + COMPONENT_MARGIN;
-    yPos += tempoHeight + ROW_SPACING;
+    yPos += transportHeight + ROW_SPACING;
 
     int codeEditorWidth = static_cast<int>(static_cast<float>(WINDOW_WIDTH) / 2.5f + OUTER_MARGIN);
     int codeEditorHeight = mCodeEditorPanel.getPreferredHeight();
@@ -87,7 +79,6 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     juce::LookAndFeel::setDefaultLookAndFeel(mGeneralLookAndFeel.get());
 
     mTransportControls.setButtonLookAndFeel(mButtonLookAndFeel.get());
-    mTempoControlsPanel.setGeneralLookAndFeel(mGeneralLookAndFeel.get());
 
     mCodeEditorPanel.setEditorLookAndFeel(mTextEditorLookAndFeel.get());
     mCodeEditorPanel.setErrorBoxLookAndFeel(mTextEditorLookAndFeel.get());
@@ -98,7 +89,6 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     mTriggerRectangle.SetProcessor(&audioProcessor);
 
     mTransportControls.setPlayButtonCallback([this]() { handlePlayButton(); });
-    mTransportControls.setSyncToggleCallback([this](bool shouldSync) { handleSyncToggle(shouldSync); });
     mCodeEditorPanel.setCompileCallback([this]() { handleCompile(); });
     mCodeEditorPanel.setExportCallback([this]() { handleExportFile(); });
     mCodeEditorPanel.setImportCallback([this]() { handleImportFile(); });
@@ -106,7 +96,6 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     
     audioProcessor.SetErrorListener(this);
 
-    addAndMakeVisible(mTempoControlsPanel);
     addAndMakeVisible(mTransportControls);
     addAndMakeVisible(mCodeEditorPanel);
     addAndMakeVisible(mTimeline);
@@ -161,17 +150,6 @@ void ORchestraAudioProcessorEditor::handlePlayButton()
     }
 }
 
-void ORchestraAudioProcessorEditor::handleSyncToggle(bool shouldSync)
-{
-    mTransportControls.setPlayButtonEnabled(!shouldSync);
-    mTempoControlsPanel.setBpmEnabled(!shouldSync);
-
-    if(shouldSync)
-    {
-        audioProcessor.IsRunning = false;
-        mTransportControls.updatePlayButtonState(false);
-    }
-}
 
 void ORchestraAudioProcessorEditor::handleCompile()
 {
