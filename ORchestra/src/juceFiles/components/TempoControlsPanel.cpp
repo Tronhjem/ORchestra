@@ -32,8 +32,8 @@ TempoControlsPanel::TempoControlsPanel(juce::AudioProcessorValueTreeState& value
     mNoteLengthLabel.setColour(juce::Label::textColourId, TextColor);
 
     // Setup combo boxes
-    mTempoDivisionSelectorBox.addItemList(mNoteDivisions, 3);
-    mNoteLengthSelectorBox.addItemList(mNoteDivisions, 3);
+    mTempoDivisionSelectorBox.addItemList(mBpmDivisions, 3);
+    mNoteLengthSelectorBox.addItemList(mBpmDivisions, 3);
 
     // Setup BPM slider
     mBpmSlider.setSliderStyle(juce::Slider::SliderStyle::LinearBarVertical);

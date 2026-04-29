@@ -18,7 +18,8 @@
       "Bash(cmake --build /Users/christiantronhjem/dev/JuceProjects/ORchestra/build)",
       "Bash(/Users/christiantronhjem/dev/JuceProjects/ORchestra/build/UnitTests/ORchestraTests)",
       "Bash(cmake -DBUILD_PLUGIN=ON -DBUILD_TESTS=ON ..)",
-      "Bash(cmake --build . --clean-first)"
+      "Bash(cmake --build . --clean-first)",
+      "Bash(cmake -DBUILD_PLUGIN=OFF -DBUILD_TESTS=ON .. -Wno-dev)"
     ]
   }
 }

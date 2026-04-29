@@ -312,17 +312,17 @@ namespace ORchestra
             return checkKeyword(1, 1, "n", ORchestraTokenType::FN);
         case 'n':
         {
-            auto r = checkKeyword(1, 1, "1",  ORchestraTokenType::NOTE_DIVISION_IDENTIFIER);
+            auto r = checkKeyword(1, 1, "1",  ORchestraTokenType::BPM_DIVISION_IDENTIFIER);
             if (r != ORchestraTokenType::IDENTIFIER) return r;
-            r = checkKeyword(1, 1, "2",  ORchestraTokenType::NOTE_DIVISION_IDENTIFIER);
+            r = checkKeyword(1, 1, "2",  ORchestraTokenType::BPM_DIVISION_IDENTIFIER);
             if (r != ORchestraTokenType::IDENTIFIER) return r;
-            r = checkKeyword(1, 1, "4",  ORchestraTokenType::NOTE_DIVISION_IDENTIFIER);
+            r = checkKeyword(1, 1, "4",  ORchestraTokenType::BPM_DIVISION_IDENTIFIER);
             if (r != ORchestraTokenType::IDENTIFIER) return r;
-            r = checkKeyword(1, 1, "8",  ORchestraTokenType::NOTE_DIVISION_IDENTIFIER);
+            r = checkKeyword(1, 1, "8",  ORchestraTokenType::BPM_DIVISION_IDENTIFIER);
             if (r != ORchestraTokenType::IDENTIFIER) return r;
-            r = checkKeyword(1, 2, "16", ORchestraTokenType::NOTE_DIVISION_IDENTIFIER);
+            r = checkKeyword(1, 2, "16", ORchestraTokenType::BPM_DIVISION_IDENTIFIER);
             if (r != ORchestraTokenType::IDENTIFIER) return r;
-            r = checkKeyword(1, 2, "32", ORchestraTokenType::NOTE_DIVISION_IDENTIFIER);
+            r = checkKeyword(1, 2, "32", ORchestraTokenType::BPM_DIVISION_IDENTIFIER);
             if (r != ORchestraTokenType::IDENTIFIER) return r;
             return checkKeyword(1, 3, "ote", ORchestraTokenType::NOTE);
         }

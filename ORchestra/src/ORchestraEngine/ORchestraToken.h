@@ -67,7 +67,7 @@ namespace ORchestra {
         EUCLIDEAN,
         PARSE_ERROR,
         NOTE_IDENTIFIER,
-        NOTE_DIVISION_IDENTIFIER,
+        BPM_DIVISION_IDENTIFIER,
 
         // Specific
         //TRACK,

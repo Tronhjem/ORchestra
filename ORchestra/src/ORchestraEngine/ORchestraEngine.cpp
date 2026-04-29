@@ -210,7 +210,7 @@ namespace ORchestra
                            mScriptTransportData.bpm = step.mFirst.GetValue(0);
                            break;
                        }
-                       case ORchestra::SequenceStepType::NOTE_DIVISION:
+                       case ORchestra::SequenceStepType::BPM_DIVISION:
                        {
                            mScriptTransportData.bpmDivision = ToBpmDivision(step.mFirst.GetValue(0));
                            break;

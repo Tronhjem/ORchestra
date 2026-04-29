@@ -39,7 +39,7 @@ namespace ORchestra
     static const std::string ranFunctionName = "ran";
     static const std::string eucFunctionName = "euc";
     static const std::string bpmFunctionName = "bpm";
-    static const std::string noteDivFunctionName = "noteDiv";
+    static const std::string bpmDivFunctionName = "bpmDiv";
     static const std::string transposeFunctionName = "transpose";
 
     Compiler::Compiler(const std::vector<ORchestraToken>& tokens, ErrorReporting& log) :
@@ -79,9 +79,9 @@ namespace ORchestra
         bpmInstructions.emplace_back(Instruction{ OpCode::SET_BPM });
         mFunctions[bpmFunctionName] = StoredFunction(1, bpmInstructions);
 
-        std::vector<Instruction> noteDivInstructions;
-        noteDivInstructions.emplace_back(Instruction{ OpCode::SET_NOTE_DIVISION });
-        mFunctions[noteDivFunctionName] = StoredFunction(1, noteDivInstructions);
+        std::vector<Instruction> bpmDivInstructions;
+        bpmDivInstructions.emplace_back(Instruction{ OpCode::SET_BPM_DIVISION });
+        mFunctions[bpmDivFunctionName] = StoredFunction(1, bpmDivInstructions);
 
         std::vector<Instruction> transposeInstructions;
         transposeInstructions.emplace_back(Instruction{ OpCode::SET_TRANSPOSE });
@@ -428,7 +428,7 @@ namespace ORchestra
 
         if (Peek().mTokenType != ORchestraTokenType::NUMBER &&
             Peek().mTokenType != ORchestraTokenType::NOTE_IDENTIFIER &&
-            Peek().mTokenType != ORchestraTokenType::NOTE_DIVISION_IDENTIFIER &&
+            Peek().mTokenType != ORchestraTokenType::BPM_DIVISION_IDENTIFIER &&
             Peek().mTokenType != ORchestraTokenType::IDENTIFIER &&
             Peek().mTokenType != ORchestraTokenType::RANDOM &&
             Peek().mTokenType != ORchestraTokenType::DOLLAR &&
@@ -492,7 +492,7 @@ namespace ORchestra
 
             case ORchestraTokenType::NUMBER:
             case ORchestraTokenType::NOTE_IDENTIFIER:
-            case ORchestraTokenType::NOTE_DIVISION_IDENTIFIER:
+            case ORchestraTokenType::BPM_DIVISION_IDENTIFIER:
             case ORchestraTokenType::IDENTIFIER:
             case ORchestraTokenType::LEFT_PAREN:
             case ORchestraTokenType::DOLLAR:
@@ -589,8 +589,8 @@ namespace ORchestra
             return { &Compiler::ParseIdentifier, nullptr, Precedence::NONE };
         case ORchestraTokenType::NOTE_IDENTIFIER:
             return { &Compiler::ParseNoteIdentifier, nullptr, Precedence::NONE };
-        case ORchestraTokenType::NOTE_DIVISION_IDENTIFIER:
-            return { &Compiler::ParseNoteDivisionIdentifier, nullptr, Precedence::NONE };
+        case ORchestraTokenType::BPM_DIVISION_IDENTIFIER:
+            return { &Compiler::ParseBpmDivisionIdentifier, nullptr, Precedence::NONE };
         case ORchestraTokenType::DOLLAR:          
             return { &Compiler::ParseDollar, nullptr, Precedence::NONE };
         case ORchestraTokenType::RANDOM:          
@@ -670,7 +670,7 @@ namespace ORchestra
         return MakeNoteIntoConstant(Previous(), instructions);
     }
 
-    bool Compiler::ParseNoteDivisionIdentifier(std::vector<Instruction>& instructions)
+    bool Compiler::ParseBpmDivisionIdentifier(std::vector<Instruction>& instructions)
     {
         const ORchestraToken& token = Previous();
         const std::string_view text(token.mStart, static_cast<size_t>(token.mLength));
@@ -847,7 +847,7 @@ namespace ORchestra
                 }
                 case ORchestraTokenType::NUMBER:
                 case ORchestraTokenType::NOTE_IDENTIFIER:
-                case ORchestraTokenType::NOTE_DIVISION_IDENTIFIER:
+                case ORchestraTokenType::BPM_DIVISION_IDENTIFIER:
                 case ORchestraTokenType::IDENTIFIER:
                 case ORchestraTokenType::LEFT_PAREN:
                 case ORchestraTokenType::RANDOM:

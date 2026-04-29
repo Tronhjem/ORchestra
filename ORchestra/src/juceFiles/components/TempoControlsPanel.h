@@ -50,7 +50,7 @@ private:
     juce::Label mBpmLabel{ "bpm","BPM" };
     juce::Label mNoteLengthLabel{ "noteLength", "Note Length" };
 
-    juce::StringArray mNoteDivisions{ "1n", "2n","4n", "8n", "16n", "32n", "64n" };
+    juce::StringArray mBpmDivisions{ "1n", "2n","4n", "8n", "16n", "32n", "64n" };
     juce::ComboBox mTempoDivisionSelectorBox;
     juce::ComboBox mNoteLengthSelectorBox;
     juce::Slider mBpmSlider;

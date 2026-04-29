@@ -43,12 +43,12 @@ ORchestraAudioProcessor::ORchestraAudioProcessor() :
             std::make_unique<juce::AudioParameterInt>(syncToggleId, "Should Sync", 0, 1, 0),
             std::make_unique<juce::AudioParameterChoice>(tempoDivisionId,
                                                          "Tempo Division", 
-                                                         mNoteDivisionsStrings, 
-                                                         static_cast<int>(NoteDivision::n4)),
+                                                         mBpmDivisionsStrings, 
+                                                         static_cast<int>(BpmDivision::n4)),
             std::make_unique<juce::AudioParameterChoice>(noteLengthId, 
                                                         "Note Length", 
-                                                        mNoteDivisionsStrings, 
-                                                        static_cast<int>(NoteDivision::n4)) 
+                                                        mBpmDivisionsStrings, 
+                                                        static_cast<int>(BpmDivision::n4)) 
         })
 {
 
@@ -280,23 +280,23 @@ juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 
 float ORchestraAudioProcessor::GetBpmDivision(float noteDiv)
 {
-    const NoteDivision div = static_cast<NoteDivision>(noteDiv);
+    const BpmDivision div = static_cast<BpmDivision>(noteDiv);
 
     switch (div)
     {
-    case NoteDivision::n1:
+    case BpmDivision::n1:
         return 0.25f;
-    case NoteDivision::n2:
+    case BpmDivision::n2:
         return 0.5f;
-    case NoteDivision::n4:
+    case BpmDivision::n4:
         return 1.f;
-    case NoteDivision::n8:
+    case BpmDivision::n8:
         return 2.f;
-    case NoteDivision::n16:
+    case BpmDivision::n16:
         return 4.f;
-    case NoteDivision::n32:
+    case BpmDivision::n32:
         return 8.f;
-    case NoteDivision::n64:
+    case BpmDivision::n64:
         return 16.f;
     default:
         return 0.f;

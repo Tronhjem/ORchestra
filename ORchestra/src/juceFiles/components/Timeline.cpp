@@ -122,7 +122,7 @@ void Timeline::timerCallback()
         const std::vector<SequenceStep>& sequenceSteps = mAudioProcessor->GetStepData()[stepWrapped];
         const float xOffset = static_cast<float>(index) * stepWidth + triggerStepMargin;
 
-        if ((globalStepOffset + index) % GetNoteDivisionWrapIndex(transportData.bpmDivision) == 0)
+        if ((globalStepOffset + index) % GetBpmDivisionWrapIndex(transportData.bpmDivision) == 0)
         {
             mBarLines.emplace_back(BarLine{xOffset - QAURTER_BAR_LINE_THICKNESS, 0, 500.f});
         }
@@ -197,7 +197,7 @@ juce::Colour Timeline::GetStepColorFromVelocity(const float value, const Sequenc
                             maxColor, value / 127.f);
 }
 
-int Timeline::GetNoteDivisionWrapIndex(const float bpmDivision)
+int Timeline::GetBpmDivisionWrapIndex(const float bpmDivision)
 {
     return static_cast<int>(bpmDivision * 4.f);
 }

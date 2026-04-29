@@ -27,7 +27,7 @@
 #include "Defines.h"
 
 using namespace ORchestra;
-enum class NoteDivision
+enum class BpmDivision
 {
     n1,
     n2,
@@ -105,7 +105,7 @@ private:
     std::atomic<float>* mShouldSync;
 
     juce::String mSavedFilePath{ "" };
-    juce::StringArray mNoteDivisionsStrings{ "1n", "2n", "4n", "8n", "16n", "32n", "64n" };
+    juce::StringArray mBpmDivisionsStrings{ "1n", "2n", "4n", "8n", "16n", "32n", "64n" };
     juce::AudioProcessorValueTreeState mValueTree;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ORchestraAudioProcessor)
