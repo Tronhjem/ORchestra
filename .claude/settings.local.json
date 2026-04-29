@@ -13,7 +13,12 @@
       "Bash(xcodebuild -project ORchestra/Builds/MacOSX/ORchestra.xcodeproj -scheme \"ORchestra - VST3\" -configuration Debug clean build)",
       "Bash(cmake -DBUILD_PLUGIN=ON -DBUILD_TESTS=OFF ..)",
       "Bash(cmake --build .)",
-      "Bash(cmake --build /Users/christiantronhjem/dev/JuceProjects/ORchestra/build --clean-first)"
+      "Bash(cmake --build /Users/christiantronhjem/dev/JuceProjects/ORchestra/build --clean-first)",
+      "Bash(cmake -DBUILD_PLUGIN=OFF -DBUILD_TESTS=ON ..)",
+      "Bash(cmake --build /Users/christiantronhjem/dev/JuceProjects/ORchestra/build)",
+      "Bash(/Users/christiantronhjem/dev/JuceProjects/ORchestra/build/UnitTests/ORchestraTests)",
+      "Bash(cmake -DBUILD_PLUGIN=ON -DBUILD_TESTS=ON ..)",
+      "Bash(cmake --build . --clean-first)"
     ]
   }
 }

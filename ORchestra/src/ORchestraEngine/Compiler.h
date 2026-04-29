@@ -76,6 +76,7 @@ namespace ORchestra
         bool ParsePrecedence(Precedence minPrecedence, std::vector<Instruction>& instructions);
         bool ParseNumber(std::vector<Instruction>& instructions);
         bool ParseNoteIdentifier(std::vector<Instruction>& instructions);
+        bool ParseNoteDivisionIdentifier(std::vector<Instruction>& instructions);
         bool ParseIdentifier(std::vector<Instruction>& instructions);
         bool ParseGrouping(std::vector<Instruction>& instructions);
         bool ParseDollar(std::vector<Instruction>& instructions);

@@ -428,6 +428,7 @@ namespace ORchestra
 
         if (Peek().mTokenType != ORchestraTokenType::NUMBER &&
             Peek().mTokenType != ORchestraTokenType::NOTE_IDENTIFIER &&
+            Peek().mTokenType != ORchestraTokenType::NOTE_DIVISION_IDENTIFIER &&
             Peek().mTokenType != ORchestraTokenType::IDENTIFIER &&
             Peek().mTokenType != ORchestraTokenType::RANDOM &&
             Peek().mTokenType != ORchestraTokenType::DOLLAR &&
@@ -491,6 +492,7 @@ namespace ORchestra
 
             case ORchestraTokenType::NUMBER:
             case ORchestraTokenType::NOTE_IDENTIFIER:
+            case ORchestraTokenType::NOTE_DIVISION_IDENTIFIER:
             case ORchestraTokenType::IDENTIFIER:
             case ORchestraTokenType::LEFT_PAREN:
             case ORchestraTokenType::DOLLAR:
@@ -585,8 +587,10 @@ namespace ORchestra
             return { &Compiler::ParseNumber, nullptr, Precedence::NONE };
         case ORchestraTokenType::IDENTIFIER:      
             return { &Compiler::ParseIdentifier, nullptr, Precedence::NONE };
-        case ORchestraTokenType::NOTE_IDENTIFIER: 
+        case ORchestraTokenType::NOTE_IDENTIFIER:
             return { &Compiler::ParseNoteIdentifier, nullptr, Precedence::NONE };
+        case ORchestraTokenType::NOTE_DIVISION_IDENTIFIER:
+            return { &Compiler::ParseNoteDivisionIdentifier, nullptr, Precedence::NONE };
         case ORchestraTokenType::DOLLAR:          
             return { &Compiler::ParseDollar, nullptr, Precedence::NONE };
         case ORchestraTokenType::RANDOM:          
@@ -664,6 +668,28 @@ namespace ORchestra
     bool Compiler::ParseNoteIdentifier(std::vector<Instruction>& instructions)
     {
         return MakeNoteIntoConstant(Previous(), instructions);
+    }
+
+    bool Compiler::ParseNoteDivisionIdentifier(std::vector<Instruction>& instructions)
+    {
+        const ORchestraToken& token = Previous();
+        const std::string_view text(token.mStart, static_cast<size_t>(token.mLength));
+
+        int value = 0;
+        if      (text == "n1")  value = 1;
+        else if (text == "n2")  value = 2;
+        else if (text == "n4")  value = 3;
+        else if (text == "n8")  value = 4;
+        else if (text == "n16") value = 5;
+        else if (text == "n32") value = 6;
+        else
+        {
+            mErrorReporting.LogError("Unknown note division literal");
+            return false;
+        }
+
+        instructions.emplace_back(Instruction{ OpCode::CONSTANT, static_cast<DataUnit>(value) });
+        return true;
     }
 
     bool Compiler::ParseIdentifier(std::vector<Instruction>& instructions)
@@ -821,6 +847,7 @@ namespace ORchestra
                 }
                 case ORchestraTokenType::NUMBER:
                 case ORchestraTokenType::NOTE_IDENTIFIER:
+                case ORchestraTokenType::NOTE_DIVISION_IDENTIFIER:
                 case ORchestraTokenType::IDENTIFIER:
                 case ORchestraTokenType::LEFT_PAREN:
                 case ORchestraTokenType::RANDOM:
