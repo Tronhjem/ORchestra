@@ -44,6 +44,7 @@ struct BarLine
     float endY;
 };
 
+
 class Timeline : public juce::Component, public juce::Timer
 {
 public:

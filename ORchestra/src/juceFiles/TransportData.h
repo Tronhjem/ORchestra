@@ -19,6 +19,8 @@
 
 #pragma once
 
+#include <cstdint>
+
 namespace ORchestra
 {
     struct TransportData
@@ -29,5 +31,6 @@ namespace ORchestra
         int noteLengthInSamples = 0;
         int64_t timeInSamples = 0;
         bool isPlaying = false;
+        int transposeOffset = 0;
     };
 } // namespace ORchestra

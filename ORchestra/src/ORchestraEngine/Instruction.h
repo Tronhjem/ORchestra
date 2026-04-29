@@ -66,6 +66,8 @@ namespace ORchestra
         PRINT,
         SET_BPM,
         SET_NOTE_DIVISION,
+        NEGATE,
+        SET_TRANSPOSE,
 
         UPDATE_IDENTIFIER_VALUE,
         EXEC_FUNC_ARRAY,

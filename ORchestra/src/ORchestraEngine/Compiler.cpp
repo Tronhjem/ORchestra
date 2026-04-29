@@ -18,6 +18,7 @@
  */
 
 #include <string>
+#include <cassert>
 
 #include "Compiler.h"
 #include "ErrorReporting.h"
@@ -39,6 +40,7 @@ namespace ORchestra
     static const std::string eucFunctionName = "euc";
     static const std::string bpmFunctionName = "bpm";
     static const std::string noteDivFunctionName = "noteDiv";
+    static const std::string transposeFunctionName = "transpose";
 
     Compiler::Compiler(const std::vector<ORchestraToken>& tokens, ErrorReporting& log) :
             mVariableIdCounter(0),
@@ -80,13 +82,17 @@ namespace ORchestra
         std::vector<Instruction> noteDivInstructions;
         noteDivInstructions.emplace_back(Instruction{ OpCode::SET_NOTE_DIVISION });
         mFunctions[noteDivFunctionName] = StoredFunction(1, noteDivInstructions);
+
+        std::vector<Instruction> transposeInstructions;
+        transposeInstructions.emplace_back(Instruction{ OpCode::SET_TRANSPOSE });
+        mFunctions[transposeFunctionName] = StoredFunction(1, transposeInstructions);
     }
 
     std::vector<std::string> Compiler::GetVariableNames() const
     {
         std::vector<std::string> names(mVariableIDMap.size());
         for (const auto& pair : mVariableIDMap)
-            names[pair.second] = pair.first;
+            names[static_cast<size_t>(pair.second)] = pair.first;
         return names;
     }
 
@@ -159,16 +165,20 @@ namespace ORchestra
 
     void Compiler::MakeConstant(const ORchestraToken& token, std::vector<Instruction>& instructions)
     {
+        // Constants are encoded in 8 bits in the Instruction operand field, so the range is always 0-255.
+        constexpr int OPERAND_MAX = 255;
+        constexpr int OPERAND_MIN = 0;
+
         int value = std::stoi(std::string(token.mStart, static_cast<unsigned long>(token.mLength)));
-        if (value > DATA_UNIT_MAX_VALUE)
+        if (value > OPERAND_MAX)
         {
-            value = DATA_UNIT_MAX_VALUE;
+            value = OPERAND_MAX;
             const std::string message = std::string("Value can't be greater than 255, correcting to 255");
             mErrorReporting.LogWarning(message);
         }
-        if (value < DATA_UNIT_MIN_VALUE)
+        if (value < OPERAND_MIN)
         {
-            value = DATA_UNIT_MIN_VALUE;
+            value = OPERAND_MIN;
             const std::string message = std::string("Value can't be smaller than 0, correcting to 0");
             mErrorReporting.LogWarning(message);
         }
@@ -421,6 +431,7 @@ namespace ORchestra
             Peek().mTokenType != ORchestraTokenType::IDENTIFIER &&
             Peek().mTokenType != ORchestraTokenType::RANDOM &&
             Peek().mTokenType != ORchestraTokenType::DOLLAR &&
+            Peek().mTokenType != ORchestraTokenType::MINUS &&
             Peek().mTokenType != ORchestraTokenType::LEFT_BRACKET)
         {
             ThrowUnexpectedTokenError(Peek());
@@ -483,6 +494,7 @@ namespace ORchestra
             case ORchestraTokenType::IDENTIFIER:
             case ORchestraTokenType::LEFT_PAREN:
             case ORchestraTokenType::DOLLAR:
+            case ORchestraTokenType::MINUS:
             {
                 if (!expectsValue)
                 {
@@ -584,8 +596,8 @@ namespace ORchestra
 
         case ORchestraTokenType::PLUS:            
             return { nullptr, &Compiler::ParseBinary, Precedence::TERM };
-        case ORchestraTokenType::MINUS:           
-            return { nullptr, &Compiler::ParseBinary, Precedence::TERM };
+        case ORchestraTokenType::MINUS:
+            return { &Compiler::ParseUnary, &Compiler::ParseBinary, Precedence::TERM };
         case ORchestraTokenType::STAR:            
             return { nullptr, &Compiler::ParseBinary, Precedence::FACTOR };
         case ORchestraTokenType::SLASH:           
@@ -693,6 +705,14 @@ namespace ORchestra
     bool Compiler::ParseRandom(std::vector<Instruction>& instructions)
     {
         return CompileFunctionCall(instructions, ranFunctionName);
+    }
+
+    bool Compiler::ParseUnary(std::vector<Instruction>& instructions)
+    {
+        if (!ParsePrecedence(Precedence::UNARY, instructions))
+            return false;
+        instructions.emplace_back(Instruction{ OpCode::NEGATE });
+        return true;
     }
 
     bool Compiler::ParseBinary(std::vector<Instruction>& instructions)

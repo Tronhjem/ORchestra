@@ -82,7 +82,7 @@ namespace ORchestra
         const std::string& VariableName(DataUnit id) const
         {
             static const std::string unknown = "<unknown>";
-            return (id < mVariableNames.size()) ? mVariableNames[id] : unknown;
+            return (static_cast<size_t>(id) < mVariableNames.size()) ? mVariableNames[static_cast<size_t>(id)] : unknown;
         }
 
         std::vector<DataSequence> mVariables;

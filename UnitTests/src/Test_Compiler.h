@@ -23,7 +23,6 @@
 
 #include "VM.h"
 #include "ErrorReporting.h"
-#include <limits>
 
 using namespace ORchestra;
 TEST_CASE("Compiler: Compiles nested array [[1,2],[3,4]], accessing a[0] returns [1,2]", "[Compiler]")
@@ -124,7 +123,7 @@ TEST_CASE("Compiler: Evaluates chained assignments 'a=10, b=a+5, c=b*2' (result=
     REQUIRE(result.GetValue(0) == 30);
 }
 
-TEST_CASE("Compiler: Clamps negative result '0 - 10' to minimum (result=0)", "[Compiler]")
+TEST_CASE("Compiler: Subtracts below zero '0 - 10' yields -10 (DataUnit is int16_t)", "[Compiler]")
 {
 
     std::string file = "a = 0 - 10\ntest a";
@@ -133,10 +132,10 @@ TEST_CASE("Compiler: Clamps negative result '0 - 10' to minimum (result=0)", "[C
     REQUIRE(vm.Prepare(file));
 
     StepData result = vm.GetTopStackValue();
-    REQUIRE(result.GetValue(0) == 0); // Result is clamped to 0-127
+    REQUIRE(result.GetValue(0) == static_cast<DataUnit>(-10));
 }
 
-TEST_CASE("Compiler: Clamps overflow '150 + 150' to maximum of DataUnit(result=300)", "[Compiler]")
+TEST_CASE("Compiler: Addition '150 + 150' yields 300 (DataUnit is int16_t)", "[Compiler]")
 {
 
     std::string file = "a = 150 + 150\ntest a";
@@ -145,8 +144,7 @@ TEST_CASE("Compiler: Clamps overflow '150 + 150' to maximum of DataUnit(result=3
     REQUIRE(vm.Prepare(file));
 
     StepData result = vm.GetTopStackValue();
-    const int maxValue = std::numeric_limits<DataUnit>::max();
-    REQUIRE(result.GetValue(0) == maxValue); // Clamped to max
+    REQUIRE(result.GetValue(0) == 300);
 }
 
 TEST_CASE("Compiler: Accesses array element 'a=[10,20,30], b=a[1]' (result=20)", "[Compiler]")

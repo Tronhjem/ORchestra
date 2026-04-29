@@ -6,7 +6,14 @@
       "Bash(make ORchestraTests)",
       "Bash(./UnitTests/ORchestraTests *)",
       "Bash(make clean *)",
-      "Bash(make)"
+      "Bash(make)",
+      "Bash(cmake --build build/UnitTests --target ORchestraTests)",
+      "Bash(./build/UnitTests/ORchestraTests *)",
+      "Bash(xcodebuild -project ORchestra/Builds/MacOSX/ORchestra.xcodeproj -scheme \"ORchestra - VST3\" -configuration Debug build)",
+      "Bash(xcodebuild -project ORchestra/Builds/MacOSX/ORchestra.xcodeproj -scheme \"ORchestra - VST3\" -configuration Debug clean build)",
+      "Bash(cmake -DBUILD_PLUGIN=ON -DBUILD_TESTS=OFF ..)",
+      "Bash(cmake --build .)",
+      "Bash(cmake --build /Users/christiantronhjem/dev/JuceProjects/ORchestra/build --clean-first)"
     ]
   }
 }

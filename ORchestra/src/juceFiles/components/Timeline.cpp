@@ -62,26 +62,37 @@ void Timeline::timerCallback()
     mTriggerRectangle.ClearRectangles();
     mTimelineTriggerRectangles.clear();
     mBarLines.clear();
-    
+
     //=================================================================================================
     //
-    // Here we gather the unique pitches
+    // Here we gather the unique pitches, accounting for transpose offset per step
     //
     std::set<DataUnit> uniqueNoteValues;
 
+    int currentTranspose = 0;
     for (int index = 0; index < TIMELINE_STEPS_DRAWN; ++index)
     {
-        const unsigned long stepWrapped = 
+        const unsigned long stepWrapped =
                 static_cast<unsigned long>((globalStepOffset + index) & STEP_BUFFER_SIZE_MASK);
 
         const std::vector<SequenceStep>& sequenceSteps = mAudioProcessor->GetStepData()[stepWrapped];
 
         for (const auto& step : sequenceSteps)
         {
+            if (step.mType == SequenceStepType::TRANSPOSE)
+            {
+                currentTranspose = static_cast<int>(step.mFirst.GetValue(0));
+                continue;
+            }
+
+            if (step.mType != SequenceStepType::NoteOn && step.mType != SequenceStepType::CC)
+                continue;
+
             const int substepLength = step.mFirst.GetLength();
             for (int j = 0; j < substepLength; ++j)
             {
-                uniqueNoteValues.insert(step.mFirst.GetValue(j));
+                const int transposed = std::clamp(static_cast<int>(step.mFirst.GetValue(j)) + currentTranspose, 0, 127);
+                uniqueNoteValues.insert(static_cast<DataUnit>(transposed));
             }
         }
     }
@@ -100,8 +111,9 @@ void Timeline::timerCallback()
 
     //=================================================================================================
     //
-    //Draw only unique pitches, relative to each other.  
+    //Draw only unique pitches, relative to each other.
     //
+    int drawTranspose = 0;
     for (int index = 0; index < TIMELINE_STEPS_DRAWN; ++index)
     {
         const unsigned long stepWrapped = 
@@ -117,6 +129,12 @@ void Timeline::timerCallback()
 
         for (const auto& step : sequenceSteps)
         {
+            if (step.mType == SequenceStepType::TRANSPOSE)
+            {
+                drawTranspose = static_cast<int>(step.mFirst.GetValue(0));
+                continue;
+            }
+
             if (step.mType != SequenceStepType::NoteOn && step.mType != SequenceStepType::CC)
             {
                 continue;
@@ -125,22 +143,23 @@ void Timeline::timerCallback()
             const int substepLength = step.mShouldTrigger.GetLength();
             const float subDividedStepWidth = stepWidth / static_cast<float>(substepLength);
             const float subStepDrawnWidth = drawnStepWidth / static_cast<float>(substepLength);
-            
+
             for (int substepIndex = 0; substepIndex < substepLength; ++substepIndex)
             {
                 if(step.mShouldTrigger.GetValue(substepIndex))
                 {
                     const float triggerReactX = static_cast<float>((substepIndex)) * subDividedStepWidth + xOffset;
-                    const DataUnit noteValue = step.mFirst.GetEquivalentValueAtIndex(substepIndex, substepLength);
-                    const float triggerRectY = static_cast<float>(indexMap[noteValue]) * stepHeight + triggerStepMargin;
+                    const int rawNote = static_cast<int>(step.mFirst.GetEquivalentValueAtIndex(substepIndex, substepLength));
+                    const DataUnit transposedNote = static_cast<DataUnit>(std::clamp(rawNote + drawTranspose, 0, 127));
+                    const float triggerRectY = static_cast<float>(indexMap[transposedNote]) * stepHeight + triggerStepMargin;
                     const float velocityFloat = static_cast<float>(step.mSecond.GetEquivalentValueAtIndex(substepIndex, substepLength));
 
-                    mTimelineTriggerRectangles.emplace_back(TriggerRectangle {triggerReactX, triggerRectY, 
+                    mTimelineTriggerRectangles.emplace_back(TriggerRectangle {triggerReactX, triggerRectY,
                                                                               subStepDrawnWidth, velocityFloat, step.mType});
 
                     if (index == 0)
                     {
-                        mTriggerRectangle.AddRectangle(TriggerRectangle {triggerReactX, triggerRectY, 
+                        mTriggerRectangle.AddRectangle(TriggerRectangle {triggerReactX, triggerRectY,
                                                                          subStepDrawnWidth, 1.f, step.mType});
                     }
                 }
@@ -164,8 +183,9 @@ void Timeline::paint(juce::Graphics& g)
     {
         const juce::Colour colorToSet = GetStepColorFromVelocity(rect.value, rect.midiType);
         g.setColour(colorToSet);
-        g.fillRoundedRectangle(rect.x, rect.y, rect.width,  drawnStepHeight, ROUNDED_CORNER_SIZE);
+        g.fillRoundedRectangle(rect.x, rect.y, rect.width, drawnStepHeight, ROUNDED_CORNER_SIZE);
     }
+
 }
 
 juce::Colour Timeline::GetStepColorFromVelocity(const float value, const SequenceStepType midiType)

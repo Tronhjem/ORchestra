@@ -19,8 +19,8 @@
 
 #pragma once
 
-#include <algorithm>
 #include <limits>
+#include <cstdint>
 namespace ORchestra 
 {
     // DataSequence Operation Lambdas
@@ -63,11 +63,11 @@ namespace ORchestra
     constexpr int MIDI_MAX_VALUE = 127;
     constexpr int MAX_MIDI_CHANNEL_NUMBER = 16;
 
-    typedef unsigned char DataUnit;
-    static_assert(sizeof(DataUnit) == 1);
+    typedef int16_t DataUnit;
+    static_assert(sizeof(DataUnit) == 2);
 
     constexpr int DATA_UNIT_MAX_VALUE = std::numeric_limits<DataUnit>::max();
-    constexpr int DATA_UNIT_MIN_VALUE = 0;
+    constexpr int DATA_UNIT_MIN_VALUE = std::numeric_limits<DataUnit>::min();
 
     constexpr int STEP_BUFFER_SIZE = 32;
     constexpr int STEP_BUFFER_SIZE_MASK = STEP_BUFFER_SIZE - 1;
@@ -88,6 +88,7 @@ namespace ORchestra
         CC = 2,
         BPM = 3,
         NOTE_DIVISION = 4,
-        PRINT = 5
+        PRINT = 5,
+        TRANSPOSE = 6
     };
 } // namespace ORchestra

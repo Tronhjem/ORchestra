@@ -80,6 +80,7 @@ namespace ORchestra
         // Reset script transport data to default values (0 means not set)
         mScriptTransportData.bpm = 0.0;
         mScriptTransportData.bpmDivision = 0.0f;
+        mScriptTransportData.transposeOffset = 0;
         
         mVM.Reset();
 
@@ -220,6 +221,11 @@ namespace ORchestra
                            mErrorReporting.LogMessage(mes, mCurrentGlobalStep.load());
                            break;
                        }
+                       case ORchestra::SequenceStepType::TRANSPOSE:
+                       {
+                           mScriptTransportData.transposeOffset = static_cast<int>(step.mFirst.GetValue(0));
+                           break;
+                       }
                        case ORchestra::SequenceStepType::NoteOn:
                        case ORchestra::SequenceStepType::NoteOff:
                        case ORchestra::SequenceStepType::CC:
@@ -232,14 +238,18 @@ namespace ORchestra
                                if (!shouldTrigger)
                                     continue;
 
-                               const DataUnit firstByte = step.mFirst.GetEquivalentValueAtIndex(i, triggerLength);
+                               const int rawFirstByte = static_cast<int>(step.mFirst.GetEquivalentValueAtIndex(i, triggerLength));
+                               const int transposedFirstByte = (step.mType == ORchestra::SequenceStepType::NoteOn)
+                                   ? rawFirstByte + mScriptTransportData.transposeOffset
+                                   : rawFirstByte;
+                               const DataUnit firstByte = static_cast<DataUnit>(transposedFirstByte);
                                const DataUnit secondByte = step.mSecond.GetEquivalentValueAtIndex(i, triggerLength);
                                const DataUnit channel = step.mChannel.GetEquivalentValueAtIndex(i, triggerLength);
                                const int timeStamp = nextStepInSamples + i * (static_cast<int>(samplesPerStep) / triggerLength);
 
                                // TODO: Change to use step.mDuration
                                // ScheduledMidiMessage message {step.mType, firstByte, secondByte, channel, timeStamp, step.mDuration};
-                               ScheduledMidiMessage message{ step.mType, firstByte, secondByte, 
+                               ScheduledMidiMessage message{ step.mType, firstByte, secondByte,
                                                              channel, timeStamp, transportData.noteLengthInSamples };
 
                                mMidiScheduler.PostMidi(message);

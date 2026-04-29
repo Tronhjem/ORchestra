@@ -25,7 +25,6 @@
 #include "ORchestraToken.h"
 #include "Instruction.h"
 #include "StoredFunction.h"
-#include "StepData.h"
 
 
 namespace ORchestra
@@ -39,6 +38,7 @@ namespace ORchestra
         COMPARISON,   // > >= < <= == != & | ^
         TERM,         // + -
         FACTOR,       // * / %
+        UNARY,        // unary -
     };
 
     class Compiler
@@ -81,6 +81,7 @@ namespace ORchestra
         bool ParseDollar(std::vector<Instruction>& instructions);
         bool ParseRandom(std::vector<Instruction>& instructions);
         bool ParseBinary(std::vector<Instruction>& instructions);
+        bool ParseUnary(std::vector<Instruction>& instructions);
 
         bool CompileExpression(std::vector<Instruction>& instructions);
         bool CompileArray(
