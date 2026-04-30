@@ -19,7 +19,6 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
-#include "ParamConstants.h"
 #include "juce_audio_processors/juce_audio_processors.h"
 
 
@@ -163,9 +162,11 @@ void ORchestraAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juc
 
     // Always fill host BPM and DAW position.
     FillPositionData(mTransportData);
+    const bool dawIsPlaying = mTransportData.isPlaying;
 
-    // If the play button is active, use the internal counter for position.
-    if (IsRunning)
+    // DAW takes precedence. Only use the internal counter when the DAW is not playing
+    // but the plugin play button is pressed (standalone testing mode).
+    if (!dawIsPlaying && IsRunning)
     {
         mTransportData.timeInSamples = mLocalTimeInSamples;
         mTransportData.isPlaying = true;
@@ -177,7 +178,9 @@ void ORchestraAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juc
 
     mORchestraEngine->Tick(mTransportData, bufferLength, midiMessages);
 
-    if (IsRunning)
+    // Advance the internal counter only when it is in use.
+    // Reset it in all other cases so standalone mode always starts from 0.
+    if (!dawIsPlaying && IsRunning)
         mLocalTimeInSamples += bufferLength;
     else
         mLocalTimeInSamples = 0;

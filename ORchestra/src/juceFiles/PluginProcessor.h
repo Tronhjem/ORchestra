@@ -66,11 +66,7 @@ public:
 
     const std::string& ImportFromFile(const std::string& filePath) { return mORchestraEngine->ImportFromFile(filePath); }
     void ExportToFile(const std::string& data) { mORchestraEngine->ExportToFile(data); }
-    void Compile(const std::string& data)
-    {
-        mTransportData.bpmFromScript = 0.0;
-        mORchestraEngine->Compile(data);
-    }
+    void Compile(const std::string& data) { mORchestraEngine->Compile(data); }
     void SetInstructionData(const std::string& data) { mORchestraEngine->SetInstructionData(data); }
     const std::string& GetInstructionData() { return mORchestraEngine->GetInstructionData(); }
     int GetGlobalStepCount() { return mORchestraEngine->GetGlobalStepCount(); }

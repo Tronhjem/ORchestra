@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2026 Christian Tronhjem
+ * Copyright (C) 2026 Christian Tronhjem255
  *
  * This file is part of ORchestra.
  *
@@ -165,21 +165,18 @@ namespace ORchestra
 
     void Compiler::MakeConstant(const ORchestraToken& token, std::vector<Instruction>& instructions)
     {
-        // Constants are encoded in 8 bits in the Instruction operand field, so the range is always 0-255.
-        constexpr int OPERAND_MAX = 255;
-        constexpr int OPERAND_MIN = 0;
-
         int value = std::stoi(std::string(token.mStart, static_cast<unsigned long>(token.mLength)));
-        if (value > OPERAND_MAX)
+        if (value > DATA_UNIT_MAX_VALUE)
         {
-            value = OPERAND_MAX;
-            const std::string message = std::string("Value can't be greater than 255, correcting to 255");
+            value = DATA_UNIT_MAX_VALUE;
+            const std::string message = std::string("Value can't be greater than 32768, capping value");
             mErrorReporting.LogWarning(message);
         }
-        if (value < OPERAND_MIN)
+
+        if (value < DATA_UNIT_MIN_VALUE)
         {
-            value = OPERAND_MIN;
-            const std::string message = std::string("Value can't be smaller than 0, correcting to 0");
+            value = DATA_UNIT_MIN_VALUE;
+            const std::string message = std::string("Value can't be smaller than -32768, capping value");
             mErrorReporting.LogWarning(message);
         }
 
@@ -214,17 +211,21 @@ namespace ORchestra
         DataUnit baseNote = noteToValue(*token.mStart);
         if (baseNote == 255 || token.mLength < 2)
         {
-            std::string message = std::string("Notes need at least a capital letter for the note name, and an octave from 0-10. Optional is # or b");
+            std::string message = 
+                std::string("Notes need at least a capital letter for the note name, and an octave from 0-10. Optional is # or b");
+
             mErrorReporting.LogError(message);
             return false;
         }
 
         int octaveIndex = 1;
+
         if (token.mStart[1] == '#')
         {
             baseNote += 1;
             octaveIndex = 2;
         }
+
         else if (token.mStart[1] == 'b')
         {
             baseNote -= 1;
@@ -235,7 +236,10 @@ namespace ORchestra
         std::string numAsString;
         try
         {
-            numAsString = std::string(token.mStart + octaveIndex, static_cast<unsigned long>(token.mLength - octaveIndex));
+            numAsString = 
+                std::string(token.mStart + octaveIndex, 
+                        static_cast<unsigned long>(token.mLength - octaveIndex));
+
             value = std::stoi(numAsString) * 12 + baseNote;
         }
         catch (std::exception& err)
@@ -248,13 +252,14 @@ namespace ORchestra
         if (value > 127)
         {
             value = 127;
-            std::string message = std::string("Value can't be greater than 127, correcting to 127");
+            std::string message = std::string("Note value can't be greater than 127, capping value");
             mErrorReporting.LogWarning(message);
         }
+
         if (value < 0)
         {
             value = 0;
-            std::string message = std::string("Value can't be smaller than 0, correcting to 0");
+            std::string message = std::string("Note value can't be smaller than 0, capping value");
             mErrorReporting.LogWarning(message);
         }
 

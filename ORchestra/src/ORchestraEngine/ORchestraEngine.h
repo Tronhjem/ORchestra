@@ -74,6 +74,7 @@ namespace ORchestra
         std::atomic<bool> mShouldExit;
         std::atomic<bool> mHasWork;
         std::atomic<bool> mIsRunning;
+        std::atomic<bool> mShouldResetScriptBpm{false};
 
         std::mutex mCVMutex;
         std::condition_variable mCV;

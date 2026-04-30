@@ -80,7 +80,8 @@ namespace ORchestra
         mStepOriginInSamples = 0;
         mLastBpm = 0.0;
         mLastBpmDivision = 0.0f;
-        
+        mShouldResetScriptBpm.store(true, std::memory_order_release);
+
         mVM.Reset();
 
         const bool innitSuccess = mVM.Prepare(&mInstructionData[0]);
@@ -160,6 +161,9 @@ namespace ORchestra
         mIsRunning.store(transportData.isPlaying);
 
         mErrorReporting.CheckAndClear();
+
+        if (mShouldResetScriptBpm.exchange(false, std::memory_order_acq_rel))
+            transportData.bpmFromScript = 0.0;
 
         if (transportData.isPlaying && mIsVMInit)
         {
@@ -262,6 +266,13 @@ namespace ORchestra
                        case ORchestra::SequenceStepType::CC:
                        {
                            const int triggerLength = static_cast<int>(step.mShouldTrigger.GetLength());
+                           const float noteDivFloat =
+                               ToBpmDivision(static_cast<DataUnit>(step.mDuration));
+                           const int noteDurationSamples =
+                               static_cast<int>(
+                                   static_cast<double>(transportData.sampleRate)
+                                   * (60.0 / (transportData.bpmFromScript * noteDivFloat)));
+
                            for (int i = 0; i < triggerLength; ++i)
                            {
                                const DataUnit shouldTrigger = step.mShouldTrigger.GetValue(i);
@@ -269,31 +280,23 @@ namespace ORchestra
                                if (!shouldTrigger)
                                     continue;
 
-                               const int rawFirstByte = 
+                               const int rawFirstByte =
                                    static_cast<int>(step.mFirst.GetEquivalentValueAtIndex(i, triggerLength));
 
-                               const int transposedFirstByte = 
+                               const int transposedFirstByte =
                                    (step.mType == ORchestra::SequenceStepType::NoteOn)
                                    ? rawFirstByte + transportData.transposeOffset
                                    : rawFirstByte;
 
                                const DataUnit firstByte = static_cast<DataUnit>(transposedFirstByte);
-                               const DataUnit secondByte = 
+                               const DataUnit secondByte =
                                    step.mSecond.GetEquivalentValueAtIndex(i, triggerLength);
 
-                               const DataUnit channel = 
+                               const DataUnit channel =
                                    step.mChannel.GetEquivalentValueAtIndex(i, triggerLength);
 
-                               const int timeStamp = nextStepInSamples 
+                               const int timeStamp = nextStepInSamples
                                    + i * (static_cast<int>(samplesPerStep) / triggerLength);
-
-                               const float noteDivFloat = 
-                                   ToBpmDivision(static_cast<DataUnit>(step.mDuration));
-
-                               const int noteDurationSamples = 
-                                   static_cast<int>(
-                                           static_cast<double>(transportData.sampleRate) 
-                                           * (60.0 / (transportData.bpmFromScript * noteDivFloat)));
 
                                ScheduledMidiMessage message{ step.mType, firstByte, secondByte,
                                                              channel, timeStamp, noteDurationSamples };

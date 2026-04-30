@@ -150,6 +150,15 @@ namespace ORchestra
             }
 
             case (OpCode::NOTE):
+            {
+                stack.Pop();
+                stack.Pop();
+                stack.Pop();
+                stack.Pop();
+                stack.Pop();
+                break;
+            }
+
             case (OpCode::CC):
             {
                 stack.Pop();
@@ -405,7 +414,9 @@ namespace ORchestra
 
         case (OpCode::SET_SUBSTEP_ARRAY):
         {
-            const int subStepArrayLength = std::clamp(static_cast<int>(stack.Pop().GetValue(0)), 0, MAX_SUB_DIVISION_LENGTH);
+            const int subStepArrayLength = 
+                std::clamp(static_cast<int>(stack.Pop().GetValue(0)), 0, MAX_SUB_DIVISION_LENGTH);
+
             DataUnit data[MAX_SUB_DIVISION_LENGTH];
 
             for (int i = subStepArrayLength - 1; i >= 0; --i)
@@ -421,11 +432,11 @@ namespace ORchestra
 
         case (OpCode::GENERATE_EUCLID_SEQUENCE):
         {
-            const int shift  = static_cast<int>(stack.Pop().GetValue(0));
+            const int shift = static_cast<int>(stack.Pop().GetValue(0));
             const int length = 
                 std::clamp(static_cast<int>(stack.Pop().GetValue(0)), 0, MAX_DATASEQUENCE_LENGTH);
 
-            const int hits   = std::clamp(static_cast<int>(stack.Pop().GetValue(0)), 0, length);
+            const int hits = std::clamp(static_cast<int>(stack.Pop().GetValue(0)), 0, length);
 
             StepData data[MAX_DATASEQUENCE_LENGTH];
 
@@ -437,8 +448,7 @@ namespace ORchestra
                 stack.Push(data[shiftedIndex]);
             }
 
-            const int clampedLength = std::clamp(length, DATA_UNIT_MIN_VALUE, DATA_UNIT_MAX_VALUE);
-            stack.Push(StepData{ clampedLength });
+            stack.Push(StepData{ length });
 
             break;
         }
