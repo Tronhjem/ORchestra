@@ -19,52 +19,29 @@
 
 #include "TransportControls.h"
 #include "Colors.h"
-#include "ParamConstants.h"
-#include "juce_graphics/juce_graphics.h"
 
 using namespace ORchestra;
 
-TransportControls::TransportControls(juce::AudioProcessorValueTreeState& valueTree)
+TransportControls::TransportControls()
 {
-    mSyncToggleAttachment.reset(new ButtonAttachment(valueTree, syncToggleString, mSyncToggleBox));
-    
-    mSyncToggleLabel.setColour(juce::Label::textColourId, TextColor);
-    
     mPlayButton.addListener(this);
-    mSyncToggleBox.addListener(this);
-    
-    addAndMakeVisible(mSyncToggleLabel);
-    addAndMakeVisible(mSyncToggleBox);
     addAndMakeVisible(mPlayButton);
 }
 
 TransportControls::~TransportControls()
 {
     mPlayButton.setLookAndFeel(nullptr);
-    mSyncToggleBox.setLookAndFeel(nullptr);
 }
 
 void TransportControls::resized()
 {
-    auto bounds = getLocalBounds();
-    
-    auto labelBounds = bounds.removeFromTop(LABEL_HEIGHT);
-
-    mSyncToggleLabel.setBounds(labelBounds.removeFromLeft(BUTTON_WIDTH));
-    mSyncToggleLabel.setJustificationType(juce::Justification::centred);
-    
-    bounds.removeFromLeft((BUTTON_WIDTH / 2) - (BUTTON_HEIGHT / 2));
-    mSyncToggleBox.setBounds(bounds.removeFromLeft(BUTTON_HEIGHT));
-    bounds.removeFromLeft(SPACING);
-    mPlayButton.setBounds(bounds.removeFromLeft(BUTTON_WIDTH));
+    mPlayButton.setBounds(getLocalBounds());
 }
 
 void TransportControls::buttonClicked(juce::Button* button)
 {
     if (button == &mPlayButton && mPlayButtonCallback)
         mPlayButtonCallback();
-    else if (button == &mSyncToggleBox && mSyncToggleCallback)
-        mSyncToggleCallback(mSyncToggleBox.getToggleState());
 }
 
 void TransportControls::setPlayButtonCallback(std::function<void()> callback)
@@ -72,23 +49,12 @@ void TransportControls::setPlayButtonCallback(std::function<void()> callback)
     mPlayButtonCallback = std::move(callback);
 }
 
-void TransportControls::setSyncToggleCallback(std::function<void(bool)> callback)
-{
-    mSyncToggleCallback = std::move(callback);
-}
-
 void TransportControls::updatePlayButtonState(bool isPlaying)
 {
     mPlayButton.setButtonText(isPlaying ? "Stop" : "Play");
 }
 
-void TransportControls::setPlayButtonEnabled(bool enabled)
-{
-    mPlayButton.setEnabled(enabled);
-}
-
 void TransportControls::setButtonLookAndFeel(juce::LookAndFeel* lookAndFeel)
 {
     mPlayButton.setLookAndFeel(lookAndFeel);
-    mSyncToggleBox.setLookAndFeel(lookAndFeel);
 }

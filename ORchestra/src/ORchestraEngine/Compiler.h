@@ -25,7 +25,6 @@
 #include "ORchestraToken.h"
 #include "Instruction.h"
 #include "StoredFunction.h"
-#include "StepData.h"
 
 
 namespace ORchestra
@@ -39,6 +38,7 @@ namespace ORchestra
         COMPARISON,   // > >= < <= == != & | ^
         TERM,         // + -
         FACTOR,       // * / %
+        UNARY,        // unary -
     };
 
     class Compiler
@@ -76,11 +76,13 @@ namespace ORchestra
         bool ParsePrecedence(Precedence minPrecedence, std::vector<Instruction>& instructions);
         bool ParseNumber(std::vector<Instruction>& instructions);
         bool ParseNoteIdentifier(std::vector<Instruction>& instructions);
+        bool ParseBpmDivisionIdentifier(std::vector<Instruction>& instructions);
         bool ParseIdentifier(std::vector<Instruction>& instructions);
         bool ParseGrouping(std::vector<Instruction>& instructions);
         bool ParseDollar(std::vector<Instruction>& instructions);
         bool ParseRandom(std::vector<Instruction>& instructions);
         bool ParseBinary(std::vector<Instruction>& instructions);
+        bool ParseUnary(std::vector<Instruction>& instructions);
 
         bool CompileExpression(std::vector<Instruction>& instructions);
         bool CompileArray(
@@ -91,6 +93,7 @@ namespace ORchestra
 
         inline void BuildFunctions();
         bool CompileFunctionCall(std::vector<Instruction>& instructions, const std::string& functionName);
+        bool CompileEuclideanCall(std::vector<Instruction>& instructions);
         bool CompileFunctionArray(const std::string& name);
         bool CompileFunctionArrayCall(std::vector<Instruction>& instructions, DataUnit arrayId);
 

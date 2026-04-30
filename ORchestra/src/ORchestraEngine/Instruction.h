@@ -19,6 +19,7 @@
 
 #pragma once
 
+#include <cassert>
 #include <cstdint>
 #include "Defines.h"
 
@@ -65,7 +66,9 @@ namespace ORchestra
         GET_GLOBAL_COUNT,
         PRINT,
         SET_BPM,
-        SET_NOTE_DIVISION,
+        SET_BPM_DIVISION,
+        NEGATE,
+        SET_TRANSPOSE,
 
         UPDATE_IDENTIFIER_VALUE,
         EXEC_FUNC_ARRAY,
@@ -82,8 +85,11 @@ namespace ORchestra
         Instruction() : mEncoded(0) {}
         explicit Instruction(OpCode code) 
             : mEncoded(static_cast<uint16_t>(static_cast<uint16_t>(static_cast<DataUnit>(code)) << 8)) {}
-        explicit Instruction(OpCode code, DataUnit operand) 
-            : mEncoded(static_cast<uint16_t>((static_cast<uint16_t>(static_cast<DataUnit>(code)) << 8) | operand)) {}
+        explicit Instruction(OpCode code, DataUnit operand)
+            : mEncoded(static_cast<uint16_t>((static_cast<uint16_t>(static_cast<DataUnit>(code)) << 8) | (static_cast<uint16_t>(operand) & 0xFF)))
+        {
+            assert(operand >= 0 && operand <= 255);
+        }
 
         OpCode GetOpCode() const { return static_cast<OpCode>(mEncoded >> 8); }
         DataUnit GetOperand() const { return static_cast<DataUnit>(mEncoded & 0xFF); }

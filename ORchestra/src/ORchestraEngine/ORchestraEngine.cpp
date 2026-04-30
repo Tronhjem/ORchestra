@@ -76,11 +76,12 @@ namespace ORchestra
 
         mReadySteps.store(0, std::memory_order_release);
         mCurrentProcessingStep.store(mCurrentGlobalStep.load(), std::memory_order_release);
-        
-        // Reset script transport data to default values (0 means not set)
-        mScriptTransportData.bpm = 0.0;
-        mScriptTransportData.bpmDivision = 0.0f;
-        
+        mSamplesPerStep = 0.0;
+        mStepOriginInSamples = 0;
+        mLastBpm = 0.0;
+        mLastBpmDivision = 0.0f;
+        mShouldResetScriptBpm.store(true, std::memory_order_release);
+
         mVM.Reset();
 
         const bool innitSuccess = mVM.Prepare(&mInstructionData[0]);
@@ -153,7 +154,7 @@ namespace ORchestra
         return true;
     }
 
-    void ORchestraEngine::Tick(const TransportData& transportData,
+    void ORchestraEngine::Tick(TransportData& transportData,
         const int bufferLength,
         juce::MidiBuffer& midiMessages)
     {
@@ -161,14 +162,41 @@ namespace ORchestra
 
         mErrorReporting.CheckAndClear();
 
+        if (mShouldResetScriptBpm.exchange(false, std::memory_order_acq_rel))
+            transportData.bpmFromScript = 0.0;
+
         if (transportData.isPlaying && mIsVMInit)
         {
-            // Use script-provided BPM and division if they were set, otherwise use the provided values
-            const double bpm = mScriptTransportData.bpm > 0.0 ? mScriptTransportData.bpm : transportData.bpm;
-            const float bpmDivision = mScriptTransportData.bpmDivision > 0.0f ? mScriptTransportData.bpmDivision : transportData.bpmDivision;
-            
-            const double samplesPerStep = static_cast<double>(transportData.sampleRate) * (60.0 / (bpm * bpmDivision));
-            const int currentStep = static_cast<int>(ceil(static_cast<double>(transportData.timeInSamples) / samplesPerStep));
+            // If the script hasn't set a BPM, use the host BPM as the active value.
+            if (transportData.bpmFromScript == 0.0)
+                transportData.bpmFromScript = transportData.bpm;
+
+            const double newSamplesPerStep =
+                static_cast<double>(transportData.sampleRate)
+                * (60.0 / (transportData.bpmFromScript * transportData.bpmDivision));
+
+            // When BPM or division changes, rebase the step origin so the step counter
+            // advances continuously without jumping. A jump causes false resets and retriggering.
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wfloat-equal"
+            const bool timingChanged = (transportData.bpmFromScript != mLastBpm)
+                                    || (transportData.bpmDivision   != mLastBpmDivision);
+#pragma clang diagnostic pop
+
+            if (timingChanged && mSamplesPerStep > 0.0)
+            {
+                const int lastStep = mCurrentGlobalStep.load();
+                mStepOriginInSamples = transportData.timeInSamples
+                    - static_cast<int64_t>(std::round(static_cast<double>(lastStep) * newSamplesPerStep));
+            }
+
+            mLastBpm = transportData.bpmFromScript;
+            mLastBpmDivision = transportData.bpmDivision;
+            mSamplesPerStep = newSamplesPerStep;
+            const double samplesPerStep = mSamplesPerStep;
+
+            const int currentStep = static_cast<int>(ceil(
+                static_cast<double>(transportData.timeInSamples - mStepOriginInSamples) / samplesPerStep));
 
             // Check if we skipped count, to regenerate everything.
             const int stepDifference = currentStep - mCurrentGlobalStep.load();
@@ -176,14 +204,16 @@ namespace ORchestra
 
             if (stepDifference > 1 || stepDifference < 0)
             {
-                // TODO: should it be 1 or 0?
-                // TODO: Should we clear hanging notes?
-                // Do we want to move it entirely down to 0 or still keep the current step we might trigger?
+                // Real time jump (seek or restart) — clear the origin so next tick
+                // recomputes from scratch with the actual time position.
+                mSamplesPerStep = 0.0;
+                mStepOriginInSamples = 0;
                 mReadySteps.store(1, std::memory_order_release);
                 mCurrentProcessingStep.store(currentStep, std::memory_order_release);
             }
 
-            const int nextStepInSamples = static_cast<int>(samplesPerStep * currentStep);
+            const int nextStepInSamples = static_cast<int>(
+                static_cast<double>(mStepOriginInSamples) + samplesPerStep * static_cast<double>(currentStep));
             const int endOfBufferInSamples = static_cast<int>(transportData.timeInSamples + bufferLength);
 
             // if the end of the buffer is longer than the next tick time
@@ -197,27 +227,38 @@ namespace ORchestra
 
                mSamplesSinceLastStep = transportData.timeInSamples;
                const int wrappedGlobalStep = currentStep & STEP_BUFFER_SIZE_MASK;
-               const std::vector<SequenceStep>& currentData = mStepRingBuffer[static_cast<unsigned long>(wrappedGlobalStep)];
+               const std::vector<SequenceStep>& currentData = 
+                   mStepRingBuffer[static_cast<unsigned long>(wrappedGlobalStep)];
                 
                for (const SequenceStep& step : currentData)
                {
-                   
                    switch (step.mType)
                    {
                        case ORchestra::SequenceStepType::BPM:
                        {
-                           mScriptTransportData.bpm = step.mFirst.GetValue(0);
+                           transportData.bpmFromScript = step.mFirst.GetValue(0);
+
                            break;
                        }
-                       case ORchestra::SequenceStepType::NOTE_DIVISION:
+                       case ORchestra::SequenceStepType::BPM_DIVISION:
                        {
-                           mScriptTransportData.bpmDivision = ToBpmDivision(step.mFirst.GetValue(0));
+                           transportData.bpmDivision = ToBpmDivision(step.mFirst.GetValue(0));
+
                            break;
                        }
                        case ORchestra::SequenceStepType::PRINT:
                        {
-                           const std::string mes = std::to_string(static_cast<int>(step.mFirst.GetValue(0)));
-                           mErrorReporting.LogMessage(mes, mCurrentGlobalStep.load());
+                           const std::string mes = 
+                               std::to_string(static_cast<int>(step.mFirst.GetValue(0)));
+
+                           mErrorReporting.LogMessage(mes);
+
+                           break;
+                       }
+                       case ORchestra::SequenceStepType::TRANSPOSE:
+                       {
+                           transportData.transposeOffset = static_cast<int>(step.mFirst.GetValue(0));
+
                            break;
                        }
                        case ORchestra::SequenceStepType::NoteOn:
@@ -225,6 +266,13 @@ namespace ORchestra
                        case ORchestra::SequenceStepType::CC:
                        {
                            const int triggerLength = static_cast<int>(step.mShouldTrigger.GetLength());
+                           const float noteDivFloat =
+                               ToBpmDivision(static_cast<DataUnit>(step.mDuration));
+                           const int noteDurationSamples =
+                               static_cast<int>(
+                                   static_cast<double>(transportData.sampleRate)
+                                   * (60.0 / (transportData.bpmFromScript * noteDivFloat)));
+
                            for (int i = 0; i < triggerLength; ++i)
                            {
                                const DataUnit shouldTrigger = step.mShouldTrigger.GetValue(i);
@@ -232,15 +280,26 @@ namespace ORchestra
                                if (!shouldTrigger)
                                     continue;
 
-                               const DataUnit firstByte = step.mFirst.GetEquivalentValueAtIndex(i, triggerLength);
-                               const DataUnit secondByte = step.mSecond.GetEquivalentValueAtIndex(i, triggerLength);
-                               const DataUnit channel = step.mChannel.GetEquivalentValueAtIndex(i, triggerLength);
-                               const int timeStamp = nextStepInSamples + i * (static_cast<int>(samplesPerStep) / triggerLength);
+                               const int rawFirstByte =
+                                   static_cast<int>(step.mFirst.GetEquivalentValueAtIndex(i, triggerLength));
 
-                               // TODO: Change to use step.mDuration
-                               // ScheduledMidiMessage message {step.mType, firstByte, secondByte, channel, timeStamp, step.mDuration};
-                               ScheduledMidiMessage message{ step.mType, firstByte, secondByte, 
-                                                             channel, timeStamp, transportData.noteLengthInSamples };
+                               const int transposedFirstByte =
+                                   (step.mType == ORchestra::SequenceStepType::NoteOn)
+                                   ? rawFirstByte + transportData.transposeOffset
+                                   : rawFirstByte;
+
+                               const DataUnit firstByte = static_cast<DataUnit>(transposedFirstByte);
+                               const DataUnit secondByte =
+                                   step.mSecond.GetEquivalentValueAtIndex(i, triggerLength);
+
+                               const DataUnit channel =
+                                   step.mChannel.GetEquivalentValueAtIndex(i, triggerLength);
+
+                               const int timeStamp = nextStepInSamples
+                                   + i * (static_cast<int>(samplesPerStep) / triggerLength);
+
+                               ScheduledMidiMessage message{ step.mType, firstByte, secondByte,
+                                                             channel, timeStamp, noteDurationSamples };
 
                                mMidiScheduler.PostMidi(message);
                            }

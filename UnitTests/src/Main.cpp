@@ -38,4 +38,5 @@
 #include "Test_Compiler.h"
 #include "Test_GlobalCount.h"
 #include "Test_UserFunctions.h"
+#include "Test_NoteDivisionLiterals.h"
 

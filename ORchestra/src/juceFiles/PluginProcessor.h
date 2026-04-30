@@ -27,17 +27,6 @@
 #include "Defines.h"
 
 using namespace ORchestra;
-enum class NoteDivision
-{
-    n1,
-    n2,
-    n4,
-    n8,
-    n16,
-    n32,
-    n64
-};
-
 class ORchestraAudioProcessor : public juce::AudioProcessor, public juce::ChangeBroadcaster
 #if JucePlugin_Enable_ARA
   ,
@@ -95,17 +84,10 @@ private:
     void FillPositionData(TransportData& data);
     TransportData mTransportData;
     std::unique_ptr<ORchestraEngine> mORchestraEngine;
-    inline float GetBpmDivision(float noteDiv);
-    inline int GetNoteLength(float noteDiv);
 
     int mLocalTimeInSamples = 0;
-    std::atomic<float>* mBpm;
-    std::atomic<float>* mTempoDivision;
-    std::atomic<float>* mNoteLength;
-    std::atomic<float>* mShouldSync;
 
     juce::String mSavedFilePath{ "" };
-    juce::StringArray mNoteDivisionsStrings{ "1n", "2n", "4n", "8n", "16n", "32n", "64n" };
     juce::AudioProcessorValueTreeState mValueTree;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ORchestraAudioProcessor)

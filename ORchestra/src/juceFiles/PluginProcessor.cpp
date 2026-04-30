@@ -19,7 +19,6 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
-#include "ParamConstants.h"
 #include "juce_audio_processors/juce_audio_processors.h"
 
 
@@ -37,30 +36,16 @@ ORchestraAudioProcessor::ORchestraAudioProcessor() :
     ),
 #endif
     IsRunning(false),
-    mValueTree(*this, nullptr, juce::Identifier("ORchestra"),
-        { 
-            std::make_unique<juce::AudioParameterInt>(bpmParamId, "Bpm", 10, 300, 120),
-            std::make_unique<juce::AudioParameterInt>(syncToggleId, "Should Sync", 0, 1, 0),
-            std::make_unique<juce::AudioParameterChoice>(tempoDivisionId,
-                                                         "Tempo Division", 
-                                                         mNoteDivisionsStrings, 
-                                                         static_cast<int>(NoteDivision::n4)),
-            std::make_unique<juce::AudioParameterChoice>(noteLengthId, 
-                                                        "Note Length", 
-                                                        mNoteDivisionsStrings, 
-                                                        static_cast<int>(NoteDivision::n4)) 
-        })
+    mValueTree(*this, nullptr, juce::Identifier("ORchestra"), {})
 {
 
     mORchestraEngine = std::make_unique<ORchestraEngine>();
 
     mTransportData.timeInSamples = 0;
     mTransportData.sampleRate = 44100;
+    mTransportData.bpm = 120.0;
+    mTransportData.bpmDivision = 1.0f;
 
-    mBpm = mValueTree.getRawParameterValue(bpmString);
-    mTempoDivision = mValueTree.getRawParameterValue(tempoDivisionString);
-    mNoteLength = mValueTree.getRawParameterValue(noteLengthString);
-    mShouldSync = mValueTree.getRawParameterValue(syncToggleString);
 }
 
 ORchestraAudioProcessor::~ORchestraAudioProcessor()
@@ -175,41 +160,30 @@ void ORchestraAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juc
     const int bufferLength = buffer.getNumSamples();
     buffer.clear();
 
-    // Fill position data from DAW when syncing,
-    // or set internal position when running standalone.
-    const bool shouldSync = static_cast<bool>(*mShouldSync);
-    if (!shouldSync && IsRunning)
+    // Always fill host BPM and DAW position.
+    FillPositionData(mTransportData);
+    const bool dawIsPlaying = mTransportData.isPlaying;
+
+    // DAW takes precedence. Only use the internal counter when the DAW is not playing
+    // but the plugin play button is pressed (standalone testing mode).
+    if (!dawIsPlaying && IsRunning)
     {
-        FillPositionData(mTransportData);
         mTransportData.timeInSamples = mLocalTimeInSamples;
-        mTransportData.bpm = static_cast<double>(*mBpm);
         mTransportData.isPlaying = true;
     }
-    else if (shouldSync && !IsRunning)
-    {
-        FillPositionData(mTransportData);
-    }
-
-    mTransportData.bpmDivision = GetBpmDivision(*mTempoDivision);
-    mTransportData.noteLengthInSamples = GetNoteLength(*mNoteLength);
 
     // Making sure that count in, doesn't crash when time is negative.
-    if(mTransportData.timeInSamples < 0)
+    if (mTransportData.timeInSamples < 0)
         return;
 
     mORchestraEngine->Tick(mTransportData, bufferLength, midiMessages);
 
-    // For incrementing sample position by the buffer and only when IsRunning
-    if (!shouldSync && IsRunning)
-    {
-        mLocalTimeInSamples += bufferLength; 
-    }
-    else if (!shouldSync && !IsRunning)
-    {
+    // Advance the internal counter only when it is in use.
+    // Reset it in all other cases so standalone mode always starts from 0.
+    if (!dawIsPlaying && IsRunning)
+        mLocalTimeInSamples += bufferLength;
+    else
         mLocalTimeInSamples = 0;
-        mTransportData.isPlaying = false;
-        mTransportData.timeInSamples = mLocalTimeInSamples;
-    }
 }
 
 void ORchestraAudioProcessor::FillPositionData(TransportData& data)
@@ -278,32 +252,4 @@ juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
     return new ORchestraAudioProcessor();
 }
 
-float ORchestraAudioProcessor::GetBpmDivision(float noteDiv)
-{
-    const NoteDivision div = static_cast<NoteDivision>(noteDiv);
 
-    switch (div)
-    {
-    case NoteDivision::n1:
-        return 0.25f;
-    case NoteDivision::n2:
-        return 0.5f;
-    case NoteDivision::n4:
-        return 1.f;
-    case NoteDivision::n8:
-        return 2.f;
-    case NoteDivision::n16:
-        return 4.f;
-    case NoteDivision::n32:
-        return 8.f;
-    case NoteDivision::n64:
-        return 16.f;
-    default:
-        return 0.f;
-    }
-}
-
-int ORchestraAudioProcessor::GetNoteLength(float noteDiv)
-{
-    return static_cast<int>(mSampleRate * (60.0 / static_cast<double>((*mBpm * GetBpmDivision(noteDiv)))));
-}

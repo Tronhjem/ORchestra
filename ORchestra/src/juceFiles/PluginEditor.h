@@ -27,7 +27,6 @@
 #include "TriggerRectangle.h"
 #include "CodeEditorPanel.h"
 #include "TransportControls.h"
-#include "TempoControlsPanel.h"
 
 #include "GeneralLookAndFeel.h"
 #include "ButtonsLookAndFeel.h"
@@ -36,8 +35,6 @@
 #include "juce_gui_basics/juce_gui_basics.h"
 
 typedef juce::AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
-typedef juce::AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
-typedef juce::AudioProcessorValueTreeState::ComboBoxAttachment ComboBoxAttachment;
 //==============================================================================
 /**
 */
@@ -68,7 +65,6 @@ private:
     void handleImportFile();
     void handleExportFile();
     void handlePlayButton();
-    void handleSyncToggle(bool shouldSync);
     void handleClearLog();
 
     ORchestraAudioProcessor& audioProcessor;
@@ -82,7 +78,6 @@ private:
     int mFileChooserFlags = juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles;
 
     TransportControls mTransportControls;
-    TempoControlsPanel mTempoControlsPanel;
     CodeEditorPanel mCodeEditorPanel;
     TriggerRectangleComponent mTriggerRectangle;
     Timeline mTimeline;

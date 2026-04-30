@@ -32,9 +32,9 @@ namespace ORchestra {
 
     void MidiScheduler::PostMidi(ScheduledMidiMessage& message)
     {
-        message.mFirstByte = CLAMP_TO_MIDI(message.mFirstByte, DATA_UNIT_MIN_VALUE, MIDI_MAX_VALUE);
-        message.mSecondByte = CLAMP_TO_MIDI(message.mSecondByte, DATA_UNIT_MIN_VALUE, MIDI_MAX_VALUE);
-        message.mChannel = CLAMP_TO_MIDI(message.mChannel, DATA_UNIT_MIN_VALUE, MAX_MIDI_CHANNEL_NUMBER);
+        message.mFirstByte = CLAMP_TO_MIDI(message.mFirstByte, 0, MIDI_MAX_VALUE);
+        message.mSecondByte = CLAMP_TO_MIDI(message.mSecondByte, 0, MIDI_MAX_VALUE);
+        message.mChannel = CLAMP_TO_MIDI(message.mChannel, 0, MAX_MIDI_CHANNEL_NUMBER);
         mScheduledMidiMessages.emplace_back(message);
 
         // Generate corresponding NoteOff for NoteOn

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2026 Christian Tronhjem
+ * Copyright (C) 2026 Christian Tronhjem255
  *
  * This file is part of ORchestra.
  *
@@ -18,6 +18,7 @@
  */
 
 #include <string>
+#include <cassert>
 
 #include "Compiler.h"
 #include "ErrorReporting.h"
@@ -38,7 +39,8 @@ namespace ORchestra
     static const std::string ranFunctionName = "ran";
     static const std::string eucFunctionName = "euc";
     static const std::string bpmFunctionName = "bpm";
-    static const std::string noteDivFunctionName = "noteDiv";
+    static const std::string bpmDivFunctionName = "bpmDiv";
+    static const std::string transposeFunctionName = "transpose";
 
     Compiler::Compiler(const std::vector<ORchestraToken>& tokens, ErrorReporting& log) :
             mVariableIdCounter(0),
@@ -59,7 +61,7 @@ namespace ORchestra
 
         std::vector<Instruction> noteInstructions;
         noteInstructions.emplace_back(Instruction{ OpCode::NOTE });
-        mFunctions["note"] = StoredFunction(4, noteInstructions);
+        mFunctions["note"] = StoredFunction(5, noteInstructions);
 
         std::vector<Instruction> ccInstructions;
         ccInstructions.emplace_back(Instruction{ OpCode::CC });
@@ -77,16 +79,20 @@ namespace ORchestra
         bpmInstructions.emplace_back(Instruction{ OpCode::SET_BPM });
         mFunctions[bpmFunctionName] = StoredFunction(1, bpmInstructions);
 
-        std::vector<Instruction> noteDivInstructions;
-        noteDivInstructions.emplace_back(Instruction{ OpCode::SET_NOTE_DIVISION });
-        mFunctions[noteDivFunctionName] = StoredFunction(1, noteDivInstructions);
+        std::vector<Instruction> bpmDivInstructions;
+        bpmDivInstructions.emplace_back(Instruction{ OpCode::SET_BPM_DIVISION });
+        mFunctions[bpmDivFunctionName] = StoredFunction(1, bpmDivInstructions);
+
+        std::vector<Instruction> transposeInstructions;
+        transposeInstructions.emplace_back(Instruction{ OpCode::SET_TRANSPOSE });
+        mFunctions[transposeFunctionName] = StoredFunction(1, transposeInstructions);
     }
 
     std::vector<std::string> Compiler::GetVariableNames() const
     {
         std::vector<std::string> names(mVariableIDMap.size());
         for (const auto& pair : mVariableIDMap)
-            names[pair.second] = pair.first;
+            names[static_cast<size_t>(pair.second)] = pair.first;
         return names;
     }
 
@@ -163,13 +169,14 @@ namespace ORchestra
         if (value > DATA_UNIT_MAX_VALUE)
         {
             value = DATA_UNIT_MAX_VALUE;
-            const std::string message = std::string("Value can't be greater than 255, correcting to 255");
+            const std::string message = std::string("Value can't be greater than 32768, capping value");
             mErrorReporting.LogWarning(message);
         }
+
         if (value < DATA_UNIT_MIN_VALUE)
         {
             value = DATA_UNIT_MIN_VALUE;
-            const std::string message = std::string("Value can't be smaller than 0, correcting to 0");
+            const std::string message = std::string("Value can't be smaller than -32768, capping value");
             mErrorReporting.LogWarning(message);
         }
 
@@ -204,17 +211,21 @@ namespace ORchestra
         DataUnit baseNote = noteToValue(*token.mStart);
         if (baseNote == 255 || token.mLength < 2)
         {
-            std::string message = std::string("Notes need at least a capital letter for the note name, and an octave from 0-10. Optional is # or b");
+            std::string message = 
+                std::string("Notes need at least a capital letter for the note name, and an octave from 0-10. Optional is # or b");
+
             mErrorReporting.LogError(message);
             return false;
         }
 
         int octaveIndex = 1;
+
         if (token.mStart[1] == '#')
         {
             baseNote += 1;
             octaveIndex = 2;
         }
+
         else if (token.mStart[1] == 'b')
         {
             baseNote -= 1;
@@ -225,7 +236,10 @@ namespace ORchestra
         std::string numAsString;
         try
         {
-            numAsString = std::string(token.mStart + octaveIndex, static_cast<unsigned long>(token.mLength - octaveIndex));
+            numAsString = 
+                std::string(token.mStart + octaveIndex, 
+                        static_cast<unsigned long>(token.mLength - octaveIndex));
+
             value = std::stoi(numAsString) * 12 + baseNote;
         }
         catch (std::exception& err)
@@ -238,13 +252,14 @@ namespace ORchestra
         if (value > 127)
         {
             value = 127;
-            std::string message = std::string("Value can't be greater than 127, correcting to 127");
+            std::string message = std::string("Note value can't be greater than 127, capping value");
             mErrorReporting.LogWarning(message);
         }
+
         if (value < 0)
         {
             value = 0;
-            std::string message = std::string("Value can't be smaller than 0, correcting to 0");
+            std::string message = std::string("Note value can't be smaller than 0, capping value");
             mErrorReporting.LogWarning(message);
         }
 
@@ -403,6 +418,58 @@ namespace ORchestra
         return true;
     }
 
+    // Compiles euc(hits, length) or euc(hits, length, shift).
+    // Shift is optional and defaults to 0.
+    bool Compiler::CompileEuclideanCall(std::vector<Instruction>& instructions)
+    {
+        Consume(); // '('
+
+        if (!CompileExpression(instructions))  // hits
+        {
+            ThrowUnexpectedTokenError(Peek());
+            return false;
+        }
+
+        if (Peek().mTokenType != ORchestraTokenType::COMMA)
+        {
+            ThrowMissingParamCount(2, 1);
+            return false;
+        }
+        Consume(); // ','
+
+        if (!CompileExpression(instructions))  // length
+        {
+            ThrowUnexpectedTokenError(Peek());
+            return false;
+        }
+
+        // Optional third parameter: shift (defaults to 0)
+        if (Peek().mTokenType == ORchestraTokenType::COMMA)
+        {
+            Consume(); // ','
+            if (!CompileExpression(instructions))  // shift
+            {
+                ThrowUnexpectedTokenError(Peek());
+                return false;
+            }
+        }
+        else
+        {
+            instructions.emplace_back(Instruction{ OpCode::CONSTANT, static_cast<DataUnit>(0) });
+        }
+
+        if (Peek().mTokenType != ORchestraTokenType::RIGHT_PAREN)
+        {
+            const std::string missingRightParen = ")";
+            ThrowUnexpectedEnd(missingRightParen);
+            return false;
+        }
+        Consume(); // ')'
+
+        instructions.emplace_back(Instruction{ OpCode::GENERATE_EUCLID_SEQUENCE });
+        return true;
+    }
+
     bool Compiler::CompileArray(std::vector<Instruction>& instructions,
         DataUnit& outLength,
         int maxLength,
@@ -418,9 +485,11 @@ namespace ORchestra
 
         if (Peek().mTokenType != ORchestraTokenType::NUMBER &&
             Peek().mTokenType != ORchestraTokenType::NOTE_IDENTIFIER &&
+            Peek().mTokenType != ORchestraTokenType::BPM_DIVISION_IDENTIFIER &&
             Peek().mTokenType != ORchestraTokenType::IDENTIFIER &&
             Peek().mTokenType != ORchestraTokenType::RANDOM &&
             Peek().mTokenType != ORchestraTokenType::DOLLAR &&
+            Peek().mTokenType != ORchestraTokenType::MINUS &&
             Peek().mTokenType != ORchestraTokenType::LEFT_BRACKET)
         {
             ThrowUnexpectedTokenError(Peek());
@@ -480,9 +549,11 @@ namespace ORchestra
 
             case ORchestraTokenType::NUMBER:
             case ORchestraTokenType::NOTE_IDENTIFIER:
+            case ORchestraTokenType::BPM_DIVISION_IDENTIFIER:
             case ORchestraTokenType::IDENTIFIER:
             case ORchestraTokenType::LEFT_PAREN:
             case ORchestraTokenType::DOLLAR:
+            case ORchestraTokenType::MINUS:
             {
                 if (!expectsValue)
                 {
@@ -573,8 +644,10 @@ namespace ORchestra
             return { &Compiler::ParseNumber, nullptr, Precedence::NONE };
         case ORchestraTokenType::IDENTIFIER:      
             return { &Compiler::ParseIdentifier, nullptr, Precedence::NONE };
-        case ORchestraTokenType::NOTE_IDENTIFIER: 
+        case ORchestraTokenType::NOTE_IDENTIFIER:
             return { &Compiler::ParseNoteIdentifier, nullptr, Precedence::NONE };
+        case ORchestraTokenType::BPM_DIVISION_IDENTIFIER:
+            return { &Compiler::ParseBpmDivisionIdentifier, nullptr, Precedence::NONE };
         case ORchestraTokenType::DOLLAR:          
             return { &Compiler::ParseDollar, nullptr, Precedence::NONE };
         case ORchestraTokenType::RANDOM:          
@@ -584,8 +657,8 @@ namespace ORchestra
 
         case ORchestraTokenType::PLUS:            
             return { nullptr, &Compiler::ParseBinary, Precedence::TERM };
-        case ORchestraTokenType::MINUS:           
-            return { nullptr, &Compiler::ParseBinary, Precedence::TERM };
+        case ORchestraTokenType::MINUS:
+            return { &Compiler::ParseUnary, &Compiler::ParseBinary, Precedence::TERM };
         case ORchestraTokenType::STAR:            
             return { nullptr, &Compiler::ParseBinary, Precedence::FACTOR };
         case ORchestraTokenType::SLASH:           
@@ -654,6 +727,28 @@ namespace ORchestra
         return MakeNoteIntoConstant(Previous(), instructions);
     }
 
+    bool Compiler::ParseBpmDivisionIdentifier(std::vector<Instruction>& instructions)
+    {
+        const ORchestraToken& token = Previous();
+        const std::string_view text(token.mStart, static_cast<size_t>(token.mLength));
+
+        int value = 0;
+        if      (text == "n1")  value = 1;
+        else if (text == "n2")  value = 2;
+        else if (text == "n4")  value = 3;
+        else if (text == "n8")  value = 4;
+        else if (text == "n16") value = 5;
+        else if (text == "n32") value = 6;
+        else
+        {
+            mErrorReporting.LogError("Unknown note division literal");
+            return false;
+        }
+
+        instructions.emplace_back(Instruction{ OpCode::CONSTANT, static_cast<DataUnit>(value) });
+        return true;
+    }
+
     bool Compiler::ParseIdentifier(std::vector<Instruction>& instructions)
     {
         const ORchestraToken& token = Previous();
@@ -693,6 +788,14 @@ namespace ORchestra
     bool Compiler::ParseRandom(std::vector<Instruction>& instructions)
     {
         return CompileFunctionCall(instructions, ranFunctionName);
+    }
+
+    bool Compiler::ParseUnary(std::vector<Instruction>& instructions)
+    {
+        if (!ParsePrecedence(Precedence::UNARY, instructions))
+            return false;
+        instructions.emplace_back(Instruction{ OpCode::NEGATE });
+        return true;
     }
 
     bool Compiler::ParseBinary(std::vector<Instruction>& instructions)
@@ -801,6 +904,7 @@ namespace ORchestra
                 }
                 case ORchestraTokenType::NUMBER:
                 case ORchestraTokenType::NOTE_IDENTIFIER:
+                case ORchestraTokenType::BPM_DIVISION_IDENTIFIER:
                 case ORchestraTokenType::IDENTIFIER:
                 case ORchestraTokenType::LEFT_PAREN:
                 case ORchestraTokenType::RANDOM:
@@ -816,7 +920,7 @@ namespace ORchestra
                 case ORchestraTokenType::EUCLIDEAN:
                 {
                     Consume();
-                    if (!CompileFunctionCall(instructions, eucFunctionName))
+                    if (!CompileEuclideanCall(instructions))
                         return StatementResult::COMPILE_ERROR;
 
                     const DataUnit id = GetOrCreateVariableID(name);

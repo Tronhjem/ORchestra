@@ -174,7 +174,7 @@ TEST_CASE("UserFunction: Function with params using note identifier as argument"
 
 TEST_CASE("UserFunction: Parameterized function calling built-in", "[UserFunction]")
 {
-    std::string file = "fn play(n)\nnote(1, n, 100, 1)\nend\nplay(C4)";
+    std::string file = "fn play(n)\nnote(1, n, 100, n4, 1)\nend\nplay(C4)";
     ErrorReporting errorReporter;
     VM vm(errorReporter);
     REQUIRE(vm.Prepare(file));
@@ -248,7 +248,7 @@ TEST_CASE("Pattern array wraps index with modulo", "[UserFunction]")
 
 TEST_CASE("Pattern array with NOTE output differs per index", "[UserFunction]")
 {
-    std::string file = "ptn verse\nnote(1, C4, 100, 1)\nend\nptn chorus\nnote(1, E4, 127, 1)\nend\npattern = [verse, chorus]\npattern($)";
+    std::string file = "ptn verse\nnote(1, C4, 100, n4, 1)\nend\nptn chorus\nnote(1, E4, 127, n4, 1)\nend\npattern = [verse, chorus]\npattern($)";
     ErrorReporting errorReporter;
     VM vm(errorReporter);
     REQUIRE(vm.Prepare(file));
@@ -408,7 +408,7 @@ TEST_CASE("UserFunction: Nested function calls in expressions", "[UserFunction]"
 
 TEST_CASE("UserFunction: Function return used as argument to built-in", "[UserFunction]")
 {
-    std::string file = "fn getVel(x)\nreturn x * 10\nend\nnote(1, C4, getVel(10), 1)";
+    std::string file = "fn getVel(x)\nreturn x * 10\nend\nnote(1, C4, getVel(10), n4, 1)";
     ErrorReporting errorReporter;
     VM vm(errorReporter);
     REQUIRE(vm.Prepare(file));

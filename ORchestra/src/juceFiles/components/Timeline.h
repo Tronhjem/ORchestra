@@ -44,13 +44,13 @@ struct BarLine
     float endY;
 };
 
+
 class Timeline : public juce::Component, public juce::Timer
 {
 public:
     Timeline(TriggerRectangleComponent& triggerRectangle) :
                 mAudioProcessor(nullptr),
                 mLastGlobalStep(-1),
-                mLastTimeInSamples(0),
                 mTriggerRectangle(triggerRectangle)
     {
         startTimerHz(40);
@@ -68,11 +68,10 @@ public:
     void paint(juce::Graphics& g) override;
 
 private:
-    inline int GetNoteDivisionWrapIndex(const float bpmDivision);
+    inline int GetBpmDivisionWrapIndex(const float bpmDivision);
     inline juce::Colour GetStepColorFromVelocity(const float value, const SequenceStepType MidiType);
     ORchestraAudioProcessor* mAudioProcessor;
     int mLastGlobalStep;
-    int64_t mLastTimeInSamples;
     TriggerRectangleComponent& mTriggerRectangle;
     std::vector<TriggerRectangle> mTimelineTriggerRectangles;
     std::vector<BarLine> mBarLines;

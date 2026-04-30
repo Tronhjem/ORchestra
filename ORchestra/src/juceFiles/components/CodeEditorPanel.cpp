@@ -108,11 +108,6 @@ void CodeEditorPanel::updateErrorDisplay(const std::vector<ORchestra::LogEntry>&
     for (auto it = errors.rbegin(); it != errors.rend(); ++it)
     {
         const auto& entry = *it;
-        // Add step count prefix if available (non-zero)
-        if (entry.mStepCount > 0)
-        {
-            mess += "[Step " + juce::String(entry.mStepCount) + "] ";
-        }
         mess.append(entry.mMessage.data(), entry.mMessage.size());
         mess.append("\n", 1);
     }

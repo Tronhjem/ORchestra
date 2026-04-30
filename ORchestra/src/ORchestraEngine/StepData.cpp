@@ -18,7 +18,6 @@
  */
 
 #include <cstring>
-#include <cmath>
 
 #include "StepData.h"
 
@@ -59,8 +58,7 @@ namespace ORchestra
         if (mLength == 1)
             return mData[0];
 
-        const int equivalentIndex = static_cast<int>(floor((static_cast<float>(index) / static_cast<float>(otherLength)) 
-                                    * static_cast<float>(mLength)));
+        const int equivalentIndex = (index * mLength) / otherLength;
 
 #if _DEBUG
         assert(equivalentIndex < mLength);

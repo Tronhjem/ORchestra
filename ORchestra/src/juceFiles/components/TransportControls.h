@@ -22,45 +22,30 @@
 #include <JuceHeader.h>
 #include <functional>
 
-typedef juce::AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
-
 class TransportControls : public juce::Component,
                           public juce::Button::Listener
 {
 public:
     static constexpr int BUTTON_HEIGHT = 20;
     static constexpr int BUTTON_WIDTH = 50;
-    static constexpr int LABEL_HEIGHT = 20;
-    static constexpr int SPACING = 15;
 
-    TransportControls(juce::AudioProcessorValueTreeState& valueTree);
+    TransportControls();
     ~TransportControls() override;
 
     void resized() override;
 
     void setPlayButtonCallback(std::function<void()> callback);
-    void setSyncToggleCallback(std::function<void(bool)> callback);
-
     void updatePlayButtonState(bool isPlaying);
-    void setPlayButtonEnabled(bool enabled);
-
     void setButtonLookAndFeel(juce::LookAndFeel* laf);
 
-    constexpr int getPreferredWidth() { return (BUTTON_WIDTH / 2) - (BUTTON_HEIGHT / 2) 
-                                        + BUTTON_HEIGHT + BUTTON_WIDTH + SPACING; }
-
-    constexpr int getPreferredHeight() { return LABEL_HEIGHT + BUTTON_HEIGHT; }
+    constexpr int getPreferredWidth() const { return BUTTON_WIDTH; }
+    constexpr int getPreferredHeight() const { return BUTTON_HEIGHT; }
 
 private:
     void buttonClicked(juce::Button* button) override;
 
     juce::TextButton mPlayButton{ "Play" };
-    juce::ToggleButton mSyncToggleBox;
-    juce::Label mSyncToggleLabel{ "sync", "Sync" };
-
-    std::unique_ptr<ButtonAttachment> mSyncToggleAttachment;
     std::function<void()> mPlayButtonCallback;
-    std::function<void(bool)> mSyncToggleCallback;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TransportControls)
 };

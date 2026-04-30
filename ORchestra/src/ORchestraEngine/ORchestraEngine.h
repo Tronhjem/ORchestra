@@ -39,7 +39,7 @@ namespace ORchestra
     public:
         ORchestraEngine();
         ~ORchestraEngine();
-        void Tick(const TransportData& transportData, const int bufferLength, juce::MidiBuffer& midiMessages);
+        void Tick(TransportData& transportData, const int bufferLength, juce::MidiBuffer& midiMessages);
         void Compile(const std::string& data);
         const std::string& ImportFromFile(const std::string& filePath);
         void ExportToFile(const std::string& filePath);
@@ -63,6 +63,10 @@ namespace ORchestra
 
         int mLastStep = -1;
         int64_t mSamplesSinceLastStep = 0;
+        double mSamplesPerStep = 0.0;
+        int64_t mStepOriginInSamples = 0;
+        double mLastBpm = 0.0;
+        float mLastBpmDivision = 0.0f;
         std::atomic<int> mReadySteps;
         std::atomic<int> mCurrentGlobalStep;
         std::atomic<int> mCurrentProcessingStep;
@@ -70,6 +74,7 @@ namespace ORchestra
         std::atomic<bool> mShouldExit;
         std::atomic<bool> mHasWork;
         std::atomic<bool> mIsRunning;
+        std::atomic<bool> mShouldResetScriptBpm{false};
 
         std::mutex mCVMutex;
         std::condition_variable mCV;
@@ -82,8 +87,6 @@ namespace ORchestra
         MidiScheduler mMidiScheduler;
         ErrorReporting mErrorReporting;
         VM mVM;
-        
-        TransportData mScriptTransportData;
     };
 
 } // namespace ORchestra

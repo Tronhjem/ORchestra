@@ -25,7 +25,6 @@
 #include "ErrorReporting.h"
 #include "StepData.h"
 #include "Defines.h"
-#include <limits>
 
 using namespace ORchestra;
 TEST_CASE("DataSequence: Evaluates ran(50,60) in array, result in range [50,60]", "[DataSequence]")
@@ -201,7 +200,7 @@ TEST_CASE("DataSequence: Accesses nested array element [3,1] subtractd with othe
 
     REQUIRE(result.GetValue(0) == 2);
     REQUIRE(result.GetValue(1) == 1);
-    REQUIRE(result.GetValue(2) == 0);
+    REQUIRE(result.GetValue(2) == static_cast<DataUnit>(-2)); // 1 - 3 = -2, no longer clamped to 0
 }
 
 TEST_CASE("DataSequence: Accesses nested array element [3,5] subtractd with other of different lengths, returns values correctly", "[DataSequence]")
@@ -268,7 +267,7 @@ TEST_CASE("DataSequence: Adds sequences of length 2 and 3, result has length 3",
     REQUIRE(added.GetValue(2) == 2);
 }
 
-TEST_CASE("DataSequence: Clamps addition overflow to max value of DataUnit", "[DataSequence]")
+TEST_CASE("DataSequence: Adds sequences with values exceeding 255 (DataUnit is int16_t)", "[DataSequence]")
 {
     DataUnit dataOne[2]{130, 130};
     DataUnit dataTwo[4]{130, 0, 130, 0};
@@ -279,10 +278,9 @@ TEST_CASE("DataSequence: Clamps addition overflow to max value of DataUnit", "[D
     StepData added = dataStepOne.ApplySequenceWithOperation(dataStepTwo, Add);
     REQUIRE(added.GetLength() == 4);
 
-    const DataUnit maxValue = std::numeric_limits<DataUnit>::max();
-    REQUIRE(added.GetValue(0) == maxValue);
+    REQUIRE(added.GetValue(0) == 260);
     REQUIRE(added.GetValue(1) == 130);
-    REQUIRE(added.GetValue(2) == maxValue);
+    REQUIRE(added.GetValue(2) == 260);
     REQUIRE(added.GetValue(3) == 130);
 }
 
