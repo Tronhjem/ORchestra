@@ -24,10 +24,10 @@ FileOperationsToolbar::FileOperationsToolbar()
     mImportButton.addListener(this);
     mExportButton.addListener(this);
     mCompileButton.addListener(this);
+    mPlayButton.addListener(this);
 
-    // addAndMakeVisible(mExportButton);
-    // addAndMakeVisible(mImportButton);
     addAndMakeVisible(mCompileButton);
+    addAndMakeVisible(mPlayButton);
 }
 
 FileOperationsToolbar::~FileOperationsToolbar()
@@ -35,20 +35,16 @@ FileOperationsToolbar::~FileOperationsToolbar()
     mImportButton.setLookAndFeel(nullptr);
     mExportButton.setLookAndFeel(nullptr);
     mCompileButton.setLookAndFeel(nullptr);
+    mPlayButton.setLookAndFeel(nullptr);
 }
 
 void FileOperationsToolbar::resized()
 {
     auto bounds = getLocalBounds();
-    int buttonWidth = (bounds.getWidth() - 2 * BUTTON_SPACING) / 3;
 
-    mCompileButton.setBounds(bounds.removeFromLeft(buttonWidth));
+    mCompileButton.setBounds(bounds.removeFromLeft(BUTTON_WIDTH));
     bounds.removeFromLeft(BUTTON_SPACING);
-
-    mImportButton.setBounds(bounds.removeFromLeft(buttonWidth));
-    bounds.removeFromLeft(BUTTON_SPACING);
-
-    mExportButton.setBounds(bounds);
+    mPlayButton.setBounds(bounds.removeFromLeft(BUTTON_WIDTH));
 }
 
 void FileOperationsToolbar::buttonClicked(juce::Button* button)
@@ -59,6 +55,13 @@ void FileOperationsToolbar::buttonClicked(juce::Button* button)
         mExportCallback();
     else if (button == &mCompileButton && mCompileCallback)
         mCompileCallback();
+    else if (button == &mPlayButton && mPlayCallback)
+        mPlayCallback();
+}
+
+void FileOperationsToolbar::updatePlayButtonState(bool isPlaying)
+{
+    mPlayButton.setButtonText(isPlaying ? "Stop" : "Play");
 }
 
 void FileOperationsToolbar::setImportCallback(std::function<void()> callback)
@@ -76,6 +79,11 @@ void FileOperationsToolbar::setCompileCallback(std::function<void()> callback)
     mCompileCallback = std::move(callback);
 }
 
+void FileOperationsToolbar::setPlayCallback(std::function<void()> callback)
+{
+    mPlayCallback = std::move(callback);
+}
+
 void FileOperationsToolbar::setCompileButtonEnabled(bool enabled)
 {
     mCompileButton.setEnabled(enabled);
@@ -86,4 +94,5 @@ void FileOperationsToolbar::setButtonLookAndFeel(juce::LookAndFeel* laf)
     mImportButton.setLookAndFeel(laf);
     mExportButton.setLookAndFeel(laf);
     mCompileButton.setLookAndFeel(laf);
+    mPlayButton.setLookAndFeel(laf);
 }

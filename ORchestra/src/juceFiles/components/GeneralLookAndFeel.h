@@ -182,6 +182,15 @@ public:
         g.strokePath(path, PathStrokeType(2.0f));
     }
 
+    void drawCallOutBoxBackground(juce::CallOutBox&, juce::Graphics& g,
+                                  const juce::Path& path, juce::Image&) override
+    {
+        g.setColour(BackgroundColor);
+        g.fillPath(path);
+        g.setColour(OutlineColor.brighter(0.5f));
+        g.strokePath(path, juce::PathStrokeType(1.5f));
+    }
+
     void drawPopupMenuBackground(Graphics& g, int width, int height) override
     {
         juce::Rectangle bounds{ (float)width, (float)height };

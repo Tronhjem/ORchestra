@@ -35,7 +35,7 @@ public:
         UNUSED(backgroundColour);
         auto bounds = button.getLocalBounds().toFloat();
 
-        juce::Colour fillColour = ButtonBackgroundColor;
+        juce::Colour fillColour = button.getToggleState() ? HighlightColor : ButtonBackgroundColor;
 
         if (isButtonDown)
             fillColour = fillColour.darker(0.15f);

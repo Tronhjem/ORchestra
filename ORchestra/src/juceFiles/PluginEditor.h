@@ -26,7 +26,6 @@
 #include "Timeline.h"
 #include "TriggerRectangle.h"
 #include "CodeEditorPanel.h"
-#include "TransportControls.h"
 
 #include "GeneralLookAndFeel.h"
 #include "ButtonsLookAndFeel.h"
@@ -35,6 +34,34 @@
 #include "juce_gui_basics/juce_gui_basics.h"
 
 typedef juce::AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
+
+//==============================================================================
+class MidiSettingsComponent : public juce::Component
+{
+public:
+    explicit MidiSettingsComponent(juce::AudioDeviceManager& deviceManager);
+    ~MidiSettingsComponent() override;
+    void resized() override;
+    void setButtonLookAndFeel(juce::LookAndFeel* laf);
+
+private:
+    static constexpr int PADDING     = 12;
+    static constexpr int LABEL_H     = 18;
+    static constexpr int ROW_H       = 26;
+    static constexpr int ROW_GAP     = 4;
+    static constexpr int SECTION_GAP = 12;
+    static constexpr int PANEL_W     = 300;
+
+    juce::AudioDeviceManager& mDeviceManager;
+
+    juce::Label mInputLabel;
+    juce::Label mOutputLabel;
+    juce::OwnedArray<juce::TextButton> mInputButtons;
+    juce::StringArray mInputIds;
+    juce::ComboBox mOutputCombo;
+    juce::StringArray mOutputIds;
+};
+
 //==============================================================================
 /**
 */
@@ -51,8 +78,9 @@ public:
     //==============================================================================
     void paint(juce::Graphics&) override;
     void resized() override;
+    void parentHierarchyChanged() override;
     void CodeEditorHasChanged() override;
-    
+
     // ErrorReportingListener - called from audio thread
     void OnLogUpdated() override;
 
@@ -77,10 +105,14 @@ private:
     juce::FileChooser mFileChooser{ "Select a file to load...", juce::File{}, "*.txt" };
     int mFileChooserFlags = juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles;
 
-    TransportControls mTransportControls;
     CodeEditorPanel mCodeEditorPanel;
     TriggerRectangleComponent mTriggerRectangle;
     Timeline mTimeline;
+
+    juce::TextEditor mLogBox;
+    juce::TextButton mClearLogButton{ "Clear" };
+    juce::TextButton mSettingsButton{ "..." };
+    juce::TextButton mCloseButton{ "X" };
 
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ORchestraAudioProcessorEditor)

@@ -22,56 +22,38 @@
 #include <JuceHeader.h>
 #include "ORchestraCodeEditorComponent.h"
 #include "ORchestraCodeEditorTokenizer.h"
-#include "ErrorReporting.h"
 #include "FileOperationsToolbar.h"
 
 class CodeEditorPanel : public juce::Component
 {
 public:
-    static constexpr int CODE_EDITOR_HEIGHT = 400;
-    static constexpr int ERROR_BOX_HEIGHT = 220;
-    static constexpr int COMPONENT_SPACING = 20;
-
     CodeEditorPanel(ORchestra::ORchestraCodeEditorChangeListener* changeListener);
     ~CodeEditorPanel() override;
 
     void resized() override;
 
     juce::CodeDocument& getCodeDocument() { return mCodeDocument; }
-    
-    void updateErrorDisplay(const std::vector<ORchestra::LogEntry>& errors);
-    
+
     void loadContent(const juce::String& content);
     void setCompileButtonEnabled(bool enabled);
     bool hasUnsavedChanges() const;
     void markSaved();
-    
+
     void setEditorLookAndFeel(juce::LookAndFeel* laf);
-    void setErrorBoxLookAndFeel(juce::LookAndFeel* laf);
     void setFileOperationButtonsLookAndFeel(juce::LookAndFeel* laf);
     void applyDefaultStyling();
 
     void setImportCallback(std::function<void()> callback);
     void setExportCallback(std::function<void()> callback);
     void setCompileCallback(std::function<void()> callback);
-    void setClearLogCallback(std::function<void()> callback);
-
-    constexpr int getPreferredHeight() const { return CODE_EDITOR_HEIGHT 
-                                                  + ERROR_BOX_HEIGHT 
-                                                  + mFileOperationsToolbar.getPreferredHeight() 
-                                                  + mFileOperationsToolbar.BUTTON_HEIGHT
-                                                  + 3 * COMPONENT_SPACING; }
+    void setPlayCallback(std::function<void()> callback);
+    void updatePlayButtonState(bool isPlaying);
 
 private:
     ORchestra::ORchestraCodeEditorTokenizer mTokeniser;
     juce::CodeDocument mCodeDocument;
     ORchestra::ORchestraCodeEditorComponent mCodeEditor;
-    juce::TextEditor mErrorTextBox;
-
-    juce::TextButton mClearLogButton;
     FileOperationsToolbar mFileOperationsToolbar;
-    
-    std::function<void()> mClearLogCallback;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CodeEditorPanel)
 };

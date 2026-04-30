@@ -38,12 +38,14 @@ public:
     void setImportCallback(std::function<void()> callback);
     void setExportCallback(std::function<void()> callback);
     void setCompileCallback(std::function<void()> callback);
+    void setPlayCallback(std::function<void()> callback);
 
     void setCompileButtonEnabled(bool enabled);
+    void updatePlayButtonState(bool isPlaying);
 
     void setButtonLookAndFeel(juce::LookAndFeel* laf);
 
-    constexpr int getPreferredWidth() const { return 3 * BUTTON_WIDTH + 2 * BUTTON_SPACING; }
+    constexpr int getPreferredWidth() const { return 2 * BUTTON_WIDTH + BUTTON_SPACING; }
     constexpr int getPreferredHeight() const { return BUTTON_HEIGHT; }
 
 private:
@@ -52,10 +54,12 @@ private:
     juce::TextButton mImportButton{ "Import" };
     juce::TextButton mExportButton{ "Export" };
     juce::TextButton mCompileButton{ "Compile" };
+    juce::TextButton mPlayButton{ "Play" };
 
     std::function<void()> mImportCallback;
     std::function<void()> mExportCallback;
     std::function<void()> mCompileCallback;
+    std::function<void()> mPlayCallback;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(FileOperationsToolbar)
 };

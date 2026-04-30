@@ -27,21 +27,125 @@
 #include "juce_audio_processors/juce_audio_processors.h"
 #include "juce_gui_extra/juce_gui_extra.h"
 
+#if JUCE_STANDALONE_APPLICATION
+#include "juce_audio_plugin_client/Standalone/juce_StandaloneFilterWindow.h"
+#endif
+
 constexpr int WINDOW_WIDTH = 1200;
 constexpr int WINDOW_HEIGHT = 800;
 constexpr int COMPONENT_MARGIN = 15;
 constexpr int OUTER_MARGIN = 20;
 constexpr int ROW_SPACING = 10;
+constexpr int LOG_BOX_HEIGHT = 180;
+constexpr int CLEAR_BUTTON_HEIGHT = 20;
+constexpr int SEPARATOR_WIDTH = 2;
+
+//==============================================================================
+// MidiSettingsComponent
+//==============================================================================
+MidiSettingsComponent::MidiSettingsComponent(juce::AudioDeviceManager& deviceManager)
+    : mDeviceManager(deviceManager)
+{
+    mInputLabel.setText("MIDI Inputs", juce::dontSendNotification);
+    mInputLabel.setColour(juce::Label::textColourId, ORchestra::TextColor);
+    addAndMakeVisible(mInputLabel);
+
+    for (const auto& device : juce::MidiInput::getAvailableDevices())
+    {
+        auto* btn = mInputButtons.add(std::make_unique<juce::TextButton>(device.name));
+        btn->setClickingTogglesState(true);
+        btn->setToggleState(mDeviceManager.isMidiInputDeviceEnabled(device.identifier),
+                            juce::dontSendNotification);
+        btn->setColour(juce::TextButton::textColourOffId, ORchestra::TextColor);
+        btn->setColour(juce::TextButton::textColourOnId, ORchestra::BackgroundColor);
+        mInputIds.add(device.identifier);
+        const int idx = mInputButtons.size() - 1;
+        btn->onClick = [this, idx]()
+        {
+            mDeviceManager.setMidiInputDeviceEnabled(mInputIds[idx],
+                                                     mInputButtons[idx]->getToggleState());
+        };
+        addAndMakeVisible(btn);
+    }
+
+    mOutputLabel.setText("MIDI Output", juce::dontSendNotification);
+    mOutputLabel.setColour(juce::Label::textColourId, ORchestra::TextColor);
+    addAndMakeVisible(mOutputLabel);
+
+    mOutputCombo.addItem("None", 1);
+    const auto currentOutputId = mDeviceManager.getDefaultMidiOutputIdentifier();
+    int itemId = 2;
+    int selectedId = 1;
+    for (const auto& device : juce::MidiOutput::getAvailableDevices())
+    {
+        mOutputCombo.addItem(device.name, itemId);
+        mOutputIds.add(device.identifier);
+        if (device.identifier == currentOutputId)
+            selectedId = itemId;
+        ++itemId;
+    }
+    mOutputCombo.setSelectedId(selectedId, juce::dontSendNotification);
+    mOutputCombo.onChange = [this]()
+    {
+        const int id = mOutputCombo.getSelectedId();
+        if (id == 1)
+            mDeviceManager.setDefaultMidiOutputDevice({});
+        else if (id >= 2 && (id - 2) < mOutputIds.size())
+            mDeviceManager.setDefaultMidiOutputDevice(mOutputIds[id - 2]);
+    };
+    addAndMakeVisible(mOutputCombo);
+
+    const int numInputs = mInputButtons.size();
+    const int height = PADDING * 2
+                     + LABEL_H + ROW_GAP
+                     + numInputs * (ROW_H + ROW_GAP)
+                     + SECTION_GAP
+                     + LABEL_H + ROW_GAP
+                     + ROW_H;
+    setSize(PANEL_W, height);
+}
+
+MidiSettingsComponent::~MidiSettingsComponent()
+{
+    for (auto* btn : mInputButtons)
+        btn->setLookAndFeel(nullptr);
+    mOutputCombo.setLookAndFeel(nullptr);
+}
+
+void MidiSettingsComponent::resized()
+{
+    auto bounds = getLocalBounds().reduced(PADDING);
+
+    mInputLabel.setBounds(bounds.removeFromTop(LABEL_H));
+    bounds.removeFromTop(ROW_GAP);
+
+    for (auto* btn : mInputButtons)
+    {
+        btn->setBounds(bounds.removeFromTop(ROW_H));
+        bounds.removeFromTop(ROW_GAP);
+    }
+
+    bounds.removeFromTop(SECTION_GAP);
+    mOutputLabel.setBounds(bounds.removeFromTop(LABEL_H));
+    bounds.removeFromTop(ROW_GAP);
+    mOutputCombo.setBounds(bounds.removeFromTop(ROW_H));
+}
+
+void MidiSettingsComponent::setButtonLookAndFeel(juce::LookAndFeel* laf)
+{
+    for (auto* btn : mInputButtons)
+        btn->setLookAndFeel(laf);
+}
 
 //==============================================================================
 ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProcessor& p)
         : AudioProcessorEditor(&p),
           audioProcessor(p),
-          mTransportControls(),
           mCodeEditorPanel(this),
           mTimeline(mTriggerRectangle)
 {
     setResizable(true, true);
+    setResizeLimits(800, 500, 99999, 99999);
     setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
 
     audioProcessor.addChangeListener(this);
@@ -50,56 +154,63 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     mButtonLookAndFeel = std::make_unique<ButtonLookAndFeel>();
     mTextEditorLookAndFeel = std::make_unique<TextEditorLookAndFeel>();
 
-    int xPos = 10;
-    int yPos = OUTER_MARGIN;
-    
-    // ==============================================================================
-    // Row 1: button controls
-    const int transportWidth = mTransportControls.getPreferredWidth();
-    const int transportHeight = mTransportControls.getPreferredHeight();
-    mTransportControls.setBounds(xPos, yPos, transportWidth, transportHeight);
-    
-    // ==============================================================================
-    // Row 2: CodeEditorPanel
-    xPos = OUTER_MARGIN;
-    yPos += transportHeight + ROW_SPACING;
-
-    int codeEditorWidth = static_cast<int>(static_cast<float>(WINDOW_WIDTH) / 2.5f + OUTER_MARGIN);
-    int codeEditorHeight = mCodeEditorPanel.getPreferredHeight();
-    mCodeEditorPanel.setBounds(xPos, yPos, codeEditorWidth, codeEditorHeight);
-
-    xPos += codeEditorWidth + COMPONENT_MARGIN;
-    
-    const int timelineHeight = WINDOW_HEIGHT - yPos - OUTER_MARGIN;
-    mTimeline.setBounds(xPos, yPos, WINDOW_WIDTH - OUTER_MARGIN * 2, timelineHeight);
-    mTriggerRectangle.setBounds(xPos, yPos, 100, timelineHeight);
-
-    // ==============================================================================
-    
     juce::LookAndFeel::setDefaultLookAndFeel(mGeneralLookAndFeel.get());
 
-    mTransportControls.setButtonLookAndFeel(mButtonLookAndFeel.get());
-
     mCodeEditorPanel.setEditorLookAndFeel(mTextEditorLookAndFeel.get());
-    mCodeEditorPanel.setErrorBoxLookAndFeel(mTextEditorLookAndFeel.get());
     mCodeEditorPanel.setFileOperationButtonsLookAndFeel(mButtonLookAndFeel.get());
     mCodeEditorPanel.applyDefaultStyling();
+
+    mLogBox.setFont(MONOSPACE_FONT_OPTIONS);
+    mLogBox.setColour(juce::TextEditor::textColourId, ORchestra::TextColor);
+    mLogBox.setColour(juce::TextEditor::backgroundColourId, ORchestra::TextEditorBackgroundColor);
+    mLogBox.setMultiLine(true);
+    mLogBox.setEnabled(false);
+    mLogBox.setLookAndFeel(mTextEditorLookAndFeel.get());
+
+    mClearLogButton.setLookAndFeel(mButtonLookAndFeel.get());
+    mClearLogButton.onClick = [this]() { handleClearLog(); };
+
+    mSettingsButton.setLookAndFeel(mButtonLookAndFeel.get());
+    mSettingsButton.onClick = [this]()
+    {
+#if JUCE_STANDALONE_APPLICATION
+        if (auto* holder = juce::StandalonePluginHolder::getInstance())
+        {
+            auto comp = std::make_unique<MidiSettingsComponent>(holder->deviceManager);
+            comp->setLookAndFeel(mGeneralLookAndFeel.get());
+            comp->setButtonLookAndFeel(mButtonLookAndFeel.get());
+            juce::CallOutBox::launchAsynchronously(std::move(comp),
+                                                   mSettingsButton.getScreenBounds(),
+                                                   nullptr);
+        }
+#endif
+    };
+
+    mCloseButton.setLookAndFeel(mButtonLookAndFeel.get());
+    mCloseButton.onClick = []()
+    {
+#if JUCE_STANDALONE_APPLICATION
+        juce::JUCEApplicationBase::quit();
+#endif
+    };
 
     mTimeline.SetProcessor(&audioProcessor);
     mTriggerRectangle.SetProcessor(&audioProcessor);
 
-    mTransportControls.setPlayButtonCallback([this]() { handlePlayButton(); });
+    mCodeEditorPanel.setPlayCallback([this]() { handlePlayButton(); });
     mCodeEditorPanel.setCompileCallback([this]() { handleCompile(); });
     mCodeEditorPanel.setExportCallback([this]() { handleExportFile(); });
     mCodeEditorPanel.setImportCallback([this]() { handleImportFile(); });
-    mCodeEditorPanel.setClearLogCallback([this]() { handleClearLog(); });
-    
+
     audioProcessor.SetErrorListener(this);
 
-    addAndMakeVisible(mTransportControls);
     addAndMakeVisible(mCodeEditorPanel);
     addAndMakeVisible(mTimeline);
     addAndMakeVisible(mTriggerRectangle);
+    addAndMakeVisible(mLogBox);
+    addAndMakeVisible(mClearLogButton);
+    addAndMakeVisible(mSettingsButton);
+    addAndMakeVisible(mCloseButton);
 
     const std::string& data = audioProcessor.GetInstructionData();
     juce::String dataAsString{ data };
@@ -115,10 +226,22 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     setWantsKeyboardFocus(true);
 }
 
+void ORchestraAudioProcessorEditor::parentHierarchyChanged()
+{
+    juce::AudioProcessorEditor::parentHierarchyChanged();
+    if (auto* w = dynamic_cast<juce::DocumentWindow*>(getTopLevelComponent()))
+        if (w->getTitleBarHeight() > 0)
+            w->setTitleBarHeight(0);
+}
+
 ORchestraAudioProcessorEditor::~ORchestraAudioProcessorEditor()
 {
     audioProcessor.removeChangeListener(this);
     audioProcessor.SetErrorListener(nullptr);
+    mLogBox.setLookAndFeel(nullptr);
+    mClearLogButton.setLookAndFeel(nullptr);
+    mSettingsButton.setLookAndFeel(nullptr);
+    mCloseButton.setLookAndFeel(nullptr);
 }
 
 void ORchestraAudioProcessorEditor::changeListenerCallback(juce::ChangeBroadcaster* broadCaster)
@@ -146,7 +269,7 @@ void ORchestraAudioProcessorEditor::handlePlayButton()
     if (audioProcessor.IsORchestraVMInit())
     {
         audioProcessor.IsRunning = !audioProcessor.IsRunning;
-        mTransportControls.updatePlayButtonState(audioProcessor.IsRunning);
+        mCodeEditorPanel.updatePlayButtonState(audioProcessor.IsRunning);
     }
 }
 
@@ -196,7 +319,14 @@ void ORchestraAudioProcessorEditor::handleExportFile()
 
 void ORchestraAudioProcessorEditor::UpdateErrors()
 {
-    mCodeEditorPanel.updateErrorDisplay(audioProcessor.GetErrors());
+    const auto& errors = audioProcessor.GetErrors();
+    juce::String mess;
+    for (auto it = errors.rbegin(); it != errors.rend(); ++it)
+    {
+        mess.append(it->mMessage.data(), it->mMessage.size());
+        mess.append("\n", 1);
+    }
+    mLogBox.setText(mess);
 }
 
 void ORchestraAudioProcessorEditor::OnLogUpdated()
@@ -220,11 +350,42 @@ void ORchestraAudioProcessorEditor::paint(juce::Graphics& g)
     g.fillAll(BackgroundColor);
     mCodeEditorPanel.setCompileButtonEnabled(mCodeEditorPanel.hasUnsavedChanges());
 
-    // float width = static_cast<float>(mCodeEditorPanel.getWidth() + COMPONENT_MARGIN + 10);
-    // g.setColour(juce::Colours::white);
-    // g.drawLine(width, 0, width, static_cast<float>(getHeight()), 2.f);
+    // Vertical separator between code panel and timeline/log area
+    const float sepX = static_cast<float>(mCodeEditorPanel.getRight()) + static_cast<float>(COMPONENT_MARGIN) / 2.0f;
+    const float topY = static_cast<float>(mCodeEditorPanel.getY());
+    const float botY = static_cast<float>(mCodeEditorPanel.getBottom());
+    g.setColour(ORchestra::OutlineColor.brighter(0.3f));
+    g.drawLine(sepX, topY, sepX, botY, static_cast<float>(SEPARATOR_WIDTH));
 }
 
 void ORchestraAudioProcessorEditor::resized()
 {
+    auto bounds = getLocalBounds().reduced(OUTER_MARGIN);
+
+    // Top-right corner buttons: [... settings] [X close]
+    constexpr int topBtnW = 30;
+    constexpr int topBtnH = 20;
+    constexpr int topBtnSpacing = 4;
+    const int topBtnY = bounds.getY();
+    mCloseButton.setBounds(bounds.getRight() - topBtnW, topBtnY, topBtnW, topBtnH);
+    mSettingsButton.setBounds(bounds.getRight() - topBtnW * 2 - topBtnSpacing, topBtnY, topBtnW, topBtnH);
+
+    // Vertical split: left = code editor, right = timeline + log
+    const int codeWidth = bounds.getWidth() * 2 / 5;
+    auto codeBounds = bounds.removeFromLeft(codeWidth);
+    bounds.removeFromLeft(COMPONENT_MARGIN);
+
+    // Code editor panel fills entire left column
+    mCodeEditorPanel.setBounds(codeBounds);
+
+    // Right column: clear button at bottom, log above it, timeline fills the rest
+    auto clearRow = bounds.removeFromBottom(CLEAR_BUTTON_HEIGHT);
+    mClearLogButton.setBounds(clearRow.removeFromLeft(60));
+    bounds.removeFromBottom(ROW_SPACING);
+    mLogBox.setBounds(bounds.removeFromBottom(LOG_BOX_HEIGHT));
+    bounds.removeFromBottom(ROW_SPACING);
+
+    // Timeline fills remaining right area
+    mTimeline.setBounds(bounds);
+    mTriggerRectangle.setBounds(bounds.removeFromLeft(100));
 }
