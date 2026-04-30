@@ -17,12 +17,24 @@
  * along with ORchestra. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <ctime>
+#include <cstdio>
 #include <iostream>
 
 #include "ErrorReporting.h"
 
-namespace ORchestra 
+namespace ORchestra
 {
+    static std::string CurrentTimestamp()
+    {
+        const std::time_t t = std::time(nullptr);
+        struct tm tm;
+        localtime_r(&t, &tm);
+        char buf[12];
+        std::snprintf(buf, sizeof(buf), "[%02d:%02d:%02d] ", tm.tm_hour, tm.tm_min, tm.tm_sec);
+        return buf;
+    }
+
     void ErrorReporting::CheckAndClear()
     {
         if (mShouldClear.exchange(false))
@@ -50,8 +62,8 @@ namespace ORchestra
 
     void ErrorReporting::LogError(const int line, std::string& message)
     {
-        message = message + ", at line " + std::to_string(line) + "\n";
-        mLogEntries.emplace_back(LogEntry{ EntryType::Error, line, 0, std::move(message) });
+        message = CurrentTimestamp() + message + ", at line " + std::to_string(line) + "\n";
+        mLogEntries.emplace_back(LogEntry{ EntryType::Error, line, message });
         TrimOldEntries();
         NotifyListener();
         std::cout << message << std::endl;
@@ -59,16 +71,17 @@ namespace ORchestra
 
     void ErrorReporting::LogError(const std::string& message)
     {
-        mLogEntries.emplace_back(LogEntry{ EntryType::Error, 0, 0, std::move(message) });
+        std::string stamped = CurrentTimestamp() + message;
+        mLogEntries.emplace_back(LogEntry{ EntryType::Error, 0, stamped });
         TrimOldEntries();
         NotifyListener();
-        std::cout << message << std::endl;
+        std::cout << stamped << std::endl;
     }
 
     void ErrorReporting::LogWarning(const int line, std::string& message)
     {
-        message = message + ", at line " + std::to_string(line) + "\n";
-        mLogEntries.emplace_back(LogEntry{ EntryType::Warning, line, 0, std::move(message) });
+        message = CurrentTimestamp() + message + ", at line " + std::to_string(line) + "\n";
+        mLogEntries.emplace_back(LogEntry{ EntryType::Warning, line, message });
         TrimOldEntries();
         NotifyListener();
         std::cout << message << std::endl;
@@ -76,26 +89,20 @@ namespace ORchestra
 
     void ErrorReporting::LogWarning(const std::string& message)
     {
-        mLogEntries.emplace_back(LogEntry{ EntryType::Warning, 0, 0, std::move(message) });
+        std::string stamped = CurrentTimestamp() + message;
+        mLogEntries.emplace_back(LogEntry{ EntryType::Warning, 0, stamped });
         TrimOldEntries();
         NotifyListener();
-        std::cout << message << std::endl;
+        std::cout << stamped << std::endl;
     }
 
     void ErrorReporting::LogMessage(const std::string& message)
     {
-        mLogEntries.emplace_back(LogEntry{ EntryType::Messasge, 0, 0, std::move(message) });
+        std::string stamped = CurrentTimestamp() + message;
+        mLogEntries.emplace_back(LogEntry{ EntryType::Messasge, 0, stamped });
         TrimOldEntries();
         NotifyListener();
-        std::cout << message << std::endl;
-    }
-
-    void ErrorReporting::LogMessage(const std::string& message, int stepCount)
-    {
-        mLogEntries.emplace_back(LogEntry{ EntryType::Messasge, 0, stepCount, std::move(message) });
-        TrimOldEntries();
-        NotifyListener();
-        std::cout << "[Step " << stepCount << "] " << message << std::endl;
+        std::cout << stamped << std::endl;
     }
 
     void ErrorReporting::Clear()

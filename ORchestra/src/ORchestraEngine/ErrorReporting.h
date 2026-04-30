@@ -33,7 +33,6 @@ namespace ORchestra
     {
         EntryType mEntryType;
         int mLine;
-        int mStepCount;
         std::string mMessage;
     };
 
@@ -56,7 +55,6 @@ namespace ORchestra
         void LogWarning(const int line, std::string& message);
         void LogWarning(const std::string& message);
         void LogMessage(const std::string& message);
-        void LogMessage(const std::string& message, int stepCount);
         void Clear();
         void RequestClear();
         std::vector<LogEntry> GetErrors() { return mLogEntries; }

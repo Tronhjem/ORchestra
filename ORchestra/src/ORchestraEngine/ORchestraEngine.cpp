@@ -251,7 +251,7 @@ namespace ORchestra
                            const std::string mes = 
                                std::to_string(static_cast<int>(step.mFirst.GetValue(0)));
 
-                           mErrorReporting.LogMessage(mes, mCurrentGlobalStep.load());
+                           mErrorReporting.LogMessage(mes);
 
                            break;
                        }
