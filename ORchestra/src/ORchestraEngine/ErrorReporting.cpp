@@ -29,7 +29,11 @@ namespace ORchestra
     {
         const std::time_t t = std::time(nullptr);
         struct tm tm;
+#ifdef _WIN32
+        localtime_s(&tm, &t);
+#else
         localtime_r(&t, &tm);
+#endif
         char buf[12];
         std::snprintf(buf, sizeof(buf), "[%02d:%02d:%02d] ", tm.tm_hour, tm.tm_min, tm.tm_sec);
         return buf;
