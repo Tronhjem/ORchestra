@@ -20,7 +20,13 @@
       "Bash(cmake -DBUILD_PLUGIN=ON -DBUILD_TESTS=ON ..)",
       "Bash(cmake --build . --clean-first)",
       "Bash(cmake -DBUILD_PLUGIN=OFF -DBUILD_TESTS=ON .. -Wno-dev)",
-      "Bash(cmake -DBUILD_PLUGIN=ON -DBUILD_TESTS=OFF .. -Wno-dev)"
+      "Bash(cmake -DBUILD_PLUGIN=ON -DBUILD_TESTS=OFF .. -Wno-dev)",
+      "Bash(cmake --build Builds/MacOSX/build --config Debug)",
+      "Bash(xcodebuild -project ORchestraUnitTests.xcodeproj -scheme EuclidCombinerUnitTests -configuration Debug build)",
+      "Bash(xcodebuild *)",
+      "Bash(/Users/christiantronhjem/dev/JuceProjects/ORchestra/UnitTests/Builds/MacOSX/build/Debug/EuclidCombinerUnitTests [UserFunction])",
+      "Bash(grep -rn \"CustomMemory\" /Users/christiantronhjem/dev/JuceProjects/ORchestra/ORchestra/src/ORchestraEngine/*.h)",
+      "Bash(/Users/christiantronhjem/dev/JuceProjects/ORchestra/UnitTests/Builds/MacOSX/build/Debug/EuclidCombinerUnitTests *)"
     ]
   }
 }

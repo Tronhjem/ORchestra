@@ -421,15 +421,20 @@ namespace ORchestra
 
         case (OpCode::GENERATE_EUCLID_SEQUENCE):
         {
-            const int length = std::clamp(static_cast<int>(stack.Pop().GetValue(0)), 0, MAX_DATASEQUENCE_LENGTH);
-            const int hits = std::clamp(static_cast<int>(stack.Pop().GetValue(0)), 0, length);
+            const int shift  = static_cast<int>(stack.Pop().GetValue(0));
+            const int length = 
+                std::clamp(static_cast<int>(stack.Pop().GetValue(0)), 0, MAX_DATASEQUENCE_LENGTH);
+
+            const int hits   = std::clamp(static_cast<int>(stack.Pop().GetValue(0)), 0, length);
+
             StepData data[MAX_DATASEQUENCE_LENGTH];
 
             GenerateEuclideanSequence(data, hits, length);
 
             for (int i = 0; i < length; ++i)
             {
-                stack.Push(data[i]);
+                const int shiftedIndex = ((i + shift) % length + length) % length;
+                stack.Push(data[shiftedIndex]);
             }
 
             const int clampedLength = std::clamp(length, DATA_UNIT_MIN_VALUE, DATA_UNIT_MAX_VALUE);

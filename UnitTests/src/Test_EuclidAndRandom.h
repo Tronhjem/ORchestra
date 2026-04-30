@@ -84,3 +84,48 @@ TEST_CASE("Euclidean: Generates 'euc(2,4)' sequence, fourth element is 0", "[Euc
     StepData result = vm.GetTopStackValue();
     REQUIRE(result.GetValue(0) == 0);
 }
+
+// euc(2,4) = [1,0,1,0]; with shift=1 => [0,1,0,1]
+TEST_CASE("Euclidean: euc(2,4,1) shift by 1, first element is 0", "[Euclidean]")
+{
+    std::string file{"a = euc(2,4,1) \n test a"};
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    REQUIRE(vm.Prepare(file));
+
+    StepData result = vm.GetTopStackValue();
+    REQUIRE(result.GetValue(0) == 0);
+}
+
+TEST_CASE("Euclidean: euc(2,4,1) shift by 1, second element is 1", "[Euclidean]")
+{
+    std::string file{"a = euc(2,4,1) \n test a[1]"};
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    REQUIRE(vm.Prepare(file));
+
+    StepData result = vm.GetTopStackValue();
+    REQUIRE(result.GetValue(0) == 1);
+}
+
+TEST_CASE("Euclidean: euc(2,4,0) explicit zero shift matches unshifted", "[Euclidean]")
+{
+    std::string file{"a = euc(2,4,0) \n test a"};
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    REQUIRE(vm.Prepare(file));
+
+    StepData result = vm.GetTopStackValue();
+    REQUIRE(result.GetValue(0) == 1);
+}
+
+TEST_CASE("Euclidean: euc(2,4,4) shift by full length wraps to same as no shift", "[Euclidean]")
+{
+    std::string file{"a = euc(2,4,4) \n test a"};
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    REQUIRE(vm.Prepare(file));
+
+    StepData result = vm.GetTopStackValue();
+    REQUIRE(result.GetValue(0) == 1);
+}

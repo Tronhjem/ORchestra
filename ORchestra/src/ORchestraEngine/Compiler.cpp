@@ -413,6 +413,58 @@ namespace ORchestra
         return true;
     }
 
+    // Compiles euc(hits, length) or euc(hits, length, shift).
+    // Shift is optional and defaults to 0.
+    bool Compiler::CompileEuclideanCall(std::vector<Instruction>& instructions)
+    {
+        Consume(); // '('
+
+        if (!CompileExpression(instructions))  // hits
+        {
+            ThrowUnexpectedTokenError(Peek());
+            return false;
+        }
+
+        if (Peek().mTokenType != ORchestraTokenType::COMMA)
+        {
+            ThrowMissingParamCount(2, 1);
+            return false;
+        }
+        Consume(); // ','
+
+        if (!CompileExpression(instructions))  // length
+        {
+            ThrowUnexpectedTokenError(Peek());
+            return false;
+        }
+
+        // Optional third parameter: shift (defaults to 0)
+        if (Peek().mTokenType == ORchestraTokenType::COMMA)
+        {
+            Consume(); // ','
+            if (!CompileExpression(instructions))  // shift
+            {
+                ThrowUnexpectedTokenError(Peek());
+                return false;
+            }
+        }
+        else
+        {
+            instructions.emplace_back(Instruction{ OpCode::CONSTANT, static_cast<DataUnit>(0) });
+        }
+
+        if (Peek().mTokenType != ORchestraTokenType::RIGHT_PAREN)
+        {
+            const std::string missingRightParen = ")";
+            ThrowUnexpectedEnd(missingRightParen);
+            return false;
+        }
+        Consume(); // ')'
+
+        instructions.emplace_back(Instruction{ OpCode::GENERATE_EUCLID_SEQUENCE });
+        return true;
+    }
+
     bool Compiler::CompileArray(std::vector<Instruction>& instructions,
         DataUnit& outLength,
         int maxLength,
@@ -863,7 +915,7 @@ namespace ORchestra
                 case ORchestraTokenType::EUCLIDEAN:
                 {
                     Consume();
-                    if (!CompileFunctionCall(instructions, eucFunctionName))
+                    if (!CompileEuclideanCall(instructions))
                         return StatementResult::COMPILE_ERROR;
 
                     const DataUnit id = GetOrCreateVariableID(name);

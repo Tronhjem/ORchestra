@@ -93,6 +93,7 @@ namespace ORchestra
 
         inline void BuildFunctions();
         bool CompileFunctionCall(std::vector<Instruction>& instructions, const std::string& functionName);
+        bool CompileEuclideanCall(std::vector<Instruction>& instructions);
         bool CompileFunctionArray(const std::string& name);
         bool CompileFunctionArrayCall(std::vector<Instruction>& instructions, DataUnit arrayId);
 
