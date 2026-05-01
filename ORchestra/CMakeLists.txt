@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 
-file(GLOB_RECURSE SRC_FILES "src/**/*.cpp")
+file(GLOB_RECURSE SRC_FILES "src/*/*.cpp")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # ===================================================================================================

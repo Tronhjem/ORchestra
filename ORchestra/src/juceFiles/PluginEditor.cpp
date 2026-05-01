@@ -40,6 +40,16 @@ constexpr int LOG_BOX_HEIGHT = 180;
 constexpr int CLEAR_BUTTON_HEIGHT = 20;
 constexpr int SEPARATOR_WIDTH = 2;
 
+// Default script shown on first load when no saved state exists.
+// Edit this string to change what new users see in the editor.
+constexpr const char* DEFAULT_SCRIPT =
+    "bpm(120)\n"
+    "bpmDiv(n8)\n"
+    "\n"
+    "trig = euc(3, 8)\n"
+    "\n"
+    "note(trig, C4, 100, n8, 1)\n";
+
 //==============================================================================
 // MidiSettingsComponent
 //==============================================================================
@@ -56,15 +66,18 @@ MidiSettingsComponent::MidiSettingsComponent(juce::AudioDeviceManager& deviceMan
         btn->setClickingTogglesState(true);
         btn->setToggleState(mDeviceManager.isMidiInputDeviceEnabled(device.identifier),
                             juce::dontSendNotification);
+
         btn->setColour(juce::TextButton::textColourOffId, ORchestra::TextColor);
         btn->setColour(juce::TextButton::textColourOnId, ORchestra::BackgroundColor);
         mInputIds.add(device.identifier);
+
         const int idx = mInputButtons.size() - 1;
         btn->onClick = [this, idx]()
         {
             mDeviceManager.setMidiInputDeviceEnabled(mInputIds[idx],
                                                      mInputButtons[idx]->getToggleState());
         };
+
         addAndMakeVisible(btn);
     }
 
@@ -76,6 +89,7 @@ MidiSettingsComponent::MidiSettingsComponent(juce::AudioDeviceManager& deviceMan
     const auto currentOutputId = mDeviceManager.getDefaultMidiOutputIdentifier();
     int itemId = 2;
     int selectedId = 1;
+
     for (const auto& device : juce::MidiOutput::getAvailableDevices())
     {
         mOutputCombo.addItem(device.name, itemId);
@@ -84,6 +98,7 @@ MidiSettingsComponent::MidiSettingsComponent(juce::AudioDeviceManager& deviceMan
             selectedId = itemId;
         ++itemId;
     }
+
     mOutputCombo.setSelectedId(selectedId, juce::dontSendNotification);
     mOutputCombo.onChange = [this]()
     {
@@ -93,7 +108,20 @@ MidiSettingsComponent::MidiSettingsComponent(juce::AudioDeviceManager& deviceMan
         else if (id >= 2 && (id - 2) < mOutputIds.size())
             mDeviceManager.setDefaultMidiOutputDevice(mOutputIds[id - 2]);
     };
+
     addAndMakeVisible(mOutputCombo);
+
+    mFileLabel.setText("File", juce::dontSendNotification);
+    mFileLabel.setColour(juce::Label::textColourId, ORchestra::TextColor);
+    addAndMakeVisible(mFileLabel);
+
+    mImportButton.setColour(juce::TextButton::textColourOffId, ORchestra::TextColor);
+    mImportButton.onClick = [this]() { if (mImportCallback) mImportCallback(); };
+    addAndMakeVisible(mImportButton);
+
+    mExportButton.setColour(juce::TextButton::textColourOffId, ORchestra::TextColor);
+    mExportButton.onClick = [this]() { if (mExportCallback) mExportCallback(); };
+    addAndMakeVisible(mExportButton);
 
     const int numInputs = mInputButtons.size();
     const int height = PADDING * 2
@@ -101,7 +129,11 @@ MidiSettingsComponent::MidiSettingsComponent(juce::AudioDeviceManager& deviceMan
                      + numInputs * (ROW_H + ROW_GAP)
                      + SECTION_GAP
                      + LABEL_H + ROW_GAP
+                     + ROW_H
+                     + SECTION_GAP
+                     + LABEL_H + ROW_GAP
                      + ROW_H;
+
     setSize(PANEL_W, height);
 }
 
@@ -110,6 +142,8 @@ MidiSettingsComponent::~MidiSettingsComponent()
     for (auto* btn : mInputButtons)
         btn->setLookAndFeel(nullptr);
     mOutputCombo.setLookAndFeel(nullptr);
+    mImportButton.setLookAndFeel(nullptr);
+    mExportButton.setLookAndFeel(nullptr);
 }
 
 void MidiSettingsComponent::resized()
@@ -129,12 +163,33 @@ void MidiSettingsComponent::resized()
     mOutputLabel.setBounds(bounds.removeFromTop(LABEL_H));
     bounds.removeFromTop(ROW_GAP);
     mOutputCombo.setBounds(bounds.removeFromTop(ROW_H));
+
+    bounds.removeFromTop(SECTION_GAP);
+    mFileLabel.setBounds(bounds.removeFromTop(LABEL_H));
+    bounds.removeFromTop(ROW_GAP);
+    auto fileRow = bounds.removeFromTop(ROW_H);
+    const int btnW = (fileRow.getWidth() - ROW_GAP) / 2;
+    mImportButton.setBounds(fileRow.removeFromLeft(btnW));
+    fileRow.removeFromLeft(ROW_GAP);
+    mExportButton.setBounds(fileRow);
 }
 
 void MidiSettingsComponent::setButtonLookAndFeel(juce::LookAndFeel* laf)
 {
     for (auto* btn : mInputButtons)
         btn->setLookAndFeel(laf);
+    mImportButton.setLookAndFeel(laf);
+    mExportButton.setLookAndFeel(laf);
+}
+
+void MidiSettingsComponent::setImportCallback(std::function<void()> callback)
+{
+    mImportCallback = std::move(callback);
+}
+
+void MidiSettingsComponent::setExportCallback(std::function<void()> callback)
+{
+    mExportCallback = std::move(callback);
 }
 
 //==============================================================================
@@ -145,7 +200,7 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
           mTimeline(mTriggerRectangle)
 {
     setResizable(true, true);
-    setResizeLimits(800, 500, 99999, 99999);
+    setResizeLimits(900, 700, 99999, 99999);
     setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
 
     audioProcessor.addChangeListener(this);
@@ -171,7 +226,7 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     mClearLogButton.onClick = [this]() { handleClearLog(); };
 
     mSettingsButton.setLookAndFeel(mButtonLookAndFeel.get());
-    mSettingsButton.onClick = [this]()
+    mSettingsButton.onClick = [&]()
     {
 #if JUCE_STANDALONE_APPLICATION
         if (auto* holder = juce::StandalonePluginHolder::getInstance())
@@ -179,6 +234,8 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
             auto comp = std::make_unique<MidiSettingsComponent>(holder->deviceManager);
             comp->setLookAndFeel(mGeneralLookAndFeel.get());
             comp->setButtonLookAndFeel(mButtonLookAndFeel.get());
+            comp->setImportCallback([this]() { handleImportFile(); });
+            comp->setExportCallback([this]() { handleExportFile(); });
             juce::CallOutBox::launchAsynchronously(std::move(comp),
                                                    mSettingsButton.getScreenBounds(),
                                                    nullptr);
@@ -187,9 +244,17 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     };
 
     mCloseButton.setLookAndFeel(mButtonLookAndFeel.get());
-    mCloseButton.onClick = []()
+    mCloseButton.onClick = [this]()
     {
+        UNUSED(this);
 #if JUCE_STANDALONE_APPLICATION
+        // Persist whatever is currently in the editor, compiled or not.
+        const juce::String text = mCodeEditorPanel.getCodeDocument().getAllContent();
+        audioProcessor.SetInstructionData(text.toStdString());
+
+        if (auto* holder = juce::StandalonePluginHolder::getInstance())
+            holder->savePluginState();
+
         juce::JUCEApplicationBase::quit();
 #endif
     };
@@ -209,11 +274,15 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     addAndMakeVisible(mTriggerRectangle);
     addAndMakeVisible(mLogBox);
     addAndMakeVisible(mClearLogButton);
+
+#if JUCE_STANDALONE_APPLICATION
     addAndMakeVisible(mSettingsButton);
     addAndMakeVisible(mCloseButton);
+#endif
 
     const std::string& data = audioProcessor.GetInstructionData();
-    juce::String dataAsString{ data };
+    const juce::String dataAsString = data.empty() ? juce::String(DEFAULT_SCRIPT)
+                                                    : juce::String(data);
     mCodeEditorPanel.loadContent(dataAsString);
     
     if (audioProcessor.IsORchestraVMInit())
@@ -232,12 +301,56 @@ void ORchestraAudioProcessorEditor::parentHierarchyChanged()
     if (auto* w = dynamic_cast<juce::DocumentWindow*>(getTopLevelComponent()))
         if (w->getTitleBarHeight() > 0)
             w->setTitleBarHeight(0);
+
+    if (auto* top = getTopLevelComponent())
+        top->addKeyListener(this);
+}
+
+bool ORchestraAudioProcessorEditor::keyPressed(const juce::KeyPress& key, juce::Component*)
+{
+    const auto cmd = juce::ModifierKeys::commandModifier;
+
+    if (key == juce::KeyPress('s', cmd, 0)) 
+    { 
+        handleCompile();    
+        return true; 
+    }
+
+    if (key == juce::KeyPress('p', cmd, 0)) 
+    { 
+        handlePlayButton(); 
+        return true; 
+    }
+
+    return false;
+}
+
+void ORchestraAudioProcessorEditor::mouseDown(const juce::MouseEvent& e)
+{
+    if (e.getPosition().getY() < OUTER_MARGIN * 2)
+    {
+        mIsDragging = true;
+        mDragger.startDraggingComponent(getTopLevelComponent(), e);
+    }
+}
+
+void ORchestraAudioProcessorEditor::mouseDrag(const juce::MouseEvent& e)
+{
+    if (mIsDragging)
+        mDragger.dragComponent(getTopLevelComponent(), e, nullptr);
+}
+
+void ORchestraAudioProcessorEditor::mouseUp(const juce::MouseEvent&)
+{
+    mIsDragging = false;
 }
 
 ORchestraAudioProcessorEditor::~ORchestraAudioProcessorEditor()
 {
     audioProcessor.removeChangeListener(this);
     audioProcessor.SetErrorListener(nullptr);
+    if (auto* top = getTopLevelComponent())
+        top->removeKeyListener(this);
     mLogBox.setLookAndFeel(nullptr);
     mClearLogButton.setLookAndFeel(nullptr);
     mSettingsButton.setLookAndFeel(nullptr);
@@ -306,15 +419,16 @@ void ORchestraAudioProcessorEditor::handleImportFile()
 
 void ORchestraAudioProcessorEditor::handleExportFile()
 {
-    mFileChooser.launchAsync(mFileChooserFlags, [this](const juce::FileChooser& fc)
+    constexpr int exportFlags = juce::FileBrowserComponent::saveMode | juce::FileBrowserComponent::canSelectFiles;
+    mFileChooser.launchAsync(exportFlags, [this](const juce::FileChooser& fc)
         {
             UNUSED(fc);
             juce::File file = mFileChooser.getResult();
+            if (file == juce::File{})
+                return;
             std::string filePath{ file.getFullPathName().toRawUTF8() };
             audioProcessor.ExportToFile(filePath);
         });
-
-    UpdateErrors();
 }
 
 void ORchestraAudioProcessorEditor::UpdateErrors()
@@ -351,9 +465,12 @@ void ORchestraAudioProcessorEditor::paint(juce::Graphics& g)
     mCodeEditorPanel.setCompileButtonEnabled(mCodeEditorPanel.hasUnsavedChanges());
 
     // Vertical separator between code panel and timeline/log area
-    const float sepX = static_cast<float>(mCodeEditorPanel.getRight()) + static_cast<float>(COMPONENT_MARGIN) / 2.0f;
+    const float sepX = 
+        static_cast<float>(mCodeEditorPanel.getRight()) + static_cast<float>(COMPONENT_MARGIN) / 2.0f;
+
     const float topY = static_cast<float>(mCodeEditorPanel.getY());
     const float botY = static_cast<float>(mCodeEditorPanel.getBottom());
+
     g.setColour(ORchestra::OutlineColor.brighter(0.3f));
     g.drawLine(sepX, topY, sepX, botY, static_cast<float>(SEPARATOR_WIDTH));
 }

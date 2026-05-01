@@ -43,6 +43,8 @@ public:
     ~MidiSettingsComponent() override;
     void resized() override;
     void setButtonLookAndFeel(juce::LookAndFeel* laf);
+    void setImportCallback(std::function<void()> callback);
+    void setExportCallback(std::function<void()> callback);
 
 private:
     static constexpr int PADDING     = 12;
@@ -60,6 +62,12 @@ private:
     juce::StringArray mInputIds;
     juce::ComboBox mOutputCombo;
     juce::StringArray mOutputIds;
+
+    juce::Label mFileLabel;
+    juce::TextButton mImportButton{ "Import" };
+    juce::TextButton mExportButton{ "Export" };
+    std::function<void()> mImportCallback;
+    std::function<void()> mExportCallback;
 };
 
 //==============================================================================
@@ -69,6 +77,7 @@ class ORchestraAudioProcessorEditor : public juce::AudioProcessorEditor,
     public juce::ChangeListener,
     public ORchestraCodeEditorChangeListener,
     public ORchestra::ErrorReportingListener,
+    public juce::KeyListener,
     private juce::AsyncUpdater
 {
 public:
@@ -79,6 +88,9 @@ public:
     void paint(juce::Graphics&) override;
     void resized() override;
     void parentHierarchyChanged() override;
+    void mouseDown(const juce::MouseEvent& e) override;
+    void mouseDrag(const juce::MouseEvent& e) override;
+    void mouseUp(const juce::MouseEvent& e) override;
     void CodeEditorHasChanged() override;
 
     // ErrorReportingListener - called from audio thread
@@ -88,6 +100,10 @@ private:
     // AsyncUpdater - called on message thread
     void handleAsyncUpdate() override;
     void changeListenerCallback(juce::ChangeBroadcaster* broadCaster) override;
+
+    // KeyListener - fires for any key press in the window regardless of focus
+    bool keyPressed(const juce::KeyPress& key, juce::Component* origin) override;
+    using juce::Component::keyPressed;
 
     void handleCompile();
     void handleImportFile();
@@ -113,6 +129,9 @@ private:
     juce::TextButton mClearLogButton{ "Clear" };
     juce::TextButton mSettingsButton{ "..." };
     juce::TextButton mCloseButton{ "X" };
+
+    juce::ComponentDragger mDragger;
+    bool mIsDragging = false;
 
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ORchestraAudioProcessorEditor)
