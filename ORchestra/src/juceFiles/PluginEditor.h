@@ -31,6 +31,7 @@
 #include "ButtonsLookAndFeel.h"
 #include "TextEditorLookAndFeel.h"
 #include "ErrorReporting.h"
+#include "FileOperationsToolbar.h"
 #include "juce_gui_basics/juce_gui_basics.h"
 
 typedef juce::AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
@@ -122,6 +123,7 @@ private:
     int mFileChooserFlags = juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles;
 
     CodeEditorPanel mCodeEditorPanel;
+    FileOperationsToolbar mFileOperationsToolbar;
     TriggerRectangleComponent mTriggerRectangle;
     Timeline mTimeline;
 

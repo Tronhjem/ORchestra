@@ -40,11 +40,12 @@ FileOperationsToolbar::~FileOperationsToolbar()
 
 void FileOperationsToolbar::resized()
 {
-    auto bounds = getLocalBounds();
+    const int padding = (getHeight() - BUTTON_HEIGHT) / 2;
+    auto row = getLocalBounds().reduced(0, padding);
 
-    mCompileButton.setBounds(bounds.removeFromLeft(BUTTON_WIDTH));
-    bounds.removeFromLeft(BUTTON_SPACING);
-    mPlayButton.setBounds(bounds.removeFromLeft(BUTTON_WIDTH));
+    mCompileButton.setBounds(row.removeFromLeft(BUTTON_WIDTH));
+    row.removeFromLeft(BUTTON_SPACING);
+    mPlayButton.setBounds(row.removeFromLeft(BUTTON_WIDTH));
 }
 
 void FileOperationsToolbar::buttonClicked(juce::Button* button)
@@ -61,7 +62,7 @@ void FileOperationsToolbar::buttonClicked(juce::Button* button)
 
 void FileOperationsToolbar::updatePlayButtonState(bool isPlaying)
 {
-    mPlayButton.setButtonText(isPlaying ? "Stop" : "Play");
+    mPlayButton.setButtonText(isPlaying ? "> Stop" : "> Play");
 }
 
 void FileOperationsToolbar::setImportCallback(std::function<void()> callback)

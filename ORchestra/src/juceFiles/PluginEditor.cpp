@@ -33,12 +33,13 @@
 
 constexpr int WINDOW_WIDTH = 1200;
 constexpr int WINDOW_HEIGHT = 800;
-constexpr int COMPONENT_MARGIN = 15;
-constexpr int OUTER_MARGIN = 20;
-constexpr int ROW_SPACING = 10;
+constexpr int OUTER_MARGIN = 16;
 constexpr int LOG_BOX_HEIGHT = 180;
-constexpr int CLEAR_BUTTON_HEIGHT = 20;
-constexpr int SEPARATOR_WIDTH = 2;
+constexpr int TITLE_BAR_HEIGHT = 28;
+constexpr int CONSOLE_HEADER_HEIGHT = 22;
+constexpr int TRAFFIC_DOT_SIZE = 12;
+constexpr int CLEAR_BTN_W = 44;
+constexpr int CLEAR_BTN_H = 16;
 
 // Default script shown on first load when no saved state exists.
 // Edit this string to change what new users see in the editor.
@@ -212,12 +213,11 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     juce::LookAndFeel::setDefaultLookAndFeel(mGeneralLookAndFeel.get());
 
     mCodeEditorPanel.setEditorLookAndFeel(mTextEditorLookAndFeel.get());
-    mCodeEditorPanel.setFileOperationButtonsLookAndFeel(mButtonLookAndFeel.get());
     mCodeEditorPanel.applyDefaultStyling();
 
     mLogBox.setFont(MONOSPACE_FONT_OPTIONS);
     mLogBox.setColour(juce::TextEditor::textColourId, ORchestra::TextColor);
-    mLogBox.setColour(juce::TextEditor::backgroundColourId, ORchestra::TextEditorBackgroundColor);
+    mLogBox.setColour(juce::TextEditor::backgroundColourId, ORchestra::ConsoleBackgroundColor);
     mLogBox.setMultiLine(true);
     mLogBox.setEnabled(false);
     mLogBox.setLookAndFeel(mTextEditorLookAndFeel.get());
@@ -244,6 +244,8 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     };
 
     mCloseButton.setLookAndFeel(mButtonLookAndFeel.get());
+    mCloseButton.setColour(juce::TextButton::buttonColourId, juce::Colour(ColorPalette::Red).darker(0.2f));
+    mCloseButton.setButtonText("");
     mCloseButton.onClick = [this]()
     {
         UNUSED(this);
@@ -262,14 +264,16 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     mTimeline.SetProcessor(&audioProcessor);
     mTriggerRectangle.SetProcessor(&audioProcessor);
 
-    mCodeEditorPanel.setPlayCallback([this]() { handlePlayButton(); });
-    mCodeEditorPanel.setCompileCallback([this]() { handleCompile(); });
-    mCodeEditorPanel.setExportCallback([this]() { handleExportFile(); });
-    mCodeEditorPanel.setImportCallback([this]() { handleImportFile(); });
+    mFileOperationsToolbar.setPlayCallback([this]() { handlePlayButton(); });
+    mFileOperationsToolbar.setCompileCallback([this]() { handleCompile(); });
+    mFileOperationsToolbar.setExportCallback([this]() { handleExportFile(); });
+    mFileOperationsToolbar.setImportCallback([this]() { handleImportFile(); });
+    mFileOperationsToolbar.setButtonLookAndFeel(mButtonLookAndFeel.get());
 
     audioProcessor.SetErrorListener(this);
 
     addAndMakeVisible(mCodeEditorPanel);
+    addAndMakeVisible(mFileOperationsToolbar);
     addAndMakeVisible(mTimeline);
     addAndMakeVisible(mTriggerRectangle);
     addAndMakeVisible(mLogBox);
@@ -288,7 +292,7 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     if (audioProcessor.IsORchestraVMInit())
     {
         mCodeEditorPanel.markSaved();
-        mCodeEditorPanel.setCompileButtonEnabled(false);
+        mFileOperationsToolbar.setCompileButtonEnabled(false);
         UpdateErrors();
     }
 
@@ -327,7 +331,7 @@ bool ORchestraAudioProcessorEditor::keyPressed(const juce::KeyPress& key, juce::
 
 void ORchestraAudioProcessorEditor::mouseDown(const juce::MouseEvent& e)
 {
-    if (e.getPosition().getY() < OUTER_MARGIN * 2)
+    if (e.getPosition().getY() < TITLE_BAR_HEIGHT)
     {
         mIsDragging = true;
         mDragger.startDraggingComponent(getTopLevelComponent(), e);
@@ -351,6 +355,7 @@ ORchestraAudioProcessorEditor::~ORchestraAudioProcessorEditor()
     audioProcessor.SetErrorListener(nullptr);
     if (auto* top = getTopLevelComponent())
         top->removeKeyListener(this);
+    mFileOperationsToolbar.setButtonLookAndFeel(nullptr);
     mLogBox.setLookAndFeel(nullptr);
     mClearLogButton.setLookAndFeel(nullptr);
     mSettingsButton.setLookAndFeel(nullptr);
@@ -370,7 +375,7 @@ void ORchestraAudioProcessorEditor::CodeEditorHasChanged()
 {
     if(mCodeEditorPanel.hasUnsavedChanges())
     {
-        mCodeEditorPanel.setCompileButtonEnabled(true);
+        mFileOperationsToolbar.setCompileButtonEnabled(true);
     }
 }
 
@@ -382,7 +387,7 @@ void ORchestraAudioProcessorEditor::handlePlayButton()
     if (audioProcessor.IsORchestraVMInit())
     {
         audioProcessor.IsRunning = !audioProcessor.IsRunning;
-        mCodeEditorPanel.updatePlayButtonState(audioProcessor.IsRunning);
+        mFileOperationsToolbar.updatePlayButtonState(audioProcessor.IsRunning);
     }
 }
 
@@ -395,7 +400,7 @@ void ORchestraAudioProcessorEditor::handleCompile()
     if (audioProcessor.IsORchestraVMInit())
     {
         mCodeEditorPanel.markSaved();
-        mCodeEditorPanel.setCompileButtonEnabled(false);
+        mFileOperationsToolbar.setCompileButtonEnabled(false);
     }
     
     UpdateErrors();
@@ -462,45 +467,127 @@ void ORchestraAudioProcessorEditor::handleClearLog()
 void ORchestraAudioProcessorEditor::paint(juce::Graphics& g)
 {
     g.fillAll(BackgroundColor);
-    mCodeEditorPanel.setCompileButtonEnabled(mCodeEditorPanel.hasUnsavedChanges());
+    mFileOperationsToolbar.setCompileButtonEnabled(mCodeEditorPanel.hasUnsavedChanges());
 
-    // Vertical separator between code panel and timeline/log area
-    const float sepX = 
-        static_cast<float>(mCodeEditorPanel.getRight()) + static_cast<float>(COMPONENT_MARGIN) / 2.0f;
+    // Title bar background
+    g.setColour(juce::Colour(ColorPalette::Mantle));
+    g.fillRect(0, 0, getWidth(), TITLE_BAR_HEIGHT);
 
-    const float topY = static_cast<float>(mCodeEditorPanel.getY());
-    const float botY = static_cast<float>(mCodeEditorPanel.getBottom());
+    // Title bar bottom border
+    g.setColour(OutlineColor);
+    g.drawLine(0.f, static_cast<float>(TITLE_BAR_HEIGHT),
+               static_cast<float>(getWidth()), static_cast<float>(TITLE_BAR_HEIGHT), 1.f);
 
-    g.setColour(ORchestra::OutlineColor.brighter(0.3f));
-    g.drawLine(sepX, topY, sepX, botY, static_cast<float>(SEPARATOR_WIDTH));
+    // "OR | CHESTRA" centered in title bar
+    {
+        juce::Font titleFont(juce::FontOptions{ MONOSPACE_FONT_OPTIONS }.withHeight(13.f));
+        g.setFont(titleFont);
+        g.setColour(TextColor);
+        g.drawText("OR | CHESTRA", 0, 0, getWidth(), TITLE_BAR_HEIGHT,
+                   juce::Justification::centred, false);
+    }
+
+    // Version indicator (top-right of title bar)
+    {
+        g.setFont(juce::Font(juce::FontOptions{}.withHeight(11.f)));
+        g.setColour(juce::Colour(ColorPalette::Subtext0));
+        const juce::String version = "* v8.4.2";
+        g.drawText(version, 0, 0, getWidth() - OUTER_MARGIN, TITLE_BAR_HEIGHT,
+                   juce::Justification::centredRight, false);
+    }
+
+    // All panel borders share edges - draw as one outer box + internal dividers
+    const auto contentArea = getLocalBounds().withTrimmedTop(TITLE_BAR_HEIGHT).reduced(OUTER_MARGIN);
+    const int splitX     = mCodeEditorPanel.getRight();
+    const int consoleSplitY = mLogBox.getY() - CONSOLE_HEADER_HEIGHT;
+    const int rightW     = contentArea.getRight() - splitX;
+
+    // Toolbar strip: left panel only, Mantle (same as title bar + console header)
+    const int toolbarY = mFileOperationsToolbar.getY();
+    const int leftW = splitX - contentArea.getX();
+    g.setColour(juce::Colour(ColorPalette::Mantle));
+    g.fillRect(contentArea.getX(), toolbarY, leftW, mFileOperationsToolbar.getHeight());
+
+    // Console background fill (entire console section: header + log)
+    g.setColour(ConsoleBackgroundColor);
+    g.fillRect(splitX, consoleSplitY, rightW, mLogBox.getBottom() - consoleSplitY);
+
+    // Outer border around entire content area
+    const auto borderColour = OutlineColor.brighter(0.2f);
+    g.setColour(borderColour);
+    g.drawRect(contentArea, 1);
+
+    // Vertical divider: code editor | right panels (full height)
+    g.drawLine(float(splitX), float(contentArea.getY()),
+               float(splitX), float(contentArea.getBottom()), 1.f);
+
+    // Toolbar top divider: left panel only
+    g.drawLine(float(contentArea.getX()), float(toolbarY),
+               float(splitX), float(toolbarY), 1.f);
+
+    // Horizontal divider: timeline | console
+    g.drawLine(float(splitX), float(consoleSplitY),
+               float(contentArea.getRight()), float(consoleSplitY), 1.f);
+
+    // Console header | log divider
+    g.drawLine(float(splitX), float(mLogBox.getY()),
+               float(contentArea.getRight()), float(mLogBox.getY()), 1.f);
+
+    // Console header labels
+    {
+        g.setFont(juce::Font(juce::FontOptions{ MONOSPACE_FONT_OPTIONS }.withHeight(12.f)));
+        g.setColour(juce::Colour(ColorPalette::Subtext1));
+        g.drawText("CONSOLE", splitX + 8, consoleSplitY, 80, CONSOLE_HEADER_HEIGHT,
+                   juce::Justification::centredLeft, false);
+
+        const juce::String countText = juce::String((int)audioProcessor.GetErrors().size()) + " messages";
+        g.drawText(countText,
+                   splitX, consoleSplitY, rightW - CLEAR_BTN_W - 12, CONSOLE_HEADER_HEIGHT,
+                   juce::Justification::centredRight, false);
+    }
 }
 
 void ORchestraAudioProcessorEditor::resized()
 {
-    auto bounds = getLocalBounds().reduced(OUTER_MARGIN);
+    auto full = getLocalBounds();
 
-    // Top-right corner buttons: [... settings] [X close]
-    constexpr int topBtnW = 30;
-    constexpr int topBtnH = 20;
-    constexpr int topBtnSpacing = 4;
-    const int topBtnY = bounds.getY();
-    mCloseButton.setBounds(bounds.getRight() - topBtnW, topBtnY, topBtnW, topBtnH);
-    mSettingsButton.setBounds(bounds.getRight() - topBtnW * 2 - topBtnSpacing, topBtnY, topBtnW, topBtnH);
+    // Title bar: single red close dot on left, settings button on right
+    full.removeFromTop(TITLE_BAR_HEIGHT);
+    const int dotY = (TITLE_BAR_HEIGHT - TRAFFIC_DOT_SIZE) / 2;
+    mCloseButton.setBounds(OUTER_MARGIN, dotY, TRAFFIC_DOT_SIZE, TRAFFIC_DOT_SIZE);
 
-    // Vertical split: left = code editor, right = timeline + log
+    constexpr int settingsBtnW = 28;
+    constexpr int settingsBtnH = 18;
+    mSettingsButton.setBounds(getWidth() - OUTER_MARGIN - settingsBtnW,
+                              (TITLE_BAR_HEIGHT - settingsBtnH) / 2,
+                              settingsBtnW, settingsBtnH);
+
+    // Content area below title bar
+    auto bounds = full.reduced(OUTER_MARGIN);
+
+    // Vertical split: left = code editor + toolbar, right = timeline + console
     const int codeWidth = bounds.getWidth() * 2 / 5;
     auto codeBounds = bounds.removeFromLeft(codeWidth);
-    bounds.removeFromLeft(COMPONENT_MARGIN);
 
-    // Code editor panel fills entire left column
+    // Left panel: toolbar strip at bottom, code editor takes the rest
+    constexpr int toolbarH = FileOperationsToolbar::BUTTON_HEIGHT + 40;
+    auto toolbarStrip = codeBounds.removeFromBottom(toolbarH);
+
+    // Center buttons vertically within the toolbar strip
+    mFileOperationsToolbar.setBounds(toolbarStrip);
     mCodeEditorPanel.setBounds(codeBounds);
 
-    // Right column: clear button at bottom, log above it, timeline fills the rest
-    auto clearRow = bounds.removeFromBottom(CLEAR_BUTTON_HEIGHT);
-    mClearLogButton.setBounds(clearRow.removeFromLeft(60));
-    bounds.removeFromBottom(ROW_SPACING);
-    mLogBox.setBounds(bounds.removeFromBottom(LOG_BOX_HEIGHT));
-    bounds.removeFromBottom(ROW_SPACING);
+    // Right column: console section at bottom, timeline fills rest (no gaps)
+    const int consoleSectionHeight = CONSOLE_HEADER_HEIGHT + LOG_BOX_HEIGHT;
+    auto consoleSection = bounds.removeFromBottom(consoleSectionHeight);
+
+    // Console header: Clear button on the right
+    auto consoleHeader = consoleSection.removeFromTop(CONSOLE_HEADER_HEIGHT);
+    mClearLogButton.setBounds(consoleHeader.getRight() - CLEAR_BTN_W,
+                              consoleHeader.getY() + (CONSOLE_HEADER_HEIGHT - CLEAR_BTN_H) / 2,
+                              CLEAR_BTN_W, CLEAR_BTN_H);
+
+    mLogBox.setBounds(consoleSection);
 
     // Timeline fills remaining right area
     mTimeline.setBounds(bounds);

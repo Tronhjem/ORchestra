@@ -32,18 +32,23 @@ public:
     void drawButtonBackground(juce::Graphics& g, juce::Button& button,
         const juce::Colour& backgroundColour, bool isMouseOverButton, bool isButtonDown) override
     {
-        UNUSED(backgroundColour);
         auto bounds = button.getLocalBounds().toFloat();
 
-        juce::Colour fillColour = button.getToggleState() ? HighlightColor : ButtonBackgroundColor;
+        const juce::Colour baseColour = backgroundColour.isTransparent() ? ButtonBackgroundColor : backgroundColour;
+        juce::Colour fillColour = button.getToggleState() ? HighlightColor : baseColour;
 
         if (isButtonDown)
             fillColour = fillColour.darker(0.15f);
         else if (isMouseOverButton)
-            fillColour = fillColour.brighter(0.15f);
+            fillColour = fillColour.brighter(0.2f);
 
         g.setColour(fillColour);
-        g.fillRoundedRectangle(bounds, ROUNDED_CORNER_SIZE);
+
+        // Square bounds -> draw as circle (used for traffic-light dots)
+        if (std::abs(bounds.getWidth() - bounds.getHeight()) < 1.f)
+            g.fillEllipse(bounds);
+        else
+            g.fillRoundedRectangle(bounds, ROUNDED_CORNER_SIZE);
     }
 
     void drawToggleButton (juce::Graphics& g, juce::ToggleButton& toggleButton,

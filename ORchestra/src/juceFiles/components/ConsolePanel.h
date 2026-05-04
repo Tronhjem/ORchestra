@@ -20,30 +20,35 @@
 #pragma once
 
 #include <JuceHeader.h>
-#include "ORchestraCodeEditorComponent.h"
-#include "ORchestraCodeEditorTokenizer.h"
+#include <functional>
 
-class CodeEditorPanel : public juce::Component
+class ConsolePanel : public juce::Component
 {
 public:
-    CodeEditorPanel(ORchestra::ORchestraCodeEditorChangeListener* changeListener);
-    ~CodeEditorPanel() override;
+    static constexpr int HEADER_HEIGHT = 22;
+    static constexpr int LOG_HEIGHT    = 180;
+
+    ConsolePanel();
+    ~ConsolePanel() override;
 
     void resized() override;
+    void paint(juce::Graphics& g) override;
 
-    juce::CodeDocument& getCodeDocument() { return mCodeDocument; }
-
-    void loadContent(const juce::String& content);
-    bool hasUnsavedChanges() const;
-    void markSaved();
-
-    void setEditorLookAndFeel(juce::LookAndFeel* laf);
+    void setText(const juce::String& text);
+    void setMessageCount(int count);
+    void setClearCallback(std::function<void()> callback);
+    void setButtonLookAndFeel(juce::LookAndFeel* laf);
+    void setTextEditorLookAndFeel(juce::LookAndFeel* laf);
     void applyDefaultStyling();
 
 private:
-    ORchestra::ORchestraCodeEditorTokenizer mTokeniser;
-    juce::CodeDocument mCodeDocument;
-    ORchestra::ORchestraCodeEditorComponent mCodeEditor;
+    static constexpr int CLEAR_BTN_W = 44;
+    static constexpr int CLEAR_BTN_H = 16;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CodeEditorPanel)
+    juce::TextEditor mLogBox;
+    juce::TextButton mClearButton{ "Clear" };
+    int mMessageCount = 0;
+    std::function<void()> mClearCallback;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ConsolePanel)
 };

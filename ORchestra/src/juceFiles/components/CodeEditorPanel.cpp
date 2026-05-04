@@ -32,7 +32,6 @@ CodeEditorPanel::CodeEditorPanel(ORchestra::ORchestraCodeEditorChangeListener* c
     mCodeEditor.setLineNumbersShown(true);
     mCodeEditor.AddChangeListener(changeListener);
 
-    addAndMakeVisible(mFileOperationsToolbar);
     addAndMakeVisible(mCodeEditor);
 }
 
@@ -43,15 +42,7 @@ CodeEditorPanel::~CodeEditorPanel()
 
 void CodeEditorPanel::resized()
 {
-    auto bounds = getLocalBounds();
-
-    const int fileOpsHeight = mFileOperationsToolbar.getPreferredHeight();
-    const int fileOpsWidth = mFileOperationsToolbar.getPreferredWidth();
-
-    auto toolbarRow = bounds.removeFromBottom(fileOpsHeight);
-    mFileOperationsToolbar.setBounds(toolbarRow.removeFromLeft(fileOpsWidth));
-
-    mCodeEditor.setBounds(bounds);
+    mCodeEditor.setBounds(getLocalBounds());
 }
 
 void CodeEditorPanel::loadContent(const juce::String& content)
@@ -74,16 +65,6 @@ void CodeEditorPanel::setEditorLookAndFeel(juce::LookAndFeel* laf)
     mCodeEditor.setLookAndFeel(laf);
 }
 
-void CodeEditorPanel::setFileOperationButtonsLookAndFeel(juce::LookAndFeel* laf)
-{
-    mFileOperationsToolbar.setButtonLookAndFeel(laf);
-}
-
-void CodeEditorPanel::setCompileButtonEnabled(bool enabled)
-{
-    mFileOperationsToolbar.setCompileButtonEnabled(enabled);
-}
-
 void CodeEditorPanel::applyDefaultStyling()
 {
     mCodeEditor.setFont(MONOSPACE_FONT_OPTIONS);
@@ -95,27 +76,3 @@ void CodeEditorPanel::applyDefaultStyling()
     mCodeEditor.setScrollbarThickness(4);
 }
 
-void CodeEditorPanel::setImportCallback(std::function<void()> callback)
-{
-    mFileOperationsToolbar.setImportCallback(std::move(callback));
-}
-
-void CodeEditorPanel::setExportCallback(std::function<void()> callback)
-{
-    mFileOperationsToolbar.setExportCallback(std::move(callback));
-}
-
-void CodeEditorPanel::setCompileCallback(std::function<void()> callback)
-{
-    mFileOperationsToolbar.setCompileCallback(std::move(callback));
-}
-
-void CodeEditorPanel::setPlayCallback(std::function<void()> callback)
-{
-    mFileOperationsToolbar.setPlayCallback(std::move(callback));
-}
-
-void CodeEditorPanel::updatePlayButtonState(bool isPlaying)
-{
-    mFileOperationsToolbar.updatePlayButtonState(isPlaying);
-}

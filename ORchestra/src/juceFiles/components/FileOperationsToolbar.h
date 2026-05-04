@@ -27,8 +27,8 @@ class FileOperationsToolbar : public juce::Component,
 {
 public:
     static constexpr int BUTTON_HEIGHT = 20;
-    static constexpr int BUTTON_WIDTH = 60;
-    static constexpr int BUTTON_SPACING = 15;
+    static constexpr int BUTTON_WIDTH = 80;
+    static constexpr int BUTTON_SPACING = 10;
 
     FileOperationsToolbar();
     ~FileOperationsToolbar() override;
@@ -46,15 +46,15 @@ public:
     void setButtonLookAndFeel(juce::LookAndFeel* laf);
 
     constexpr int getPreferredWidth() const { return 2 * BUTTON_WIDTH + BUTTON_SPACING; }
-    constexpr int getPreferredHeight() const { return BUTTON_HEIGHT; }
+    constexpr int getPreferredHeight() const { return BUTTON_HEIGHT * 2; }
 
 private:
     void buttonClicked(juce::Button* button) override;
 
     juce::TextButton mImportButton{ "Import" };
     juce::TextButton mExportButton{ "Export" };
-    juce::TextButton mCompileButton{ "Compile" };
-    juce::TextButton mPlayButton{ "Play" };
+    juce::TextButton mCompileButton{ "> Compile" };
+    juce::TextButton mPlayButton{ "> Play" };
 
     std::function<void()> mImportCallback;
     std::function<void()> mExportCallback;
