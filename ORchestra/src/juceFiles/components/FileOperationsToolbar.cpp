@@ -17,12 +17,12 @@
  * along with ORchestra. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "Colors.h"
+#include "LookAndFeelConstants.h"
 #include "FileOperationsToolbar.h"
 
 FileOperationsToolbar::FileOperationsToolbar()
 {
-    mImportButton.addListener(this);
-    mExportButton.addListener(this);
     mCompileButton.addListener(this);
     mPlayButton.addListener(this);
 
@@ -32,10 +32,15 @@ FileOperationsToolbar::FileOperationsToolbar()
 
 FileOperationsToolbar::~FileOperationsToolbar()
 {
-    mImportButton.setLookAndFeel(nullptr);
-    mExportButton.setLookAndFeel(nullptr);
     mCompileButton.setLookAndFeel(nullptr);
     mPlayButton.setLookAndFeel(nullptr);
+}
+
+void FileOperationsToolbar::paint(juce::Graphics& g) 
+{
+    g.fillAll(ORchestra::TransportButtonPanelBackground);
+    g.setColour(ORchestra::TextColor);
+    g.drawRect(getLocalBounds().toFloat(), OUTLINE_THICKNESS);
 }
 
 void FileOperationsToolbar::resized()
@@ -50,11 +55,7 @@ void FileOperationsToolbar::resized()
 
 void FileOperationsToolbar::buttonClicked(juce::Button* button)
 {
-    if (button == &mImportButton && mImportCallback)
-        mImportCallback();
-    else if (button == &mExportButton && mExportCallback)
-        mExportCallback();
-    else if (button == &mCompileButton && mCompileCallback)
+    if (button == &mCompileButton && mCompileCallback)
         mCompileCallback();
     else if (button == &mPlayButton && mPlayCallback)
         mPlayCallback();
@@ -63,16 +64,6 @@ void FileOperationsToolbar::buttonClicked(juce::Button* button)
 void FileOperationsToolbar::updatePlayButtonState(bool isPlaying)
 {
     mPlayButton.setButtonText(isPlaying ? "> Stop" : "> Play");
-}
-
-void FileOperationsToolbar::setImportCallback(std::function<void()> callback)
-{
-    mImportCallback = std::move(callback);
-}
-
-void FileOperationsToolbar::setExportCallback(std::function<void()> callback)
-{
-    mExportCallback = std::move(callback);
 }
 
 void FileOperationsToolbar::setCompileCallback(std::function<void()> callback)

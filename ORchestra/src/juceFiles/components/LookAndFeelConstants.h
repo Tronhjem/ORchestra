@@ -26,4 +26,5 @@ constexpr float ROUNDED_CORNER_SIZE = 4.f;
 constexpr float BAR_LINE_THICKNESS = 4.f;
 constexpr float QAURTER_BAR_LINE_THICKNESS = BAR_LINE_THICKNESS / 4.f;
 constexpr float COMPONENT_LINE_THICKNESS = 2.f;
+constexpr float OUTLINE_THICKNESS = 0.5f;
 

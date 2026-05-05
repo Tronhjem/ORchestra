@@ -266,8 +266,6 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
 
     mFileOperationsToolbar.setPlayCallback([this]() { handlePlayButton(); });
     mFileOperationsToolbar.setCompileCallback([this]() { handleCompile(); });
-    mFileOperationsToolbar.setExportCallback([this]() { handleExportFile(); });
-    mFileOperationsToolbar.setImportCallback([this]() { handleImportFile(); });
     mFileOperationsToolbar.setButtonLookAndFeel(mButtonLookAndFeel.get());
 
     audioProcessor.SetErrorListener(this);
@@ -499,39 +497,13 @@ void ORchestraAudioProcessorEditor::paint(juce::Graphics& g)
     // All panel borders share edges - draw as one outer box + internal dividers
     const auto contentArea = getLocalBounds().withTrimmedTop(TITLE_BAR_HEIGHT).reduced(OUTER_MARGIN);
     const int splitX     = mCodeEditorPanel.getRight();
+    const int splitY     = mCodeEditorPanel.getY();
     const int consoleSplitY = mLogBox.getY() - CONSOLE_HEADER_HEIGHT;
     const int rightW     = contentArea.getRight() - splitX;
-
-    // Toolbar strip: left panel only, Mantle (same as title bar + console header)
-    const int toolbarY = mFileOperationsToolbar.getY();
-    const int leftW = splitX - contentArea.getX();
-    g.setColour(juce::Colour(ColorPalette::Mantle));
-    g.fillRect(contentArea.getX(), toolbarY, leftW, mFileOperationsToolbar.getHeight());
 
     // Console background fill (entire console section: header + log)
     g.setColour(ConsoleBackgroundColor);
     g.fillRect(splitX, consoleSplitY, rightW, mLogBox.getBottom() - consoleSplitY);
-
-    // Outer border around entire content area
-    const auto borderColour = OutlineColor.brighter(0.2f);
-    g.setColour(borderColour);
-    g.drawRect(contentArea, 1);
-
-    // Vertical divider: code editor | right panels (full height)
-    g.drawLine(float(splitX), float(contentArea.getY()),
-               float(splitX), float(contentArea.getBottom()), 1.f);
-
-    // Toolbar top divider: left panel only
-    g.drawLine(float(contentArea.getX()), float(toolbarY),
-               float(splitX), float(toolbarY), 1.f);
-
-    // Horizontal divider: timeline | console
-    g.drawLine(float(splitX), float(consoleSplitY),
-               float(contentArea.getRight()), float(consoleSplitY), 1.f);
-
-    // Console header | log divider
-    g.drawLine(float(splitX), float(mLogBox.getY()),
-               float(contentArea.getRight()), float(mLogBox.getY()), 1.f);
 
     // Console header labels
     {
@@ -545,14 +517,17 @@ void ORchestraAudioProcessorEditor::paint(juce::Graphics& g)
                    splitX, consoleSplitY, rightW - CLEAR_BTN_W - 12, CONSOLE_HEADER_HEIGHT,
                    juce::Justification::centredRight, false);
     }
+
+    // Vertical separator bewteen code editor, play button and Timeline. 
+    g.drawLine((float)splitX, (float)splitY, (float)splitX, (float)getHeight());
 }
 
 void ORchestraAudioProcessorEditor::resized()
 {
-    auto full = getLocalBounds();
+    auto localBounds = getLocalBounds();
 
     // Title bar: single red close dot on left, settings button on right
-    full.removeFromTop(TITLE_BAR_HEIGHT);
+    localBounds.removeFromTop(TITLE_BAR_HEIGHT);
     const int dotY = (TITLE_BAR_HEIGHT - TRAFFIC_DOT_SIZE) / 2;
     mCloseButton.setBounds(OUTER_MARGIN, dotY, TRAFFIC_DOT_SIZE, TRAFFIC_DOT_SIZE);
 
@@ -562,24 +537,20 @@ void ORchestraAudioProcessorEditor::resized()
                               (TITLE_BAR_HEIGHT - settingsBtnH) / 2,
                               settingsBtnW, settingsBtnH);
 
-    // Content area below title bar
-    auto bounds = full.reduced(OUTER_MARGIN);
-
-    // Vertical split: left = code editor + toolbar, right = timeline + console
-    const int codeWidth = bounds.getWidth() * 2 / 5;
-    auto codeBounds = bounds.removeFromLeft(codeWidth);
 
     // Left panel: toolbar strip at bottom, code editor takes the rest
+    const int codeWidth = localBounds.getWidth() * 2 / 5;
     constexpr int toolbarH = FileOperationsToolbar::BUTTON_HEIGHT + 40;
-    auto toolbarStrip = codeBounds.removeFromBottom(toolbarH);
-
-    // Center buttons vertically within the toolbar strip
+    auto toolbarStrip = localBounds.removeFromBottom(toolbarH).removeFromLeft(codeWidth);
     mFileOperationsToolbar.setBounds(toolbarStrip);
+
+    // Vertical split: left = code editor + toolbar, right = timeline + console
+    auto codeBounds = localBounds.removeFromLeft(codeWidth);
     mCodeEditorPanel.setBounds(codeBounds);
 
     // Right column: console section at bottom, timeline fills rest (no gaps)
     const int consoleSectionHeight = CONSOLE_HEADER_HEIGHT + LOG_BOX_HEIGHT;
-    auto consoleSection = bounds.removeFromBottom(consoleSectionHeight);
+    auto consoleSection = localBounds.removeFromBottom(consoleSectionHeight);
 
     // Console header: Clear button on the right
     auto consoleHeader = consoleSection.removeFromTop(CONSOLE_HEADER_HEIGHT);
@@ -590,6 +561,6 @@ void ORchestraAudioProcessorEditor::resized()
     mLogBox.setBounds(consoleSection);
 
     // Timeline fills remaining right area
-    mTimeline.setBounds(bounds);
-    mTriggerRectangle.setBounds(bounds.removeFromLeft(100));
+    mTimeline.setBounds(localBounds);
+    mTriggerRectangle.setBounds(localBounds.removeFromLeft(100));
 }

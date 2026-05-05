@@ -34,6 +34,7 @@ public:
     ~FileOperationsToolbar() override;
 
     void resized() override;
+    void paint(juce::Graphics&) override;
 
     void setImportCallback(std::function<void()> callback);
     void setExportCallback(std::function<void()> callback);

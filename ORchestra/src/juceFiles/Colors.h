@@ -115,6 +115,7 @@ namespace ORchestra
     const Colour BarLineColor = Colour(ColorPalette::Surface0);
     const Colour GridLineColor = Colour(ColorPalette::Surface1).withAlpha(0.6f);
     const Colour ConsoleBackgroundColor = Colour(ColorPalette::Mantle);
+    const Colour TransportButtonPanelBackground = Colour(ColorPalette::Mantle);
     const Colour SharpRowColor = Colour(ColorPalette::Mantle);
 
 } // namespace ORchestra
