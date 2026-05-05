@@ -34,12 +34,8 @@
 constexpr int WINDOW_WIDTH = 1200;
 constexpr int WINDOW_HEIGHT = 800;
 constexpr int OUTER_MARGIN = 16;
-constexpr int LOG_BOX_HEIGHT = 180;
 constexpr int TITLE_BAR_HEIGHT = 28;
-constexpr int CONSOLE_HEADER_HEIGHT = 22;
 constexpr int TRAFFIC_DOT_SIZE = 12;
-constexpr int CLEAR_BTN_W = 44;
-constexpr int CLEAR_BTN_H = 16;
 
 // Default script shown on first load when no saved state exists.
 // Edit this string to change what new users see in the editor.
@@ -215,15 +211,10 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     mCodeEditorPanel.setEditorLookAndFeel(mTextEditorLookAndFeel.get());
     mCodeEditorPanel.applyDefaultStyling();
 
-    mLogBox.setFont(MONOSPACE_FONT_OPTIONS);
-    mLogBox.setColour(juce::TextEditor::textColourId, ORchestra::TextColor);
-    mLogBox.setColour(juce::TextEditor::backgroundColourId, ORchestra::ConsoleBackgroundColor);
-    mLogBox.setMultiLine(true);
-    mLogBox.setEnabled(false);
-    mLogBox.setLookAndFeel(mTextEditorLookAndFeel.get());
-
-    mClearLogButton.setLookAndFeel(mButtonLookAndFeel.get());
-    mClearLogButton.onClick = [this]() { handleClearLog(); };
+    mConsolePanel.applyDefaultStyling();
+    mConsolePanel.setTextEditorLookAndFeel(mTextEditorLookAndFeel.get());
+    mConsolePanel.setButtonLookAndFeel(mButtonLookAndFeel.get());
+    mConsolePanel.setClearCallback([this]() { handleClearLog(); });
 
     mSettingsButton.setLookAndFeel(mButtonLookAndFeel.get());
     mSettingsButton.onClick = [&]()
@@ -274,8 +265,7 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     addAndMakeVisible(mFileOperationsToolbar);
     addAndMakeVisible(mTimeline);
     addAndMakeVisible(mTriggerRectangle);
-    addAndMakeVisible(mLogBox);
-    addAndMakeVisible(mClearLogButton);
+    addAndMakeVisible(mConsolePanel);
 
 #if JUCE_STANDALONE_APPLICATION
     addAndMakeVisible(mSettingsButton);
@@ -354,8 +344,8 @@ ORchestraAudioProcessorEditor::~ORchestraAudioProcessorEditor()
     if (auto* top = getTopLevelComponent())
         top->removeKeyListener(this);
     mFileOperationsToolbar.setButtonLookAndFeel(nullptr);
-    mLogBox.setLookAndFeel(nullptr);
-    mClearLogButton.setLookAndFeel(nullptr);
+    mConsolePanel.setButtonLookAndFeel(nullptr);
+    mConsolePanel.setTextEditorLookAndFeel(nullptr);
     mSettingsButton.setLookAndFeel(nullptr);
     mCloseButton.setLookAndFeel(nullptr);
 }
@@ -443,7 +433,8 @@ void ORchestraAudioProcessorEditor::UpdateErrors()
         mess.append(it->mMessage.data(), it->mMessage.size());
         mess.append("\n", 1);
     }
-    mLogBox.setText(mess);
+    mConsolePanel.setText(mess);
+    mConsolePanel.setMessageCount((int)errors.size());
 }
 
 void ORchestraAudioProcessorEditor::OnLogUpdated()
@@ -494,31 +485,10 @@ void ORchestraAudioProcessorEditor::paint(juce::Graphics& g)
                    juce::Justification::centredRight, false);
     }
 
-    // All panel borders share edges - draw as one outer box + internal dividers
-    const auto contentArea = getLocalBounds().withTrimmedTop(TITLE_BAR_HEIGHT).reduced(OUTER_MARGIN);
-    const int splitX     = mCodeEditorPanel.getRight();
-    const int splitY     = mCodeEditorPanel.getY();
-    const int consoleSplitY = mLogBox.getY() - CONSOLE_HEADER_HEIGHT;
-    const int rightW     = contentArea.getRight() - splitX;
-
-    // Console background fill (entire console section: header + log)
-    g.setColour(ConsoleBackgroundColor);
-    g.fillRect(splitX, consoleSplitY, rightW, mLogBox.getBottom() - consoleSplitY);
-
-    // Console header labels
-    {
-        g.setFont(juce::Font(juce::FontOptions{ MONOSPACE_FONT_OPTIONS }.withHeight(12.f)));
-        g.setColour(juce::Colour(ColorPalette::Subtext1));
-        g.drawText("CONSOLE", splitX + 8, consoleSplitY, 80, CONSOLE_HEADER_HEIGHT,
-                   juce::Justification::centredLeft, false);
-
-        const juce::String countText = juce::String((int)audioProcessor.GetErrors().size()) + " messages";
-        g.drawText(countText,
-                   splitX, consoleSplitY, rightW - CLEAR_BTN_W - 12, CONSOLE_HEADER_HEIGHT,
-                   juce::Justification::centredRight, false);
-    }
-
-    // Vertical separator bewteen code editor, play button and Timeline. 
+    // Vertical separator between code editor and timeline/console
+    const int splitX = mCodeEditorPanel.getRight();
+    const int splitY = mCodeEditorPanel.getY();
+    g.setColour(OutlineColor.brighter(0.2f));
     g.drawLine((float)splitX, (float)splitY, (float)splitX, (float)getHeight());
 }
 
@@ -548,17 +518,9 @@ void ORchestraAudioProcessorEditor::resized()
     auto codeBounds = localBounds.removeFromLeft(codeWidth);
     mCodeEditorPanel.setBounds(codeBounds);
 
-    // Right column: console section at bottom, timeline fills rest (no gaps)
-    const int consoleSectionHeight = CONSOLE_HEADER_HEIGHT + LOG_BOX_HEIGHT;
-    auto consoleSection = localBounds.removeFromBottom(consoleSectionHeight);
-
-    // Console header: Clear button on the right
-    auto consoleHeader = consoleSection.removeFromTop(CONSOLE_HEADER_HEIGHT);
-    mClearLogButton.setBounds(consoleHeader.getRight() - CLEAR_BTN_W,
-                              consoleHeader.getY() + (CONSOLE_HEADER_HEIGHT - CLEAR_BTN_H) / 2,
-                              CLEAR_BTN_W, CLEAR_BTN_H);
-
-    mLogBox.setBounds(consoleSection);
+    // Right column: console section at bottom, timeline fills rest
+    const int consoleSectionHeight = ConsolePanel::HEADER_HEIGHT + ConsolePanel::LOG_HEIGHT;
+    mConsolePanel.setBounds(localBounds.removeFromBottom(consoleSectionHeight));
 
     // Timeline fills remaining right area
     mTimeline.setBounds(localBounds);

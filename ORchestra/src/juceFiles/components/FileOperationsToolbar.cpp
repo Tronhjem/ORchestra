@@ -83,8 +83,6 @@ void FileOperationsToolbar::setCompileButtonEnabled(bool enabled)
 
 void FileOperationsToolbar::setButtonLookAndFeel(juce::LookAndFeel* laf)
 {
-    mImportButton.setLookAndFeel(laf);
-    mExportButton.setLookAndFeel(laf);
     mCompileButton.setLookAndFeel(laf);
     mPlayButton.setLookAndFeel(laf);
 }

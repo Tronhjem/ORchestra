@@ -36,8 +36,6 @@ public:
     void resized() override;
     void paint(juce::Graphics&) override;
 
-    void setImportCallback(std::function<void()> callback);
-    void setExportCallback(std::function<void()> callback);
     void setCompileCallback(std::function<void()> callback);
     void setPlayCallback(std::function<void()> callback);
 
@@ -52,13 +50,9 @@ public:
 private:
     void buttonClicked(juce::Button* button) override;
 
-    juce::TextButton mImportButton{ "Import" };
-    juce::TextButton mExportButton{ "Export" };
     juce::TextButton mCompileButton{ "> Compile" };
     juce::TextButton mPlayButton{ "> Play" };
 
-    std::function<void()> mImportCallback;
-    std::function<void()> mExportCallback;
     std::function<void()> mCompileCallback;
     std::function<void()> mPlayCallback;
 

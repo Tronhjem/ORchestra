@@ -32,6 +32,7 @@
 #include "TextEditorLookAndFeel.h"
 #include "ErrorReporting.h"
 #include "FileOperationsToolbar.h"
+#include "ConsolePanel.h"
 #include "juce_gui_basics/juce_gui_basics.h"
 
 typedef juce::AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
@@ -126,9 +127,8 @@ private:
     FileOperationsToolbar mFileOperationsToolbar;
     TriggerRectangleComponent mTriggerRectangle;
     Timeline mTimeline;
+    ConsolePanel mConsolePanel;
 
-    juce::TextEditor mLogBox;
-    juce::TextButton mClearLogButton{ "Clear" };
     juce::TextButton mSettingsButton{ "..." };
     juce::TextButton mCloseButton{ "X" };
 
