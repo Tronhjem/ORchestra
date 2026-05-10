@@ -19,6 +19,7 @@
 
 #include <ctime>
 
+#include "LookAndFeelConstants.h"
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
@@ -31,10 +32,10 @@
 #include "juce_audio_plugin_client/Standalone/juce_StandaloneFilterWindow.h"
 #endif
 
-constexpr int WINDOW_WIDTH = 1200;
+constexpr int WINDOW_WIDTH = 1600;
 constexpr int WINDOW_HEIGHT = 800;
 constexpr int OUTER_MARGIN = 16;
-constexpr int TITLE_BAR_HEIGHT = 28;
+constexpr int TITLE_BAR_HEIGHT = 35;
 constexpr int TRAFFIC_DOT_SIZE = 12;
 
 // Default script shown on first load when no saved state exists.
@@ -208,6 +209,8 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
 
     juce::LookAndFeel::setDefaultLookAndFeel(mGeneralLookAndFeel.get());
 
+    setColour(juce::ResizableWindow::backgroundColourId, BackgroundColor);
+
     mCodeEditorPanel.setEditorLookAndFeel(mTextEditorLookAndFeel.get());
     mCodeEditorPanel.applyDefaultStyling();
 
@@ -362,9 +365,7 @@ void ORchestraAudioProcessorEditor::changeListenerCallback(juce::ChangeBroadcast
 void ORchestraAudioProcessorEditor::CodeEditorHasChanged()
 {
     if(mCodeEditorPanel.hasUnsavedChanges())
-    {
         mFileOperationsToolbar.setCompileButtonEnabled(true);
-    }
 }
 
 void ORchestraAudioProcessorEditor::handlePlayButton()
@@ -385,6 +386,7 @@ void ORchestraAudioProcessorEditor::handleCompile()
     juce::String text = mCodeEditorPanel.getCodeDocument().getAllContent();
     std::string utf8Text = text.toRawUTF8();
     audioProcessor.Compile(utf8Text);
+
     if (audioProcessor.IsORchestraVMInit())
     {
         mCodeEditorPanel.markSaved();
@@ -428,11 +430,13 @@ void ORchestraAudioProcessorEditor::UpdateErrors()
 {
     const auto& errors = audioProcessor.GetErrors();
     juce::String mess;
+
     for (auto it = errors.rbegin(); it != errors.rend(); ++it)
     {
         mess.append(it->mMessage.data(), it->mMessage.size());
         mess.append("\n", 1);
     }
+
     mConsolePanel.setText(mess);
     mConsolePanel.setMessageCount((int)errors.size());
 }
@@ -463,13 +467,13 @@ void ORchestraAudioProcessorEditor::paint(juce::Graphics& g)
     g.fillRect(0, 0, getWidth(), TITLE_BAR_HEIGHT);
 
     // Title bar bottom border
-    g.setColour(OutlineColor);
+    g.setColour(ComponentOutlineColor);
     g.drawLine(0.f, static_cast<float>(TITLE_BAR_HEIGHT),
-               static_cast<float>(getWidth()), static_cast<float>(TITLE_BAR_HEIGHT), 1.f);
+               static_cast<float>(getWidth()), static_cast<float>(TITLE_BAR_HEIGHT), OUTLINE_THICKNESS);
 
     // "OR | CHESTRA" centered in title bar
     {
-        juce::Font titleFont(juce::FontOptions{ MONOSPACE_FONT_OPTIONS }.withHeight(13.f));
+        juce::Font titleFont(juce::FontOptions{ MONOSPACE_FONT_OPTIONS }.withHeight(15.f));
         g.setFont(titleFont);
         g.setColour(TextColor);
         g.drawText("OR | CHESTRA", 0, 0, getWidth(), TITLE_BAR_HEIGHT,
@@ -488,7 +492,8 @@ void ORchestraAudioProcessorEditor::paint(juce::Graphics& g)
     // Vertical separator between code editor and timeline/console
     const int splitX = mCodeEditorPanel.getRight();
     const int splitY = mCodeEditorPanel.getY();
-    g.setColour(OutlineColor.brighter(0.2f));
+
+    g.setColour(ComponentOutlineColor);
     g.drawLine((float)splitX, (float)splitY, (float)splitX, (float)getHeight());
 }
 
@@ -516,6 +521,10 @@ void ORchestraAudioProcessorEditor::resized()
     constexpr int toolbarH = FileOperationsToolbar::BUTTON_HEIGHT + 40;
     auto toolbarStrip = leftPanel.removeFromBottom(toolbarH).removeFromLeft(codeWidth);
     mFileOperationsToolbar.setBounds(toolbarStrip);
+
+
+    // Move code panel slightly down. 
+    leftPanel.removeFromTop(18);
 
     // Vertical split: left = code editor + toolbar, right = timeline + console
     auto codeBounds = leftPanel.removeFromLeft(codeWidth);

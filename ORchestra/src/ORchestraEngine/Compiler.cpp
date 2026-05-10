@@ -25,7 +25,7 @@
 #include "ErrorReporting.h"
 #include "Defines.h"
 
-#if _DEBUG
+#if defined(_DEBUG)
 #include "ScopedTimer.h"
 #endif
 
@@ -111,7 +111,7 @@ namespace ORchestra
 
     const ORchestraToken& Compiler::Peek()
     {
-#if _DEBUG
+#if defined(_DEBUG)
         assert(mCurrentIndex < mTokens.size());
 #endif
         return mTokens[mCurrentIndex];
@@ -119,7 +119,7 @@ namespace ORchestra
 
     const ORchestraToken& Compiler::Previous()
     {
-#if _DEBUG
+#if defined(_DEBUG)
         assert(mCurrentIndex < mTokens.size());
         assert(mCurrentIndex - 1 >= 0);
 #endif
@@ -1123,7 +1123,7 @@ namespace ORchestra
 
     bool Compiler::Compile(std::vector<Instruction>& instructions)
     {
-#if _DEBUG
+#if defined(_DEBUG)
         ScopedTimer timer("Compile");
 #endif
 

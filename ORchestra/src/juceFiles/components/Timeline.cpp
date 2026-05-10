@@ -25,6 +25,7 @@
 #include "Utility.h"
 #include "Colors.h"
 #include "LookAndFeelConstants.h"
+#include "juce_graphics/fonts/harfbuzz/hb-ot-head-table.hh"
 
 // Used to offset the trigger step so the trigger rect around 
 // is shown properly
@@ -32,7 +33,7 @@ constexpr float triggerStepMargin = 2.f;
 
 void Timeline::timerCallback()
 {
-#if _DEBUG
+#if defined(_DEBUG)
     assert(mAudioProcessor != nullptr);
 #endif
 
@@ -77,7 +78,7 @@ void Timeline::timerCallback()
             const int barNumber = (musicalStep >= 0 ? musicalStep : 0) / barStepCount + 1;
             const float barWidth = static_cast<float>(barStepCount) * stepWidth;
             mBarLines.emplace_back(BarLine{xOffset - QAURTER_BAR_LINE_THICKNESS,
-                                           barHeaderHeight, barHeaderHeight + totalGridHeight,
+                                           0.f, barHeaderHeight + totalGridHeight,
                                            barNumber, barWidth});
         }
 
@@ -162,14 +163,14 @@ void Timeline::paint(juce::Graphics& g)
         g.drawLine(0.f, y, labelColumnWidth + totalGridWidth, y, 1.f);
     }
 
-    g.setFont(juce::Font(juce::FontOptions{12.f}));
+    g.setFont(juce::Font(juce::FontOptions{13.f}));
     for (int row = 0; row < TIMELINE_ROWS_DRAWN; ++row)
     {
         const float y = gridTop + static_cast<float>(row) * stepHeight;
         const int pitchClass = 11 - row;
         g.setColour(TextColor);
         g.drawText(pitchNames[pitchClass],
-                   2, static_cast<int>(y),
+                   8, static_cast<int>(y),
                    static_cast<int>(labelColumnWidth) - 4, static_cast<int>(stepHeight),
                    juce::Justification::centredLeft, false);
     }
@@ -187,13 +188,14 @@ void Timeline::paint(juce::Graphics& g)
     for (const auto& barLine : mBarLines)
     {
         // Outlined box for this bar in the header
-        g.setColour(GridLineColor.brighter(0.4f));
-        g.drawRect(barLine.x, 0.f, barLine.barWidth, barHeaderHeight, 1.f);
+        // g.setColour(GridLineColor.brighter(0.4f));
+        // const float xPos = barLine.x < 0.f ? 0 : barLine.x;
+        // g.drawRect(xPos, 0.f, barLine.barWidth, barHeaderHeight, 1.f);
 
         // Bar number text inside the box
         g.setColour(juce::Colour(ColorPalette::Subtext1));
         g.drawText(juce::String(barLine.barNumber),
-                   static_cast<int>(barLine.x) + 4, 0,
+                   static_cast<int>(barLine.x) + 8, 0,
                    static_cast<int>(barLine.barWidth) - 4, static_cast<int>(barHeaderHeight),
                    juce::Justification::centredLeft, false);
 
@@ -203,8 +205,8 @@ void Timeline::paint(juce::Graphics& g)
     }
 
     // Solid separator between header and grid (closes the bottom of all bar boxes)
-    g.setColour(GridLineColor.brighter(0.4f));
-    g.drawLine(labelColumnWidth, gridTop, labelColumnWidth + totalGridWidth, gridTop, 1.f);
+    g.setColour(GridLineColor);
+    g.drawLine(labelColumnWidth, gridTop, labelColumnWidth + totalGridWidth, gridTop, OUTLINE_THICKNESS);
 
     // Note rectangles
     for (const auto& rect : mTimelineTriggerRectangles)
@@ -213,6 +215,13 @@ void Timeline::paint(juce::Graphics& g)
         g.setColour(colorToSet);
         g.fillRoundedRectangle(rect.x, rect.y, rect.width, drawnStepHeight, ROUNDED_CORNER_SIZE);
     }
+
+    // closing bar header at top.
+    g.setColour(ComponentOutlineColor);
+    g.drawLine(labelColumnWidth, 0.f, labelColumnWidth, barHeaderHeight, OUTLINE_THICKNESS);
+
+    // Close space to the code editor with line
+    g.drawLine(0.f, 0.f, 0.f, (float)getHeight(), VERTICAL_SEPARATOR_THICKNESS);
 }
 
 juce::Colour Timeline::GetStepColorFromVelocity(const float value, const SequenceStepType midiType)

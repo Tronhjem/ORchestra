@@ -29,7 +29,7 @@ namespace ORchestra
         Stack() : mStackPointer(0) {}
         T Pop()
         {
-#if _DEBUG
+#if defined(_DEBUG)
             assert(mStackPointer > 0);
 #endif
             return mStack[--mStackPointer];
@@ -37,7 +37,7 @@ namespace ORchestra
 
         void Push(const T& i)
         {
-#if _DEBUG
+#if defined(_DEBUG)
             assert(mStackPointer + 1 <= 64);
 #endif
             mStack[mStackPointer++] = i;
@@ -50,7 +50,7 @@ namespace ORchestra
 
         T Top()
         {
-#if _DEBUG
+#if defined(_DEBUG)
             assert(mStackPointer != 0 && mStackPointer > 0);
 #endif
             return mStack[mStackPointer - 1];

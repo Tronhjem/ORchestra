@@ -102,7 +102,6 @@ namespace ORchestra
         static constexpr uint32_t Note = ColorPalette::Red;
     };
 
-    const Colour OutlineColor = Colour(ColorPalette::Mantle);
     const Colour BackgroundColor = Colour(ColorPalette::Base);
     const Colour ButtonBackgroundColor = Colour(ColorPalette::Blue);
     const Colour TextEditorBackgroundColor = Colour(ColorPalette::Base);

@@ -30,7 +30,7 @@ using namespace ORchestra;
 constexpr int TIMELINE_STEPS_DRAWN = 20;
 constexpr int TIMELINE_ROWS_DRAWN = 12;
 
-constexpr float stepHeight = 20.f;
+constexpr float stepHeight = 25.f;
 constexpr float stepWidth = 48.f;
 constexpr float stepMargin = 2.5f;
 constexpr float labelColumnWidth = 32.f;

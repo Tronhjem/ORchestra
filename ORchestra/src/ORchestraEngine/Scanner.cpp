@@ -24,7 +24,7 @@
 #include "Scanner.h"
 #include "ErrorReporting.h"
 #include "ORchestraToken.h"
-#if _DEBUG
+#if defined(_DEBUG)
 #include "ScopedTimer.h"
 #endif
 
@@ -107,7 +107,7 @@ namespace ORchestra
 
     bool Scanner::ScanFile(const std::string& data)
     {
-#if _DEBUG
+#if defined(_DEBUG)
         ScopedTimer timer("ScanTokens");
 #endif
 

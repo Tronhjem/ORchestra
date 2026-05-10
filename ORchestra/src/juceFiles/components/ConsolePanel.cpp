@@ -59,13 +59,13 @@ void ConsolePanel::paint(juce::Graphics& g)
     g.fillRect(0, 0, getWidth(), HEADER_HEIGHT);
 
     // Header/log divider
-    g.setColour(OutlineColor.brighter(0.2f));
+    g.setColour(ComponentOutlineColor);
     g.drawLine(0.f, float(HEADER_HEIGHT), float(getWidth()), float(HEADER_HEIGHT), 1.f);
     
     // Side of full panel divider
-    g.drawLine(0.f, 0.f, 0.f, float(getHeight()), OUTLINE_THICKNESS);
+    g.drawLine(0.f, 0.f, 0.f, float(getHeight()), VERTICAL_SEPARATOR_THICKNESS);
     // Top
-    g.drawLine(0.f, 0.f, getWidth(), 0.f, OUTLINE_THICKNESS);
+    g.drawLine(0.f, 0.f, (float)getWidth(), 0.f, OUTLINE_THICKNESS);
 
     // "CONSOLE" label
     g.setFont(juce::Font(juce::FontOptions{ MONOSPACE_FONT_OPTIONS }.withHeight(12.f)));

@@ -20,7 +20,7 @@
 #include "ErrorReporting.h"
 #include <algorithm>
 
-#if _DEBUG
+#if defined(_DEBUG)
 #include "ScopedTimer.h"
 #endif
 
@@ -76,7 +76,7 @@ namespace ORchestra
 
     bool VM::ProcessOpCodes(std::vector<Instruction>& instructions)
     {
-#if _DEBUG
+#if defined(_DEBUG)
         ScopedTimer timer("VM Process OpCodes");
 #endif
 
