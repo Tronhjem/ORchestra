@@ -35,7 +35,7 @@ namespace ORchestra
             return mStack[--mStackPointer];
         }
 
-        void Push(T i)
+        void Push(const T& i)
         {
 #if _DEBUG
             assert(mStackPointer + 1 <= 64);

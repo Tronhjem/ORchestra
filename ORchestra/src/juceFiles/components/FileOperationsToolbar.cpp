@@ -39,8 +39,8 @@ FileOperationsToolbar::~FileOperationsToolbar()
 void FileOperationsToolbar::paint(juce::Graphics& g) 
 {
     g.fillAll(ORchestra::TransportButtonPanelBackground);
-    g.setColour(ORchestra::TextColor);
-    g.drawRect(getLocalBounds().toFloat(), OUTLINE_THICKNESS);
+    g.setColour(ORchestra::ComponentOutlineColor);
+    g.drawLine(0.f, 0.f, getWidth(), 0.f, OUTLINE_THICKNESS);
 }
 
 void FileOperationsToolbar::resized()

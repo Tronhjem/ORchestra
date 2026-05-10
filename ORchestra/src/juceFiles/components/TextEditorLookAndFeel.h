@@ -67,5 +67,8 @@ public:
         UNUSED(width);
         UNUSED(height);
         UNUSED(ed);
+        
+        g.setColour(ORchestra::ComponentOutlineColor);
+        g.drawLine(0.f, 0.f, 0.f, height, OUTLINE_THICKNESS);
     }
 };

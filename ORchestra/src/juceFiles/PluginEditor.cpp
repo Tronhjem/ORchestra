@@ -477,13 +477,13 @@ void ORchestraAudioProcessorEditor::paint(juce::Graphics& g)
     }
 
     // Version indicator (top-right of title bar)
-    {
-        g.setFont(juce::Font(juce::FontOptions{}.withHeight(11.f)));
-        g.setColour(juce::Colour(ColorPalette::Subtext0));
-        const juce::String version = "* v8.4.2";
-        g.drawText(version, 0, 0, getWidth() - OUTER_MARGIN, TITLE_BAR_HEIGHT,
-                   juce::Justification::centredRight, false);
-    }
+//    {
+//        g.setFont(juce::Font(juce::FontOptions{}.withHeight(11.f)));
+//        g.setColour(juce::Colour(ColorPalette::Subtext0));
+//        const juce::String version = "* v8.4.2";
+//        g.drawText(version, 0, 0, getWidth() - OUTER_MARGIN, TITLE_BAR_HEIGHT,
+//                   juce::Justification::centredRight, false);
+//    }
 
     // Vertical separator between code editor and timeline/console
     const int splitX = mCodeEditorPanel.getRight();
@@ -508,21 +508,25 @@ void ORchestraAudioProcessorEditor::resized()
                               settingsBtnW, settingsBtnH);
 
 
+    Rectangle<int> leftPanel = localBounds;
+    Rectangle<int> rightPanel = localBounds;
+    
     // Left panel: toolbar strip at bottom, code editor takes the rest
-    const int codeWidth = localBounds.getWidth() * 2 / 5;
+    const int codeWidth = leftPanel.getWidth() * 2 / 5;
     constexpr int toolbarH = FileOperationsToolbar::BUTTON_HEIGHT + 40;
-    auto toolbarStrip = localBounds.removeFromBottom(toolbarH).removeFromLeft(codeWidth);
+    auto toolbarStrip = leftPanel.removeFromBottom(toolbarH).removeFromLeft(codeWidth);
     mFileOperationsToolbar.setBounds(toolbarStrip);
 
     // Vertical split: left = code editor + toolbar, right = timeline + console
-    auto codeBounds = localBounds.removeFromLeft(codeWidth);
+    auto codeBounds = leftPanel.removeFromLeft(codeWidth);
     mCodeEditorPanel.setBounds(codeBounds);
 
+    rightPanel.removeFromLeft(codeWidth);
     // Right column: console section at bottom, timeline fills rest
-    const int consoleSectionHeight = ConsolePanel::HEADER_HEIGHT + ConsolePanel::LOG_HEIGHT;
-    mConsolePanel.setBounds(localBounds.removeFromBottom(consoleSectionHeight));
+    const int consoleSectionHeight = ConsolePanel::GetPreferredHeight();
+    mConsolePanel.setBounds(rightPanel.removeFromBottom(consoleSectionHeight));
 
     // Timeline fills remaining right area
-    mTimeline.setBounds(localBounds);
-    mTriggerRectangle.setBounds(localBounds.removeFromLeft(100));
+    mTimeline.setBounds(rightPanel);
+    mTriggerRectangle.setBounds(rightPanel.removeFromLeft(100));
 }

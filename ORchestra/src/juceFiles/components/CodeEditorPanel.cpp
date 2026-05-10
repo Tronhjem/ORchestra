@@ -28,6 +28,8 @@ using namespace ORchestra;
 CodeEditorPanel::CodeEditorPanel(ORchestra::ORchestraCodeEditorChangeListener* changeListener)
     : mCodeEditor(mCodeDocument, &mTokeniser)
 {
+    mCodeDocument.addListener(this);
+
     mCodeEditor.setTabSize(4, true);
     mCodeEditor.setLineNumbersShown(true);
     mCodeEditor.AddChangeListener(changeListener);
@@ -47,7 +49,9 @@ void CodeEditorPanel::resized()
 
 void CodeEditorPanel::loadContent(const juce::String& content)
 {
-    mCodeDocument.insertText(0, content);
+    mCodeDocument.replaceAllContent(content);
+    mCodeDocument.clearUndoHistory();
+    mTokeniser.syncWithDocument(mCodeDocument);
 }
 
 bool CodeEditorPanel::hasUnsavedChanges() const

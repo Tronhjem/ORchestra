@@ -66,7 +66,11 @@ namespace ORchestra
 
     void ErrorReporting::LogError(const int line, std::string& message)
     {
-        message = CurrentTimestamp() + message + ", at line " + std::to_string(line) + "\n";
+        std::string stamp = CurrentTimestamp();
+        message.insert(0, stamp);
+        message += ", at line ";
+        message += std::to_string(line);
+        message += "\n";
         mLogEntries.emplace_back(LogEntry{ EntryType::Error, line, message });
         TrimOldEntries();
         NotifyListener();
@@ -75,7 +79,10 @@ namespace ORchestra
 
     void ErrorReporting::LogError(const std::string& message)
     {
-        std::string stamped = CurrentTimestamp() + message;
+        std::string stamped;
+        stamped.reserve(12 + message.size());
+        stamped = CurrentTimestamp();
+        stamped += message;
         mLogEntries.emplace_back(LogEntry{ EntryType::Error, 0, stamped });
         TrimOldEntries();
         NotifyListener();
@@ -84,7 +91,11 @@ namespace ORchestra
 
     void ErrorReporting::LogWarning(const int line, std::string& message)
     {
-        message = CurrentTimestamp() + message + ", at line " + std::to_string(line) + "\n";
+        std::string stamp = CurrentTimestamp();
+        message.insert(0, stamp);
+        message += ", at line ";
+        message += std::to_string(line);
+        message += "\n";
         mLogEntries.emplace_back(LogEntry{ EntryType::Warning, line, message });
         TrimOldEntries();
         NotifyListener();
@@ -93,7 +104,10 @@ namespace ORchestra
 
     void ErrorReporting::LogWarning(const std::string& message)
     {
-        std::string stamped = CurrentTimestamp() + message;
+        std::string stamped;
+        stamped.reserve(12 + message.size());
+        stamped = CurrentTimestamp();
+        stamped += message;
         mLogEntries.emplace_back(LogEntry{ EntryType::Warning, 0, stamped });
         TrimOldEntries();
         NotifyListener();
@@ -102,7 +116,10 @@ namespace ORchestra
 
     void ErrorReporting::LogMessage(const std::string& message)
     {
-        std::string stamped = CurrentTimestamp() + message;
+        std::string stamped;
+        stamped.reserve(12 + message.size());
+        stamped = CurrentTimestamp();
+        stamped += message;
         mLogEntries.emplace_back(LogEntry{ EntryType::Messasge, 0, stamped });
         TrimOldEntries();
         NotifyListener();

@@ -282,19 +282,21 @@ These are used to send data from your Data Sequences to midi.
 
 **Important:**
 - Tracks are not variables - they execute immediately
-- Both require exactly 4 arguments
 - Arguments can be values, expressions, or variables
 - The trigger argument checks if value > 0 to determine when to send MIDI
 - Even if a step in a Data Sequence has a value, it will only send a value if the trigger of the same step is true.
+- The `channel` parameter is optional in both `note` and `cc` - if omitted it defaults to MIDI channel 1
 
 **Note Track Syntax:**
 ```cpp
-note(trigger, note, velocity, channel)
+note(trigger, note, velocity, duration)           // channel defaults to 1
+note(trigger, note, velocity, duration, channel)  // explicit channel
 ```
 
 **CC Track Syntax:**
 ```cpp
-cc(trigger, controlNumber, controlValue, channel)
+cc(trigger, controlNumber, controlValue)           // channel defaults to 1
+cc(trigger, controlNumber, controlValue, channel)  // explicit channel
 ```
 
 **Example:**
@@ -302,7 +304,8 @@ cc(trigger, controlNumber, controlValue, channel)
 a = [1, 0, 1, 0]      // Trigger pattern
 b = [64, 64, 65, 67]  // Note sequence
 
-note(a, b, 100, 1)    // Trigger: a, Notes: b, Velocity: 100, Channel: 1
+note(a, b, 100, n8)        // Trigger: a, Notes: b, Velocity: 100, Duration: 8th note, Channel: 1 (default)
+note(a, b, 100, n8, 2)     // Same but on MIDI channel 2
 ```
 
 ### Global Step
@@ -316,10 +319,10 @@ Everything is wrapped around the length of the sequence, meaning even if the glo
 ```cpp
 a = [1,  0,  1,  0]
 b = [64, 65, 66, 67]
-note(a, b, 100, 1)
+note(a, b, 100, n8)
 ```
 
-For Global Step **0** we have a trigger which is 1, and a note of 64 with a velocity of 100 and MIDI channel of 1 hard-coded. 
+For Global Step **0** we have a trigger which is 1, and a note of 64 with a velocity of 100 and MIDI channel of 1 (default). 
 For Global Step **1**, we have a trigger that is 0 so this will not output any note.
 For Global Step **2**, we have a trigger again, and a note value of 65, with the same velocity, and Global Step **3** will result in nothing played again as we do not have a trigger.
 
@@ -331,7 +334,7 @@ This is part of the power of ORchestra, as we can define triggers and note Data 
 a = [1,  0,  1]
 b = [64, 65, 66, 67]
 
-note(a, b, 100, 1)
+note(a, b, 100, n8)
 ```
 
 Here our note sequence would be as following for each global step:
@@ -401,7 +404,7 @@ a = [[value1, value2, ...], normalValue, ...]
 // First step has 4 subdivisions, second and third are single values
 // If the overall note division is set to 4th notes, the first step is playing 2 16th notes with a 16th note pause in between. 
 a = [[1, 0, 1, 0], 0, 1]
-note(a, 60, 100, 1)
+note(a, 60, 100, n8)
 ```
 
 **Mixed substeps with different lengths:**
@@ -409,13 +412,13 @@ note(a, 60, 100, 1)
 // First step subdivided into 3 notes, others are single values.
 // Note that here it will only play the first note, as the trigger is not a subdivided one. 
 notes = [[60, 65, 70], 64, 67]
-note(1, notes, 100, 1)
+note(1, notes, 100, n8)
 
 // If we instead define it like this we have triplets playing for the triggers
 // and each note in the subdivisions have a trigger for it.
 trigger = [[1, 1, 1],     1,  1]
 notes =    [[60, 65, 70], 64, 67]
-note(trigger, notes, 100, 1)
+note(trigger, notes, 100, n8)
 ```
 
 **Substep operations:**
@@ -423,7 +426,7 @@ note(trigger, notes, 100, 1)
 // Substeps can be used in operations
 a = [[60, 65, 70], 0, 0]
 b = a + 10  // Adds 10 to each value in the substep
-note(1, b, 100, 1)  // Plays [70, 75, 80] in the first step
+note(1, b, 100, n8)  // Plays [70, 75, 80] in the first step
 ```
 
 **Accessing substep elements:**
@@ -438,7 +441,7 @@ firstStep = pattern[0]  // Gets the entire substep [1, 1, 0]
 // Trigger has 4 subdivisions, notes only has 2
 trigger = [[1, 1, 1, 1], 0, 0]
 notes = [[60, 64], 0, 0]  // Maps: 60, 60, 64, 64 (nearest value)
-note(trigger, notes, 100, 1)
+note(trigger, notes, 100, n8)
 
 // This allows fewer note values to span more trigger divisions
 ```
@@ -482,7 +485,7 @@ The `euc(hits, length)` function generates euclidean rhythm patterns.
 ```cpp
 // Euclidean sequence with 4 hits divided across 8 steps
 a = euc(4, 8)
-note(a, 64, 100, 1)  // Use the euclidean pattern as a trigger
+note(a, 64, 100, n8)  // Use the euclidean pattern as a trigger
 ```
 
 #### Random Number Generator
@@ -500,7 +503,7 @@ The `ran(low, high)` function generates random values at runtime.
 **Example:**
 ```cpp
 vel = ran(50, 100)   // Random velocity between 50-100
-note(1, 64, vel, 1)  // Play C4 with random velocity
+note(1, 64, vel, n8)  // Play C4 with random velocity
 ```
 
 #### BPM (Tempo) Control
@@ -519,7 +522,7 @@ The `bpm(tempo)` function sets the tempo for the sequencer.
 ```cpp
 bpm(120)             // Set tempo to 120 BPM
 pattern = euc(4, 8)
-note(pattern, C4, 100, 1)
+note(pattern, C4, 100, n8)
 ```
 
 #### Note Division Control
@@ -546,7 +549,7 @@ The `bpmDiv(division)` function sets the note division (timing resolution) for t
 bpmDiv(4)           // Set to 8th notes
 bpm(120)
 pattern = euc(3, 8)
-note(pattern, C4, 100, 1)  // Triggers on 8th notes at 120 BPM
+note(pattern, C4, 100, n8)  // Triggers on 8th notes at 120 BPM
 ```
 
 ### User-Defined Functions
@@ -601,7 +604,7 @@ end
 a = scale(10)              // a == 20
 b = scale(5) + scale(3)   // b == 16
 c = [scale(1), scale(2)]   // c == [2, 4]
-note(1, scale(C4), 100, 1) // use return value as note pitch
+note(1, scale(C4), 100, n8) // use return value as note pitch
 ```
 
 **Examples:**
@@ -615,9 +618,9 @@ setA()
 
 // Function with parameters
 fn playChord(root, vel)
-  note(1, root, vel, 1)
-  note(1, root + 4, vel, 1)
-  note(1, root + 7, vel, 1)
+  note(1, root, vel, n8)
+  note(1, root + 4, vel, n8)
+  note(1, root + 7, vel, n8)
 end
 playChord(C4, 100)
 playChord(E4, 80)
@@ -628,7 +631,7 @@ fn transpose(note, semitones)
 end
 
 melody = [transpose(C4, 0), transpose(C4, 4), transpose(C4, 7)]
-note(1, melody, 100, 1)  // plays C4, E4, G4 in sequence
+note(1, melody, 100, n8)  // plays C4, E4, G4 in sequence
 ```
 
 ### Patterns and Pattern Arrays
@@ -665,13 +668,13 @@ arrayName(someVar)     // variables work too
 ```cpp
 // Define two patterns with different note sequences
 ptn verse
-  note(1, C4, 100, 1)
-  note(1, E4, 80, 1)
+  note(1, C4, 100, n8)
+  note(1, E4, 80, n8)
 end
 
 ptn chorus
-  note(1, G4, 127, 1)
-  note(1, C5, 127, 1)
+  note(1, G4, 127, n8)
+  note(1, C5, 127, n8)
 end
 
 // Create pattern array -- alternates between verse and chorus
@@ -687,14 +690,14 @@ song($)  // verse on even ticks, chorus on odd ticks
 ```cpp
 // Simple kick drum pattern
 kick = [1, 0, 0, 0]
-note(kick, 36, 100, 1)  // C1 on MIDI channel 1
+note(kick, 36, 100, n8)  // C1 on MIDI channel 1
 ```
 
 ### Euclidean Rhythm
 ```cpp
 // Create a euclidean pattern
 pattern = euc(5, 8)
-note(pattern, C4, 100, 1)
+note(pattern, C4, 100, n8)
 ```
 
 ### Combining Sequences with Logic
@@ -705,7 +708,7 @@ b = euc(5, 8)
 
 // Combine with XOR - triggers when only one is active
 combined = a ^ b
-note(combined, D4, 100, 1)
+note(combined, D4, 100, n8)
 ```
 
 ### Phasing Patterns
@@ -716,7 +719,7 @@ pattern2 = euc(5, 13)
 
 // Combine with AND - both must be active
 both = pattern1 & pattern2
-note(both, E4, 120, 1)
+note(both, E4, 120, n8)
 ```
 
 ### Random Velocity and Notes
@@ -724,12 +727,12 @@ note(both, E4, 120, 1)
 // Random velocity for each triggered note
 trigger = euc(4, 8)
 velocity = ran(80, 127)
-note(trigger, C4, velocity, 1)
+note(trigger, C4, velocity, n8)
 
 // Random note selection
 notes = [C4, D4, E4, G4, A4]
 randomNote = notes[ran(0, 4)]
-note(1, randomNote, 100, 1)
+note(1, randomNote, 100, n8)
 ```
 
 ### Using CC Messages
@@ -747,13 +750,13 @@ bpmDiv(5)  // 16th notes
 
 // Create rapid hi-hat pattern
 hihat = euc(11, 16)
-note(hihat, 42, 80, 10)
+note(hihat, 42, 80, n8, 10)
 
 // Kick and snare on quarter notes
 kick = [1, 0, 0, 0]
 snare = [0, 0, 0, 0, 1, 0, 0, 0]
-note(kick, 36, 100, 10)
-note(snare, 38, 100, 10)
+note(kick, 36, 100, n8, 10)
+note(snare, 38, 100, n8, 10)
 ```
 
 ### Modifying Arrays with Index Assignment
@@ -767,8 +770,8 @@ melody[3] = A4  // Change fourth note to A4
 kick = [1, 0, 0, 0]
 kick[2] = 1  // Add extra kick on third beat
 
-note(kick, 36, 100, 10)    // Modified kick pattern
-note(1, melody, 100, 1)    // Modified melody
+note(kick, 36, 100, n8, 10)    // Modified kick pattern
+note(1, melody, 100, n8)    // Modified melody
 ```
 
 ### Complex Rhythm
@@ -780,25 +783,25 @@ snare = [0, 1, 0, 1]
 // Hi-hat euclidean pattern
 hihat = euc(7, 8)
 
-note(kick, 36, 100, 10)   // Kick on channel 10
-note(snare, 38, 100, 10)  // Snare on channel 10
-note(hihat, 42, 80, 10)   // Hi-hat on channel 10
+note(kick, 36, 100, n8, 10)   // Kick on channel 10
+note(snare, 38, 100, n8, 10)  // Snare on channel 10
+note(hihat, 42, 80, n8, 10)   // Hi-hat on channel 10
 ```
 
 ### Using Substeps for Drum Fills
 ```cpp
 // Create a pattern with a drum fill on the 4th step
 trigger = [1, 0, 1, [1, 0, 1, 1]]  // Fourth step has rapid hits
-note(trigger, 38, 100, 10)  // Snare drum
+note(trigger, 38, 100, n8, 10)  // Snare drum
 
 // Alternating note pattern with substep variation
 notes = [[60, 64, 67], 60, 62, 64]  // First step plays notes in rapid sequence
-note(1, notes, 100, 1)
+note(1, notes, 100, n8)
 
 // Modulo operation example with substeps
 counter = [[0, 1, 2, 3], 4, 5, 6]
 everyOther = counter % 2  // Creates pattern: [[0,1,0,1], 0, 1, 0]
-note(everyOther, C4, 100, 1)
+note(everyOther, C4, 100, n8)
 ```
 
 ### User-Defined Functions
@@ -806,9 +809,9 @@ note(everyOther, C4, 100, 1)
 ```cpp
 // Helper that builds a chord from a root note
 fn chord(root, vel)
-  note(1, root, vel, 1)
-  note(1, root + 4, vel, 1)
-  note(1, root + 7, vel, 1)
+  note(1, root, vel, n8)
+  note(1, root + 4, vel, n8)
+  note(1, root + 7, vel, n8)
 end
 
 chord(C4, 100)   // C major chord
@@ -823,7 +826,7 @@ fn clampedVelocity(v)
 end
 
 trigger = euc(4, 8)
-note(trigger, C4, clampedVelocity($), 1)  // velocity changes each tick
+note(trigger, C4, clampedVelocity($), n8)  // velocity changes each tick
 ```
 
 ```cpp
@@ -836,8 +839,8 @@ base = [C4, D4, E4, G4]
 high = [up(C4), up(D4), up(E4), up(G4)]  // one octave up
 
 trigger = euc(4, 8)
-note(trigger, base, 100, 1)
-note(trigger, high, 70, 2)   // doubled an octave up on channel 2
+note(trigger, base, 100, n8)
+note(trigger, high, 70, n8, 2)   // doubled an octave up on channel 2
 ```
 
 ### Patterns and Pattern Arrays
@@ -845,14 +848,14 @@ note(trigger, high, 70, 2)   // doubled an octave up on channel 2
 ```cpp
 // Two patterns that alternate each tick
 ptn verse
-  note(1, C4, 100, 1)
-  note(1, E4, 80, 1)
+  note(1, C4, 100, n8)
+  note(1, E4, 80, n8)
 end
 
 ptn chorus
-  note(1, G4, 127, 1)
-  note(1, C5, 127, 1)
-  note(1, E5, 110, 1)
+  note(1, G4, 127, n8)
+  note(1, C5, 127, n8)
+  note(1, E5, 110, n8)
 end
 
 song = [verse, chorus]
@@ -862,22 +865,22 @@ song($)   // verse on even ticks, chorus on odd ticks
 ```cpp
 // Four patterns cycling every 4 ticks
 ptn intro
-  note(1, C4, 80, 1)
+  note(1, C4, 80, n8)
 end
 
 ptn build
-  note(1, C4, 100, 1)
-  note(1, G4, 90, 1)
+  note(1, C4, 100, n8)
+  note(1, G4, 90, n8)
 end
 
 ptn drop
-  note(1, C4, 127, 1)
-  note(1, E4, 127, 1)
-  note(1, G4, 127, 1)
+  note(1, C4, 127, n8)
+  note(1, E4, 127, n8)
+  note(1, G4, 127, n8)
 end
 
 ptn break
-  note(0, C4, 0, 1)  // silence
+  note(0, C4, 0, n8)  // silence
 end
 
 arrangement = [intro, build, drop, break]
@@ -888,12 +891,12 @@ arrangement($ % 4)
 // Patterns using euclidean rhythms, switched by section
 ptn sparse
   trigger = euc(3, 8)
-  note(trigger, C4, 90, 1)
+  note(trigger, C4, 90, n8)
 end
 
 ptn dense
   trigger = euc(7, 8)
-  note(trigger, C4, 100, 1)
+  note(trigger, C4, 100, n8)
 end
 
 groove = [sparse, dense]
@@ -906,12 +909,12 @@ groove($ / 8)  // switch pattern every 8 ticks
 phase = $ % 4
 pattern = [1, 0, 1, 0]
 trigger = pattern[phase]
-note(trigger, C4, 100, 1)
+note(trigger, C4, 100, n8)
 
 // Gradually increase velocity over time
 velocity = ($ * 2) % 127 + 20  // Starts at 20, increases by 2 each tick
 kick = [1, 0, 0, 0]
-note(kick, 36, velocity, 10)
+note(kick, 36, velocity, n8, 10)
 
 // Change MIDI CC value based on global count
 filterValue = ($ * 4) % 127  // Sweeps filter from 0 to 127
@@ -921,12 +924,12 @@ cc(1, 74, filterValue, 1)  // CC#74 (filter cutoff)
 lateEntry = $ > 16
 snare = [0, 1, 0, 1]
 trigger = snare & lateEntry  // Only plays after tick 16
-note(trigger, 38, 100, 10)
+note(trigger, 38, 100, n8, 10)
 
 // Create a sequence that changes every 8 ticks
 octave = ($ / 8) % 3  // Switches between 0, 1, 2
 baseNote = 60 + (octave * 12)  // C4, C5, C6
-note(1, baseNote, 100, 1)
+note(1, baseNote, 100, n8)
 ```
 
 ---

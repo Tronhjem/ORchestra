@@ -57,7 +57,7 @@ namespace ORchestra
         void LogMessage(const std::string& message);
         void Clear();
         void RequestClear();
-        std::vector<LogEntry> GetErrors() { return mLogEntries; }
+        const std::vector<LogEntry>& GetErrors() const { return mLogEntries; }
         
         void SetListener(ErrorReportingListener* listener) { mListener = listener; }
         void CheckAndClear();

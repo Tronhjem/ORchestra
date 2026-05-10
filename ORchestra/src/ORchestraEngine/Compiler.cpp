@@ -19,6 +19,7 @@
 
 #include <string>
 #include <cassert>
+#include <charconv>
 
 #include "Compiler.h"
 #include "ErrorReporting.h"
@@ -57,35 +58,27 @@ namespace ORchestra
         // populate built in functions
         std::vector<Instruction> printInstructions;
         printInstructions.emplace_back(Instruction{ OpCode::PRINT });
-        mFunctions["print"] = StoredFunction(1, printInstructions);
-
-        std::vector<Instruction> noteInstructions;
-        noteInstructions.emplace_back(Instruction{ OpCode::NOTE });
-        mFunctions["note"] = StoredFunction(5, noteInstructions);
-
-        std::vector<Instruction> ccInstructions;
-        ccInstructions.emplace_back(Instruction{ OpCode::CC });
-        mFunctions["cc"] = StoredFunction(4, ccInstructions);
+        mFunctions["print"] = StoredFunction(1, std::move(printInstructions));
 
         std::vector<Instruction> ranInstructions;
         ranInstructions.emplace_back(Instruction{ OpCode::GET_RANDOM_IN_RANGE });
-        mFunctions[ranFunctionName] = StoredFunction(2, ranInstructions);
+        mFunctions[ranFunctionName] = StoredFunction(2, std::move(ranInstructions));
 
         std::vector<Instruction> eucInstructions;
         eucInstructions.emplace_back(Instruction{ OpCode::GENERATE_EUCLID_SEQUENCE });
-        mFunctions[eucFunctionName] = StoredFunction(2, eucInstructions);
+        mFunctions[eucFunctionName] = StoredFunction(2, std::move(eucInstructions));
 
         std::vector<Instruction> bpmInstructions;
         bpmInstructions.emplace_back(Instruction{ OpCode::SET_BPM });
-        mFunctions[bpmFunctionName] = StoredFunction(1, bpmInstructions);
+        mFunctions[bpmFunctionName] = StoredFunction(1, std::move(bpmInstructions));
 
         std::vector<Instruction> bpmDivInstructions;
         bpmDivInstructions.emplace_back(Instruction{ OpCode::SET_BPM_DIVISION });
-        mFunctions[bpmDivFunctionName] = StoredFunction(1, bpmDivInstructions);
+        mFunctions[bpmDivFunctionName] = StoredFunction(1, std::move(bpmDivInstructions));
 
         std::vector<Instruction> transposeInstructions;
         transposeInstructions.emplace_back(Instruction{ OpCode::SET_TRANSPOSE });
-        mFunctions[transposeFunctionName] = StoredFunction(1, transposeInstructions);
+        mFunctions[transposeFunctionName] = StoredFunction(1, std::move(transposeInstructions));
     }
 
     std::vector<std::string> Compiler::GetVariableNames() const
@@ -165,7 +158,8 @@ namespace ORchestra
 
     void Compiler::MakeConstant(const ORchestraToken& token, std::vector<Instruction>& instructions)
     {
-        int value = std::stoi(std::string(token.mStart, static_cast<unsigned long>(token.mLength)));
+        int value = 0;
+        std::from_chars(token.mStart, token.mStart + token.mLength, value);
         if (value > DATA_UNIT_MAX_VALUE)
         {
             value = DATA_UNIT_MAX_VALUE;
@@ -232,22 +226,20 @@ namespace ORchestra
             octaveIndex = 2;
         }
 
-        int value = -1;
-        std::string numAsString;
-        try
-        {
-            numAsString = 
-                std::string(token.mStart + octaveIndex, 
-                        static_cast<unsigned long>(token.mLength - octaveIndex));
+        int octaveValue = 0;
+        const auto [ptr, ec] = std::from_chars(
+            token.mStart + octaveIndex,
+            token.mStart + token.mLength,
+            octaveValue);
 
-            value = std::stoi(numAsString) * 12 + baseNote;
-        }
-        catch (std::exception& err)
+        if (ec != std::errc{})
         {
-            std::string message = std::string("Note Letters are rerved for notes, couldn't convert this to note: ") + numAsString;
+            std::string message = std::string("Note Letters are rerved for notes, couldn't convert this to note");
             mErrorReporting.LogError(message);
             return false;
         }
+
+        int value = octaveValue * 12 + baseNote;
 
         if (value > 127)
         {
@@ -467,6 +459,94 @@ namespace ORchestra
         Consume(); // ')'
 
         instructions.emplace_back(Instruction{ OpCode::GENERATE_EUCLID_SEQUENCE });
+        return true;
+    }
+
+    // Compiles note(trig, note, vel, duration) or note(trig, note, vel, duration, channel).
+    // Channel is optional and defaults to 1.
+    bool Compiler::CompileNoteCall(std::vector<Instruction>& instructions)
+    {
+        Consume(); // '('
+
+        if (!CompileExpression(instructions))  // trig
+        { ThrowUnexpectedTokenError(Peek()); return false; }
+
+        if (Peek().mTokenType != ORchestraTokenType::COMMA) { ThrowMissingParamCount(4, 1); return false; }
+        Consume();
+
+        if (!CompileExpression(instructions))  // note
+        { ThrowUnexpectedTokenError(Peek()); return false; }
+
+        if (Peek().mTokenType != ORchestraTokenType::COMMA) { ThrowMissingParamCount(4, 2); return false; }
+        Consume();
+
+        if (!CompileExpression(instructions))  // vel
+        { ThrowUnexpectedTokenError(Peek()); return false; }
+
+        if (Peek().mTokenType != ORchestraTokenType::COMMA) { ThrowMissingParamCount(4, 3); return false; }
+        Consume();
+
+        if (!CompileExpression(instructions))  // duration
+        { ThrowUnexpectedTokenError(Peek()); return false; }
+
+        // Optional: channel (defaults to 1)
+        if (Peek().mTokenType == ORchestraTokenType::COMMA)
+        {
+            Consume();
+            if (!CompileExpression(instructions))
+            { ThrowUnexpectedTokenError(Peek()); return false; }
+        }
+        else
+        {
+            instructions.emplace_back(Instruction{ OpCode::CONSTANT, static_cast<DataUnit>(1) });
+        }
+
+        if (Peek().mTokenType != ORchestraTokenType::RIGHT_PAREN)
+        { ThrowUnexpectedEnd(")"); return false; }
+        Consume(); // ')'
+
+        instructions.emplace_back(Instruction{ OpCode::NOTE });
+        return true;
+    }
+
+    // Compiles cc(trig, ccNumber, ccValue) or cc(trig, ccNumber, ccValue, channel).
+    // Channel is optional and defaults to 1.
+    bool Compiler::CompileCCCall(std::vector<Instruction>& instructions)
+    {
+        Consume(); // '('
+
+        if (!CompileExpression(instructions))  // trig
+        { ThrowUnexpectedTokenError(Peek()); return false; }
+
+        if (Peek().mTokenType != ORchestraTokenType::COMMA) { ThrowMissingParamCount(3, 1); return false; }
+        Consume();
+
+        if (!CompileExpression(instructions))  // ccNumber
+        { ThrowUnexpectedTokenError(Peek()); return false; }
+
+        if (Peek().mTokenType != ORchestraTokenType::COMMA) { ThrowMissingParamCount(3, 2); return false; }
+        Consume();
+
+        if (!CompileExpression(instructions))  // ccValue
+        { ThrowUnexpectedTokenError(Peek()); return false; }
+
+        // Optional: channel (defaults to 1)
+        if (Peek().mTokenType == ORchestraTokenType::COMMA)
+        {
+            Consume();
+            if (!CompileExpression(instructions))
+            { ThrowUnexpectedTokenError(Peek()); return false; }
+        }
+        else
+        {
+            instructions.emplace_back(Instruction{ OpCode::CONSTANT, static_cast<DataUnit>(1) });
+        }
+
+        if (Peek().mTokenType != ORchestraTokenType::RIGHT_PAREN)
+        { ThrowUnexpectedEnd(")"); return false; }
+        Consume(); // ')'
+
+        instructions.emplace_back(Instruction{ OpCode::CC });
         return true;
     }
 
@@ -958,13 +1038,24 @@ namespace ORchestra
         }
 
         case ORchestraTokenType::PRINT:
-        case ORchestraTokenType::NOTE:
-        case ORchestraTokenType::CC:
         {
             const std::string functionName = std::string(token.mStart, static_cast<unsigned long>(token.mLength));
             if (!CompileFunctionCall(instructions, functionName))
                 return StatementResult::COMPILE_ERROR;
+            break;
+        }
 
+        case ORchestraTokenType::NOTE:
+        {
+            if (!CompileNoteCall(instructions))
+                return StatementResult::COMPILE_ERROR;
+            break;
+        }
+
+        case ORchestraTokenType::CC:
+        {
+            if (!CompileCCCall(instructions))
+                return StatementResult::COMPILE_ERROR;
             break;
         }
 
@@ -1188,7 +1279,7 @@ namespace ORchestra
                 continue;
             case StatementResult::END_OF_FUNCTION:
                 mInsideFunctionDefinition = false;
-                mPatterns[name] = StoredFunction(0, bodyInstructions);
+                mPatterns[name] = StoredFunction(0, std::move(bodyInstructions));
                 return true;
             case StatementResult::END_OF_INPUT:
             {
@@ -1308,9 +1399,12 @@ namespace ORchestra
             case StatementResult::SUCCESS:
                 continue;
             case StatementResult::END_OF_FUNCTION:
+            {
                 mInsideFunctionDefinition = false;
-                mFunctions[name] = StoredFunction(static_cast<int>(paramIds.size()), paramIds, bodyInstructions);
+                const int numParams = static_cast<int>(paramIds.size());
+                mFunctions[name] = StoredFunction(numParams, std::move(paramIds), std::move(bodyInstructions));
                 return true;
+            }
             case StatementResult::END_OF_INPUT:
             {
                 mInsideFunctionDefinition = false;
@@ -1327,45 +1421,62 @@ namespace ORchestra
 
     void Compiler::ThrowUnknownFunctionOrVariable(const std::string& name)
     {
-        std::string message = std::string("Unexpected function or variable '") + name + std::string("'");
+        std::string message;
+        message.reserve(35 + name.size());
+        message = "Unexpected function or variable '";
+        message += name;
+        message += "'";
         mErrorReporting.LogError(Peek().mLine, message);
     }
 
     void Compiler::ThrowUnexpectedTokenError(const ORchestraToken& tokenForError)
     {
-        std::string token = std::string(tokenForError.mStart, static_cast<unsigned long>(tokenForError.mLength));
-        std::string message = std::string("Unexpected Character '") + token + std::string("'");
+        std::string message;
+        const int tokenLen = tokenForError.mLength;
+        message.reserve(23 + static_cast<size_t>(tokenLen));
+        message = "Unexpected Character '";
+        message.append(tokenForError.mStart, static_cast<size_t>(tokenLen));
+        message += "'";
         mErrorReporting.LogError(tokenForError.mLine, message);
     }
 
     void Compiler::ThrowUnexpectedStart(const ORchestraToken& tokenForError)
     {
-        std::string token = std::string(tokenForError.mStart, static_cast<unsigned long>(tokenForError.mLength));
-        std::string message = std::string("Unexpected Character '") 
-                                          + token 
-                                          + std::string("'. Start a line with an variable identifier, or note() or cc()");
+        std::string message;
+        const int tokenLen = tokenForError.mLength;
+        message.reserve(80 + static_cast<size_t>(tokenLen));
+        message = "Unexpected Character '";
+        message.append(tokenForError.mStart, static_cast<size_t>(tokenLen));
+        message += "'. Start a line with an variable identifier, or note() or cc()";
         mErrorReporting.LogError(tokenForError.mLine, message);
     }
 
     void Compiler::ThrowMissingExpectedToken(const std::string& missingToken)
     {
-        std::string message = std::string("Missing a ") + missingToken;
+        std::string message;
+        message.reserve(10 + missingToken.size());
+        message = "Missing a ";
+        message += missingToken;
         mErrorReporting.LogError(Peek().mLine, message);
     }
 
     void Compiler::ThrowMissingParamCount(int expected, int received)
     {
-        std::string message = std::string("Expected '") +
-            std::to_string(expected) +
-            std::string("' function parameters, but received ") +
-            std::to_string(received);
-
+        std::string message;
+        message.reserve(60);
+        message = "Expected '";
+        message += std::to_string(expected);
+        message += "' function parameters, but received ";
+        message += std::to_string(received);
         mErrorReporting.LogError(Peek().mLine, message);
     }
 
     void Compiler::ThrowUnexpectedEnd(const std::string& missingToken)
     {
-        std::string message = "Unexpected end, you're missing a " + missingToken;
+        std::string message;
+        message.reserve(30 + missingToken.size());
+        message = "Unexpected end, you're missing a ";
+        message += missingToken;
         mErrorReporting.LogError(Peek().mLine, message);
     }
 

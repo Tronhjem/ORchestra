@@ -41,7 +41,7 @@ void ConsolePanel::resized()
     auto bounds = getLocalBounds();
     auto header = bounds.removeFromTop(HEADER_HEIGHT);
 
-    mClearButton.setBounds(header.getRight() - CLEAR_BTN_W,
+    mClearButton.setBounds(header.getRight() - CLEAR_BTN_W - 10,
                            header.getY() + (HEADER_HEIGHT - CLEAR_BTN_H) / 2,
                            CLEAR_BTN_W, CLEAR_BTN_H);
 
@@ -61,6 +61,11 @@ void ConsolePanel::paint(juce::Graphics& g)
     // Header/log divider
     g.setColour(OutlineColor.brighter(0.2f));
     g.drawLine(0.f, float(HEADER_HEIGHT), float(getWidth()), float(HEADER_HEIGHT), 1.f);
+    
+    // Side of full panel divider
+    g.drawLine(0.f, 0.f, 0.f, float(getHeight()), OUTLINE_THICKNESS);
+    // Top
+    g.drawLine(0.f, 0.f, getWidth(), 0.f, OUTLINE_THICKNESS);
 
     // "CONSOLE" label
     g.setFont(juce::Font(juce::FontOptions{ MONOSPACE_FONT_OPTIONS }.withHeight(12.f)));
@@ -70,8 +75,10 @@ void ConsolePanel::paint(juce::Graphics& g)
     // Message count
     const juce::String countText = juce::String(mMessageCount) + " messages";
     g.drawText(countText,
-               0, 0, getWidth() - CLEAR_BTN_W - 12, HEADER_HEIGHT,
+               0, 0, getWidth() - CLEAR_BTN_W - 24, HEADER_HEIGHT,
                juce::Justification::centredRight, false);
+    
+
 }
 
 void ConsolePanel::setText(const juce::String& text)

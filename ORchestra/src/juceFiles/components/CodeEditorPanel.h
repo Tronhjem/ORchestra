@@ -23,7 +23,8 @@
 #include "ORchestraCodeEditorComponent.h"
 #include "ORchestraCodeEditorTokenizer.h"
 
-class CodeEditorPanel : public juce::Component
+class CodeEditorPanel : public juce::Component,
+                         private juce::CodeDocument::Listener
 {
 public:
     CodeEditorPanel(ORchestra::ORchestraCodeEditorChangeListener* changeListener);
@@ -41,6 +42,9 @@ public:
     void applyDefaultStyling();
 
 private:
+    void codeDocumentTextInserted (const juce::String&, int) override { mTokeniser.syncWithDocument (mCodeDocument); }
+    void codeDocumentTextDeleted (int, int) override                  { mTokeniser.syncWithDocument (mCodeDocument); }
+
     ORchestra::ORchestraCodeEditorTokenizer mTokeniser;
     juce::CodeDocument mCodeDocument;
     ORchestra::ORchestraCodeEditorComponent mCodeEditor;
