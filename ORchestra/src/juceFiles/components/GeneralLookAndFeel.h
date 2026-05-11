@@ -254,6 +254,10 @@ public:
         g.drawRect(0, 0, w, h);
     }
 
+    void drawCornerResizer(juce::Graphics&, int, int, bool, bool) override
+    {
+    }
+
 private:
     const Font mFont{ MONOSPACE_FONT_OPTIONS };
 };

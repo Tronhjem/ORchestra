@@ -127,7 +127,7 @@ private:
     Timeline mTimeline;
     ConsolePanel mConsolePanel;
 
-    juce::TextButton mSettingsButton{ "..." };
+    DotsButton mSettingsButton;
     juce::TextButton mCloseButton{ "X" };
 
     juce::ComponentDragger mDragger;

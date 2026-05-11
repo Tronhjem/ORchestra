@@ -178,7 +178,6 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     mConsolePanel.setButtonLookAndFeel(mButtonLookAndFeel.get());
     mConsolePanel.setClearCallback([this]() { handleClearLog(); });
 
-    mSettingsButton.setLookAndFeel(mButtonLookAndFeel.get());
     mSettingsButton.onClick = [&]()
     {
 #if JUCE_STANDALONE_APPLICATION
@@ -356,7 +355,6 @@ ORchestraAudioProcessorEditor::~ORchestraAudioProcessorEditor()
     mFileOperationsToolbar.setButtonLookAndFeel(nullptr);
     mConsolePanel.setButtonLookAndFeel(nullptr);
     mConsolePanel.setTextEditorLookAndFeel(nullptr);
-    mSettingsButton.setLookAndFeel(nullptr);
     mCloseButton.setLookAndFeel(nullptr);
 }
 
