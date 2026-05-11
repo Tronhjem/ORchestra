@@ -68,14 +68,13 @@ void ConsolePanel::paint(juce::Graphics& g)
     g.drawLine(0.f, 0.f, (float)getWidth(), 0.f, OUTLINE_THICKNESS);
 
     // "CONSOLE" label
-    g.setFont(juce::Font(juce::FontOptions{ MONOSPACE_FONT_OPTIONS }.withHeight(12.f)));
+    g.setFont(juce::Font(juce::FontOptions{ MONOSPACE_FONT_OPTIONS }.withHeight(13.f)));
     g.setColour(juce::Colour(ColorPalette::Subtext1));
     g.drawText("CONSOLE", 8, 0, 80, HEADER_HEIGHT, juce::Justification::centredLeft, false);
 
     // Message count
     const juce::String countText = juce::String(mMessageCount) + " message" + (mMessageCount == 1 ? "" : "s");
-    g.drawText(countText,
-               0, 0, getWidth() - CLEAR_BTN_W - 24, HEADER_HEIGHT,
+    g.drawText(countText, 0, 0, getWidth() - CLEAR_BTN_W - 24, HEADER_HEIGHT,
                juce::Justification::centredRight, false);
     
 
@@ -109,7 +108,7 @@ void ConsolePanel::setTextEditorLookAndFeel(juce::LookAndFeel* laf)
 
 void ConsolePanel::applyDefaultStyling()
 {
-    mLogBox.setFont(MONOSPACE_FONT_OPTIONS);
+    mLogBox.setFont(BUTTON_FONT_OPTIONS);
     mLogBox.setColour(juce::TextEditor::textColourId, TextColor);
     mLogBox.setColour(juce::TextEditor::backgroundColourId, ConsoleBackgroundColor);
     mLogBox.setMultiLine(true);

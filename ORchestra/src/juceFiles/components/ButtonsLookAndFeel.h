@@ -99,7 +99,7 @@ public:
     }
 
 private:
-    const Font mFont{ MONOSPACE_FONT_OPTIONS };
+    const Font mFont{ BUTTON_FONT_OPTIONS };
 };
 
 class DotsButton : public juce::Component

@@ -26,9 +26,11 @@ class FileOperationsToolbar : public juce::Component,
                               public juce::Button::Listener
 {
 public:
-    static constexpr int BUTTON_HEIGHT = 20;
+    static constexpr int PANEL_HEIGHT = 70;
+    static constexpr int BUTTON_HEIGHT = 28;
     static constexpr int BUTTON_WIDTH = 80;
-    static constexpr int BUTTON_SPACING = 10;
+    static constexpr int BUTTON_SPACING = 20;
+    static constexpr int BUTTON_LEFT_MARGIN = 20;
 
     FileOperationsToolbar();
     ~FileOperationsToolbar() override;
@@ -45,12 +47,12 @@ public:
     void setButtonLookAndFeel(juce::LookAndFeel* laf);
 
     constexpr int getPreferredWidth() const { return 2 * BUTTON_WIDTH + BUTTON_SPACING; }
-    constexpr int getPreferredHeight() const { return BUTTON_HEIGHT * 2; }
+    constexpr int getPreferredHeight() const { return PANEL_HEIGHT; }
 
 private:
     void buttonClicked(juce::Button* button) override;
 
-    juce::TextButton mCompileButton{ ">> Compile" };
+    juce::TextButton mCompileButton{ "Compile" };
     juce::TextButton mPlayButton{ "> Play" };
 
     std::function<void()> mCompileCallback;

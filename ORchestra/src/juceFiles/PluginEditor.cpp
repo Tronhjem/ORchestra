@@ -44,7 +44,7 @@ constexpr const char* DEFAULT_SCRIPT =
     "\n"
     "trig = euc(3, 8)\n"
     "\n"
-    "note(trig, C4, 100, n8, 1)\n";
+    "note(trig, C4, 100, n8)\n";
 
 //==============================================================================
 // MidiSettingsComponent
@@ -477,22 +477,12 @@ void ORchestraAudioProcessorEditor::paint(juce::Graphics& g)
 
     // "OR | CHESTRA" centered in title bar
     {
-        juce::Font titleFont(juce::FontOptions{ MONOSPACE_FONT_OPTIONS }.withHeight(15.f));
+        juce::Font titleFont(juce::FontOptions{ MONOSPACE_FONT_OPTIONS });
         g.setFont(titleFont);
         g.setColour(TextColor);
         g.drawText("OR | CHESTRA", 0, 0, getWidth(), TITLE_BAR_HEIGHT,
                    juce::Justification::centred, false);
     }
-
-    // Version indicator (top-right of title bar)
-//    {
-//        g.setFont(juce::Font(juce::FontOptions{}.withHeight(11.f)));
-//        g.setColour(juce::Colour(ColorPalette::Subtext0));
-//        const juce::String version = "* v8.4.2";
-//        g.drawText(version, 0, 0, getWidth() - OUTER_MARGIN, TITLE_BAR_HEIGHT,
-//                   juce::Justification::centredRight, false);
-//    }
-
 }
 
 void ORchestraAudioProcessorEditor::paintOverChildren(juce::Graphics& g)

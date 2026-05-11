@@ -25,7 +25,7 @@
 class ConsolePanel : public juce::Component
 {
 public:
-    static constexpr int HEADER_HEIGHT = 30;
+    static constexpr int HEADER_HEIGHT = 32;
     static constexpr int LOG_HEIGHT    = 200;
 
     ConsolePanel();
@@ -44,8 +44,8 @@ public:
     static constexpr int GetPreferredHeight() { return HEADER_HEIGHT + LOG_HEIGHT; }
 
 private:
-    static constexpr int CLEAR_BTN_W = 44;
-    static constexpr int CLEAR_BTN_H = 15;
+    static constexpr int CLEAR_BTN_W = 47;
+    static constexpr int CLEAR_BTN_H = 18;
 
     juce::TextEditor mLogBox;
     juce::TextButton mClearButton{ "Clear" };

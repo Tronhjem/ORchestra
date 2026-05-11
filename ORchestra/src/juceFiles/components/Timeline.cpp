@@ -162,7 +162,7 @@ void Timeline::paint(juce::Graphics& g)
         g.drawLine(0.f, y, labelColumnWidth + totalGridWidth, y, 1.f);
     }
 
-    g.setFont(juce::Font(juce::FontOptions{13.f}));
+    g.setFont(juce::Font(BUTTON_FONT_OPTIONS));
     for (int row = 0; row < TIMELINE_ROWS_DRAWN; ++row)
     {
         const float y = gridTop + static_cast<float>(row) * stepHeight;

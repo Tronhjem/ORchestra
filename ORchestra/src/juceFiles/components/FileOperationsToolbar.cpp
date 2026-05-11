@@ -26,8 +26,8 @@ FileOperationsToolbar::FileOperationsToolbar()
     mCompileButton.addListener(this);
     mPlayButton.addListener(this);
 
-    mCompileButton.setColour(juce::TextButton::buttonColourId, juce::Colour(ORchestra::ColorPalette::Teal));
-    mPlayButton.setColour(juce::TextButton::buttonColourId, juce::Colour(ORchestra::ColorPalette::Green));
+    mCompileButton.setColour(juce::TextButton::buttonColourId, juce::Colour(ORchestra::ColorPalette::Blue));
+    mPlayButton.setColour(juce::TextButton::buttonColourId, juce::Colour(ORchestra::ColorPalette::Pink));
 
     addAndMakeVisible(mCompileButton);
     addAndMakeVisible(mPlayButton);
@@ -43,7 +43,7 @@ void FileOperationsToolbar::paint(juce::Graphics& g)
 {
     g.fillAll(ORchestra::TransportButtonPanelBackground);
     g.setColour(ORchestra::ComponentOutlineColor);
-    g.drawLine(0.f, 0.f, getWidth(), 0.f, OUTLINE_THICKNESS);
+    g.drawLine(0.f, 0.f, static_cast<float>(getWidth()), 0.f, OUTLINE_THICKNESS);
 }
 
 void FileOperationsToolbar::resized()
@@ -51,6 +51,7 @@ void FileOperationsToolbar::resized()
     const int padding = (getHeight() - BUTTON_HEIGHT) / 2;
     auto row = getLocalBounds().reduced(0, padding);
 
+    row.removeFromLeft(BUTTON_LEFT_MARGIN);
     mCompileButton.setBounds(row.removeFromLeft(BUTTON_WIDTH));
     row.removeFromLeft(BUTTON_SPACING);
     mPlayButton.setBounds(row.removeFromLeft(BUTTON_WIDTH));
@@ -66,9 +67,9 @@ void FileOperationsToolbar::buttonClicked(juce::Button* button)
 
 void FileOperationsToolbar::updatePlayButtonState(bool isPlaying)
 {
-    mPlayButton.setButtonText(isPlaying ? "> Stop" : "> Play");
+    mPlayButton.setButtonText(isPlaying ? "| Stop" : "> Play");
     mPlayButton.setColour(juce::TextButton::buttonColourId,
-        juce::Colour(isPlaying ? ORchestra::ColorPalette::Red : ORchestra::ColorPalette::Green));
+        juce::Colour(isPlaying ? ORchestra::ColorPalette::Red : ORchestra::ColorPalette::Pink));
 }
 
 void FileOperationsToolbar::setCompileCallback(std::function<void()> callback)
