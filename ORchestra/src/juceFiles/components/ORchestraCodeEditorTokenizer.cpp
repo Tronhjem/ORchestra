@@ -17,8 +17,6 @@
  * along with ORchestra. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <unordered_set>
-
 #include "ORchestraCodeEditorTokenizer.h"
 #include "Colors.h"
 

@@ -50,7 +50,7 @@ public:
 private:
     void buttonClicked(juce::Button* button) override;
 
-    juce::TextButton mCompileButton{ "> Compile" };
+    juce::TextButton mCompileButton{ ">> Compile" };
     juce::TextButton mPlayButton{ "> Play" };
 
     std::function<void()> mCompileCallback;

@@ -58,10 +58,7 @@ private:
 
     juce::AudioDeviceManager& mDeviceManager;
 
-    juce::Label mInputLabel;
     juce::Label mOutputLabel;
-    juce::OwnedArray<juce::TextButton> mInputButtons;
-    juce::StringArray mInputIds;
     juce::ComboBox mOutputCombo;
     juce::StringArray mOutputIds;
 

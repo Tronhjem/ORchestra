@@ -73,7 +73,7 @@ void ConsolePanel::paint(juce::Graphics& g)
     g.drawText("CONSOLE", 8, 0, 80, HEADER_HEIGHT, juce::Justification::centredLeft, false);
 
     // Message count
-    const juce::String countText = juce::String(mMessageCount) + " messages";
+    const juce::String countText = juce::String(mMessageCount) + " message" + (mMessageCount == 1 ? "" : "s");
     g.drawText(countText,
                0, 0, getWidth() - CLEAR_BTN_W - 24, HEADER_HEIGHT,
                juce::Justification::centredRight, false);

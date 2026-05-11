@@ -25,7 +25,6 @@
 #include "Utility.h"
 #include "Colors.h"
 #include "LookAndFeelConstants.h"
-#include "juce_graphics/fonts/harfbuzz/hb-ot-head-table.hh"
 
 // Used to offset the trigger step so the trigger rect around 
 // is shown properly

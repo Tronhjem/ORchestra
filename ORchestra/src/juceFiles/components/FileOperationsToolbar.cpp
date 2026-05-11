@@ -26,6 +26,9 @@ FileOperationsToolbar::FileOperationsToolbar()
     mCompileButton.addListener(this);
     mPlayButton.addListener(this);
 
+    mCompileButton.setColour(juce::TextButton::buttonColourId, juce::Colour(ORchestra::ColorPalette::Teal));
+    mPlayButton.setColour(juce::TextButton::buttonColourId, juce::Colour(ORchestra::ColorPalette::Green));
+
     addAndMakeVisible(mCompileButton);
     addAndMakeVisible(mPlayButton);
 }
@@ -64,6 +67,8 @@ void FileOperationsToolbar::buttonClicked(juce::Button* button)
 void FileOperationsToolbar::updatePlayButtonState(bool isPlaying)
 {
     mPlayButton.setButtonText(isPlaying ? "> Stop" : "> Play");
+    mPlayButton.setColour(juce::TextButton::buttonColourId,
+        juce::Colour(isPlaying ? ORchestra::ColorPalette::Red : ORchestra::ColorPalette::Green));
 }
 
 void FileOperationsToolbar::setCompileCallback(std::function<void()> callback)

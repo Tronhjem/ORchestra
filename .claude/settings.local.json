@@ -29,7 +29,8 @@
       "Bash(/Users/christiantronhjem/dev/JuceProjects/ORchestra/UnitTests/Builds/MacOSX/build/Debug/EuclidCombinerUnitTests *)",
       "Bash(cmake --build . --target ORchestra_Standalone)",
       "Bash(cmake --build . --target ORchestra_Standalone --clean-first)",
-      "Bash(cmake --build /Users/christiantronhjem/dev/JuceProjects/ORchestra/build --target ORchestra_Standalone)"
+      "Bash(cmake --build /Users/christiantronhjem/dev/JuceProjects/ORchestra/build --target ORchestra_Standalone)",
+      "Bash(cmake --build build --target ORchestra_Standalone)"
     ]
   }
 }

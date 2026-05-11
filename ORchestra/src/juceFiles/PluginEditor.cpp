@@ -17,8 +17,6 @@
  * along with ORchestra. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <ctime>
-
 #include "LookAndFeelConstants.h"
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
@@ -54,31 +52,6 @@ constexpr const char* DEFAULT_SCRIPT =
 MidiSettingsComponent::MidiSettingsComponent(juce::AudioDeviceManager& deviceManager)
     : mDeviceManager(deviceManager)
 {
-    mInputLabel.setText("MIDI Inputs", juce::dontSendNotification);
-    mInputLabel.setColour(juce::Label::textColourId, ORchestra::TextColor);
-    addAndMakeVisible(mInputLabel);
-
-    for (const auto& device : juce::MidiInput::getAvailableDevices())
-    {
-        auto* btn = mInputButtons.add(std::make_unique<juce::TextButton>(device.name));
-        btn->setClickingTogglesState(true);
-        btn->setToggleState(mDeviceManager.isMidiInputDeviceEnabled(device.identifier),
-                            juce::dontSendNotification);
-
-        btn->setColour(juce::TextButton::textColourOffId, ORchestra::TextColor);
-        btn->setColour(juce::TextButton::textColourOnId, ORchestra::BackgroundColor);
-        mInputIds.add(device.identifier);
-
-        const int idx = mInputButtons.size() - 1;
-        btn->onClick = [this, idx]()
-        {
-            mDeviceManager.setMidiInputDeviceEnabled(mInputIds[idx],
-                                                     mInputButtons[idx]->getToggleState());
-        };
-
-        addAndMakeVisible(btn);
-    }
-
     mOutputLabel.setText("MIDI Output", juce::dontSendNotification);
     mOutputLabel.setColour(juce::Label::textColourId, ORchestra::TextColor);
     addAndMakeVisible(mOutputLabel);
@@ -121,11 +94,7 @@ MidiSettingsComponent::MidiSettingsComponent(juce::AudioDeviceManager& deviceMan
     mExportButton.onClick = [this]() { if (mExportCallback) mExportCallback(); };
     addAndMakeVisible(mExportButton);
 
-    const int numInputs = mInputButtons.size();
     const int height = PADDING * 2
-                     + LABEL_H + ROW_GAP
-                     + numInputs * (ROW_H + ROW_GAP)
-                     + SECTION_GAP
                      + LABEL_H + ROW_GAP
                      + ROW_H
                      + SECTION_GAP
@@ -137,8 +106,6 @@ MidiSettingsComponent::MidiSettingsComponent(juce::AudioDeviceManager& deviceMan
 
 MidiSettingsComponent::~MidiSettingsComponent()
 {
-    for (auto* btn : mInputButtons)
-        btn->setLookAndFeel(nullptr);
     mOutputCombo.setLookAndFeel(nullptr);
     mImportButton.setLookAndFeel(nullptr);
     mExportButton.setLookAndFeel(nullptr);
@@ -148,16 +115,6 @@ void MidiSettingsComponent::resized()
 {
     auto bounds = getLocalBounds().reduced(PADDING);
 
-    mInputLabel.setBounds(bounds.removeFromTop(LABEL_H));
-    bounds.removeFromTop(ROW_GAP);
-
-    for (auto* btn : mInputButtons)
-    {
-        btn->setBounds(bounds.removeFromTop(ROW_H));
-        bounds.removeFromTop(ROW_GAP);
-    }
-
-    bounds.removeFromTop(SECTION_GAP);
     mOutputLabel.setBounds(bounds.removeFromTop(LABEL_H));
     bounds.removeFromTop(ROW_GAP);
     mOutputCombo.setBounds(bounds.removeFromTop(ROW_H));
@@ -174,8 +131,6 @@ void MidiSettingsComponent::resized()
 
 void MidiSettingsComponent::setButtonLookAndFeel(juce::LookAndFeel* laf)
 {
-    for (auto* btn : mInputButtons)
-        btn->setLookAndFeel(laf);
     mImportButton.setLookAndFeel(laf);
     mExportButton.setLookAndFeel(laf);
 }
@@ -486,7 +441,6 @@ void ORchestraAudioProcessorEditor::UpdateErrors()
     for (auto it = errors.rbegin(); it != errors.rend(); ++it)
     {
         mess.append(it->mMessage.data(), it->mMessage.size());
-        mess.append("\n", 1);
     }
 
     mConsolePanel.setText(mess);
