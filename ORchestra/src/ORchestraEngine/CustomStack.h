@@ -32,6 +32,9 @@ namespace ORchestra
 #if defined(_DEBUG)
             assert(mStackPointer > 0);
 #endif
+            if (mStackPointer == 0)
+                return T{};
+
             return mStack[--mStackPointer];
         }
 
@@ -40,6 +43,9 @@ namespace ORchestra
 #if defined(_DEBUG)
             assert(mStackPointer + 1 <= 64);
 #endif
+            if (mStackPointer >= 64)
+                return;
+
             mStack[mStackPointer++] = i;
         }
 
@@ -53,6 +59,9 @@ namespace ORchestra
 #if defined(_DEBUG)
             assert(mStackPointer != 0 && mStackPointer > 0);
 #endif
+            if (mStackPointer == 0)
+                return T{};
+
             return mStack[mStackPointer - 1];
         }
 

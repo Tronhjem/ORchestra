@@ -1,0 +1,11 @@
+fn add(x, y)
+  return x + y
+end
+
+fn scale(val, factor, offset)
+  return val * factor + offset
+end
+
+a = add(10, 20)
+b = scale(a, 2, 5)
+note(1, b, 100, n8)

@@ -1,0 +1,6 @@
+fn addFive(x)
+  return x + 5
+end
+
+a = addFive(10)
+note(1, a, 100, n8)

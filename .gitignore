@@ -1,6 +1,7 @@
 Builds/
 build/
 build-fuzz/
+build-test/
 
 JuceLibraryCode/
 .DS_Store

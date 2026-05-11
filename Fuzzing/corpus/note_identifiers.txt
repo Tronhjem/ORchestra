@@ -1,0 +1,6 @@
+note(1, C4, 100, n8)
+note(1, D#5, 80, n4)
+note(1, Bb3, 90, n16)
+note(1, G2, 100, n8)
+note(1, A0, 100, n1)
+note(1, F#7, 60, n32)

@@ -10,9 +10,9 @@
 #include <fstream>
 #include <exception>
 
-#include "Scanner.h"
-#include "Compiler.h"
+#include "VM.h"
 #include "ErrorReporting.h"
+#include "SequenceStep.h"
 
 using namespace ORchestra;
 
@@ -36,7 +36,7 @@ static void SaveCrashInput(const uint8_t* data, size_t size)
     std::cerr << "CRASH INPUT SAVED: " << (gCrashDir / filename).string() << "\n";
 }
 
-static void RunInput(const uint8_t* data, size_t size)
+static void RunVM(const uint8_t* data, size_t size)
 {
     if (size == 0)
         return;
@@ -49,13 +49,20 @@ static void RunInput(const uint8_t* data, size_t size)
     try
     {
         ErrorReporting logger;
-        Scanner scanner(logger);
+        VM vm(logger);
 
-        if (scanner.ScanFile(input))
+        if (vm.Prepare(input))
         {
-            std::vector<Instruction> instructions;
-            Compiler compiler(scanner.GetTokens(), logger);
-            compiler.Compile(instructions);
+            std::vector<SequenceStep> steps;
+            vm.Tick(steps, 0);
+            steps.clear();
+            vm.Tick(steps, 1);
+            steps.clear();
+            vm.Tick(steps, 10);
+            steps.clear();
+            vm.Tick(steps, 100);
+            steps.clear();
+            vm.Tick(steps, 255);
         }
     }
     catch (const std::exception& e)
@@ -131,17 +138,17 @@ static void RunWithCorpus(const std::string& corpusDir, std::mt19937& rng, size_
 
         auto input = mutate(seeds[seedDist(rng)]);
         SaveInput(input.data(), input.size(), gLastInputPath);
-        RunInput(input.data(), input.size());
+        RunVM(input.data(), input.size());
 
         if ((i + 1) % 10000 == 0)
-            std::cout << "Scanner fuzz progress: " << (i + 1) << "/" << iterations << "\n";
+            std::cout << "VM fuzz progress: " << (i + 1) << "/" << iterations << "\n";
     }
 }
 
 #ifdef FUZZING_BUILD_LIBFUZZER
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
-    RunInput(data, size);
+    RunVM(data, size);
     return 0;
 }
 #else
@@ -154,7 +161,7 @@ int main(int argc, char** argv)
         seed = static_cast<unsigned int>(std::stoul(argv[1]));
 
     std::mt19937 rng(seed);
-    std::cout << "Scanner/Compiler fuzzer seed: " << seed << "\n";
+    std::cout << "VM fuzzer seed: " << seed << "\n";
 
     gCrashDir = std::filesystem::path(argv[0]).parent_path() / "crashes";
     if (argc > 3)
@@ -188,14 +195,14 @@ int main(int argc, char** argv)
                 data[j] = static_cast<uint8_t>(byteDist(rng));
 
             SaveInput(data.data(), data.size(), gLastInputPath);
-            RunInput(data.data(), data.size());
+            RunVM(data.data(), data.size());
 
             if ((i + 1) % 10000 == 0)
-                std::cout << "Scanner fuzz progress: " << (i + 1) << "/" << iterations << "\n";
+                std::cout << "VM fuzz progress: " << (i + 1) << "/" << iterations << "\n";
         }
     }
 
-    std::cout << "Scanner/Compiler fuzzing completed successfully.\n";
+    std::cout << "VM fuzzing completed successfully.\n";
     return 0;
 }
 #endif

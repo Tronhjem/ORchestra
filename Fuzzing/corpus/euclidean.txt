@@ -1,0 +1,4 @@
+trigger = euc(4, 8)
+notes = [60, 62, 64, 65]
+vel = [100, 80, 90, 100]
+note(trigger, notes, vel, n8)

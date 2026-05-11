@@ -39,12 +39,18 @@ namespace ORchestra
 
     StepData DataSequence::GetValue(const int index) const
     {
+        if (mData.empty())
+            return StepData{ 0 };
+
         const int indexWrapped = index % static_cast<int>(mData.size());
         return mData[static_cast<unsigned long>(indexWrapped)];
     }
 
     void DataSequence::SetValue(int index, const StepData& value)
     {
+        if (mData.empty())
+            return;
+
         const int indexWrapped = index % static_cast<int>(mData.size());
         mData[static_cast<unsigned long>(indexWrapped)] = value;
     }

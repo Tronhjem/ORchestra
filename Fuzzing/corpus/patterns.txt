@@ -1,0 +1,10 @@
+ptn verse
+  note(1, 60, 100, n8)
+end
+
+ptn chorus
+  note(1, 64, 100, n8)
+end
+
+song = [verse, chorus]
+song($)

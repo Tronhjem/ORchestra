@@ -350,7 +350,14 @@ namespace ORchestra
         case (OpCode::SET_IDENTIFIER_VALUE):
         {
             const StepData value = stack.Pop();
-            mVariables[static_cast<size_t>(instruction.GetOperand())].SetValue(0, value);
+            const size_t operandId = static_cast<size_t>(instruction.GetOperand());
+            if (operandId < mVariables.size())
+                mVariables[operandId].SetValue(0, value);
+            else
+            {
+                mErrorReporting.LogError("VM: Variable '" + VariableName(instruction.GetOperand()) + "' is not defined");
+                return false;
+            }
 
             break;
         }
@@ -395,7 +402,14 @@ namespace ORchestra
         case (OpCode::UPDATE_IDENTIFIER_VALUE):
         {
             const StepData value = stack.Pop();
-            mVariables[static_cast<size_t>(instruction.GetOperand())].SetValue(0, value);
+            const size_t operandId = static_cast<size_t>(instruction.GetOperand());
+            if (operandId < mVariables.size())
+                mVariables[operandId].SetValue(0, value);
+            else
+            {
+                mErrorReporting.LogError("VM: Variable '" + VariableName(instruction.GetOperand()) + "' is not defined");
+                return false;
+            }
             break;
         }
 

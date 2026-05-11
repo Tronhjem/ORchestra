@@ -78,9 +78,10 @@ namespace ORchestra
     void ErrorReporting::LogError(const std::string& message)
     {
         std::string stamped;
-        stamped.reserve(12 + message.size());
+        stamped.reserve(12 + message.size() + 1);
         stamped = CurrentTimestamp();
         stamped += message;
+        stamped += "\n";
         mLogEntries.emplace_back(LogEntry{ EntryType::Error, 0, stamped });
         TrimOldEntries();
         NotifyListener();
@@ -101,9 +102,10 @@ namespace ORchestra
     void ErrorReporting::LogWarning(const std::string& message)
     {
         std::string stamped;
-        stamped.reserve(12 + message.size());
+        stamped.reserve(12 + message.size() + 1);
         stamped = CurrentTimestamp();
         stamped += message;
+        stamped += "\n";
         mLogEntries.emplace_back(LogEntry{ EntryType::Warning, 0, stamped });
         TrimOldEntries();
         NotifyListener();
@@ -112,9 +114,10 @@ namespace ORchestra
     void ErrorReporting::LogMessage(const std::string& message)
     {
         std::string stamped;
-        stamped.reserve(12 + message.size());
+        stamped.reserve(12 + message.size() + 1);
         stamped = CurrentTimestamp();
         stamped += message;
+        stamped += "\n";
         mLogEntries.emplace_back(LogEntry{ EntryType::Messasge, 0, stamped });
         TrimOldEntries();
         NotifyListener();

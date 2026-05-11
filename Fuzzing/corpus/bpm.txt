@@ -1,0 +1,4 @@
+bpm(120)
+bpmDiv(4)
+trigger = euc(5, 8)
+note(trigger, 60, 100, n8)

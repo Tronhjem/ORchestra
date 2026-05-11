@@ -106,23 +106,25 @@ namespace ORchestra
 
     const ORchestraToken& Compiler::Consume()
     {
+        if (mCurrentIndex >= mTokens.size())
+            return mTokens.back();
+
         return mTokens[mCurrentIndex++];
     }
 
     const ORchestraToken& Compiler::Peek()
     {
-#if defined(_DEBUG)
-        assert(mCurrentIndex < mTokens.size());
-#endif
+        if (mCurrentIndex >= mTokens.size())
+            return mTokens.back();
+
         return mTokens[mCurrentIndex];
     }
 
     const ORchestraToken& Compiler::Previous()
     {
-#if defined(_DEBUG)
-        assert(mCurrentIndex < mTokens.size());
-        assert(mCurrentIndex - 1 >= 0);
-#endif
+        if (mCurrentIndex == 0 || mCurrentIndex > mTokens.size())
+            return mTokens.front();
+
         return mTokens[mCurrentIndex - 1];
     }
 
@@ -160,18 +162,21 @@ namespace ORchestra
     {
         int value = 0;
         std::from_chars(token.mStart, token.mStart + token.mLength, value);
-        if (value > DATA_UNIT_MAX_VALUE)
+        constexpr int MAX_CONSTANT = 255;
+        if (value > MAX_CONSTANT)
         {
-            value = DATA_UNIT_MAX_VALUE;
-            const std::string message = std::string("Value can't be greater than 32768, capping value");
-            mErrorReporting.LogWarning(message);
+            std::string message = std::string("Constant value ") + std::to_string(value) +
+                                  " exceeds 255, capping to 255";
+            mErrorReporting.LogWarning(token.mLine, message);
+            value = MAX_CONSTANT;
         }
 
-        if (value < DATA_UNIT_MIN_VALUE)
+        if (value < 0)
         {
-            value = DATA_UNIT_MIN_VALUE;
-            const std::string message = std::string("Value can't be smaller than -32768, capping value");
-            mErrorReporting.LogWarning(message);
+            std::string message = std::string("Constant value ") + std::to_string(value) +
+                                  " is negative, capping to 0";
+            mErrorReporting.LogWarning(token.mLine, message);
+            value = 0;
         }
 
         instructions.emplace_back(Instruction{ OpCode::CONSTANT, static_cast<DataUnit>(value) });
