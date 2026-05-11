@@ -49,7 +49,7 @@ namespace ORchestra
 
     void ErrorReporting::TrimOldEntries()
     {
-        while (mLogEntries.size() > MAX_LOG_ENTRIES)
+        if (mLogEntries.size() > MAX_LOG_ENTRIES)
         {
             mLogEntries.erase(mLogEntries.begin());
         }

@@ -322,13 +322,14 @@ namespace ORchestra
 
     bool Compiler::CompileFunctionCall(std::vector<Instruction>& instructions, const std::string& functionName)
     {
-        if (mFunctions.find(functionName) == mFunctions.end())
+        auto funcIt = mFunctions.find(functionName);
+        if (funcIt == mFunctions.end())
         {
             ThrowUnknownFunctionOrVariable(functionName);
             return false;
         }
 
-        const StoredFunction& function = mFunctions[functionName];
+        const StoredFunction& function = funcIt->second;
 
         Consume(); // For Left Parenteses
         int paramCounter = 0;
@@ -1487,19 +1488,14 @@ namespace ORchestra
 
     DataUnit Compiler::GetOrCreateVariableID(const std::string& varName)
     {
-        if (mVariableIDMap.find(varName) != mVariableIDMap.end())
+        auto [it, inserted] = mVariableIDMap.emplace(varName, mVariableIdCounter);
+        if (inserted)
         {
-            return mVariableIDMap[varName];
+            ++mVariableIdCounter;
+            if (mVariableIdCounter > 255)
+                mErrorReporting.LogWarning("Only 255 unique variables are supported");
         }
-        
-        mVariableIDMap[varName] = mVariableIdCounter++;
-
-        if (mVariableIdCounter > 255)
-        {
-            mErrorReporting.LogWarning("Only 255 unique variables are supported");
-        }
-
-        return mVariableIDMap[varName];
+        return it->second;
     }
 
 #ifdef __clang__
