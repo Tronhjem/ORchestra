@@ -88,6 +88,7 @@ public:
 
     //==============================================================================
     void paint(juce::Graphics&) override;
+    void paintOverChildren(juce::Graphics&) override;
     void resized() override;
     void parentHierarchyChanged() override;
     void mouseDown(const juce::MouseEvent& e) override;
@@ -135,6 +136,58 @@ private:
     juce::ComponentDragger mDragger;
     bool mIsDragging = false;
 
+    int mCodePanelWidth = 0;
+    int mConsoleHeight = 0;
+    int mDragStartCodeWidth = 0;
+    int mDragStartConsoleHeight = 0;
+
+    class DividerResizer : public juce::Component
+    {
+    public:
+        enum Orientation { Vertical, Horizontal };
+        explicit DividerResizer(Orientation o) : mOrientation(o) {}
+
+        std::function<void()> onDragStart;
+        std::function<void(int delta)> onDrag;
+
+        void mouseEnter(const juce::MouseEvent&) override
+        {
+            setMouseCursor(mOrientation == Vertical
+                ? juce::MouseCursor::LeftRightResizeCursor
+                : juce::MouseCursor::UpDownResizeCursor);
+        }
+
+        void mouseExit(const juce::MouseEvent&) override
+        {
+            setMouseCursor(juce::MouseCursor::NormalCursor);
+        }
+
+        void mouseDown(const juce::MouseEvent& e) override
+        {
+            mStartScreenX = e.getScreenX();
+            mStartScreenY = e.getScreenY();
+            if (onDragStart)
+                onDragStart();
+        }
+
+        void mouseDrag(const juce::MouseEvent& e) override
+        {
+            if (!onDrag)
+                return;
+
+            int dx = e.getScreenX() - mStartScreenX;
+            int dy = e.getScreenY() - mStartScreenY;
+            onDrag(mOrientation == Vertical ? dx : dy);
+        }
+
+    private:
+        Orientation mOrientation;
+        int mStartScreenX = 0;
+        int mStartScreenY = 0;
+    };
+
+    DividerResizer mVerticalDivider{ DividerResizer::Vertical };
+    DividerResizer mHorizontalDivider{ DividerResizer::Horizontal };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ORchestraAudioProcessorEditor)
 };

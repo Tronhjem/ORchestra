@@ -199,7 +199,11 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
 {
     setResizable(true, true);
     setResizeLimits(900, 700, 99999, 99999);
-    setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
+
+    int savedW = audioProcessor.GetEditorWidth();
+    int savedH = audioProcessor.GetEditorHeight();
+    setSize(savedW > 0 ? savedW : WINDOW_WIDTH,
+            savedH > 0 ? savedH : WINDOW_HEIGHT);
 
     audioProcessor.addChangeListener(this);
 
@@ -247,6 +251,9 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
         // Persist whatever is currently in the editor, compiled or not.
         const juce::String text = mCodeEditorPanel.getCodeDocument().getAllContent();
         audioProcessor.SetInstructionData(text.toStdString());
+        audioProcessor.SetEditorSize(getWidth(), getHeight());
+        audioProcessor.SetCodePanelWidth(mCodePanelWidth);
+        audioProcessor.SetConsoleHeight(mConsoleHeight);
 
         if (auto* holder = juce::StandalonePluginHolder::getInstance())
             holder->savePluginState();
@@ -275,6 +282,38 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     addAndMakeVisible(mCloseButton);
 #endif
 
+    int savedCodeW = audioProcessor.GetCodePanelWidth();
+    int savedConsoleH = audioProcessor.GetConsoleHeight();
+    mCodePanelWidth = savedCodeW > 0 ? savedCodeW : WINDOW_WIDTH * 2 / 5;
+    mConsoleHeight = savedConsoleH > 0 ? savedConsoleH : ConsolePanel::GetPreferredHeight();
+
+    mVerticalDivider.onDragStart = [this]()
+    {
+        mDragStartCodeWidth = mCodePanelWidth;
+    };
+
+    mVerticalDivider.onDrag = [this](int delta)
+    {
+        mCodePanelWidth = juce::jlimit(200, getWidth() - 300, mDragStartCodeWidth + delta);
+        resized();
+    };
+
+    mHorizontalDivider.onDragStart = [this]()
+    {
+        mDragStartConsoleHeight = mConsoleHeight;
+    };
+
+    mHorizontalDivider.onDrag = [this](int delta)
+    {
+        int minH = ConsolePanel::HEADER_HEIGHT + 50;
+        int maxH = getHeight() - TITLE_BAR_HEIGHT - 150;
+        mConsoleHeight = juce::jlimit(minH, maxH, mDragStartConsoleHeight - delta);
+        resized();
+    };
+
+    addAndMakeVisible(mVerticalDivider);
+    addAndMakeVisible(mHorizontalDivider);
+
     const std::string& data = audioProcessor.GetInstructionData();
     const juce::String dataAsString = data.empty() ? juce::String(DEFAULT_SCRIPT)
                                                     : juce::String(data);
@@ -294,8 +333,17 @@ void ORchestraAudioProcessorEditor::parentHierarchyChanged()
 {
     juce::AudioProcessorEditor::parentHierarchyChanged();
     if (auto* w = dynamic_cast<juce::DocumentWindow*>(getTopLevelComponent()))
+    {
         if (w->getTitleBarHeight() > 0)
+        {
+            int desiredW = getWidth();
+            int desiredH = getHeight();
             w->setTitleBarHeight(0);
+            auto border = w->getContentComponentBorder();
+            w->setSize(desiredW + border.getLeftAndRight(),
+                       desiredH + border.getTopAndBottom());
+        }
+    }
 
     if (auto* top = getTopLevelComponent())
         top->addKeyListener(this);
@@ -342,6 +390,10 @@ void ORchestraAudioProcessorEditor::mouseUp(const juce::MouseEvent&)
 
 ORchestraAudioProcessorEditor::~ORchestraAudioProcessorEditor()
 {
+    audioProcessor.SetEditorSize(getWidth(), getHeight());
+    audioProcessor.SetCodePanelWidth(mCodePanelWidth);
+    audioProcessor.SetConsoleHeight(mConsoleHeight);
+
     audioProcessor.removeChangeListener(this);
     audioProcessor.SetErrorListener(nullptr);
     if (auto* top = getTopLevelComponent())
@@ -489,12 +541,24 @@ void ORchestraAudioProcessorEditor::paint(juce::Graphics& g)
 //                   juce::Justification::centredRight, false);
 //    }
 
-    // Vertical separator between code editor and timeline/console
-    const int splitX = mCodeEditorPanel.getRight();
-    const int splitY = mCodeEditorPanel.getY();
+}
 
+void ORchestraAudioProcessorEditor::paintOverChildren(juce::Graphics& g)
+{
+    // Vertical separator between code editor and timeline/console
     g.setColour(ComponentOutlineColor);
-    g.drawLine((float)splitX, (float)splitY, (float)splitX, (float)getHeight());
+    g.drawLine(static_cast<float>(mCodePanelWidth),
+               static_cast<float>(TITLE_BAR_HEIGHT),
+               static_cast<float>(mCodePanelWidth),
+               static_cast<float>(getHeight()));
+
+    // Horizontal separator between timeline and console
+    const int consoleTop = getHeight() - mConsoleHeight;
+    g.setColour(ComponentOutlineColor);
+    g.drawLine(static_cast<float>(mCodePanelWidth),
+               static_cast<float>(consoleTop),
+               static_cast<float>(getWidth()),
+               static_cast<float>(consoleTop));
 }
 
 void ORchestraAudioProcessorEditor::resized()
@@ -512,30 +576,40 @@ void ORchestraAudioProcessorEditor::resized()
                               (TITLE_BAR_HEIGHT - settingsBtnH) / 2,
                               settingsBtnW, settingsBtnH);
 
+    // Clamp stored sizes to current window dimensions
+    mCodePanelWidth = juce::jlimit(200, getWidth() - 300, mCodePanelWidth);
+    int minConsoleH = ConsolePanel::HEADER_HEIGHT + 50;
+    int maxConsoleH = getHeight() - TITLE_BAR_HEIGHT - 150;
+    mConsoleHeight = juce::jlimit(minConsoleH, maxConsoleH, mConsoleHeight);
 
     Rectangle<int> leftPanel = localBounds;
     Rectangle<int> rightPanel = localBounds;
-    
+
     // Left panel: toolbar strip at bottom, code editor takes the rest
-    const int codeWidth = leftPanel.getWidth() * 2 / 5;
     constexpr int toolbarH = FileOperationsToolbar::BUTTON_HEIGHT + 40;
-    auto toolbarStrip = leftPanel.removeFromBottom(toolbarH).removeFromLeft(codeWidth);
+    auto toolbarStrip = leftPanel.removeFromBottom(toolbarH).removeFromLeft(mCodePanelWidth);
     mFileOperationsToolbar.setBounds(toolbarStrip);
 
-
-    // Move code panel slightly down. 
+    // Move code panel slightly down.
     leftPanel.removeFromTop(18);
 
     // Vertical split: left = code editor + toolbar, right = timeline + console
-    auto codeBounds = leftPanel.removeFromLeft(codeWidth);
+    auto codeBounds = leftPanel.removeFromLeft(mCodePanelWidth);
     mCodeEditorPanel.setBounds(codeBounds);
 
-    rightPanel.removeFromLeft(codeWidth);
+    rightPanel.removeFromLeft(mCodePanelWidth);
     // Right column: console section at bottom, timeline fills rest
-    const int consoleSectionHeight = ConsolePanel::GetPreferredHeight();
-    mConsolePanel.setBounds(rightPanel.removeFromBottom(consoleSectionHeight));
+    mConsolePanel.setBounds(rightPanel.removeFromBottom(mConsoleHeight));
 
     // Timeline fills remaining right area
     mTimeline.setBounds(rightPanel);
     mTriggerRectangle.setBounds(rightPanel.removeFromLeft(100));
+
+    // Position divider hit areas on top of the lines
+    mVerticalDivider.setBounds(mCodePanelWidth - 3, TITLE_BAR_HEIGHT,
+                                6, getHeight() - TITLE_BAR_HEIGHT);
+
+    int consoleTop = getHeight() - mConsoleHeight;
+    mHorizontalDivider.setBounds(mCodePanelWidth, consoleTop - 3,
+                                  getWidth() - mCodePanelWidth, 6);
 }

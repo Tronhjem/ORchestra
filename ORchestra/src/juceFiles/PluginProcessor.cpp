@@ -28,9 +28,6 @@ ORchestraAudioProcessor::ORchestraAudioProcessor() :
 #ifndef JucePlugin_PreferredChannelConfigurations
     AudioProcessor(BusesProperties()
 #if !JucePlugin_IsMidiEffect
-#if !JucePlugin_IsSynth
-        .withInput("Input", juce::AudioChannelSet::stereo(), true)
-#endif
         .withOutput("Output", juce::AudioChannelSet::stereo(), true)
 #endif
     ),
@@ -136,18 +133,9 @@ bool ORchestraAudioProcessor::isBusesLayoutSupported(const BusesLayout& layouts)
     juce::ignoreUnused(layouts);
     return true;
 #else
-    // This is the place where you check if the layout is supported.
-    // In this template code we only support mono or stereo.
-    // Some plugin hosts, such as certain GarageBand versions, will only
-    // load plugins that support stereo bus layouts.
-    if (layouts.getMainOutputChannelSet() != juce::AudioChannelSet::mono() && layouts.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())
+    if (layouts.getMainOutputChannelSet() != juce::AudioChannelSet::mono()
+        && layouts.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())
         return false;
-
-    // This checks if the input layout matches the output layout
-#if !JucePlugin_IsSynth
-    if (layouts.getMainOutputChannelSet() != layouts.getMainInputChannelSet())
-        return false;
-#endif
 
     return true;
 #endif
@@ -221,6 +209,10 @@ void ORchestraAudioProcessor::getStateInformation(juce::MemoryBlock& destData)
     auto state = mValueTree.copyState();
     std::unique_ptr<juce::XmlElement> xml(state.createXml());
     xml->setAttribute("data", mORchestraEngine->GetInstructionData());
+    xml->setAttribute("editorWidth", mEditorWidth);
+    xml->setAttribute("editorHeight", mEditorHeight);
+    xml->setAttribute("codePanelWidth", mCodePanelWidth);
+    xml->setAttribute("consoleHeight", mConsoleHeight);
     copyXmlToBinary(*xml, destData);
 }
 
@@ -242,6 +234,11 @@ void ORchestraAudioProcessor::setStateInformation(const void* data, int sizeInBy
             Compile(convertedData);
             sendChangeMessage();
         }
+
+        mEditorWidth      = xmlState->getIntAttribute("editorWidth", 0);
+        mEditorHeight     = xmlState->getIntAttribute("editorHeight", 0);
+        mCodePanelWidth   = xmlState->getIntAttribute("codePanelWidth", 0);
+        mConsoleHeight    = xmlState->getIntAttribute("consoleHeight", 0);
     }
 }
 

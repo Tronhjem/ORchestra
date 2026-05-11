@@ -77,6 +77,16 @@ public:
     void SetErrorListener(ErrorReportingListener* listener) { mORchestraEngine->SetErrorListener(listener); }
     void RequestClearErrors() { mORchestraEngine->RequestClearErrors(); }
 
+    void SetEditorSize(int w, int h) { mEditorWidth = w; mEditorHeight = h; }
+    int GetEditorWidth() const { return mEditorWidth; }
+    int GetEditorHeight() const { return mEditorHeight; }
+
+    void SetCodePanelWidth(int w) { mCodePanelWidth = w; }
+    int GetCodePanelWidth() const { return mCodePanelWidth; }
+
+    void SetConsoleHeight(int h) { mConsoleHeight = h; }
+    int GetConsoleHeight() const { return mConsoleHeight; }
+
     bool IsRunning = false;
     double mSampleRate = 44100;
 
@@ -89,6 +99,11 @@ private:
 
     juce::String mSavedFilePath{ "" };
     juce::AudioProcessorValueTreeState mValueTree;
+
+    int mEditorWidth = 0;
+    int mEditorHeight = 0;
+    int mCodePanelWidth = 0;
+    int mConsoleHeight = 0;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ORchestraAudioProcessor)
 };
