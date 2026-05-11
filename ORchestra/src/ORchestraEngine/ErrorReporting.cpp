@@ -19,7 +19,6 @@
 
 #include <ctime>
 #include <cstdio>
-#include <iostream>
 
 #include "ErrorReporting.h"
 
@@ -74,7 +73,6 @@ namespace ORchestra
         mLogEntries.emplace_back(LogEntry{ EntryType::Error, line, message });
         TrimOldEntries();
         NotifyListener();
-        std::cout << message << std::endl;
     }
 
     void ErrorReporting::LogError(const std::string& message)
@@ -86,7 +84,6 @@ namespace ORchestra
         mLogEntries.emplace_back(LogEntry{ EntryType::Error, 0, stamped });
         TrimOldEntries();
         NotifyListener();
-        std::cout << stamped << std::endl;
     }
 
     void ErrorReporting::LogWarning(const int line, std::string& message)
@@ -99,7 +96,6 @@ namespace ORchestra
         mLogEntries.emplace_back(LogEntry{ EntryType::Warning, line, message });
         TrimOldEntries();
         NotifyListener();
-        std::cout << message << std::endl;
     }
 
     void ErrorReporting::LogWarning(const std::string& message)
@@ -111,7 +107,6 @@ namespace ORchestra
         mLogEntries.emplace_back(LogEntry{ EntryType::Warning, 0, stamped });
         TrimOldEntries();
         NotifyListener();
-        std::cout << stamped << std::endl;
     }
 
     void ErrorReporting::LogMessage(const std::string& message)
@@ -123,7 +118,6 @@ namespace ORchestra
         mLogEntries.emplace_back(LogEntry{ EntryType::Messasge, 0, stamped });
         TrimOldEntries();
         NotifyListener();
-        std::cout << stamped << std::endl;
     }
 
     void ErrorReporting::Clear()

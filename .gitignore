@@ -1,9 +1,11 @@
 Builds/
+build/
+build-fuzz/
+
 JuceLibraryCode/
 .DS_Store
 .vscode/
 *.dSYM
-build/
 *.cmake
 _codeql_build_dir/
 .cache/

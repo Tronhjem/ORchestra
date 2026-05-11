@@ -34,6 +34,7 @@ The original prototype that sparked the idea can be found here: <https://github.
 - [Quick Start](#quick-start)
 - [Build Instructions](#build-instructions)
 - [Running Tests](#running-tests)
+- [Fuzzing](#fuzzing)
 - [Syntax and Language Reference](#syntax-and-language-reference)
   - [Operators](#operators)
   - [Variables](#variables)
@@ -138,6 +139,48 @@ cmake -DBUILD_PLUGIN=OFF -DBUILD_TESTS=ON ..
 cmake --build .
 ./UnitTests/ORchestraTests
 ```
+
+---
+
+## Fuzzing
+
+Fuzzing targets the Scanner and Compiler with random input to catch crashes, hangs, or assertion failures. The fuzzing suite is completely separate from unit tests and has no JUCE dependency, making it suitable for Windows builds and CI servers.
+
+### Standalone Fuzzer (any compiler)
+
+The default build uses a standalone fuzzer that generates random inputs without requiring libFuzzer. The quickest way to get started is the provided script:
+
+```bash
+./run-fuzzer.sh                  # default: 100,000 iterations
+./run-fuzzer.sh 42 500000        # seed 42, 500,000 iterations
+```
+
+Or build and run manually:
+
+```bash
+cd build
+cmake -DBUILD_PLUGIN=OFF -DBUILD_TESTS=OFF -DBUILD_FUZZING=ON ..
+cmake --build . --target ORchestraFuzz
+./Fuzzing/ORchestraFuzz          # default: 100,000 iterations
+./Fuzzing/ORchestraFuzz 42 500000 # seed 42, 500,000 iterations
+```
+
+### libFuzzer (coverage-guided, requires upstream Clang)
+
+For coverage-guided fuzzing with AddressSanitizer, use upstream Clang (not AppleClang) and enable `FUZZING_USE_LIBFUZZER`:
+
+```bash
+cmake -DBUILD_FUZZING=ON -DFUZZING_USE_LIBFUZZER=ON -DCMAKE_CXX_COMPILER=$(brew --prefix llvm)/bin/clang++ -B build
+cmake --build build --target ORchestraFuzz
+./build/Fuzzing/ORchestraFuzz -max_total_time=300 corpus/
+```
+
+Common libFuzzer flags:
+- `-max_total_time=N` — run for N seconds
+- `-runs=N` — run N total iterations
+- `-max_total_time=300` — run for 5 minutes
+
+libFuzzer runs indefinitely by default until stopped or a crash is found.
 
 ---
 
