@@ -94,12 +94,21 @@ MidiSettingsComponent::MidiSettingsComponent(juce::AudioDeviceManager& deviceMan
     mExportButton.onClick = [this]() { if (mExportCallback) mExportCallback(); };
     addAndMakeVisible(mExportButton);
 
+    mVersionLabel.setText(juce::String("v") + ProjectInfo::versionString,
+                          juce::dontSendNotification);
+    mVersionLabel.setColour(juce::Label::textColourId,
+                            ORchestra::TextColor.withAlpha(0.5f));
+    mVersionLabel.setJustificationType(juce::Justification::centredRight);
+    addAndMakeVisible(mVersionLabel);
+
     const int height = PADDING * 2
                      + LABEL_H + ROW_GAP
                      + ROW_H
                      + SECTION_GAP
                      + LABEL_H + ROW_GAP
-                     + ROW_H;
+                     + ROW_H
+                     + SECTION_GAP
+                     + LABEL_H;
 
     setSize(PANEL_W, height);
 }
@@ -127,6 +136,9 @@ void MidiSettingsComponent::resized()
     mImportButton.setBounds(fileRow.removeFromLeft(btnW));
     fileRow.removeFromLeft(ROW_GAP);
     mExportButton.setBounds(fileRow);
+
+    bounds.removeFromTop(SECTION_GAP);
+    mVersionLabel.setBounds(bounds.removeFromTop(LABEL_H));
 }
 
 void MidiSettingsComponent::setButtonLookAndFeel(juce::LookAndFeel* laf)

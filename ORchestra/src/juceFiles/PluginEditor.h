@@ -69,6 +69,8 @@ private:
     juce::TextButton mExportButton{ "Export" };
     std::function<void()> mImportCallback;
     std::function<void()> mExportCallback;
+
+    juce::Label mVersionLabel;
 };
 
 //==============================================================================

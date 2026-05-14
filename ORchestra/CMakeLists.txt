@@ -7,7 +7,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # PLGUINS 
 # ===================================================================================================
 juce_add_plugin(ORchestra
-    VERSION 0.1
+    VERSION ${CMAKE_PROJECT_VERSION}
     # ICON_BIG ...
     # ICON_SMALL ...
     COMPANY_NAME SonoTron
@@ -54,7 +54,7 @@ target_link_libraries(ORchestra
 # STANDLONE 
 # ===================================================================================================
 juce_add_plugin(ORchestra_Standalone
-    VERSION 0.1
+    VERSION ${CMAKE_PROJECT_VERSION}
     # ICON_BIG 
     # ICON_SMALL 
     COMPANY_NAME SonoTron
