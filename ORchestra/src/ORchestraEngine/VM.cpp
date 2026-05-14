@@ -98,9 +98,8 @@ namespace ORchestra
                 StepData value = stack.Pop();
                 const size_t operandId = static_cast<size_t>(instruction.GetOperand());
                 if(operandId >= mVariables.size())
-                    mVariables.emplace_back(DataSequence{ value });
-                else
-                    mVariables[operandId] = DataSequence{ value };
+                    mVariables.resize(operandId + 1);
+                mVariables[operandId] = DataSequence{ value };
 
                 break;
             }
@@ -116,9 +115,8 @@ namespace ORchestra
 
                 const size_t operandId = static_cast<size_t>(instruction.GetOperand());
                 if(operandId >= mVariables.size())
-                    mVariables.emplace_back(DataSequence{ data, arrayLength });
-                else
-                    mVariables[operandId] = DataSequence{ data, arrayLength };
+                    mVariables.resize(operandId + 1);
+                mVariables[operandId] = DataSequence{ data, arrayLength };
 
                 break;
             }
@@ -174,9 +172,8 @@ namespace ORchestra
                 StepData value = stack.Pop();
                 const size_t operandId = static_cast<size_t>(instruction.GetOperand());
                 if (operandId >= mVariables.size())
-                    mVariables.emplace_back(DataSequence{ value });
-                else
-                    mVariables[operandId].SetValue(0, value);
+                    mVariables.resize(operandId + 1);
+                mVariables[operandId].SetValue(0, value);
                 break;
             }
 
@@ -373,9 +370,8 @@ namespace ORchestra
 
             const size_t operandId = static_cast<size_t>(instruction.GetOperand());
             if(operandId >= mVariables.size())
-                mVariables.emplace_back(DataSequence{ data, arrayLength });
-            else
-                mVariables[operandId] = DataSequence{ data, arrayLength };
+                mVariables.resize(operandId + 1);
+            mVariables[operandId] = DataSequence{ data, arrayLength };
 
             break;
         }

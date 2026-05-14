@@ -550,3 +550,89 @@ TEST_CASE("UserFunction: Error - ptn name collision with built-in function", "[U
     VM vm(errorReporter);
     REQUIRE(vm.Prepare(file) == false);
 }
+
+TEST_CASE("Pattern: variable declared after pattern is accessible", "[UserFunction]")
+{
+    std::string file = "ptn pat1\nt = [1,1]\nend\nb = [1, 1, 1]\ntest b";
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    REQUIRE(vm.Prepare(file));
+
+    std::vector<SequenceStep> steps;
+    REQUIRE(vm.Tick(steps, 0));
+    StepData result = vm.GetTopStackValue();
+    REQUIRE(result.GetValue(0) == 1);
+}
+
+TEST_CASE("Pattern: variable declared after pattern with fn before it", "[UserFunction]")
+{
+    // Reproduces the original bug: fn params + ptn locals create variable ID gaps
+    std::string file =
+        "a = [0, 2, -1, 0]\n"
+        "fn MajChord(trig, toPost)\nnote(trig, toPost, 100, n8)\nend\n"
+        "ptn pat1\nt = [1,1]\nend\n"
+        "b = [1, 1, 1]\n"
+        "test b";
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    REQUIRE(vm.Prepare(file));
+
+    std::vector<SequenceStep> steps;
+    REQUIRE(vm.Tick(steps, 0));
+    StepData result = vm.GetTopStackValue();
+    REQUIRE(result.GetValue(0) == 1);
+}
+
+TEST_CASE("Pattern: multiple patterns with locals don't break later variables", "[UserFunction]")
+{
+    std::string file =
+        "ptn p1\nx = 10\nend\n"
+        "ptn p2\ny = 20\nend\n"
+        "z = 99\n"
+        "test z";
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    REQUIRE(vm.Prepare(file));
+
+    std::vector<SequenceStep> steps;
+    REQUIRE(vm.Tick(steps, 0));
+    StepData result = vm.GetTopStackValue();
+    REQUIRE(result.GetValue(0) == 99);
+}
+
+TEST_CASE("Pattern: pattern local variable works when pattern is executed", "[UserFunction]")
+{
+    // Verify that pattern-local vars are usable inside the pattern body at runtime
+    std::string file =
+        "a = [0]\n"
+        "ptn setA\na[0] = 42\nend\n"
+        "b = 5\n"
+        "arr = [setA]\n"
+        "arr($)\n"
+        "test a[0]";
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    REQUIRE(vm.Prepare(file));
+
+    std::vector<SequenceStep> steps;
+    REQUIRE(vm.Tick(steps, 0));
+    StepData result = vm.GetTopStackValue();
+    REQUIRE(result.GetValue(0) == 42);
+}
+
+TEST_CASE("Pattern: fn with locals before variable declaration", "[UserFunction]")
+{
+    // fn body locals also consume variable IDs from the shared pool
+    std::string file =
+        "fn myFunc\nlocal = 5\nend\n"
+        "v = 77\n"
+        "test v";
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    REQUIRE(vm.Prepare(file));
+
+    std::vector<SequenceStep> steps;
+    REQUIRE(vm.Tick(steps, 0));
+    StepData result = vm.GetTopStackValue();
+    REQUIRE(result.GetValue(0) == 77);
+}
