@@ -22,11 +22,10 @@
 #include "LookAndFeelConstants.h"
 #include "Colors.h"
 #include "Utility.h"
-#include "juce_graphics/juce_graphics.h"
 
 using namespace ORchestra;
 
-class ButtonLookAndFeel : public juce::LookAndFeel_V4
+class TransportLookAndFeel : public juce::LookAndFeel_V4
 {
 public:
     void drawButtonBackground(juce::Graphics& g, juce::Button& button,
@@ -49,47 +48,10 @@ public:
             outlineColour = outlineColour.brighter(0.15f);
         }
 
-        // Square bounds -> draw as solid circle (used for traffic-light dots)
-        if (std::abs(bounds.getWidth() - bounds.getHeight()) < 1.f)
-        {
-            juce::Colour dotColour = outlineColour;
-            if (isButtonDown)
-                dotColour = dotColour.darker(0.15f);
-            else if (isMouseOverButton)
-                dotColour = dotColour.brighter(0.2f);
-            g.setColour(dotColour);
-            g.fillEllipse(bounds);
-        }
-        else
-        {
-            g.setColour(fillColour);
-            g.fillRoundedRectangle(bounds, ROUNDED_CORNER_SIZE);
-            g.setColour(outlineColour);
-            g.drawRoundedRectangle(bounds.reduced(OUTLINE_THICKNESS * 0.5f), ROUNDED_CORNER_SIZE, OUTLINE_THICKNESS);
-        }
-    }
-
-    void drawToggleButton (juce::Graphics& g, juce::ToggleButton& toggleButton,
-                           bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown) override
-    {
-        UNUSED(shouldDrawButtonAsHighlighted);
-        UNUSED(shouldDrawButtonAsDown);
-
-        juce::Colour fillColour = ButtonBackgroundColor;
         g.setColour(fillColour);
-
-        g.fillRoundedRectangle(toggleButton.getLocalBounds().toFloat(), ROUNDED_CORNER_SIZE);
-
-        const bool isPressed = toggleButton.getToggleState();
-        if (isPressed)
-        {
-            g.setColour(juce::Colours::white);
-
-            Rectangle<float> bounds = toggleButton.getLocalBounds().toFloat() * 0.6f;
-            bounds.setCentre(toggleButton.getLocalBounds().toFloat().getCentre());
-
-            g.fillEllipse(bounds);
-        }
+        g.fillRoundedRectangle(bounds, ROUNDED_CORNER_SIZE);
+        g.setColour(outlineColour);
+        g.drawRoundedRectangle(bounds.reduced(OUTLINE_THICKNESS * 0.5f), ROUNDED_CORNER_SIZE, OUTLINE_THICKNESS);
     }
 
     juce::Font getTextButtonFont(juce::TextButton&, int buttonHeight) override
@@ -99,6 +61,5 @@ public:
     }
 
 private:
-    const Font mFont{ BUTTON_FONT_OPTIONS };
+    const juce::Font mFont{ BUTTON_FONT_OPTIONS };
 };
-

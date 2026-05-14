@@ -87,7 +87,7 @@ void FileOperationsToolbar::setCompileButtonEnabled(bool enabled)
     mCompileButton.setEnabled(enabled);
 }
 
-void FileOperationsToolbar::setButtonLookAndFeel(juce::LookAndFeel* laf)
+void FileOperationsToolbar::setTransportLookAndFeel(juce::LookAndFeel* laf)
 {
     mCompileButton.setLookAndFeel(laf);
     mPlayButton.setLookAndFeel(laf);

@@ -3,6 +3,7 @@ build/
 build-fuzz/
 build-test/
 
+.claude/
 JuceLibraryCode/
 .DS_Store
 .vscode/
@@ -11,5 +12,6 @@ JuceLibraryCode/
 _codeql_build_dir/
 .cache/
 _codeql_detected_source_root
+
 AGENTS.md
 

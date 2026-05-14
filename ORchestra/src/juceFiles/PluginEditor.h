@@ -29,7 +29,9 @@
 
 #include "GeneralLookAndFeel.h"
 #include "ButtonsLookAndFeel.h"
+#include "TransportLookAndFeel.h"
 #include "TextEditorLookAndFeel.h"
+#include "DotsButton.h"
 #include "ErrorReporting.h"
 #include "FileOperationsToolbar.h"
 #include "ConsolePanel.h"
@@ -116,6 +118,7 @@ private:
 
     std::unique_ptr<GeneralLookAndFeel> mGeneralLookAndFeel;
     std::unique_ptr<ButtonLookAndFeel> mButtonLookAndFeel;
+    std::unique_ptr<TransportLookAndFeel> mTransportLookAndFeel;
     std::unique_ptr<TextEditorLookAndFeel> mTextEditorLookAndFeel;
 
     juce::FileChooser mFileChooser{ "Select a file to load...", juce::File{}, "*.txt" };

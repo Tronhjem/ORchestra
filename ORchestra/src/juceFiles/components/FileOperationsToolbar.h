@@ -44,7 +44,7 @@ public:
     void setCompileButtonEnabled(bool enabled);
     void updatePlayButtonState(bool isPlaying);
 
-    void setButtonLookAndFeel(juce::LookAndFeel* laf);
+    void setTransportLookAndFeel(juce::LookAndFeel* laf);
 
     constexpr int getPreferredWidth() const { return 2 * BUTTON_WIDTH + BUTTON_SPACING; }
     constexpr int getPreferredHeight() const { return PANEL_HEIGHT; }

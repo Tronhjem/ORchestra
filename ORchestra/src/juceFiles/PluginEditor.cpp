@@ -164,6 +164,7 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
 
     mGeneralLookAndFeel = std::make_unique<GeneralLookAndFeel>();
     mButtonLookAndFeel = std::make_unique<ButtonLookAndFeel>();
+    mTransportLookAndFeel = std::make_unique<TransportLookAndFeel>();
     mTextEditorLookAndFeel = std::make_unique<TextEditorLookAndFeel>();
 
     juce::LookAndFeel::setDefaultLookAndFeel(mGeneralLookAndFeel.get());
@@ -221,7 +222,7 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
 
     mFileOperationsToolbar.setPlayCallback([this]() { handlePlayButton(); });
     mFileOperationsToolbar.setCompileCallback([this]() { handleCompile(); });
-    mFileOperationsToolbar.setButtonLookAndFeel(mButtonLookAndFeel.get());
+    mFileOperationsToolbar.setTransportLookAndFeel(mTransportLookAndFeel.get());
 
     audioProcessor.SetErrorListener(this);
 
@@ -352,7 +353,7 @@ ORchestraAudioProcessorEditor::~ORchestraAudioProcessorEditor()
     audioProcessor.SetErrorListener(nullptr);
     if (auto* top = getTopLevelComponent())
         top->removeKeyListener(this);
-    mFileOperationsToolbar.setButtonLookAndFeel(nullptr);
+    mFileOperationsToolbar.setTransportLookAndFeel(nullptr);
     mConsolePanel.setButtonLookAndFeel(nullptr);
     mConsolePanel.setTextEditorLookAndFeel(nullptr);
     mCloseButton.setLookAndFeel(nullptr);
