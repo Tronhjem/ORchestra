@@ -1,13 +1,13 @@
 cmake_minimum_required(VERSION 3.22)
 
-file(GLOB_RECURSE SRC_FILES "src/**/*.cpp")
+file(GLOB_RECURSE SRC_FILES "src/*/*.cpp")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # ===================================================================================================
 # PLGUINS 
 # ===================================================================================================
 juce_add_plugin(ORchestra
-    VERSION 0.1
+    VERSION ${CMAKE_PROJECT_VERSION}
     # ICON_BIG ...
     # ICON_SMALL ...
     COMPANY_NAME SonoTron
@@ -45,16 +45,16 @@ target_compile_definitions(ORchestra
 target_link_libraries(ORchestra
     PRIVATE
         juce::juce_audio_utils
+        juce::juce_recommended_warning_flags
     PUBLIC
         juce::juce_recommended_config_flags
-        juce::juce_recommended_lto_flags
-        juce::juce_recommended_warning_flags)
+        juce::juce_recommended_lto_flags)
 
 # ===================================================================================================
 # STANDLONE 
 # ===================================================================================================
 juce_add_plugin(ORchestra_Standalone
-    VERSION 0.1
+    VERSION ${CMAKE_PROJECT_VERSION}
     # ICON_BIG 
     # ICON_SMALL 
     COMPANY_NAME SonoTron
@@ -92,18 +92,18 @@ target_compile_definitions(ORchestra_Standalone
 target_link_libraries(ORchestra_Standalone
     PRIVATE
         juce::juce_audio_utils
+        juce::juce_recommended_warning_flags
     PUBLIC
         juce::juce_recommended_config_flags
-        juce::juce_recommended_lto_flags
-        juce::juce_recommended_warning_flags)
+        juce::juce_recommended_lto_flags)
 
-# Disable -Wswitch-enum warning for all compilers
-# This warning requires exhaustive case handling for all enum values, even when a default case is present
-# We need to modify the interface compile options of juce_recommended_warning_flags to remove -Wswitch-enum
-# and then add -Wno-switch-enum
+# Disable -Wswitch-enum: this warning requires exhaustive case handling for all
+# enum values even when a default case is present, which is unnecessary for us.
+# We also modify the JUCE interface target to remove -Wswitch-enum so it doesn't
+# conflict with our override (last flag wins in clang).
 if(CMAKE_CXX_COMPILER_ID MATCHES "AppleClang" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-    get_target_property(WARNING_FLAGS juce_recommended_warning_flags INTERFACE_COMPILE_OPTIONS)
-    list(REMOVE_ITEM WARNING_FLAGS "-Wswitch-enum")
-    list(APPEND WARNING_FLAGS "-Wno-switch-enum")
-    set_target_properties(juce_recommended_warning_flags PROPERTIES INTERFACE_COMPILE_OPTIONS "${WARNING_FLAGS}")
+    get_target_property(_warn_flags juce_recommended_warning_flags INTERFACE_COMPILE_OPTIONS)
+    list(REMOVE_ITEM _warn_flags "-Wswitch-enum")
+    list(APPEND _warn_flags "-Wno-switch-enum")
+    set_target_properties(juce_recommended_warning_flags PROPERTIES INTERFACE_COMPILE_OPTIONS "${_warn_flags}")
 endif()

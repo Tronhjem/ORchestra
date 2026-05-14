@@ -22,7 +22,7 @@
 
 #include "ORchestraEngine.h"
 #include "Defines.h"
-#if _DEBUG
+#if defined(_DEBUG)
 #include "ScopedTimer.h"
 #endif
 
@@ -129,7 +129,7 @@ namespace ORchestra
         const int readySteps = mReadySteps.load();
         const int stepsToProcess = STEP_BUFFER_SIZE - 1 - readySteps; // leave the last step unprocessed.
 
-#if _DEBUG
+#if defined(_DEBUG)
         ScopedTimer timer{ "PreProcess" };
 #endif
 
@@ -220,7 +220,7 @@ namespace ORchestra
             // Check if we should tick in this buffer.
             if (endOfBufferInSamples >= nextStepInSamples && currentStep != mLastStep)
             {
-#if _DEBUG
+#if defined(_DEBUG)
 //               ScopedTimer timer{ "Process Beat" };
 #endif
                mLastStep = currentStep;

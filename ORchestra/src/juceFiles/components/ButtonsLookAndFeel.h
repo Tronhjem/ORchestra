@@ -32,18 +32,41 @@ public:
     void drawButtonBackground(juce::Graphics& g, juce::Button& button,
         const juce::Colour& backgroundColour, bool isMouseOverButton, bool isButtonDown) override
     {
-        UNUSED(backgroundColour);
         auto bounds = button.getLocalBounds().toFloat();
 
-        juce::Colour fillColour = ButtonBackgroundColor;
+        const juce::Colour baseColour = backgroundColour.isTransparent() ? ButtonBackgroundColor : backgroundColour;
+        juce::Colour outlineColour = button.getToggleState() ? HighlightColor : baseColour;
+        juce::Colour fillColour = TransportButtonPanelBackground.interpolatedWith(outlineColour, 0.1f);
 
         if (isButtonDown)
-            fillColour = fillColour.darker(0.15f);
+        {
+            fillColour = fillColour.brighter(0.1f);
+            outlineColour = outlineColour.brighter(0.1f);
+        }
         else if (isMouseOverButton)
-            fillColour = fillColour.brighter(0.15f);
+        {
+            fillColour = fillColour.brighter(0.05f);
+            outlineColour = outlineColour.brighter(0.15f);
+        }
 
-        g.setColour(fillColour);
-        g.fillRoundedRectangle(bounds, ROUNDED_CORNER_SIZE);
+        // Square bounds -> draw as solid circle (used for traffic-light dots)
+        if (std::abs(bounds.getWidth() - bounds.getHeight()) < 1.f)
+        {
+            juce::Colour dotColour = outlineColour;
+            if (isButtonDown)
+                dotColour = dotColour.darker(0.15f);
+            else if (isMouseOverButton)
+                dotColour = dotColour.brighter(0.2f);
+            g.setColour(dotColour);
+            g.fillEllipse(bounds);
+        }
+        else
+        {
+            g.setColour(fillColour);
+            g.fillRoundedRectangle(bounds, ROUNDED_CORNER_SIZE);
+            g.setColour(outlineColour);
+            g.drawRoundedRectangle(bounds.reduced(OUTLINE_THICKNESS * 0.5f), ROUNDED_CORNER_SIZE, OUTLINE_THICKNESS);
+        }
     }
 
     void drawToggleButton (juce::Graphics& g, juce::ToggleButton& toggleButton,
@@ -76,5 +99,6 @@ public:
     }
 
 private:
-    const Font mFont{ MONOSPACE_FONT_OPTIONS };
+    const Font mFont{ BUTTON_FONT_OPTIONS };
 };
+

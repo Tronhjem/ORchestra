@@ -21,7 +21,6 @@
 
 #include <JuceHeader.h>
 #include <memory>
-#include <ctime>
 #include <mutex>
 #include <condition_variable>
 
@@ -46,7 +45,7 @@ namespace ORchestra
 
         std::array<std::vector<SequenceStep>, STEP_BUFFER_SIZE>& GetStepData() { return mStepRingBuffer; }
         int GetGlobalStepCount() { return mCurrentGlobalStep.load(); }
-        std::vector<LogEntry> GetErrors() { return mErrorReporting.GetErrors(); }
+        const std::vector<LogEntry>& GetErrors() { return mErrorReporting.GetErrors(); }
         const std::string& GetInstructionData() { return mInstructionData; }
         void SetInstructionData(const std::string& data) { mInstructionData = data; }
         bool IsVMInit() { return mIsVMInit.load(); }

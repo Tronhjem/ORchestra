@@ -74,6 +74,9 @@
               file="src/juceFiles/components/CodeEditorPanel.cpp"/>
         <FILE id="NMftiD" name="CodeEditorPanel.h" compile="0" resource="0"
               file="src/juceFiles/components/CodeEditorPanel.h"/>
+        <FILE id="GeXXdN" name="ConsolePanel.cpp" compile="1" resource="0"
+              file="src/juceFiles/components/ConsolePanel.cpp"/>
+        <FILE id="K9OeWW" name="ConsolePanel.h" compile="0" resource="0" file="src/juceFiles/components/ConsolePanel.h"/>
         <FILE id="PGuZeA" name="FileOperationsToolbar.cpp" compile="1" resource="0"
               file="src/juceFiles/components/FileOperationsToolbar.cpp"/>
         <FILE id="LevhxL" name="FileOperationsToolbar.h" compile="0" resource="0"

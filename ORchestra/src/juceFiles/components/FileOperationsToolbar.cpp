@@ -17,58 +17,59 @@
  * along with ORchestra. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "Colors.h"
+#include "LookAndFeelConstants.h"
 #include "FileOperationsToolbar.h"
 
 FileOperationsToolbar::FileOperationsToolbar()
 {
-    mImportButton.addListener(this);
-    mExportButton.addListener(this);
     mCompileButton.addListener(this);
+    mPlayButton.addListener(this);
 
-    // addAndMakeVisible(mExportButton);
-    // addAndMakeVisible(mImportButton);
+    mCompileButton.setColour(juce::TextButton::buttonColourId, juce::Colour(ORchestra::ColorPalette::Blue));
+    mPlayButton.setColour(juce::TextButton::buttonColourId, juce::Colour(ORchestra::ColorPalette::Pink));
+
     addAndMakeVisible(mCompileButton);
+    addAndMakeVisible(mPlayButton);
 }
 
 FileOperationsToolbar::~FileOperationsToolbar()
 {
-    mImportButton.setLookAndFeel(nullptr);
-    mExportButton.setLookAndFeel(nullptr);
     mCompileButton.setLookAndFeel(nullptr);
+    mPlayButton.setLookAndFeel(nullptr);
+}
+
+void FileOperationsToolbar::paint(juce::Graphics& g) 
+{
+    g.fillAll(ORchestra::TransportButtonPanelBackground);
+    g.setColour(ORchestra::ComponentOutlineColor);
+    g.drawLine(0.f, 0.f, static_cast<float>(getWidth()), 0.f, OUTLINE_THICKNESS);
 }
 
 void FileOperationsToolbar::resized()
 {
-    auto bounds = getLocalBounds();
-    int buttonWidth = (bounds.getWidth() - 2 * BUTTON_SPACING) / 3;
+    const int padding = (getHeight() - BUTTON_HEIGHT) / 2;
+    auto row = getLocalBounds().reduced(0, padding);
 
-    mCompileButton.setBounds(bounds.removeFromLeft(buttonWidth));
-    bounds.removeFromLeft(BUTTON_SPACING);
-
-    mImportButton.setBounds(bounds.removeFromLeft(buttonWidth));
-    bounds.removeFromLeft(BUTTON_SPACING);
-
-    mExportButton.setBounds(bounds);
+    row.removeFromLeft(BUTTON_LEFT_MARGIN);
+    mCompileButton.setBounds(row.removeFromLeft(BUTTON_WIDTH));
+    row.removeFromLeft(BUTTON_SPACING);
+    mPlayButton.setBounds(row.removeFromLeft(BUTTON_WIDTH));
 }
 
 void FileOperationsToolbar::buttonClicked(juce::Button* button)
 {
-    if (button == &mImportButton && mImportCallback)
-        mImportCallback();
-    else if (button == &mExportButton && mExportCallback)
-        mExportCallback();
-    else if (button == &mCompileButton && mCompileCallback)
+    if (button == &mCompileButton && mCompileCallback)
         mCompileCallback();
+    else if (button == &mPlayButton && mPlayCallback)
+        mPlayCallback();
 }
 
-void FileOperationsToolbar::setImportCallback(std::function<void()> callback)
+void FileOperationsToolbar::updatePlayButtonState(bool isPlaying)
 {
-    mImportCallback = std::move(callback);
-}
-
-void FileOperationsToolbar::setExportCallback(std::function<void()> callback)
-{
-    mExportCallback = std::move(callback);
+    mPlayButton.setButtonText(isPlaying ? "| Stop" : "> Play");
+    mPlayButton.setColour(juce::TextButton::buttonColourId,
+        juce::Colour(isPlaying ? ORchestra::ColorPalette::Red : ORchestra::ColorPalette::Pink));
 }
 
 void FileOperationsToolbar::setCompileCallback(std::function<void()> callback)
@@ -76,14 +77,18 @@ void FileOperationsToolbar::setCompileCallback(std::function<void()> callback)
     mCompileCallback = std::move(callback);
 }
 
+void FileOperationsToolbar::setPlayCallback(std::function<void()> callback)
+{
+    mPlayCallback = std::move(callback);
+}
+
 void FileOperationsToolbar::setCompileButtonEnabled(bool enabled)
 {
     mCompileButton.setEnabled(enabled);
 }
 
-void FileOperationsToolbar::setButtonLookAndFeel(juce::LookAndFeel* laf)
+void FileOperationsToolbar::setTransportLookAndFeel(juce::LookAndFeel* laf)
 {
-    mImportButton.setLookAndFeel(laf);
-    mExportButton.setLookAndFeel(laf);
     mCompileButton.setLookAndFeel(laf);
+    mPlayButton.setLookAndFeel(laf);
 }

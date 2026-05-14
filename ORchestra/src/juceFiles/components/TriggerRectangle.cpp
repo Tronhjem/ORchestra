@@ -25,7 +25,7 @@ using namespace ORchestra;
 
 void TriggerRectangleComponent::timerCallback()
 {
-#if _DEBUG
+#if defined(_DEBUG)
     assert(mAudioProcessor != nullptr);
 #endif
 

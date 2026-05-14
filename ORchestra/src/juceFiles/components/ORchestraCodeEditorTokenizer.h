@@ -35,18 +35,29 @@ namespace ORchestra
         int readNextToken (CodeDocument::Iterator&) override;
         CodeEditorComponent::ColourScheme getDefaultColourScheme() override;
 
+        void syncWithDocument (const CodeDocument& doc);
+        bool isUserFunctionName (const String& name) const { return mUserFunctionNames.contains (name); }
+
         enum TokenType
         {
             tokenType_error = 0,
             tokenType_comment,
             tokenType_keyword,
+            tokenType_function,
             tokenType_operator,
             tokenType_identifier,
             tokenType_integer,
             tokenType_float,
             tokenType_string,
             tokenType_bracket,
-            tokenType_punctuation
+            tokenType_punctuation,
+            tokenType_note
         };
+
+    private:
+        void scanForUserFunctions (const String& documentContent);
+
+        juce::StringArray mUserFunctionNames;
+        juce::int64 mLastDocumentHash = 0;
     };
 } // namespace ORchestra

@@ -1,12 +1,17 @@
 Builds/
+build/
+build-fuzz/
+build-test/
+
+.claude/
 JuceLibraryCode/
 .DS_Store
 .vscode/
 *.dSYM
-build/
 *.cmake
 _codeql_build_dir/
 .cache/
 _codeql_detected_source_root
+
 AGENTS.md
 

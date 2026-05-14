@@ -25,14 +25,32 @@ namespace ORchestra
     {
     }
 
+    DataSequence::DataSequence(std::vector<StepData>&& data) noexcept : mData(std::move(data))
+    {
+    }
+
+    DataSequence::DataSequence(const StepData* begin, int count) : mData(begin, begin + count)
+    {
+    }
+
+    DataSequence::DataSequence(StepData value) : mData{value}
+    {
+    }
+
     StepData DataSequence::GetValue(const int index) const
     {
+        if (mData.empty())
+            return StepData{ 0 };
+
         const int indexWrapped = index % static_cast<int>(mData.size());
         return mData[static_cast<unsigned long>(indexWrapped)];
     }
 
-    void DataSequence::SetValue(int index, StepData value)
+    void DataSequence::SetValue(int index, const StepData& value)
     {
+        if (mData.empty())
+            return;
+
         const int indexWrapped = index % static_cast<int>(mData.size());
         mData[static_cast<unsigned long>(indexWrapped)] = value;
     }

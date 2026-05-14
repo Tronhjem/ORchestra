@@ -26,7 +26,7 @@ namespace ORchestra
     StepData::StepData(const DataUnit* data, const int length)
         : mLength(length)
     {
-#if _DEBUG
+#if defined(_DEBUG)
         assert(length <= MAX_SUB_DIVISION_LENGTH);
         assert(length <= MAX_SUB_DIVISION_LENGTH);
 #endif
@@ -42,7 +42,7 @@ namespace ORchestra
 
     DataUnit StepData::GetValue(const int index) const
     {
-#if _DEBUG
+#if defined(_DEBUG)
         assert(index < mLength);
 #endif
 
@@ -51,7 +51,7 @@ namespace ORchestra
 
     DataUnit StepData::GetEquivalentValueAtIndex(const int index, const int otherLength) const
     {
-#if _DEBUG
+#if defined(_DEBUG)
         assert(index < MAX_SUB_DIVISION_LENGTH);
 #endif
 
@@ -60,7 +60,7 @@ namespace ORchestra
 
         const int equivalentIndex = (index * mLength) / otherLength;
 
-#if _DEBUG
+#if defined(_DEBUG)
         assert(equivalentIndex < mLength);
 #endif
 
@@ -69,7 +69,7 @@ namespace ORchestra
 
     void StepData::SetData(const DataUnit* data, const int length)
     {
-#if _DEBUG
+#if defined(_DEBUG)
         assert(length <= MAX_SUB_DIVISION_LENGTH);
 #endif
 

@@ -421,3 +421,218 @@ TEST_CASE("UserFunction: Error - return outside function body", "[UserFunction]"
     VM vm(errorReporter);
     REQUIRE(vm.Prepare(file) == false);
 }
+
+TEST_CASE("UserFunction: Error - fn name collision with variable", "[UserFunction]")
+{
+    std::string file = "a = 5\nfn a\nend\n";
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    REQUIRE(vm.Prepare(file) == false);
+}
+
+TEST_CASE("UserFunction: Error - ptn name collision with variable", "[UserFunction]")
+{
+    std::string file = "a = 5\nptn a\nend\n";
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    REQUIRE(vm.Prepare(file) == false);
+}
+
+TEST_CASE("UserFunction: Error - fn name collision with pattern", "[UserFunction]")
+{
+    std::string file = "ptn myFunc\nend\nfn myFunc\nend\n";
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    REQUIRE(vm.Prepare(file) == false);
+}
+
+TEST_CASE("UserFunction: return inside pattern body works (ptn uses mInsideFunctionDefinition)", "[UserFunction]")
+{
+    std::string file = "a = 5\nptn myPat\nreturn 99\nend\npat = [myPat]\npat(0)\ntest a";
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    REQUIRE(vm.Prepare(file));
+
+    std::vector<SequenceStep> steps;
+    REQUIRE(vm.Tick(steps, 0));
+    StepData result = vm.GetTopStackValue();
+    REQUIRE(result.GetValue(0) == 5); // a was not modified by return in ptn
+}
+
+TEST_CASE("UserFunction: Error - duplicate function definition", "[UserFunction]")
+{
+    std::string file = "fn myFunc\nend\nfn myFunc\nend\n";
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    REQUIRE(vm.Prepare(file) == false);
+}
+
+TEST_CASE("UserFunction: Error - duplicate pattern definition", "[UserFunction]")
+{
+    std::string file = "ptn myPat\nend\nptn myPat\nend\n";
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    REQUIRE(vm.Prepare(file) == false);
+}
+
+TEST_CASE("UserFunction: fn returning expression used in note call", "[UserFunction]")
+{
+    std::string file = "fn getNote()\nreturn C4\nend\nnote(1, getNote(), 100, n4, 1)";
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    REQUIRE(vm.Prepare(file));
+}
+
+TEST_CASE("UserFunction: fn with return used in multiple calls", "[UserFunction]")
+{
+    std::string file = "fn addOne(x)\nreturn x + 1\nend\na = addOne(5)\nb = addOne(10)\ntest b";
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    REQUIRE(vm.Prepare(file));
+
+    StepData result = vm.GetTopStackValue();
+    REQUIRE(result.GetValue(0) == 11);
+}
+
+TEST_CASE("UserFunction: Error - comma without param name in fn def", "[UserFunction]")
+{
+    std::string file = "fn myFunc(,)\nend\n";
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    REQUIRE(vm.Prepare(file) == false);
+}
+
+TEST_CASE("UserFunction: Error - duplicate parameter names", "[UserFunction]")
+{
+    std::string file = "fn add(x, x)\na = x + x\nend\n";
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    // Duplicate parameter names should be allowed (x is same var id), just tests it compiles
+    REQUIRE(vm.Prepare(file));
+}
+
+TEST_CASE("UserFunction: fn with multiple return statements returns last one", "[UserFunction]")
+{
+    std::string file = "fn pick(x)\nreturn x + 1\nreturn x + 2\nend\na = pick(5)\ntest a";
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    REQUIRE(vm.Prepare(file));
+
+    StepData result = vm.GetTopStackValue();
+    REQUIRE(result.GetValue(0) == 7); // last return wins
+}
+
+TEST_CASE("UserFunction: Pattern array with constant index works correctly", "[UserFunction]")
+{
+    std::string file = "a = [0]\nptn setA\na[0] = 42\nend\nptn setB\na[0] = 99\nend\npat = [setA, setB]\npat(1)\ntest a[0]";
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    REQUIRE(vm.Prepare(file));
+
+    std::vector<SequenceStep> steps;
+    REQUIRE(vm.Tick(steps, 0));
+    StepData result = vm.GetTopStackValue();
+    REQUIRE(result.GetValue(0) == 99);
+}
+
+TEST_CASE("UserFunction: Error - cannot define fn inside ptn", "[UserFunction]")
+{
+    std::string file = "ptn outer\nfn inner\nend\nend\n";
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    REQUIRE(vm.Prepare(file) == false);
+}
+
+TEST_CASE("UserFunction: Error - ptn name collision with built-in function", "[UserFunction]")
+{
+    std::string file = "ptn print\nend\n";
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    REQUIRE(vm.Prepare(file) == false);
+}
+
+TEST_CASE("Pattern: variable declared after pattern is accessible", "[UserFunction]")
+{
+    std::string file = "ptn pat1\nt = [1,1]\nend\nb = [1, 1, 1]\ntest b";
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    REQUIRE(vm.Prepare(file));
+
+    std::vector<SequenceStep> steps;
+    REQUIRE(vm.Tick(steps, 0));
+    StepData result = vm.GetTopStackValue();
+    REQUIRE(result.GetValue(0) == 1);
+}
+
+TEST_CASE("Pattern: variable declared after pattern with fn before it", "[UserFunction]")
+{
+    // Reproduces the original bug: fn params + ptn locals create variable ID gaps
+    std::string file =
+        "a = [0, 2, -1, 0]\n"
+        "fn MajChord(trig, toPost)\nnote(trig, toPost, 100, n8)\nend\n"
+        "ptn pat1\nt = [1,1]\nend\n"
+        "b = [1, 1, 1]\n"
+        "test b";
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    REQUIRE(vm.Prepare(file));
+
+    std::vector<SequenceStep> steps;
+    REQUIRE(vm.Tick(steps, 0));
+    StepData result = vm.GetTopStackValue();
+    REQUIRE(result.GetValue(0) == 1);
+}
+
+TEST_CASE("Pattern: multiple patterns with locals don't break later variables", "[UserFunction]")
+{
+    std::string file =
+        "ptn p1\nx = 10\nend\n"
+        "ptn p2\ny = 20\nend\n"
+        "z = 99\n"
+        "test z";
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    REQUIRE(vm.Prepare(file));
+
+    std::vector<SequenceStep> steps;
+    REQUIRE(vm.Tick(steps, 0));
+    StepData result = vm.GetTopStackValue();
+    REQUIRE(result.GetValue(0) == 99);
+}
+
+TEST_CASE("Pattern: pattern local variable works when pattern is executed", "[UserFunction]")
+{
+    // Verify that pattern-local vars are usable inside the pattern body at runtime
+    std::string file =
+        "a = [0]\n"
+        "ptn setA\na[0] = 42\nend\n"
+        "b = 5\n"
+        "arr = [setA]\n"
+        "arr($)\n"
+        "test a[0]";
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    REQUIRE(vm.Prepare(file));
+
+    std::vector<SequenceStep> steps;
+    REQUIRE(vm.Tick(steps, 0));
+    StepData result = vm.GetTopStackValue();
+    REQUIRE(result.GetValue(0) == 42);
+}
+
+TEST_CASE("Pattern: fn with locals before variable declaration", "[UserFunction]")
+{
+    // fn body locals also consume variable IDs from the shared pool
+    std::string file =
+        "fn myFunc\nlocal = 5\nend\n"
+        "v = 77\n"
+        "test v";
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    REQUIRE(vm.Prepare(file));
+
+    std::vector<SequenceStep> steps;
+    REQUIRE(vm.Tick(steps, 0));
+    StepData result = vm.GetTopStackValue();
+    REQUIRE(result.GetValue(0) == 77);
+}

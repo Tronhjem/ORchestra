@@ -39,4 +39,11 @@
 #include "Test_GlobalCount.h"
 #include "Test_UserFunctions.h"
 #include "Test_NoteDivisionLiterals.h"
+#include "Test_NoteAndCC.h"
+#include "Test_Scanner_EdgeCases.h"
+#include "Test_BuiltInFunctions.h"
+#include "Test_ErrorReportingClass.h"
+#include "Test_Instruction.h"
+#include "Test_VM_EdgeCases.h"
+#include "Test_Performance.h"
 

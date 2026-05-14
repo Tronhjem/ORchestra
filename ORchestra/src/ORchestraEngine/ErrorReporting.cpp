@@ -19,7 +19,6 @@
 
 #include <ctime>
 #include <cstdio>
-#include <iostream>
 
 #include "ErrorReporting.h"
 
@@ -50,7 +49,7 @@ namespace ORchestra
 
     void ErrorReporting::TrimOldEntries()
     {
-        while (mLogEntries.size() > MAX_LOG_ENTRIES)
+        if (mLogEntries.size() > MAX_LOG_ENTRIES)
         {
             mLogEntries.erase(mLogEntries.begin());
         }
@@ -66,47 +65,62 @@ namespace ORchestra
 
     void ErrorReporting::LogError(const int line, std::string& message)
     {
-        message = CurrentTimestamp() + message + ", at line " + std::to_string(line) + "\n";
+        std::string stamp = CurrentTimestamp();
+        message.insert(0, stamp);
+        message += ", at line ";
+        message += std::to_string(line);
+        message += "\n";
         mLogEntries.emplace_back(LogEntry{ EntryType::Error, line, message });
         TrimOldEntries();
         NotifyListener();
-        std::cout << message << std::endl;
     }
 
     void ErrorReporting::LogError(const std::string& message)
     {
-        std::string stamped = CurrentTimestamp() + message;
+        std::string stamped;
+        stamped.reserve(12 + message.size() + 1);
+        stamped = CurrentTimestamp();
+        stamped += message;
+        stamped += "\n";
         mLogEntries.emplace_back(LogEntry{ EntryType::Error, 0, stamped });
         TrimOldEntries();
         NotifyListener();
-        std::cout << stamped << std::endl;
     }
 
     void ErrorReporting::LogWarning(const int line, std::string& message)
     {
-        message = CurrentTimestamp() + message + ", at line " + std::to_string(line) + "\n";
+        std::string stamp = CurrentTimestamp();
+        message.insert(0, stamp);
+        message += ", at line ";
+        message += std::to_string(line);
+        message += "\n";
         mLogEntries.emplace_back(LogEntry{ EntryType::Warning, line, message });
         TrimOldEntries();
         NotifyListener();
-        std::cout << message << std::endl;
     }
 
     void ErrorReporting::LogWarning(const std::string& message)
     {
-        std::string stamped = CurrentTimestamp() + message;
+        std::string stamped;
+        stamped.reserve(12 + message.size() + 1);
+        stamped = CurrentTimestamp();
+        stamped += message;
+        stamped += "\n";
         mLogEntries.emplace_back(LogEntry{ EntryType::Warning, 0, stamped });
         TrimOldEntries();
         NotifyListener();
-        std::cout << stamped << std::endl;
     }
 
     void ErrorReporting::LogMessage(const std::string& message)
     {
-        std::string stamped = CurrentTimestamp() + message;
+        std::string stamped;
+        stamped.reserve(12 + message.size() + 1);
+        stamped = CurrentTimestamp();
+        stamped += message;
+        stamped += "\n";
         mLogEntries.emplace_back(LogEntry{ EntryType::Messasge, 0, stamped });
         TrimOldEntries();
         NotifyListener();
-        std::cout << stamped << std::endl;
     }
 
     void ErrorReporting::Clear()

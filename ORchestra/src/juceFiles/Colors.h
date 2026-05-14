@@ -95,11 +95,13 @@ namespace ORchestra
         static constexpr uint32_t Identifier = ColorPalette::Mauve;
         static constexpr uint32_t Integer = ColorPalette::Text;
         static constexpr uint32_t Float = ColorPalette::Text;
-        static constexpr uint32_t Bracket = ColorPalette::Peach;
+        static constexpr uint32_t String = ColorPalette::Text;
+        static constexpr uint32_t Bracket = ColorPalette::Text;
+        static constexpr uint32_t Function = ColorPalette::Blue;
         static constexpr uint32_t Punctuation = ColorPalette::Text;
+        static constexpr uint32_t Note = ColorPalette::Red;
     };
 
-    const Colour OutlineColor = Colour(ColorPalette::Mantle);
     const Colour BackgroundColor = Colour(ColorPalette::Base);
     const Colour ButtonBackgroundColor = Colour(ColorPalette::Blue);
     const Colour TextEditorBackgroundColor = Colour(ColorPalette::Base);
@@ -113,5 +115,10 @@ namespace ORchestra
     const Colour MaxCCValueColor = Colour(ColorPalette::Teal);
      
     const Colour BarLineColor = Colour(ColorPalette::Surface0);
-    
+    const Colour GridLineColor = Colour(ColorPalette::Surface1).withAlpha(0.6f);
+    const Colour ComponentOutlineColor = Colour(ColorPalette::Surface0);
+    const Colour ConsoleBackgroundColor = Colour(ColorPalette::Mantle);
+    const Colour TransportButtonPanelBackground = Colour(ColorPalette::Mantle);
+    const Colour SharpRowColor = Colour(ColorPalette::Mantle);
+
 } // namespace ORchestra

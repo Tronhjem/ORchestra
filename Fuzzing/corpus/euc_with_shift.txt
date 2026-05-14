@@ -1,0 +1,2 @@
+trigger = euc(5, 8, 2)
+note(trigger, 60, 100, n8)

@@ -32,8 +32,11 @@ namespace ORchestra
     public:
         DataSequence() {}
         explicit DataSequence(const std::vector<StepData>& data);
+        explicit DataSequence(std::vector<StepData>&& data) noexcept;
+        explicit DataSequence(const StepData* begin, int count);
+        explicit DataSequence(StepData value);
         StepData GetValue(const int index) const;
-        void SetValue(const int index, StepData value);
+        void SetValue(const int index, const StepData& value);
 
     private:
         std::vector<StepData> mData;

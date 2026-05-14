@@ -182,6 +182,15 @@ public:
         g.strokePath(path, PathStrokeType(2.0f));
     }
 
+    void drawCallOutBoxBackground(juce::CallOutBox&, juce::Graphics& g,
+                                  const juce::Path& path, juce::Image&) override
+    {
+        g.setColour(BackgroundColor);
+        g.fillPath(path);
+        g.setColour(ComponentOutlineColor);
+        g.strokePath(path, juce::PathStrokeType(1.5f));
+    }
+
     void drawPopupMenuBackground(Graphics& g, int width, int height) override
     {
         juce::Rectangle bounds{ (float)width, (float)height };
@@ -214,6 +223,39 @@ public:
     {
         UNUSED(buttonHeight);
         return mFont;
+    }
+
+    void fillResizableWindowBackground(juce::Graphics& g, int /*w*/, int /*h*/,
+        const juce::BorderSize<int>& /*border*/, juce::ResizableWindow&) override
+    {
+        g.fillAll(BackgroundColor);
+    }
+
+    void drawResizableFrame(juce::Graphics& g, int w, int h,
+        const juce::BorderSize<int>& border) override
+    {
+        if (!border.isEmpty())
+        {
+            auto fullSize = juce::Rectangle<int>(0, 0, w, h);
+            auto centreArea = border.subtractedFrom(fullSize);
+
+            juce::Graphics::ScopedSaveState ss(g);
+            g.excludeClipRegion(centreArea);
+
+            g.setColour(juce::Colour(ColorPalette::Surface0));
+            g.drawRect(fullSize);
+        }
+    }
+
+    void drawResizableWindowBorder(juce::Graphics& g, int w, int h,
+        const juce::BorderSize<int>& /*border*/, juce::ResizableWindow&) override
+    {
+        g.setColour(juce::Colour(ColorPalette::Surface0));
+        g.drawRect(0, 0, w, h);
+    }
+
+    void drawCornerResizer(juce::Graphics&, int, int, bool, bool) override
+    {
     }
 
 private:

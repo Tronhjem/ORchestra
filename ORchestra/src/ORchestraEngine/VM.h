@@ -100,7 +100,7 @@ namespace ORchestra
             const StepData& b = stack.Pop();
             const StepData& a = stack.Pop();
             const StepData result = a.ApplySequenceWithOperation(b, op);
-            stack.Push(StepData{ result });
+            stack.Push(result);
         }
         
         static unsigned int mRanSeed;

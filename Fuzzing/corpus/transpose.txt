@@ -1,0 +1,2 @@
+transpose(3)
+note(1, 60, 100, n8)

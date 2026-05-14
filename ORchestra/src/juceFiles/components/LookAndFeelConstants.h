@@ -20,10 +20,22 @@
 #pragma once
 #include <JuceHeader.h>
 
-constexpr float NORMAL_FONT_SIZE = 18.f;
-const juce::FontOptions MONOSPACE_FONT_OPTIONS{ "Intel One Mono", NORMAL_FONT_SIZE, juce::Font::bold };
+constexpr float NORMAL_FONT_SIZE = 15.f;
+constexpr float BUTTON_FONT_SIZE = 13.f;
+#if JUCE_MAC
+    const juce::FontOptions MONOSPACE_FONT_OPTIONS{ "Menlo", NORMAL_FONT_SIZE, juce::Font::bold };
+    const juce::FontOptions BUTTON_FONT_OPTIONS{ "Menlo", BUTTON_FONT_SIZE, juce::Font::bold };
+#elif JUCE_WINDOWS
+    const juce::FontOptions MONOSPACE_FONT_OPTIONS{ "Consolas", NORMAL_FONT_SIZE, juce::Font::bold };
+    const juce::FontOptions BUTTON_FONT_OPTIONS{ "Consolas", BUTTON_FONT_SIZE, juce::Font::bold };
+#else
+    const juce::FontOptions MONOSPACE_FONT_OPTIONS{ juce::Font::findDefaultMonospaceFont().getTypefaceName(), NORMAL_FONT_SIZE, juce::Font::bold };
+    const juce::FontOptions BUTTON_FONT_OPTIONS{ juce::Font::findDefaultMonospaceFont().getTypefaceName(), BUTTON_FONT_SIZE, juce::Font::bold };
+#endif
 constexpr float ROUNDED_CORNER_SIZE = 4.f;
-constexpr float BAR_LINE_THICKNESS = 4.f;
+constexpr float BAR_LINE_THICKNESS = 3.f;
 constexpr float QAURTER_BAR_LINE_THICKNESS = BAR_LINE_THICKNESS / 4.f;
 constexpr float COMPONENT_LINE_THICKNESS = 2.f;
+constexpr float OUTLINE_THICKNESS = 2.f;
+constexpr float VERTICAL_SEPARATOR_THICKNESS = 4.f;
 

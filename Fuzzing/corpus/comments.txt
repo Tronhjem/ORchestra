@@ -1,0 +1,5 @@
+// this is a comment
+a = 10 // inline comment
+// another comment
+b = a + 5
+note(1, b, 100, n8)

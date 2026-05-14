@@ -20,6 +20,7 @@
 #pragma once
 #include <juce_gui_basics/juce_gui_basics.h>
 #include "Colors.h"
+#include "LookAndFeelConstants.h"
 #include "Utility.h"
 
 using namespace ORchestra;
@@ -67,5 +68,8 @@ public:
         UNUSED(width);
         UNUSED(height);
         UNUSED(ed);
+        
+        g.setColour(ORchestra::ComponentOutlineColor);
+        g.drawLine(0.f, 0.f, 0.f, (float)height, VERTICAL_SEPARATOR_THICKNESS);
     }
 };

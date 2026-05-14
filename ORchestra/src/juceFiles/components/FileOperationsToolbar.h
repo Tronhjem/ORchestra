@@ -26,36 +26,37 @@ class FileOperationsToolbar : public juce::Component,
                               public juce::Button::Listener
 {
 public:
-    static constexpr int BUTTON_HEIGHT = 20;
-    static constexpr int BUTTON_WIDTH = 60;
-    static constexpr int BUTTON_SPACING = 15;
+    static constexpr int PANEL_HEIGHT = 70;
+    static constexpr int BUTTON_HEIGHT = 28;
+    static constexpr int BUTTON_WIDTH = 80;
+    static constexpr int BUTTON_SPACING = 20;
+    static constexpr int BUTTON_LEFT_MARGIN = 20;
 
     FileOperationsToolbar();
     ~FileOperationsToolbar() override;
 
     void resized() override;
+    void paint(juce::Graphics&) override;
 
-    void setImportCallback(std::function<void()> callback);
-    void setExportCallback(std::function<void()> callback);
     void setCompileCallback(std::function<void()> callback);
+    void setPlayCallback(std::function<void()> callback);
 
     void setCompileButtonEnabled(bool enabled);
+    void updatePlayButtonState(bool isPlaying);
 
-    void setButtonLookAndFeel(juce::LookAndFeel* laf);
+    void setTransportLookAndFeel(juce::LookAndFeel* laf);
 
-    constexpr int getPreferredWidth() const { return 3 * BUTTON_WIDTH + 2 * BUTTON_SPACING; }
-    constexpr int getPreferredHeight() const { return BUTTON_HEIGHT; }
+    constexpr int getPreferredWidth() const { return 2 * BUTTON_WIDTH + BUTTON_SPACING; }
+    constexpr int getPreferredHeight() const { return PANEL_HEIGHT; }
 
 private:
     void buttonClicked(juce::Button* button) override;
 
-    juce::TextButton mImportButton{ "Import" };
-    juce::TextButton mExportButton{ "Export" };
     juce::TextButton mCompileButton{ "Compile" };
+    juce::TextButton mPlayButton{ "> Play" };
 
-    std::function<void()> mImportCallback;
-    std::function<void()> mExportCallback;
     std::function<void()> mCompileCallback;
+    std::function<void()> mPlayCallback;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(FileOperationsToolbar)
 };

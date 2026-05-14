@@ -21,7 +21,7 @@
 #include <iostream>
 
 #include "FileLoader.h"
-#if _DEBUG
+#if defined(_DEBUG)
 #include "ScopedTimer.h"
 #endif
 
@@ -33,7 +33,7 @@ namespace ORchestra
 
     std::string FileLoader::LoadFile(const std::string& filePath)
     {
-#if _DEBUG
+#if defined(_DEBUG)
         ScopedTimer timer("Read File");
 #endif
 
@@ -67,7 +67,7 @@ namespace ORchestra
             return false;
         }
 
-#if _DEBUG
+#if defined(_DEBUG)
         ScopedTimer timer("Write File");
 #endif
 
