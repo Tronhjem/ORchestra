@@ -3,7 +3,7 @@
 [![Build](https://github.com/Tronhjem/ORchestra/actions/workflows/Build.yml/badge.svg)](https://github.com/Tronhjem/ORchestra/actions/workflows/Build.yml)
 [![Run Tests](https://github.com/Tronhjem/ORchestra/actions/workflows/RunTests.yml/badge.svg)](https://github.com/Tronhjem/ORchestra/actions/workflows/RunTests.yml)
 
-> ORchestra is still in development, and not even in an alpha stage. A release will be made available, once it's ready. 
+> ORchestra is currently in alpha, pretty much feature complete but still working on small fixes and bugs. 
 
 ## Overview
 
