@@ -9,11 +9,12 @@ set -e
 #   iterations: Number of fuzz iterations (default: 100000)
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-BUILD_DIR="${SCRIPT_DIR}/build-fuzz"
+ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+BUILD_DIR="${ROOT_DIR}/build-fuzz"
 
 TARGET="${1:-scanner}"
 SEED="${2:-$(date +%s)}"
-CORPUS_DIR="${3:-${SCRIPT_DIR}/Fuzzing/corpus}"
+CORPUS_DIR="${3:-${ROOT_DIR}/Fuzzing/corpus}"
 CRASH_DIR="${4:-}"
 ITERATIONS="${5:-100000}"
 
@@ -32,7 +33,7 @@ echo "Iterations: ${ITERATIONS}"
 echo ""
 
 echo "Configuring..."
-cmake -DBUILD_PLUGIN=OFF -DBUILD_TESTS=OFF -DBUILD_FUZZING=ON -B "${BUILD_DIR}" "${SCRIPT_DIR}"
+cmake -DBUILD_PLUGIN=OFF -DBUILD_TESTS=OFF -DBUILD_FUZZING=ON -B "${BUILD_DIR}" "${ROOT_DIR}"
 
 echo ""
 echo "Building ${EXECUTABLE}..."

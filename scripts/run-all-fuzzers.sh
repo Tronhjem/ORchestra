@@ -3,9 +3,10 @@
 # No arguments needed. Exit code is non-zero if anything fails.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-BUILD_FUZZ="${SCRIPT_DIR}/build-fuzz"
-BUILD_TEST="${SCRIPT_DIR}/build-test"
-CORPUS_DIR="${SCRIPT_DIR}/Fuzzing/corpus"
+ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+BUILD_FUZZ="${ROOT_DIR}/build-fuzz"
+BUILD_TEST="${ROOT_DIR}/build-test"
+CORPUS_DIR="${ROOT_DIR}/Fuzzing/corpus"
 SEED="$(date +%s)"
 ITERATIONS=100000
 
@@ -48,13 +49,13 @@ echo ""
 # -- Build --
 echo -e "${BOLD}[1/5] Building fuzzers (ASan + UBSan)...${NC}"
 cmake -DBUILD_PLUGIN=OFF -DBUILD_TESTS=OFF -DBUILD_FUZZING=ON \
-      -B "${BUILD_FUZZ}" "${SCRIPT_DIR}" > /dev/null 2>&1
+      -B "${BUILD_FUZZ}" "${ROOT_DIR}" > /dev/null 2>&1
 cmake --build "${BUILD_FUZZ}" > /dev/null 2>&1
 echo "  Done."
 
 echo -e "${BOLD}[2/5] Building unit tests...${NC}"
 cmake -DBUILD_PLUGIN=OFF -DBUILD_TESTS=ON -DBUILD_FUZZING=OFF \
-      -B "${BUILD_TEST}" "${SCRIPT_DIR}" > /dev/null 2>&1
+      -B "${BUILD_TEST}" "${ROOT_DIR}" > /dev/null 2>&1
 cmake --build "${BUILD_TEST}" > /dev/null 2>&1
 echo "  Done."
 echo ""
