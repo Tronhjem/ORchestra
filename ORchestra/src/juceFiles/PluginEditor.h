@@ -124,7 +124,8 @@ private:
     std::unique_ptr<TextEditorLookAndFeel> mTextEditorLookAndFeel;
 
     juce::FileChooser mFileChooser{ "Select a file to load...", juce::File{}, "*.txt" };
-    int mFileChooserFlags = juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles;
+    int mFileChooserFlags = 
+        juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles;
 
     CodeEditorPanel mCodeEditorPanel;
     FileOperationsToolbar mFileOperationsToolbar;
@@ -137,6 +138,7 @@ private:
 
     juce::ComponentDragger mDragger;
     bool mIsDragging = false;
+    juce::Component* mKeyListenerComponent = nullptr;
 
     int mCodePanelWidth = 0;
     int mConsoleHeight = 0;

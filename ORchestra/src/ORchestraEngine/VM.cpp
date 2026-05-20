@@ -159,7 +159,7 @@ namespace ORchestra
             }
 
             case (OpCode::SET_BPM):
-            case (OpCode::SET_BPM_DIVISION):
+            case (OpCode::SET_BEAT):
             case (OpCode::SET_TRANSPOSE):
             case (OpCode::PRINT):
             {
@@ -239,12 +239,12 @@ namespace ORchestra
             break;
         }
 
-        case (OpCode::SET_BPM_DIVISION):
+        case (OpCode::SET_BEAT):
         {
-            const StepData bpmDivValue = stack.Pop();
-            stepQueue.emplace_back(SequenceStep{ SequenceStepType::BPM_DIVISION, bpmDivValue,
-                            bpmDivValue, bpmDivValue,
-                            bpmDivValue, DEFAULT_NOTE_DURATION });
+            const StepData beatValue = stack.Pop();
+            stepQueue.emplace_back(SequenceStep{ SequenceStepType::BEAT, beatValue,
+                            beatValue, beatValue,
+                            beatValue, DEFAULT_NOTE_DURATION });
             break;
         }
 

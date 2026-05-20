@@ -1,3 +1,12 @@
+### v0.1.2
+
+- Changing built in function from `bpmDiv()` to `beat()` 
+
+Bugs:
+- Fixed wrong sizing and placement of UI when re opening on VST and AU
+- Fixed issue where looping in a daw would leave hanging midi notes.
+- Fixing midi notes being cut if an overlapping note is fired, now we choke the earlier note and then fire the new note.
+- Fixed notes block not appearing when compiling and only when plyaing. 
 
 ### v0.1.1 
 Official Alpha release.
@@ -9,7 +18,7 @@ See documentation for full feature set.
 Note worthy features added recently in patching.
 - First pass on the layout done the way it should be. 
 - User functions and patterns where introduced.
-- Bpm, bpmDivision and note length is now scriptable. 
+- Bpm, beat and note length is now scriptable. 
 - Transpose added, and introducing negation to be able to have negative global transpose. 
 - UI is more or less complete the way I want it. 
 - Full scriptiung capability with variables.

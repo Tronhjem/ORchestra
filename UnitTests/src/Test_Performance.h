@@ -89,7 +89,7 @@ static std::string makeMediumScript()
         "note(chords[$ % 8] & 1, B3, vel + 5, n2, 1)\n"
         "note(bass[$ % 8] & 1, scale[$ % 8], vel, n16, 1)\n"
         "bpm(128)\n"
-        "bpmDiv(n8)\n"
+        "beat(n8)\n"
         "transpose(0)\n";
 }
 
@@ -143,7 +143,7 @@ static std::string makeComplexScript()
         "vel = 100\n"
         "song($ / 16 % 2)\n"
         "bpm(128)\n"
-        "bpmDiv(n8)\n"
+        "beat(n8)\n"
         "transpose(0)\n";
 }
 
@@ -273,7 +273,7 @@ TEST_CASE("Performance: Max-sized arrays with euclidean (Prepare + Tick x100)", 
         "note(a[$ % 32] & b[$ % 32] & c[$ % 32], C4, d[$ % 32] * 127, n16)\n"
         "note(e[$ % 32] & 1, E4, f[$ % 32] * 127, n8)\n"
         "bpm(140)\n"
-        "bpmDiv(n16)\n";
+        "beat(n16)\n";
 
     {
         Benchmark b("Prepare max arrays");

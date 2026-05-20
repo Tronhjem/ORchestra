@@ -37,15 +37,17 @@ void Timeline::timerCallback()
 #endif
 
     const TransportData& transportData = mAudioProcessor->GetTransportData();
-    if (!transportData.isPlaying || !mAudioProcessor->IsORchestraVMInit())
+    if (!mAudioProcessor->IsORchestraVMInit())
         return;
 
     const int currentStep = mAudioProcessor->GetGlobalStepCount();
 
-    if (currentStep == mLastGlobalStep)
+    if (currentStep == mLastGlobalStep && !mTimelineDirty.load())
         return;
 
     mLastGlobalStep = currentStep;
+    SetTimelineDirty(false);
+
     // We start behind the global step, as it's always one ahead and we
     // want to paint the current step being triggered.
     const int globalStepOffset = mLastGlobalStep - 1 + STEP_BUFFER_SIZE;
@@ -76,7 +78,7 @@ void Timeline::timerCallback()
             const int musicalStep = mLastGlobalStep - 1 + index;
             const int barNumber = (musicalStep >= 0 ? musicalStep : 0) / barStepCount + 1;
             const float barWidth = static_cast<float>(barStepCount) * stepWidth;
-            mBarLines.emplace_back(BarLine{xOffset - QAURTER_BAR_LINE_THICKNESS,
+            mBarLines.emplace_back(BarLine {xOffset - QAURTER_BAR_LINE_THICKNESS,
                                            0.f, barHeaderHeight + totalGridHeight,
                                            barNumber, barWidth});
         }
@@ -106,7 +108,8 @@ void Timeline::timerCallback()
                     const int pitchClass = transposedNote % 12;
                     const int row = 11 - pitchClass; // B=row0 (top), C=row11 (bottom)
                     const float triggerRectY = barHeaderHeight + static_cast<float>(row) * stepHeight + triggerStepMargin;
-                    const float velocityFloat = static_cast<float>(step.mSecond.GetEquivalentValueAtIndex(substepIndex, substepLength));
+                    const float velocityFloat 
+                        = static_cast<float>(step.mSecond.GetEquivalentValueAtIndex(substepIndex, substepLength));
 
                     mTimelineTriggerRectangles.emplace_back(TriggerRectangle{triggerReactX, triggerRectY,
                                                                              subStepDrawnWidth, velocityFloat, step.mType});

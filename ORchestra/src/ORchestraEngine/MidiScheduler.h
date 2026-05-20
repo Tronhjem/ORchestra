@@ -45,6 +45,7 @@ namespace ORchestra {
 
     private:
         std::vector<ScheduledMidiMessage> mScheduledMidiMessages;
+        int mActiveNoteCounts[128 * 16] = {};
     };
 
 } // namespace ORchestra

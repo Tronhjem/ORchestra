@@ -103,27 +103,27 @@ TEST_CASE("BuiltInFunctions: bpm with too many params fails", "[BuiltInFunctions
     REQUIRE(vm.Prepare(file) == false);
 }
 
-// --- bpmDiv() ---
+// --- beat() ---
 
-TEST_CASE("BuiltInFunctions: bpmDiv(n4) compiles successfully", "[BuiltInFunctions]")
+TEST_CASE("BuiltInFunctions: beat(n4) compiles successfully", "[BuiltInFunctions]")
 {
-    std::string file{"bpmDiv(n4)\n"};
+    std::string file{"beat(n4)\n"};
     ErrorReporting errorReporter;
     VM vm(errorReporter);
     REQUIRE(vm.Prepare(file));
 }
 
-TEST_CASE("BuiltInFunctions: bpmDiv with variable argument compiles", "[BuiltInFunctions]")
+TEST_CASE("BuiltInFunctions: beat with variable argument compiles", "[BuiltInFunctions]")
 {
-    std::string file{"div = n8\nbpmDiv(div)\n"};
+    std::string file{"div = n8\nbeat(div)\n"};
     ErrorReporting errorReporter;
     VM vm(errorReporter);
     REQUIRE(vm.Prepare(file));
 }
 
-TEST_CASE("BuiltInFunctions: bpmDiv(n4) produces BPM_DIVISION SequenceStep at Tick", "[BuiltInFunctions]")
+TEST_CASE("BuiltInFunctions: beat(n4) produces BEAT SequenceStep at Tick", "[BuiltInFunctions]")
 {
-    std::string file{"bpmDiv(n4)\n"};
+    std::string file{"beat(n4)\n"};
     ErrorReporting errorReporter;
     VM vm(errorReporter);
     REQUIRE(vm.Prepare(file));
@@ -131,47 +131,47 @@ TEST_CASE("BuiltInFunctions: bpmDiv(n4) produces BPM_DIVISION SequenceStep at Ti
     std::vector<SequenceStep> steps;
     REQUIRE(vm.Tick(steps, 0));
     REQUIRE_FALSE(steps.empty());
-    REQUIRE(steps[0].mType == SequenceStepType::BPM_DIVISION);
+    REQUIRE(steps[0].mType == SequenceStepType::BEAT);
     REQUIRE(steps[0].mFirst.GetValue(0) == 3); // n4 -> 3
 }
 
-TEST_CASE("BuiltInFunctions: bpmDiv(n1) produces value 1", "[BuiltInFunctions]")
+TEST_CASE("BuiltInFunctions: beat(n1) produces value 1", "[BuiltInFunctions]")
 {
-    std::string file{"bpmDiv(n1)\n"};
+    std::string file{"beat(n1)\n"};
     ErrorReporting errorReporter;
     VM vm(errorReporter);
     REQUIRE(vm.Prepare(file));
 
     std::vector<SequenceStep> steps;
     REQUIRE(vm.Tick(steps, 0));
-    REQUIRE(steps[0].mType == SequenceStepType::BPM_DIVISION);
+    REQUIRE(steps[0].mType == SequenceStepType::BEAT);
     REQUIRE(steps[0].mFirst.GetValue(0) == 1);
 }
 
-TEST_CASE("BuiltInFunctions: bpmDiv(n16) produces value 5", "[BuiltInFunctions]")
+TEST_CASE("BuiltInFunctions: beat(n16) produces value 5", "[BuiltInFunctions]")
 {
-    std::string file{"bpmDiv(n16)\n"};
+    std::string file{"beat(n16)\n"};
     ErrorReporting errorReporter;
     VM vm(errorReporter);
     REQUIRE(vm.Prepare(file));
 
     std::vector<SequenceStep> steps;
     REQUIRE(vm.Tick(steps, 0));
-    REQUIRE(steps[0].mType == SequenceStepType::BPM_DIVISION);
+    REQUIRE(steps[0].mType == SequenceStepType::BEAT);
     REQUIRE(steps[0].mFirst.GetValue(0) == 5);
 }
 
-TEST_CASE("BuiltInFunctions: bpmDiv with no params fails", "[BuiltInFunctions]")
+TEST_CASE("BuiltInFunctions: beat with no params fails", "[BuiltInFunctions]")
 {
-    std::string file{"bpmDiv()\n"};
+    std::string file{"beat()\n"};
     ErrorReporting errorReporter;
     VM vm(errorReporter);
     REQUIRE(vm.Prepare(file) == false);
 }
 
-TEST_CASE("BuiltInFunctions: bpmDiv with too many params fails", "[BuiltInFunctions]")
+TEST_CASE("BuiltInFunctions: beat with too many params fails", "[BuiltInFunctions]")
 {
-    std::string file{"bpmDiv(n4, n2)\n"};
+    std::string file{"beat(n4, n2)\n"};
     ErrorReporting errorReporter;
     VM vm(errorReporter);
     REQUIRE(vm.Prepare(file) == false);

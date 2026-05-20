@@ -87,7 +87,7 @@ namespace ORchestra
         NoteOff = 1,
         CC = 2,
         BPM = 3,
-        BPM_DIVISION = 4,
+        BEAT = 4,
         PRINT = 5,
         TRANSPOSE = 6
     };

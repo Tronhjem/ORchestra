@@ -307,7 +307,7 @@ The following words are reserved and cannot be used as variable names:
 - `ran` - Random number generator function
 - `euc` - Euclidean sequence generator function
 - `bpm` - Sets the BPM (tempo) for the sequencer
-- `bpmDiv` - Sets the note division (timing resolution)
+- `beat` - Sets the note division (timing resolution)
 - `fn` - Defines a user function
 - `end` - Ends a function or pattern definition
 - `ptn` - Defines a pattern for use in pattern arrays
@@ -583,7 +583,7 @@ note(pattern, C4, 100, n8)
 
 #### Note Division Control
 
-The `bpmDiv(division)` function sets the note division (timing resolution) for the sequencer.
+The `beat(division)` function sets the note division (timing resolution) for the sequencer.
 
 **Parameters:**
 - `division` - Note division value (1-7):
@@ -602,7 +602,7 @@ The `bpmDiv(division)` function sets the note division (timing resolution) for t
 
 **Example:**
 ```cpp
-bpmDiv(4)           // Set to 8th notes
+beat(4)           // Set to 8th notes
 bpm(120)
 pattern = euc(3, 8)
 note(pattern, C4, 100, n8)  // Triggers on 8th notes at 120 BPM
@@ -802,7 +802,7 @@ cc(1, 74, cutoff, 1)  // Always trigger, CC#74 (filter cutoff)
 ```cpp
 // Override DAW tempo and use fast 16th notes
 bpm(120)
-bpmDiv(5)  // 16th notes
+beat(5)  // 16th notes
 
 // Create rapid hi-hat pattern
 hihat = euc(11, 16)

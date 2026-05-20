@@ -30,7 +30,7 @@
 #include "juce_audio_plugin_client/Standalone/juce_StandaloneFilterWindow.h"
 #endif
 
-constexpr int WINDOW_WIDTH = 1600;
+constexpr int WINDOW_WIDTH = 1300;
 constexpr int WINDOW_HEIGHT = 800;
 constexpr int OUTER_MARGIN = 16;
 constexpr int TITLE_BAR_HEIGHT = 35;
@@ -39,8 +39,7 @@ constexpr int TRAFFIC_DOT_SIZE = 12;
 // Default script shown on first load when no saved state exists.
 // Edit this string to change what new users see in the editor.
 constexpr const char* DEFAULT_SCRIPT =
-    "bpm(120)\n"
-    "bpmDiv(n8)\n"
+    "beat(n8)\n"
     "\n"
     "trig = euc(3, 8)\n"
     "\n"
@@ -169,6 +168,11 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
 
     int savedW = audioProcessor.GetEditorWidth();
     int savedH = audioProcessor.GetEditorHeight();
+    int savedCodeW = audioProcessor.GetCodePanelWidth();
+    int savedConsoleH = audioProcessor.GetConsoleHeight();
+    mCodePanelWidth = savedCodeW > 0 ? savedCodeW : WINDOW_WIDTH * 2 / 5;
+    mConsoleHeight = savedConsoleH > 0 ? savedConsoleH : ConsolePanel::GetPreferredHeight();
+
     setSize(savedW > 0 ? savedW : WINDOW_WIDTH,
             savedH > 0 ? savedH : WINDOW_HEIGHT);
 
@@ -249,11 +253,6 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     addAndMakeVisible(mCloseButton);
 #endif
 
-    int savedCodeW = audioProcessor.GetCodePanelWidth();
-    int savedConsoleH = audioProcessor.GetConsoleHeight();
-    mCodePanelWidth = savedCodeW > 0 ? savedCodeW : WINDOW_WIDTH * 2 / 5;
-    mConsoleHeight = savedConsoleH > 0 ? savedConsoleH : ConsolePanel::GetPreferredHeight();
-
     mVerticalDivider.onDragStart = [this]()
     {
         mDragStartCodeWidth = mCodePanelWidth;
@@ -312,8 +311,13 @@ void ORchestraAudioProcessorEditor::parentHierarchyChanged()
         }
     }
 
+#if JUCE_STANDALONE_APPLICATION
     if (auto* top = getTopLevelComponent())
+    {
+        mKeyListenerComponent = top;
         top->addKeyListener(this);
+    }
+#endif
 }
 
 bool ORchestraAudioProcessorEditor::keyPressed(const juce::KeyPress& key, juce::Component*)
@@ -337,17 +341,29 @@ bool ORchestraAudioProcessorEditor::keyPressed(const juce::KeyPress& key, juce::
 
 void ORchestraAudioProcessorEditor::mouseDown(const juce::MouseEvent& e)
 {
+    UNUSED(e);
+
+#if JUCE_STANDALONE_APPLICATION
     if (e.getPosition().getY() < TITLE_BAR_HEIGHT)
     {
-        mIsDragging = true;
-        mDragger.startDraggingComponent(getTopLevelComponent(), e);
+        if (auto* top = getTopLevelComponent())
+        {
+            mIsDragging = true;
+            mDragger.startDraggingComponent(top, e);
+        }
     }
+#endif
 }
 
 void ORchestraAudioProcessorEditor::mouseDrag(const juce::MouseEvent& e)
 {
+    UNUSED(e);
+
+#if JUCE_STANDALONE_APPLICATION
     if (mIsDragging)
-        mDragger.dragComponent(getTopLevelComponent(), e, nullptr);
+        if (auto* top = getTopLevelComponent())
+            mDragger.dragComponent(top, e, nullptr);
+#endif
 }
 
 void ORchestraAudioProcessorEditor::mouseUp(const juce::MouseEvent&)
@@ -363,8 +379,13 @@ ORchestraAudioProcessorEditor::~ORchestraAudioProcessorEditor()
 
     audioProcessor.removeChangeListener(this);
     audioProcessor.SetErrorListener(nullptr);
-    if (auto* top = getTopLevelComponent())
-        top->removeKeyListener(this);
+
+    if (mKeyListenerComponent != nullptr)
+    {
+        mKeyListenerComponent->removeKeyListener(this);
+        mKeyListenerComponent = nullptr;
+    }
+
     mFileOperationsToolbar.setTransportLookAndFeel(nullptr);
     mConsolePanel.setButtonLookAndFeel(nullptr);
     mConsolePanel.setTextEditorLookAndFeel(nullptr);
@@ -376,8 +397,23 @@ void ORchestraAudioProcessorEditor::changeListenerCallback(juce::ChangeBroadcast
     UNUSED(broadCaster);
 
     const std::string& data = audioProcessor.GetInstructionData();
-    const juce::String dataAsString{ data };
-    mCodeEditorPanel.loadContent(dataAsString);
+
+    if (!data.empty())
+    {
+        const juce::String dataAsString{ data };
+        mCodeEditorPanel.loadContent(dataAsString);
+    }
+
+    int savedCodeW = audioProcessor.GetCodePanelWidth();
+    int savedConsoleH = audioProcessor.GetConsoleHeight();
+
+    if (savedCodeW > 0)
+        mCodePanelWidth = savedCodeW;
+
+    if (savedConsoleH > 0)
+        mConsoleHeight = savedConsoleH;
+
+    resized();
 }
 
 void ORchestraAudioProcessorEditor::CodeEditorHasChanged()
@@ -409,6 +445,7 @@ void ORchestraAudioProcessorEditor::handleCompile()
     {
         mCodeEditorPanel.markSaved();
         mFileOperationsToolbar.setCompileButtonEnabled(false);
+        mTimeline.SetTimelineDirty(true);
     }
     
     UpdateErrors();

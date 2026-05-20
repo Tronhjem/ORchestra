@@ -176,7 +176,13 @@ void ORchestraAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juc
 
 void ORchestraAudioProcessor::FillPositionData(TransportData& data)
 {
-    const auto positionInfo = getPlayHead()->getPosition();
+    auto* playHead = getPlayHead();
+    if (playHead == nullptr)
+        return;
+
+    const auto positionInfo = playHead->getPosition();
+    if (!positionInfo.hasValue())
+        return;
 
     if (positionInfo->getBpm().hasValue())
     {
@@ -232,13 +238,13 @@ void ORchestraAudioProcessor::setStateInformation(const void* data, int sizeInBy
             const std::string convertedData = pluginData.toStdString();
             SetInstructionData(convertedData);
             Compile(convertedData);
-            sendChangeMessage();
         }
 
         mEditorWidth      = xmlState->getIntAttribute("editorWidth", 0);
         mEditorHeight     = xmlState->getIntAttribute("editorHeight", 0);
         mCodePanelWidth   = xmlState->getIntAttribute("codePanelWidth", 0);
         mConsoleHeight    = xmlState->getIntAttribute("consoleHeight", 0);
+        sendChangeMessage();
     }
 }
 

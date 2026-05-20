@@ -66,7 +66,7 @@ namespace ORchestra
         GET_GLOBAL_COUNT,
         PRINT,
         SET_BPM,
-        SET_BPM_DIVISION,
+        SET_BEAT,
         NEGATE,
         SET_TRANSPOSE,
 
