@@ -29,6 +29,8 @@
         <FILE id="crkqkk" name="Scanner.h" compile="0" resource="0" file="src/ORchestraEngine/Scanner.h"/>
       </GROUP>
       <GROUP id="{7FFAF05D-68FF-0512-C959-08C2BD9566BC}" name="VM">
+        <FILE id="EeKwO6" name="FunctionArraySlot.h" compile="0" resource="0"
+              file="src/ORchestraEngine/FunctionArraySlot.h"/>
         <FILE id="QzuzxL" name="VM.cpp" compile="1" resource="0" file="src/ORchestraEngine/VM.cpp"/>
         <FILE id="p7hBgb" name="VM.h" compile="0" resource="0" file="src/ORchestraEngine/VM.h"/>
         <FILE id="MMQHhj" name="Instruction.h" compile="0" resource="0" file="src/ORchestraEngine/Instruction.h"/>

@@ -353,7 +353,6 @@ namespace ORchestra
             //    case 'o':
             //        return checkKeyword(1, 1, "r", ORchestraTokenType::OR);
             //    case 'r':
-            //        return checkKeyword(1, 5, "eturn", ORchestraTokenType::RETURN);
             //    case 's':
             //        return checkKeyword(1, 4, "uper", ORchestraTokenType::SUPER);
             //    case 'v':

@@ -33,13 +33,13 @@ namespace ORchestra
         return c >= '0' && c <= '9';
     }
 
-    // Returns tokenType_keyword for structural keywords (fn, end, ptn).
+    // Returns tokenType_keyword for structural keywords (fn, end).
     // Returns tokenType_function for callable builtins and user-defined.
     // Returns -1 if not a keyword at all.
     static int classifyKeyword (String::CharPointerType token, const int tokenLength) noexcept
     {
         static const char* const structural2Char[] = { "fn", nullptr };
-        static const char* const structural3Char[] = { "end", "ptn", nullptr };
+        static const char* const structural3Char[] = { "end", nullptr };
 
         static const char* const function2Char[]  = { "cc", nullptr };
         static const char* const function3Char[]  = { "euc", "ran", "bpm", nullptr };
@@ -96,8 +96,8 @@ namespace ORchestra
 
         while (pos < len)
         {
-            // Find next occurrence of "fn " or "ptn " at start of line
-            while (pos < len && text[pos] != '\n' && text[pos] != 'f' && text[pos] != 'p')
+            // Find next occurrence of "fn " at start of line
+            while (pos < len && text[pos] != '\n' && text[pos] != 'f')
                 ++pos;
 
             if (pos >= len) break;
@@ -105,18 +105,17 @@ namespace ORchestra
             // Skip newlines
             if (text[pos] == '\n') { ++pos; continue; }
 
-            // Check for "fn " or "ptn " preceded by start-of-line or whitespace
+            // Check for "fn " preceded by start-of-line or whitespace
             bool atLineStart = (pos == 0 || text[pos - 1] == '\n');
             if (!atLineStart) { ++pos; continue; }
 
             const char* rest = text.c_str() + pos;
             bool isFn = (len - pos >= 3 && strncmp (rest, "fn ", 3) == 0);
-            bool isPtn = (len - pos >= 4 && strncmp (rest, "ptn ", 4) == 0);
 
-            if (!isFn && !isPtn) { ++pos; continue; }
+            if (!isFn) { ++pos; continue; }
 
-            // Advance past "fn " or "ptn "
-            pos += isFn ? 3 : 4;
+            // Advance past "fn "
+            pos += 3;
 
             // Skip whitespace
             while (pos < len && (text[pos] == ' ' || text[pos] == '\t'))

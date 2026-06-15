@@ -109,7 +109,7 @@ static std::string makeComplexScript()
         "  return vel + x\n"
         "end\n"
         "\n"
-        "ptn verse\n"
+        "fn verse\n"
         "  note(kick[$ % 8] & 1, C3, 127, n4, 1)\n"
         "  note(hihat[$ % 8] & 1, F#4, accent(100), n8, 10)\n"
         "  note(hats[$ % 8] & 1, A#3, 60, n16, 10)\n"
@@ -118,7 +118,7 @@ static std::string makeComplexScript()
         "  note(arp[$ % 16] & 1, arpNotes[$ % 16], 80, n32, 1)\n"
         "end\n"
         "\n"
-        "ptn chorus\n"
+        "fn chorus\n"
         "  note(kick[$ % 8] & 1, C3, 127, n4, 1)\n"
         "  note(kick[$ % 8] & 1, E3, 127, n4, 1)\n"
         "  note(hihat[$ % 4] & 1, F#4, 110, n8, 10)\n"
@@ -141,7 +141,7 @@ static std::string makeComplexScript()
         "scale = [C4, D4, E4, F4, G4, A4, B4, C5]\n"
         "song = [verse, chorus]\n"
         "vel = 100\n"
-        "song($ / 16 % 2)\n"
+        "song[$ / 16 % 2]()\n"
         "bpm(128)\n"
         "beat(n8)\n"
         "transpose(0)\n";
@@ -203,7 +203,7 @@ TEST_CASE("Performance: Medium script (Prepare + Tick x1000)", "[Performance]")
     }
 }
 
-TEST_CASE("Performance: Complex script with patterns and functions (Prepare + Tick x1000)", "[Performance]")
+TEST_CASE("Performance: Complex script with functions and function arrays (Prepare + Tick x1000)", "[Performance]")
 {
     std::string script = makeComplexScript();
 

@@ -31,6 +31,7 @@
 #include "StepData.h"
 #include "CustomStack.h"
 #include "SequenceStep.h"
+#include "FunctionArraySlot.h"
 
 namespace ORchestra
 {
@@ -88,7 +89,7 @@ namespace ORchestra
         std::vector<DataSequence> mVariables;
         std::vector<std::string> mVariableNames;
         std::vector<Instruction> mRuntimeInstructions;
-        std::vector<std::vector<std::vector<Instruction>>> mFunctionArrays;
+        std::vector<std::vector<FunctionArraySlot>> mFunctionArrays;
         inline DataUnit RandomValue(const DataUnit low, const DataUnit high);
         
         template <typename Operation>

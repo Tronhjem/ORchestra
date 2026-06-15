@@ -56,8 +56,8 @@ namespace ORchestra
             if (success)
             {
                 mVariableNames = mCompiler.GetVariableNames();
-                success = ProcessOpCodes(mRuntimeInstructions);
                 mFunctionArrays = mCompiler.GetFunctionArrays();
+                success = ProcessOpCodes(mRuntimeInstructions);
             }
         }
 
@@ -179,7 +179,11 @@ namespace ORchestra
 
             case (OpCode::EXEC_FUNC_ARRAY):
             {
-                stack.Pop();
+                const size_t arrayId = static_cast<size_t>(instruction.GetOperand());
+                const auto& funcArray = mFunctionArrays[arrayId];
+                stack.Pop(); // index
+                for (int i = 0; i < funcArray[0].mNumOfParams; ++i)
+                    stack.Pop(); // discard args
                 break;
             }
 
@@ -268,9 +272,18 @@ namespace ORchestra
             const size_t arrayId = static_cast<size_t>(instruction.GetOperand());
             const auto& funcArray = mFunctionArrays[arrayId];
             const size_t index = static_cast<size_t>(stack.Pop().GetValue(0)) % funcArray.size();
-            const auto& block = funcArray[index];
+            const auto& slot = funcArray[index];
 
-            for (const Instruction& blockInstr : block)
+            // Pop arguments and assign to parameter variable IDs
+            for (int i = slot.mNumOfParams - 1; i >= 0; --i)
+            {
+                const DataUnit paramId = slot.mParamIds[i];
+                if (paramId >= mVariables.size())
+                    mVariables.resize(paramId + 1);
+                mVariables[paramId].SetValue(0, stack.Pop());
+            }
+
+            for (const Instruction& blockInstr : slot.mInstructions)
             {
                 if (!ExecuteTickInstruction(blockInstr, globalCount, stack, stepQueue))
                     return false;
@@ -460,7 +473,8 @@ namespace ORchestra
             }
             else
             {
-                mErrorReporting.LogError("VM: Variable '" + VariableName(instruction.GetOperand()) + "' is not defined");
+                mErrorReporting.LogError("VM: Variable '" + VariableName(instruction.GetOperand()) + "' is either not defined, or you're trying to use a function in a value array");
+                
                 return false;
             }
 

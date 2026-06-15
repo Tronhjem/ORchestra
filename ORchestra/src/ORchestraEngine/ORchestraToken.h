@@ -96,7 +96,6 @@ namespace ORchestra {
         //    FOR,
         //    IF,
         //    NIL,
-        //    RETURN,
         //    SUPER,
         //    THIS,
         //    TRUE,

@@ -838,6 +838,16 @@ namespace ORchestra
         const ORchestraToken& token = Previous();
         const std::string name = std::string(token.mStart, static_cast<unsigned long>(token.mLength));
 
+        if (Peek().mTokenType == ORchestraTokenType::LEFT_BRACKET)
+        {
+            auto funcArrayIt = mFunctionArrayNames.find(name);
+            if (funcArrayIt != mFunctionArrayNames.end())
+            {
+                Consume(); // consume '['
+                return CompileFunctionArrayCall(instructions, funcArrayIt->second);
+            }
+        }
+
         if (Peek().mTokenType == ORchestraTokenType::LEFT_PAREN &&
             mFunctions.find(name) != mFunctions.end())
         {
@@ -968,7 +978,7 @@ namespace ORchestra
                     // Data Array
                     case ORchestraTokenType::LEFT_BRACKET:
                     {
-                        // Check if this is a pattern array
+                        // Check if this is a function array
                         if (mCurrentIndex + 1 < mTokens.size() &&
                             mTokens[mCurrentIndex + 1].mTokenType == ORchestraTokenType::IDENTIFIER)
                         {
@@ -977,10 +987,15 @@ namespace ORchestra
 
                             if (mFunctions.find(firstName) != mFunctions.end())
                             {
-                                if (!CompileFunctionArray(name))
-                                    return StatementResult::COMPILE_ERROR;
+                                if (mCurrentIndex + 2 < mTokens.size() &&
+                                    (mTokens[mCurrentIndex + 2].mTokenType == ORchestraTokenType::COMMA ||
+                                     mTokens[mCurrentIndex + 2].mTokenType == ORchestraTokenType::RIGHT_BRACKET))
+                                {
+                                    if (!CompileFunctionArray(name))
+                                        return StatementResult::COMPILE_ERROR;
 
-                                break;
+                                    break;
+                                }
                             }
                         }
 
@@ -1083,14 +1098,6 @@ namespace ORchestra
             break;
         }
 
-        // case ORchestraTokenType::PTN:
-        // {
-        //     if (!CompilePatternDefinition())
-        //         return StatementResult::COMPILE_ERROR;
-        //
-        //     break;
-        // }
-
         case ORchestraTokenType::RETURN:
         {
             if (!mInsideFunctionDefinition)
@@ -1104,6 +1111,8 @@ namespace ORchestra
             if (!CompileExpression(instructions))
                 return StatementResult::COMPILE_ERROR;
 
+            mFunctionHasReturnValue = true;
+            
             break;
         }
 
@@ -1175,13 +1184,14 @@ namespace ORchestra
     {
         Consume(); // consume '['
 
-        std::vector<std::vector<Instruction>> funcBlocks;
+        std::vector<FunctionArraySlot> funcSlots;
+        int expectedParamCount = -1;
 
         for (;;)
         {
             const ORchestraToken& funcToken = Consume();
             
-            if (Peek().mTokenType != ORchestraTokenType::IDENTIFIER)
+            if (funcToken.mTokenType != ORchestraTokenType::IDENTIFIER)
             {
                 std::string message = std::string("function arrays can only contain functions");
                 mErrorReporting.LogError(funcToken.mLine, message);
@@ -1200,7 +1210,21 @@ namespace ORchestra
             }
 
             const StoredFunction& func = it->second;
-            funcBlocks.push_back(func.mInstructions);
+
+            if (expectedParamCount == -1)
+            {
+                expectedParamCount = func.mNumOfParams;
+            }
+            else if (func.mNumOfParams != expectedParamCount)
+            {
+                std::string message = std::string("function '") + funcName +
+                    std::string("' has ") + std::to_string(func.mNumOfParams) +
+                    std::string(" parameters, expected ") + std::to_string(expectedParamCount);
+                mErrorReporting.LogError(funcToken.mLine, message);
+                return false;
+            }
+
+            funcSlots.push_back(FunctionArraySlot{ func.mNumOfParams, func.mParamIds, func.mInstructions });
 
             if (Peek().mTokenType == ORchestraTokenType::COMMA)
             {
@@ -1222,7 +1246,7 @@ namespace ORchestra
         Consume(); // consume ']'
 
         const DataUnit arrayId = static_cast<DataUnit>(mFunctionArrays.size());
-        mFunctionArrays.push_back(funcBlocks);
+        mFunctionArrays.push_back(std::move(funcSlots));
         mFunctionArrayNames[name] = arrayId;
 
         return true;
@@ -1230,6 +1254,7 @@ namespace ORchestra
 
     bool Compiler::CompileFunctionArrayCall(std::vector<Instruction>& instructions, DataUnit arrayId)
     {
+        // assume '[' already consumed by caller
         if (!CompileExpression(instructions))
         {
             ThrowUnexpectedTokenError(Peek());
@@ -1244,6 +1269,85 @@ namespace ORchestra
         }
 
         Consume(); // consume ']'
+
+        if (Peek().mTokenType != ORchestraTokenType::LEFT_PAREN)
+        {
+            std::string missingToken{ "(" };
+            ThrowMissingExpectedToken(missingToken);
+            return false;
+        }
+
+        Consume(); // consume '('
+
+        const int expectedParams = mFunctionArrays[arrayId][0].mNumOfParams;
+        int paramCounter = 0;
+        bool expectsValue = true;
+
+        while (Peek().mTokenType != ORchestraTokenType::RIGHT_PAREN)
+        {
+            const ORchestraToken& currentToken = Peek();
+            switch (currentToken.mTokenType)
+            {
+            case ORchestraTokenType::COMMA:
+            {
+                if (expectsValue)
+                {
+                    ThrowUnexpectedTokenError(currentToken);
+                    return false;
+                }
+                Consume();
+                expectsValue = true;
+                break;
+            }
+
+            case ORchestraTokenType::END:
+            case ORchestraTokenType::EOL:
+            {
+                const std::string missingRightParen = ")";
+                ThrowUnexpectedEnd(missingRightParen);
+                return false;
+            }
+
+            default:
+            {
+                if (!expectsValue)
+                {
+                    ThrowUnexpectedTokenError(currentToken);
+                    return false;
+                }
+
+                if (!CompileExpression(instructions))
+                {
+                    ThrowUnexpectedTokenError(Peek());
+                    return false;
+                }
+                ++paramCounter;
+                expectsValue = false;
+                break;
+            }
+            }
+        }
+
+        if (expectsValue && paramCounter != expectedParams)
+        {
+            ThrowMissingParamCount(expectedParams, paramCounter);
+            return false;
+        }
+
+        if (Peek().mTokenType != ORchestraTokenType::RIGHT_PAREN)
+        {
+            const std::string missingRightParen = ")";
+            ThrowUnexpectedEnd(missingRightParen);
+            return false;
+        }
+
+        if (expectedParams != paramCounter)
+        {
+            ThrowMissingParamCount(expectedParams, paramCounter);
+            return false;
+        }
+
+        Consume(); // consume ')'
 
         instructions.emplace_back(Instruction{ OpCode::EXEC_FUNC_ARRAY, arrayId });
 
@@ -1349,9 +1453,16 @@ namespace ORchestra
                 continue;
             case StatementResult::END_OF_FUNCTION:
             {
-                mInsideFunctionDefinition = false;
                 const int numParams = static_cast<int>(paramIds.size());
-                mFunctions[name] = StoredFunction(numParams, std::move(paramIds), std::move(bodyInstructions));
+                
+                // for now we push a 0 as a return value if nothing was returned.
+                if (!mFunctionHasReturnValue)
+                    bodyInstructions.emplace_back(Instruction{ OpCode::CONSTANT, static_cast<DataUnit>(0) });
+                
+                mFunctions[name] = StoredFunction(numParams, std::move(paramIds), std::move(bodyInstructions), mFunctionHasReturnValue);
+                mInsideFunctionDefinition = false;
+                mFunctionHasReturnValue = false;
+                
                 return true;
             }
             case StatementResult::END_OF_INPUT:
