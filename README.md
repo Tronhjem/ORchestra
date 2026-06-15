@@ -603,24 +603,23 @@ note(1, 64, vel, n8)  // Play C4 with random velocity
 
 #### BPM (Tempo) Control
 
-The `bpm(tempo)` function sets the tempo for the sequencer.
-
-**Parameters:**
-- `tempo` - BPM value (0-127). Common values: 60 = slow, 80 = moderate, 120 = fast
+The `bpm(120)` function sets the tempo for the sequencer.
 
 **Note:** 
 - Sets the internal tempo instead of using the value from the DAW or UI
-- Limited to 0-127 range due to language constraints
+- Limited to 0-255 range due to language constraints
 - Called during initialization, not every tick
+- Any variable or expression can be used to set this as well.
 
 **Example:**
 ```cpp
-bpm(120)             // Set tempo to 120 BPM
+tempo = 120
+bpm(tempo)             // Set tempo to 120 BPM
 pattern = euc(4, 8)
 note(pattern, C4, 100, n8)
 ```
 
-#### Note Division Control
+#### Beat Division Control
 
 The `beat(division)` function sets the note division (timing resolution) for the sequencer.
 
@@ -749,15 +748,16 @@ Function arrays let you group named functions and dispatch to one at runtime bas
 **Creating a function array:**
 ```cpp
 arrayName = [function1, function2, function3]
+arrayName[index]() // executes the function at the index
 ```
 
 The compiler detects a function array by checking whether the first element is the name of a previously defined function. If so, every element must be a valid function name.
 
 **Dispatching with an index:**
 ```cpp
-arrayName[$]           // use global count as index
-arrayName[$ % 4]       // any expression works
-arrayName[someVar]     // variables work too
+arrayName[$]()           // use global count as index
+arrayName[$ % 4]()       // any expression works
+arrayName[someVar]()     // variables work too
 ```
 
 The index is wrapped with modulo, so `arrayName[5]` on a 2-element array executes `function2` (index 1).
@@ -771,19 +771,19 @@ The index is wrapped with modulo, so `arrayName[5]` on a 2-element array execute
 **Example:**
 ```cpp
 // Define two functions with different note sequences
-fn verse
+fn verse()
   note(1, C4, 100, n8)
   note(1, E4, 80, n8)
 end
 
-fn chorus
+fn chorus()
   note(1, G4, 127, n8)
   note(1, C5, 127, n8)
 end
 
 // Create function array -- alternates between verse and chorus
 song = [verse, chorus]
-song[$]  // verse on even ticks, chorus on odd ticks
+song[$]()  // verse on even ticks, chorus on odd ticks
 ```
 
 ---
@@ -850,7 +850,7 @@ cc(1, 74, cutoff, 1)  // Always trigger, CC#74 (filter cutoff)
 ```cpp
 // Override DAW tempo and use fast 16th notes
 bpm(120)
-beat(5)  // 16th notes
+beat(n16)  // 16th notes
 
 // Create rapid hi-hat pattern
 hihat = euc(11, 16)
@@ -951,60 +951,60 @@ note(trigger, high, 70, n8, 2)   // doubled an octave up on channel 2
 
 ```cpp
 // Two functions that alternate each tick
-fn verse
+fn verse()
   note(1, C4, 100, n8)
   note(1, E4, 80, n8)
 end
 
-fn chorus
+fn chorus()
   note(1, G4, 127, n8)
   note(1, C5, 127, n8)
   note(1, E5, 110, n8)
 end
 
 song = [verse, chorus]
-song[$]   // verse on even ticks, chorus on odd ticks
+song[$]()   // verse on even ticks, chorus on odd ticks
 ```
 
 ```cpp
 // Four functions cycling every 4 ticks
-fn intro
+fn intro()
   note(1, C4, 80, n8)
 end
 
-fn build
+fn build()
   note(1, C4, 100, n8)
   note(1, G4, 90, n8)
 end
 
-fn drop
+fn drop()
   note(1, C4, 127, n8)
   note(1, E4, 127, n8)
   note(1, G4, 127, n8)
 end
 
-fn breakSection
+fn breakSection()
   note(0, C4, 0, n8)  // silence
 end
 
 arrangement = [intro, build, drop, breakSection]
-arrangement[$ % 4]
+arrangement[$ % 4]()
 ```
 
 ```cpp
 // Functions using euclidean rhythms, switched by section
-fn sparse
+fn sparse()
   trigger = euc(3, 8)
   note(trigger, C4, 90, n8)
 end
 
-fn dense
+fn dense()
   trigger = euc(7, 8)
   note(trigger, C4, 100, n8)
 end
 
 groove = [sparse, dense]
-groove[$ / 8]  // switch function every 8 ticks
+groove[$ / 8]()  // switch function every 8 ticks
 ```
 
 ### Using Global Count (`$`) for Evolving Patterns
