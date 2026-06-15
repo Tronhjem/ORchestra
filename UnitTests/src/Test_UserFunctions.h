@@ -609,3 +609,45 @@ TEST_CASE("Function array: mismatched parameter signatures fail at compile time"
     VM vm(errorReporter);
     REQUIRE(vm.Prepare(file) == false);
 }
+
+TEST_CASE("Function array: no-return in expression context fails at compile time", "[UserFunction]")
+{
+    std::string file = "fn sideEffect\nprint(2)\nend\na = [sideEffect, sideEffect]\nprint(a[$]())";
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    REQUIRE(vm.Prepare(file) == false);
+}
+
+TEST_CASE("Function array: no-return at statement level is valid", "[UserFunction]")
+{
+    std::string file = "result = [0]\nfn setResult\nresult[0] = 42\nend\narr = [setResult, setResult]\narr[$]()\ntest result[0]";
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    REQUIRE(vm.Prepare(file));
+
+    std::vector<SequenceStep> steps;
+    REQUIRE(vm.Tick(steps, 0));
+    StepData result = vm.GetTopStackValue();
+    REQUIRE(result.GetValue(0) == 42);
+}
+
+TEST_CASE("UserFunction: no-return fn in expression context fails at compile time", "[UserFunction]")
+{
+    std::string file = "fn some\nprint(2)\nend\nprint(some())";
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    REQUIRE(vm.Prepare(file) == false);
+}
+
+TEST_CASE("UserFunction: no-return fn at statement level is valid", "[UserFunction]")
+{
+    std::string file = "result = [0]\nfn setResult\nresult[0] = 99\nend\nsetResult()\ntest result[0]";
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    REQUIRE(vm.Prepare(file));
+
+    std::vector<SequenceStep> steps;
+    REQUIRE(vm.Tick(steps, 0));
+    StepData result = vm.GetTopStackValue();
+    REQUIRE(result.GetValue(0) == 99);
+}

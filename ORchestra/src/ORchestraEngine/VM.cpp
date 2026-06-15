@@ -171,19 +171,27 @@ namespace ORchestra
             {
                 StepData value = stack.Pop();
                 const size_t operandId = static_cast<size_t>(instruction.GetOperand());
+                
                 if (operandId >= mVariables.size())
                     mVariables.resize(operandId + 1);
+                
                 mVariables[operandId].SetValue(0, value);
+                
                 break;
             }
 
             case (OpCode::EXEC_FUNC_ARRAY):
             {
                 const size_t arrayId = static_cast<size_t>(instruction.GetOperand());
-                const auto& funcArray = mFunctionArrays[arrayId];
+                const auto& slot = mFunctionArrays[arrayId][0];
+                // Args are on top (pushed after index), discard them first
+                for (int i = 0; i < slot.mNumOfParams; ++i)
+                    stack.Pop();
                 stack.Pop(); // index
-                for (int i = 0; i < funcArray[0].mNumOfParams; ++i)
-                    stack.Pop(); // discard args
+                
+                if (slot.mHasReturnValue)
+                    stack.Push(StepData{ 0 }); // keep stack balanced for callers expecting a return value
+                
                 break;
             }
 
@@ -271,16 +279,26 @@ namespace ORchestra
         {
             const size_t arrayId = static_cast<size_t>(instruction.GetOperand());
             const auto& funcArray = mFunctionArrays[arrayId];
+            const int numParams = funcArray[0].mNumOfParams;
+
+            // Args are on top of stack (pushed after index), collect them first
+            StepData args[256];
+
+            for (int i = numParams - 1; i >= 0; --i)
+                args[i] = stack.Pop();
+
             const size_t index = static_cast<size_t>(stack.Pop().GetValue(0)) % funcArray.size();
             const auto& slot = funcArray[index];
 
-            // Pop arguments and assign to parameter variable IDs
-            for (int i = slot.mNumOfParams - 1; i >= 0; --i)
+            // Assign collected args to parameter variable IDs
+            for (int i = 0; i < numParams; ++i)
             {
                 const DataUnit paramId = slot.mParamIds[i];
+
                 if (paramId >= mVariables.size())
                     mVariables.resize(paramId + 1);
-                mVariables[paramId].SetValue(0, stack.Pop());
+
+                mVariables[paramId] = DataSequence{ args[i] };
             }
 
             for (const Instruction& blockInstr : slot.mInstructions)
@@ -288,6 +306,7 @@ namespace ORchestra
                 if (!ExecuteTickInstruction(blockInstr, globalCount, stack, stepQueue))
                     return false;
             }
+
             break;
         }
 

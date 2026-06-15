@@ -28,6 +28,7 @@ namespace ORchestra
     struct FunctionArraySlot
     {
         int mNumOfParams = 0;
+        bool mHasReturnValue = false;
         std::vector<DataUnit> mParamIds {};
         std::vector<Instruction> mInstructions {};
     };

@@ -843,15 +843,35 @@ namespace ORchestra
             auto funcArrayIt = mFunctionArrayNames.find(name);
             if (funcArrayIt != mFunctionArrayNames.end())
             {
+                const DataUnit arrayId = funcArrayIt->second;
+                if (!mFunctionArrays[arrayId][0].mHasReturnValue)
+                {
+                    std::string message = std::string("function array '") + name +
+                        std::string("' has no return value and cannot be used in an expression");
+                    mErrorReporting.LogError(token.mLine, message);
+                    return false;
+                }
+
                 Consume(); // consume '['
-                return CompileFunctionArrayCall(instructions, funcArrayIt->second);
+                return CompileFunctionArrayCall(instructions, arrayId);
             }
         }
 
-        if (Peek().mTokenType == ORchestraTokenType::LEFT_PAREN &&
-            mFunctions.find(name) != mFunctions.end())
+        if (Peek().mTokenType == ORchestraTokenType::LEFT_PAREN)
         {
-            return CompileFunctionCall(instructions, name);
+            auto funcIt = mFunctions.find(name);
+            if (funcIt != mFunctions.end())
+            {
+                if (!funcIt->second.mHasReturnValue)
+                {
+                    std::string message = std::string("function '") + name +
+                        std::string("' has no return value and cannot be used in an expression");
+                    mErrorReporting.LogError(token.mLine, message);
+                    return false;
+                }
+
+                return CompileFunctionCall(instructions, name);
+            }
         }
 
         return MakeIdentifierGetter(token, instructions);
@@ -1186,6 +1206,7 @@ namespace ORchestra
 
         std::vector<FunctionArraySlot> funcSlots;
         int expectedParamCount = -1;
+        int expectedHasReturn = -1; // -1 = not yet set, 0 = false, 1 = true
 
         for (;;)
         {
@@ -1214,6 +1235,7 @@ namespace ORchestra
             if (expectedParamCount == -1)
             {
                 expectedParamCount = func.mNumOfParams;
+                expectedHasReturn = func.mHasReturnValue ? 1 : 0;
             }
             else if (func.mNumOfParams != expectedParamCount)
             {
@@ -1223,8 +1245,15 @@ namespace ORchestra
                 mErrorReporting.LogError(funcToken.mLine, message);
                 return false;
             }
+            else if ((func.mHasReturnValue ? 1 : 0) != expectedHasReturn)
+            {
+                std::string message = std::string("function '") + funcName +
+                    std::string("' must agree on return value with other functions in the array");
+                mErrorReporting.LogError(funcToken.mLine, message);
+                return false;
+            }
 
-            funcSlots.push_back(FunctionArraySlot{ func.mNumOfParams, func.mParamIds, func.mInstructions });
+            funcSlots.push_back(FunctionArraySlot{ func.mNumOfParams, func.mHasReturnValue, func.mParamIds, func.mInstructions });
 
             if (Peek().mTokenType == ORchestraTokenType::COMMA)
             {
@@ -1456,8 +1485,8 @@ namespace ORchestra
                 const int numParams = static_cast<int>(paramIds.size());
                 
                 // for now we push a 0 as a return value if nothing was returned.
-                if (!mFunctionHasReturnValue)
-                    bodyInstructions.emplace_back(Instruction{ OpCode::CONSTANT, static_cast<DataUnit>(0) });
+//                if (!mFunctionHasReturnValue)
+//                    bodyInstructions.emplace_back(Instruction{ OpCode::CONSTANT, static_cast<DataUnit>(0) });
                 
                 mFunctions[name] = StoredFunction(numParams, std::move(paramIds), std::move(bodyInstructions), mFunctionHasReturnValue);
                 mInsideFunctionDefinition = false;
