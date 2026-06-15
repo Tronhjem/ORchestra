@@ -23,25 +23,22 @@
 
 using namespace ORchestra;
 
-void TriggerRectangleComponent::timerCallback()
+void TriggerRectangleComponent::Update()
 {
 #if defined(_DEBUG)
     assert(mAudioProcessor != nullptr);
 #endif
 
     const TransportData& transportData = mAudioProcessor->GetTransportData();
-    if (!transportData.isPlaying || !mAudioProcessor->IsORchestraVMInit())
-        return;
 
-
-    const float stepDurationInMiliSeconds = 60000.f / static_cast<float>(transportData.bpm * transportData.bpmDivision);
+    const float stepDurationInMiliSeconds = 60000.f / static_cast<float>(transportData.bpmFromScript * transportData.bpmDivision);
     const float framesPerStep = stepDurationInMiliSeconds * miliesecondsPerFrameInverse;
     const float alphaDecrementPerFrame = 1.f / framesPerStep;
     
     for (auto& rect : triggerRectangles)
     {
         rect.value -= alphaDecrementPerFrame;
-            
+    
         if(rect.value < 0.f)
             rect.value = 0.f;
     }
@@ -49,7 +46,7 @@ void TriggerRectangleComponent::timerCallback()
     repaint(getLocalBounds());
 }
 
-void TriggerRectangleComponent::paint(juce::Graphics &g)
+void TriggerRectangleComponent::paint(juce::Graphics& g)
 {
     for (auto& rect : triggerRectangles)
     {

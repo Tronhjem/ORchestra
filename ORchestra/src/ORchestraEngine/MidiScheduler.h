@@ -22,6 +22,7 @@
 #include <JuceHeader.h>
 #include <vector>
 #include "Defines.h"
+#include "juce_core/juce_core.h"
 
 namespace ORchestra {
 
@@ -40,11 +41,12 @@ namespace ORchestra {
     public:
         MidiScheduler();
         void PostMidi(ScheduledMidiMessage& message);
-        void ProcessMidiPosts(juce::MidiBuffer& midiMessages, const int bufferLength, const int64_t endOfBufferPosition);
+        void ProcessMidiPosts(juce::MidiBuffer& midiMessages, const int bufferLength);
         void ClearAllData(juce::MidiBuffer& midiMessages);
 
     private:
         std::vector<ScheduledMidiMessage> mScheduledMidiMessages;
+        uint8 mActiveNoteCounts[128 * 16] = {};
     };
 
 } // namespace ORchestra

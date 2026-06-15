@@ -26,41 +26,58 @@
 #include "Colors.h"
 #include "LookAndFeelConstants.h"
 
-// Used to offset the trigger step so the trigger rect around 
+// Used to offset the trigger step so the trigger rect around
 // is shown properly
 constexpr float triggerStepMargin = 2.f;
 
+static float DurationToBpmDivision(int divValue)
+{
+    switch (divValue)
+    {
+        case 1: return 0.25f;
+        case 2: return 0.5f;
+        case 3: return 1.0f;
+        case 4: return 2.0f;
+        case 5: return 4.0f;
+        case 6: return 8.0f;
+        case 7: return 16.0f;
+        default: return 1.0f;
+    }
+}
+
 void Timeline::timerCallback()
 {
+
 #if defined(_DEBUG)
     assert(mAudioProcessor != nullptr);
 #endif
 
-    const TransportData& transportData = mAudioProcessor->GetTransportData();
-    if (!transportData.isPlaying || !mAudioProcessor->IsORchestraVMInit())
+    if (!mAudioProcessor->IsORchestraVMInit())
         return;
+
+    mTriggerRectangle.Update(); 
 
     const int currentStep = mAudioProcessor->GetGlobalStepCount();
 
-    if (currentStep == mLastGlobalStep)
+    if (currentStep == mLastGlobalStep && !mTimelineDirty.load())
         return;
 
     mLastGlobalStep = currentStep;
+    SetTimelineDirty(false);
+
     // We start behind the global step, as it's always one ahead and we
     // want to paint the current step being triggered.
     const int globalStepOffset = mLastGlobalStep - 1 + STEP_BUFFER_SIZE;
  
     mTriggerRectangle.ClearRectangles();
-    mTimelineTriggerRectangles.clear();
+    mTimelineRectangles.clear();
     mBarLines.clear();
 
-    //=================================================================================================
-    //
     // Draw all steps using fixed chromatic rows (C=bottom/row11, B=top/row0)
-    //
     constexpr float totalGridHeight = static_cast<float>(TIMELINE_ROWS_DRAWN) * stepHeight;
 
-    const int barStepCount = GetBpmDivisionWrapIndex(transportData.bpmDivision);
+    const float bpmDivision = mAudioProcessor->GetTransportData().bpmDivision;
+    const int barStepCount = GetBpmDivisionWrapIndex(bpmDivision);
 
     int drawTranspose = 0;
     for (int index = 0; index < TIMELINE_STEPS_DRAWN; ++index)
@@ -76,7 +93,7 @@ void Timeline::timerCallback()
             const int musicalStep = mLastGlobalStep - 1 + index;
             const int barNumber = (musicalStep >= 0 ? musicalStep : 0) / barStepCount + 1;
             const float barWidth = static_cast<float>(barStepCount) * stepWidth;
-            mBarLines.emplace_back(BarLine{xOffset - QAURTER_BAR_LINE_THICKNESS,
+            mBarLines.emplace_back(BarLine {xOffset - QAURTER_BAR_LINE_THICKNESS,
                                            0.f, barHeaderHeight + totalGridHeight,
                                            barNumber, barWidth});
         }
@@ -108,13 +125,27 @@ void Timeline::timerCallback()
                     const float triggerRectY = barHeaderHeight + static_cast<float>(row) * stepHeight + triggerStepMargin;
                     const float velocityFloat = static_cast<float>(step.mSecond.GetEquivalentValueAtIndex(substepIndex, substepLength));
 
-                    mTimelineTriggerRectangles.emplace_back(TriggerRectangle{triggerReactX, triggerRectY,
-                                                                             subStepDrawnWidth, velocityFloat, step.mType});
+                    float noteWidth = subStepDrawnWidth;
+
+                    if (step.mType == SequenceStepType::NoteOn && bpmDivision > 0.f)
+                    {
+                        const float noteDiv = DurationToBpmDivision(step.mDuration);
+                        const float durationInSteps = bpmDivision / noteDiv;
+                        noteWidth = std::max(2.f, stepWidth * durationInSteps - stepMargin);
+                        const float maxRightEdge = labelColumnWidth + static_cast<float>(TIMELINE_STEPS_DRAWN) * stepWidth;
+                        const float rightEdge = triggerReactX + noteWidth;
+
+                        if (rightEdge > maxRightEdge)
+                            noteWidth = maxRightEdge - triggerReactX;
+                    }
+
+                    mTimelineRectangles.emplace_back(TimelineRectangle{triggerReactX, triggerRectY,
+                                                                       noteWidth, velocityFloat, step.mType});
 
                     if (index == 0)
                     {
-                        mTriggerRectangle.AddRectangle(TriggerRectangle{triggerReactX, triggerRectY,
-                                                                        subStepDrawnWidth, 1.f, step.mType});
+                        mTriggerRectangle.AddRectangle(TimelineRectangle{triggerReactX, triggerRectY,
+                                                                         noteWidth, 1.f, step.mType});
                     }
                 }
             }
@@ -186,11 +217,6 @@ void Timeline::paint(juce::Graphics& g)
     g.setFont(juce::Font(juce::FontOptions{12.f}));
     for (const auto& barLine : mBarLines)
     {
-        // Outlined box for this bar in the header
-        // g.setColour(GridLineColor.brighter(0.4f));
-        // const float xPos = barLine.x < 0.f ? 0 : barLine.x;
-        // g.drawRect(xPos, 0.f, barLine.barWidth, barHeaderHeight, 1.f);
-
         // Bar number text inside the box
         g.setColour(juce::Colour(ColorPalette::Subtext1));
         g.drawText(juce::String(barLine.barNumber),
@@ -208,11 +234,14 @@ void Timeline::paint(juce::Graphics& g)
     g.drawLine(labelColumnWidth, gridTop, labelColumnWidth + totalGridWidth, gridTop, OUTLINE_THICKNESS);
 
     // Note rectangles
-    for (const auto& rect : mTimelineTriggerRectangles)
+    for (const auto& rect : mTimelineRectangles)
     {
         const juce::Colour colorToSet = GetStepColorFromVelocity(rect.value, rect.midiType);
         g.setColour(colorToSet);
         g.fillRoundedRectangle(rect.x, rect.y, rect.width, drawnStepHeight, ROUNDED_CORNER_SIZE);
+
+        g.setColour(GridLineColor);
+        g.drawRoundedRectangle(rect.x, rect.y, rect.width, drawnStepHeight, ROUNDED_CORNER_SIZE, 2.f);
     }
 
     // closing bar header at top.
@@ -228,8 +257,7 @@ juce::Colour Timeline::GetStepColorFromVelocity(const float value, const Sequenc
     const Colour& minColor = midiType == SequenceStepType::CC ? MinCCValueColor : MinVelocityColor;
     const Colour& maxColor = midiType == SequenceStepType::CC ? MaxCCValueColor : MaxVelocityColor;
 
-    return smoothstepColour(minColor,
-                            maxColor, value / 127.f);
+    return smoothstepColour(minColor, maxColor, value / 127.f);
 }
 
 int Timeline::GetBpmDivisionWrapIndex(const float bpmDivision)

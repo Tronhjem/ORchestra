@@ -43,9 +43,9 @@ namespace ORchestra
 
         static const char* const function2Char[]  = { "cc", nullptr };
         static const char* const function3Char[]  = { "euc", "ran", "bpm", nullptr };
-        static const char* const function4Char[]  = { "note", nullptr };
+        static const char* const function4Char[]  = { "note", "beat", nullptr };
         static const char* const function5Char[]  = { "print", nullptr };
-        static const char* const function6Char[]  = { "return", "bpmDiv", nullptr };
+        static const char* const function6Char[]  = { "return", nullptr };
         static const char* const function9Char[]  = { "transpose", nullptr };
 
         const char* const* k = nullptr;

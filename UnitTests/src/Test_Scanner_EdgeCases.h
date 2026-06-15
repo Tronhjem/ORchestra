@@ -393,7 +393,7 @@ TEST_CASE("Scanner: 'cc' keyword recognized", "[Scanner_EdgeCases]")
     REQUIRE(tokens[0].GetType() == ORchestraTokenType::CC);
 }
 
-TEST_CASE("Scanner: All note division literals tokenized as BPM_DIVISION_IDENTIFIER", "[Scanner_EdgeCases]")
+TEST_CASE("Scanner: All note division literals tokenized as BEAT_IDENTIFIER", "[Scanner_EdgeCases]")
 {
     ErrorReporting errorReporting;
     Scanner scanner(errorReporting);
@@ -403,7 +403,7 @@ TEST_CASE("Scanner: All note division literals tokenized as BPM_DIVISION_IDENTIF
     {
         Scanner s(errorReporting);
         REQUIRE(s.ScanFile(div.c_str()));
-        REQUIRE(s.GetTokens()[0].GetType() == ORchestraTokenType::BPM_DIVISION_IDENTIFIER);
+        REQUIRE(s.GetTokens()[0].GetType() == ORchestraTokenType::BEAT_IDENTIFIER);
     }
 }
 

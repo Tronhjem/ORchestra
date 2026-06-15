@@ -55,10 +55,11 @@ public:
     Timeline(TriggerRectangleComponent& triggerRectangle) :
                 mAudioProcessor(nullptr),
                 mLastGlobalStep(-1),
-                mTriggerRectangle(triggerRectangle)
+                mTriggerRectangle(triggerRectangle),
+                mTimelineDirty(false)
     {
         startTimerHz(40);
-        mTimelineTriggerRectangles.reserve(TIMELINE_STEPS_DRAWN * TIMELINE_ROWS_DRAWN);
+        mTimelineRectangles.reserve(TIMELINE_STEPS_DRAWN * TIMELINE_ROWS_DRAWN);
         mBarLines.reserve(8);
     }
 
@@ -68,6 +69,12 @@ public:
     }
 
     void SetProcessor(ORchestraAudioProcessor* audioProcessor) { mAudioProcessor = audioProcessor; }
+
+    inline void SetTimelineDirty(const bool isDirty) 
+    { 
+        mTimelineDirty.store(isDirty, std::memory_order_release); 
+    }
+
     void timerCallback() override;
     void paint(juce::Graphics& g) override;
 
@@ -77,6 +84,7 @@ private:
     ORchestraAudioProcessor* mAudioProcessor;
     int mLastGlobalStep;
     TriggerRectangleComponent& mTriggerRectangle;
-    std::vector<TriggerRectangle> mTimelineTriggerRectangles;
+    std::vector<TimelineRectangle> mTimelineRectangles;
     std::vector<BarLine> mBarLines;
+    std::atomic<bool> mTimelineDirty;
 };

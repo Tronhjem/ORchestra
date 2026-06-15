@@ -240,7 +240,7 @@ namespace ORchestra
 
                            break;
                        }
-                       case ORchestra::SequenceStepType::BPM_DIVISION:
+                       case ORchestra::SequenceStepType::BEAT:
                        {
                            transportData.bpmDivision = ToBpmDivision(step.mFirst.GetValue(0));
 
@@ -295,13 +295,14 @@ namespace ORchestra
                                const DataUnit channel =
                                    step.mChannel.GetEquivalentValueAtIndex(i, triggerLength);
 
-                               const int timeStamp = nextStepInSamples
-                                   + i * (static_cast<int>(samplesPerStep) / triggerLength);
+                                const int timeStamp = nextStepInSamples
+                                    + i * (static_cast<int>(samplesPerStep) / triggerLength);
+                                const int remainingSamples = timeStamp - static_cast<int>(transportData.timeInSamples);
 
-                               ScheduledMidiMessage message{ step.mType, firstByte, secondByte,
-                                                             channel, timeStamp, noteDurationSamples };
+                                ScheduledMidiMessage message{ step.mType, firstByte, secondByte,
+                                                              channel, remainingSamples, noteDurationSamples };
 
-                               mMidiScheduler.PostMidi(message);
+                                mMidiScheduler.PostMidi(message);
                            }
 
                            break;
@@ -315,7 +316,7 @@ namespace ORchestra
             }
 
             // Process all Midi.
-            mMidiScheduler.ProcessMidiPosts(midiMessages, bufferLength, endOfBufferInSamples);
+            mMidiScheduler.ProcessMidiPosts(midiMessages, bufferLength);
         }
         else
         {

@@ -41,7 +41,8 @@ The original prototype that sparked the idea can be found here: <https://github.
   - [Reserved Keywords](#reserved-keywords)
   - [Data Sequences](#data-sequences)
   - [Substeps / Sub-divisions](#substeps--sub-divisions)
-  - [Note Values](#note-values)
+  - [Note Division Literals](#note-division-literals)
+  - [Musical Note Names](#musical-note-names)
   - [Tracks](#tracks)
   - [Built-in Functions](#built-in-functions)
   - [User-Defined Functions](#user-defined-functions)
@@ -307,7 +308,7 @@ The following words are reserved and cannot be used as variable names:
 - `ran` - Random number generator function
 - `euc` - Euclidean sequence generator function
 - `bpm` - Sets the BPM (tempo) for the sequencer
-- `bpmDiv` - Sets the note division (timing resolution)
+- `beat` - Sets the note division (timing resolution)
 - `fn` - Defines a user function
 - `end` - Ends a function or pattern definition
 - `ptn` - Defines a pattern for use in pattern arrays
@@ -348,6 +349,8 @@ These are used to send data from your Data Sequences to midi.
 note(trigger, note, velocity, duration)           // channel defaults to 1
 note(trigger, note, velocity, duration, channel)  // explicit channel
 ```
+
+- `duration` sets how long the note is held. Use a note division literal (`n8`, `n16`, etc.) or a raw number (see [Note Division Literals](#note-division-literals)).
 
 **CC Track Syntax:**
 ```cpp
@@ -502,9 +505,42 @@ note(trigger, notes, 100, n8)
 // This allows fewer note values to span more trigger divisions
 ```
 
-### Note Values
+### Note Division Literals
 
-Notes can be represented in two ways:
+ORchestra provides note division literals as a convenient way to specify durations and beat divisions. These compile to their underlying numeric values and can be used anywhere a number is expected.
+
+**Literal to value mapping:**
+
+| Literal | Underlying value | Note type    |
+|---------|------------------|--------------|
+| `n1`    | 1                | Whole note   |
+| `n2`    | 2                | Half note    |
+| `n4`    | 3                | Quarter note |
+| `n8`    | 4                | 8th note     |
+| `n16`   | 5                | 16th note    |
+| `n32`   | 6                | 32nd note    |
+
+**Usage:**
+
+As the `duration` argument in `note()`:
+```cpp
+note(1, 64, 100, n8)   // 8th note duration
+note(1, 64, 100, n16)  // 16th note duration
+```
+
+As the `division` argument in `beat()`:
+```cpp
+beat(n8)   // 8th note division
+beat(n16)  // 16th note division
+```
+
+These are not special types — they are simply integer constants. You can use the raw numbers directly if you prefer (`beat(4)` is identical to `beat(n8)`). Because they compile to plain numbers, you can also use them in expressions: `n8 + 1` evaluates to `5`.
+
+**Note:** `7` (64th note) is also valid for `beat()`, but there is no `n64` literal — use the raw number `7`.
+
+### Musical Note Names
+
+Note pitches can be represented in two ways:
 
 **1. Raw MIDI values (0-127):**
 ```cpp
@@ -527,11 +563,12 @@ When compiled, note names are converted to MIDI values, allowing them to be comb
 
 #### Euclidean Sequence Generator
 
-The `euc(hits, length)` function generates euclidean rhythm patterns.
+The `euc(hits, length, shift)` function generates euclidean rhythm patterns.
 
 **Parameters:**
 - `hits` - Number of beats to distribute
 - `length` - Total length of the sequence
+- `shift` - (Optional) Number of steps to rotate the pattern. Positive values shift right, negative values shift left.
 
 **Returns:** A data sequence containing 0s and 1s (designed for triggers)
 
@@ -542,6 +579,9 @@ The `euc(hits, length)` function generates euclidean rhythm patterns.
 // Euclidean sequence with 4 hits divided across 8 steps
 a = euc(4, 8)
 note(a, 64, 100, n8)  // Use the euclidean pattern as a trigger
+
+// Shifted euclidean sequence
+b = euc(5, 8, 2)      // 5 hits across 8 steps, shifted by 2
 ```
 
 #### Random Number Generator
@@ -583,26 +623,30 @@ note(pattern, C4, 100, n8)
 
 #### Note Division Control
 
-The `bpmDiv(division)` function sets the note division (timing resolution) for the sequencer.
+The `beat(division)` function sets the note division (timing resolution) for the sequencer.
 
 **Parameters:**
-- `division` - Note division value (1-7):
-  - `1` = Whole note
-  - `2` = Half note
-  - `3` = Quarter note (default)
-  - `4` = 8th note
-  - `5` = 16th note
-  - `6` = 32nd note
-  - `7` = 64th note
+- `division` - Note division value. Use either a note division literal or the underlying number:
 
-**Note:** 
+| Literal   | Number | Note type    |
+|-----------|--------|--------------|
+| `n1`      | 1      | Whole note   |
+| `n2`      | 2      | Half note    |
+| `n4`      | 3      | Quarter note (default) |
+| `n8`      | 4      | 8th note     |
+| `n16`     | 5      | 16th note    |
+| `n32`     | 6      | 32nd note    |
+| —         | 7      | 64th note    |
+
+**Note:**
 - Sets the internal note division instead of using the value from the DAW or UI
 - Determines how often the sequencer steps forward
 - Called during initialization, not every tick
+- The `nX` literals compile to the numbers shown above; either form can be used
 
 **Example:**
 ```cpp
-bpmDiv(4)           // Set to 8th notes
+beat(n8)          // Set to 8th notes (same as beat(4))
 bpm(120)
 pattern = euc(3, 8)
 note(pattern, C4, 100, n8)  // Triggers on 8th notes at 120 BPM
@@ -802,7 +846,7 @@ cc(1, 74, cutoff, 1)  // Always trigger, CC#74 (filter cutoff)
 ```cpp
 // Override DAW tempo and use fast 16th notes
 bpm(120)
-bpmDiv(5)  // 16th notes
+beat(5)  // 16th notes
 
 // Create rapid hi-hat pattern
 hihat = euc(11, 16)

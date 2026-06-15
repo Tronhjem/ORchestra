@@ -266,9 +266,9 @@ TEST_CASE("VM_EdgeCases: note() and cc() in same Tick produce correct steps", "[
     REQUIRE(steps[1].mType == SequenceStepType::CC);
 }
 
-TEST_CASE("VM_EdgeCases: bpm() and bpmDiv() in same Tick produce steps", "[VM_EdgeCases]")
+TEST_CASE("VM_EdgeCases: bpm() and beat() in same Tick produce steps", "[VM_EdgeCases]")
 {
-    std::string file{"bpm(120)\nbpmDiv(n4)\n"};
+    std::string file{"bpm(120)\nbeat(n4)\n"};
     ErrorReporting errorReporter;
     VM vm(errorReporter);
     REQUIRE(vm.Prepare(file));
@@ -277,7 +277,7 @@ TEST_CASE("VM_EdgeCases: bpm() and bpmDiv() in same Tick produce steps", "[VM_Ed
     REQUIRE(vm.Tick(steps, 0));
     REQUIRE(steps.size() == 2);
     REQUIRE(steps[0].mType == SequenceStepType::BPM);
-    REQUIRE(steps[1].mType == SequenceStepType::BPM_DIVISION);
+    REQUIRE(steps[1].mType == SequenceStepType::BEAT);
 }
 
 TEST_CASE("VM_EdgeCases: VM Reset allows reuse", "[VM_EdgeCases]")

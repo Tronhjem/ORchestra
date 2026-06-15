@@ -25,12 +25,12 @@
 #include "Defines.h"
 #include "PluginProcessor.h"
 
-constexpr int updateFrequency = 30;
+constexpr int updateFrequency = 40;
 constexpr float miliesecondsPerFrameInverse = 1.f / (1000.f / static_cast<float>(updateFrequency));
 
 namespace ORchestra
 {
-    struct TriggerRectangle
+    struct TimelineRectangle
     {
         float x;
         float y;
@@ -39,29 +39,27 @@ namespace ORchestra
         SequenceStepType midiType;
     };
 
-    class TriggerRectangleComponent : public juce::Component, public juce::Timer
+    class TriggerRectangleComponent : public juce::Component
     {
     public:
         TriggerRectangleComponent()
         {
-            startTimerHz(updateFrequency);
         }
         
         ~TriggerRectangleComponent() override
         {
-            stopTimer();
         }
         
 
-        void AddRectangle(TriggerRectangle rect) { triggerRectangles.emplace_back(rect); }
+        void AddRectangle(TimelineRectangle rect) { triggerRectangles.emplace_back(rect); }
         void ClearRectangles() { triggerRectangles.clear(); }
         void SetProcessor(ORchestraAudioProcessor* audioProcessor) { mAudioProcessor = audioProcessor; }
+        void Update();
         
     private:
         ORchestraAudioProcessor* mAudioProcessor;
-        void timerCallback() override;
         void paint(juce::Graphics& g) override;
         
-        std::vector<TriggerRectangle> triggerRectangles;
+        std::vector<TimelineRectangle> triggerRectangles;
     };
 } // namespace ORchestra
