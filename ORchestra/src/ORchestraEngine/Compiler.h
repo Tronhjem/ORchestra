@@ -47,7 +47,7 @@ namespace ORchestra
         Compiler(const std::vector<ORchestraToken>& tokens, ErrorReporting& log);
         bool Compile(std::vector<Instruction>& runtimeInstructions);
         void Reset();
-        const std::vector<std::vector<std::vector<Instruction>>>& GetFunctionArrays() const { return mFunctionArrays; }
+        const std::vector<std::vector<StoredFunction>>& GetFunctionArrays() const { return mFunctionArrays; }
         std::vector<std::string> GetVariableNames() const;
 
     private:
@@ -64,7 +64,6 @@ namespace ORchestra
         inline void ThrowUnexpectedEnd(const std::string& missingToken);
         inline void ThrowUnknownFunctionOrVariable(const std::string& name);
 
-        bool CompilePatternDefinition();
         inline bool MakeIdentifierGetter(const ORchestraToken& token, std::vector<Instruction>& instructions);
         inline void MakeConstant(const ORchestraToken& token, std::vector<Instruction>& instructions);
         bool MakeNoteIntoConstant(const ORchestraToken& token, std::vector<Instruction>& instructions);
@@ -80,7 +79,6 @@ namespace ORchestra
         bool ParseIdentifier(std::vector<Instruction>& instructions);
         bool ParseGrouping(std::vector<Instruction>& instructions);
         bool ParseDollar(std::vector<Instruction>& instructions);
-        bool ParseRandom(std::vector<Instruction>& instructions);
         bool ParseBinary(std::vector<Instruction>& instructions);
         bool ParseUnary(std::vector<Instruction>& instructions);
 
@@ -103,6 +101,7 @@ namespace ORchestra
         StatementResult CompileStatement(std::vector<Instruction>& instructions);
         bool CompileFunctionDefinition(std::vector<Instruction>& mainInstructions);
         bool mInsideFunctionDefinition = false;
+        bool mFunctionHasReturnValue = false;
 
         inline DataUnit GetOrCreateVariableID(const std::string& varName);
 
@@ -111,9 +110,8 @@ namespace ORchestra
         const std::vector<ORchestraToken>& mTokens;
         ErrorReporting& mErrorReporting;
         std::unordered_map<std::string, StoredFunction> mFunctions;
-        std::unordered_map<std::string, StoredFunction> mPatterns;
         std::unordered_map<std::string, DataUnit> mVariableIDMap;
-        std::vector<std::vector<std::vector<Instruction>>> mFunctionArrays;
+        std::vector<std::vector<StoredFunction>> mFunctionArrays;
         std::unordered_map<std::string, DataUnit> mFunctionArrayNames;
     };
 } // namespace ORchestra

@@ -1,12 +1,16 @@
 ### v0.1.2
 
 - Changing built in function from `bpmDiv()` to `beat()` 
+- Removing ptn entirely and rely on functions only.
+- Arrays are now either value arrays or function arrays, these can't be mixed. This allows for the same use with ptn but with functions instead.
+- General cleanup and refactor on how functions work internally.
 
 Bugs:
 - Fixed wrong sizing and placement of UI when re opening on VST and AU
 - Fixed issue where looping in a daw would leave hanging midi notes.
 - Fixing midi notes being cut if an overlapping note is fired, now we choke the earlier note and then fire the new note.
 - Fixed notes block not appearing when compiling and only when plyaing. 
+- Ensure that functions can only be used in expressions if they return a value.
 
 ### v0.1.1 
 Official Alpha release.

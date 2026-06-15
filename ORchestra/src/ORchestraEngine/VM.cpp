@@ -56,8 +56,8 @@ namespace ORchestra
             if (success)
             {
                 mVariableNames = mCompiler.GetVariableNames();
-                success = ProcessOpCodes(mRuntimeInstructions);
                 mFunctionArrays = mCompiler.GetFunctionArrays();
+                success = ProcessOpCodes(mRuntimeInstructions);
             }
         }
 
@@ -171,15 +171,27 @@ namespace ORchestra
             {
                 StepData value = stack.Pop();
                 const size_t operandId = static_cast<size_t>(instruction.GetOperand());
+                
                 if (operandId >= mVariables.size())
                     mVariables.resize(operandId + 1);
+                
                 mVariables[operandId].SetValue(0, value);
+                
                 break;
             }
 
             case (OpCode::EXEC_FUNC_ARRAY):
             {
-                stack.Pop();
+                const size_t arrayId = static_cast<size_t>(instruction.GetOperand());
+                const auto& slot = mFunctionArrays[arrayId][0];
+                // Args are on top (pushed after index), discard them first
+                for (int i = 0; i < slot.mNumOfParams; ++i)
+                    stack.Pop();
+                stack.Pop(); // index
+                
+                if (slot.mHasReturnValue)
+                    stack.Push(StepData{ 0 }); // keep stack balanced for callers expecting a return value
+                
                 break;
             }
 
@@ -267,14 +279,34 @@ namespace ORchestra
         {
             const size_t arrayId = static_cast<size_t>(instruction.GetOperand());
             const auto& funcArray = mFunctionArrays[arrayId];
-            const size_t index = static_cast<size_t>(stack.Pop().GetValue(0)) % funcArray.size();
-            const auto& block = funcArray[index];
+            const int numParams = funcArray[0].mNumOfParams;
 
-            for (const Instruction& blockInstr : block)
+            // Args are on top of stack (pushed after index), collect them first
+            StepData args[256];
+
+            for (int i = numParams - 1; i >= 0; --i)
+                args[i] = stack.Pop();
+
+            const size_t index = static_cast<size_t>(stack.Pop().GetValue(0)) % funcArray.size();
+            const auto& slot = funcArray[index];
+
+            // Assign collected args to parameter variable IDs
+            for (int i = 0; i < numParams; ++i)
+            {
+                const DataUnit paramId = slot.mParamIds[i];
+
+                if (paramId >= mVariables.size())
+                    mVariables.resize(paramId + 1);
+
+                mVariables[paramId] = DataSequence{ args[i] };
+            }
+
+            for (const Instruction& blockInstr : slot.mInstructions)
             {
                 if (!ExecuteTickInstruction(blockInstr, globalCount, stack, stepQueue))
                     return false;
             }
+
             break;
         }
 
@@ -460,7 +492,8 @@ namespace ORchestra
             }
             else
             {
-                mErrorReporting.LogError("VM: Variable '" + VariableName(instruction.GetOperand()) + "' is not defined");
+                mErrorReporting.LogError("VM: Variable '" + VariableName(instruction.GetOperand()) + "' is either not defined, or you're trying to use a function in a value array");
+                
                 return false;
             }
 

@@ -46,7 +46,7 @@ The original prototype that sparked the idea can be found here: <https://github.
   - [Tracks](#tracks)
   - [Built-in Functions](#built-in-functions)
   - [User-Defined Functions](#user-defined-functions)
-  - [Patterns and Pattern Arrays](#patterns-and-pattern-arrays)
+  - [Function Arrays](#function-arrays)
 - [Examples](#examples)
 - [Troubleshooting](#troubleshooting)
 
@@ -310,8 +310,7 @@ The following words are reserved and cannot be used as variable names:
 - `bpm` - Sets the BPM (tempo) for the sequencer
 - `beat` - Sets the note division (timing resolution)
 - `fn` - Defines a user function
-- `end` - Ends a function or pattern definition
-- `ptn` - Defines a pattern for use in pattern arrays
+- `end` - Ends a function definition
 - `return` - Returns a value from a function
 
 **Note:** The keywords `print` and `test` are reserved for debugging purposes but are only available in debug builds.
@@ -690,7 +689,7 @@ b = functionName(3) + 1    // b == 7
 - Parameters become global variables -- they persist after the call
 - Functions can call other previously defined functions and built-in functions
 - Nested function definitions are not allowed
-- Function names cannot collide with built-in function names, variable names, or pattern names
+- Function names cannot collide with built-in function names or variable names
 - `return` leaves the result on the stack. Calling a returning function as a statement (not in an expression) will leak one stack value -- prefer using the return value when a function has `return`
 
 **Using functions in expressions:**
@@ -734,52 +733,57 @@ melody = [transpose(C4, 0), transpose(C4, 4), transpose(C4, 7)]
 note(1, melody, 100, n8)  // plays C4, E4, G4 in sequence
 ```
 
-### Patterns and Pattern Arrays
+### Function Arrays
 
-Patterns are code blocks defined with the `ptn` keyword. Unlike functions, patterns cannot be called directly -- they can only be grouped into pattern arrays for runtime dispatch based on an index.
+Function arrays let you group named functions and dispatch to one at runtime based on an index. This is useful for creating song sections, alternating grooves, or any scenario where you want to switch between predefined blocks of behavior.
 
-**Defining patterns:**
+**How they differ from value arrays:**
+
+| Feature | Value Array | Function Array |
+|---------|-------------|----------------|
+| Syntax | `a = [1, 2, 3]` | `a = [func1, func2]` |
+| Elements | Numbers, expressions, variables | Function names only |
+| Access | `a[$]` reads a value | `a[$]` executes a function |
+| Return value | The stored value | Ignored (function runs for side effects) |
+
+**Creating a function array:**
 ```cpp
-ptn patternName
-  // body
-end
+arrayName = [function1, function2, function3]
 ```
 
-**Creating a pattern array:**
+The compiler detects a function array by checking whether the first element is the name of a previously defined function. If so, every element must be a valid function name.
+
+**Dispatching with an index:**
 ```cpp
-arrayName = [pattern1, pattern2, pattern3]
+arrayName[$]           // use global count as index
+arrayName[$ % 4]       // any expression works
+arrayName[someVar]     // variables work too
 ```
 
-**Calling a pattern array:**
-```cpp
-arrayName($)           // use global count as index
-arrayName($ % 4)       // any expression works
-arrayName(someVar)     // variables work too
-```
+The index is wrapped with modulo, so `arrayName[5]` on a 2-element array executes `function2` (index 1).
 
 **Key Points:**
-- Patterns have no parameters and no parentheses in their definition
-- Pattern arrays select which pattern to execute using `index % array_length`
-- Patterns must be defined before being used in an array
-- Only `ptn` definitions can be used in pattern arrays (not `fn` functions)
-- Pattern names cannot collide with function names, variable names, or other pattern names
+- Functions in a function array are executed for their side effects; any `return` value is discarded
+- Functions must be defined before they are used in a function array
+- Function arrays select which function to execute using `index % array_length`
+- Normal value arrays and function arrays cannot be mixed in the same declaration
 
 **Example:**
 ```cpp
-// Define two patterns with different note sequences
-ptn verse
+// Define two functions with different note sequences
+fn verse
   note(1, C4, 100, n8)
   note(1, E4, 80, n8)
 end
 
-ptn chorus
+fn chorus
   note(1, G4, 127, n8)
   note(1, C5, 127, n8)
 end
 
-// Create pattern array -- alternates between verse and chorus
+// Create function array -- alternates between verse and chorus
 song = [verse, chorus]
-song($)  // verse on even ticks, chorus on odd ticks
+song[$]  // verse on even ticks, chorus on odd ticks
 ```
 
 ---
@@ -943,64 +947,64 @@ note(trigger, base, 100, n8)
 note(trigger, high, 70, n8, 2)   // doubled an octave up on channel 2
 ```
 
-### Patterns and Pattern Arrays
+### Function Arrays
 
 ```cpp
-// Two patterns that alternate each tick
-ptn verse
+// Two functions that alternate each tick
+fn verse
   note(1, C4, 100, n8)
   note(1, E4, 80, n8)
 end
 
-ptn chorus
+fn chorus
   note(1, G4, 127, n8)
   note(1, C5, 127, n8)
   note(1, E5, 110, n8)
 end
 
 song = [verse, chorus]
-song($)   // verse on even ticks, chorus on odd ticks
+song[$]   // verse on even ticks, chorus on odd ticks
 ```
 
 ```cpp
-// Four patterns cycling every 4 ticks
-ptn intro
+// Four functions cycling every 4 ticks
+fn intro
   note(1, C4, 80, n8)
 end
 
-ptn build
+fn build
   note(1, C4, 100, n8)
   note(1, G4, 90, n8)
 end
 
-ptn drop
+fn drop
   note(1, C4, 127, n8)
   note(1, E4, 127, n8)
   note(1, G4, 127, n8)
 end
 
-ptn break
+fn breakSection
   note(0, C4, 0, n8)  // silence
 end
 
-arrangement = [intro, build, drop, break]
-arrangement($ % 4)
+arrangement = [intro, build, drop, breakSection]
+arrangement[$ % 4]
 ```
 
 ```cpp
-// Patterns using euclidean rhythms, switched by section
-ptn sparse
+// Functions using euclidean rhythms, switched by section
+fn sparse
   trigger = euc(3, 8)
   note(trigger, C4, 90, n8)
 end
 
-ptn dense
+fn dense
   trigger = euc(7, 8)
   note(trigger, C4, 100, n8)
 end
 
 groove = [sparse, dense]
-groove($ / 8)  // switch pattern every 8 ticks
+groove[$ / 8]  // switch function every 8 ticks
 ```
 
 ### Using Global Count (`$`) for Evolving Patterns
@@ -1062,7 +1066,7 @@ Solution: Install build essentials:
 
 **Problem:** Reserved keyword error
 ```
-Solution: Check that you're not using: note, cc, ran, euc, print, or test as variable names
+Solution: Check that you're not using: note, cc, ran, euc, beat, print, or test as variable names
 ```
 
 **Problem:** Note name parsing error

@@ -215,9 +215,9 @@ TEST_CASE("UserFunction: Parameterized function called from another function bod
     REQUIRE(result.GetValue(0) == 77);
 }
 
-TEST_CASE("Pattern array selects pattern by index via Tick", "[UserFunction]")
+TEST_CASE("Function array: selects function by index via Tick", "[UserFunction]")
 {
-    std::string file = "a = [0]\nptn setA10\na[0] = 10\nend\nptn setA20\na[0] = 20\nend\npattern = [setA10, setA20]\npattern($)\ntest a[0]";
+    std::string file = "a = [0]\nfn setA10\na[0] = 10\nend\nfn setA20\na[0] = 20\nend\npattern = [setA10, setA20]\npattern[$]()\ntest a[0]";
     ErrorReporting errorReporter;
     VM vm(errorReporter);
     REQUIRE(vm.Prepare(file));
@@ -233,9 +233,9 @@ TEST_CASE("Pattern array selects pattern by index via Tick", "[UserFunction]")
     REQUIRE(result1.GetValue(0) == 20);
 }
 
-TEST_CASE("Pattern array wraps index with modulo", "[UserFunction]")
+TEST_CASE("Function array: wraps index with modulo", "[UserFunction]")
 {
-    std::string file = "a = [0]\nptn setA10\na[0] = 10\nend\nptn setA20\na[0] = 20\nend\npattern = [setA10, setA20]\npattern($)\ntest a[0]";
+    std::string file = "a = [0]\nfn setA10\na[0] = 10\nend\nfn setA20\na[0] = 20\nend\npattern = [setA10, setA20]\npattern[$]()\ntest a[0]";
     ErrorReporting errorReporter;
     VM vm(errorReporter);
     REQUIRE(vm.Prepare(file));
@@ -246,9 +246,9 @@ TEST_CASE("Pattern array wraps index with modulo", "[UserFunction]")
     REQUIRE(result.GetValue(0) == 10);
 }
 
-TEST_CASE("Pattern array with NOTE output differs per index", "[UserFunction]")
+TEST_CASE("Function array: with NOTE output differs per index", "[UserFunction]")
 {
-    std::string file = "ptn verse\nnote(1, C4, 100, n4, 1)\nend\nptn chorus\nnote(1, E4, 127, n4, 1)\nend\npattern = [verse, chorus]\npattern($)";
+    std::string file = "fn verse\nnote(1, C4, 100, n4, 1)\nend\nfn chorus\nnote(1, E4, 127, n4, 1)\nend\npattern = [verse, chorus]\npattern[$]()";
     ErrorReporting errorReporter;
     VM vm(errorReporter);
     REQUIRE(vm.Prepare(file));
@@ -266,9 +266,9 @@ TEST_CASE("Pattern array with NOTE output differs per index", "[UserFunction]")
     REQUIRE(steps1[0].mSecond.GetValue(0) == 127);
 }
 
-TEST_CASE("Pattern array with expression as index", "[UserFunction]")
+TEST_CASE("Function array: with expression as index", "[UserFunction]")
 {
-    std::string file = "a = [0]\nptn setA10\na[0] = 10\nend\nptn setA20\na[0] = 20\nend\npattern = [setA10, setA20]\npattern($ + 1)\ntest a[0]";
+    std::string file = "a = [0]\nfn setA10\na[0] = 10\nend\nfn setA20\na[0] = 20\nend\npattern = [setA10, setA20]\npattern[$ + 1]()\ntest a[0]";
     ErrorReporting errorReporter;
     VM vm(errorReporter);
     REQUIRE(vm.Prepare(file));
@@ -279,9 +279,9 @@ TEST_CASE("Pattern array with expression as index", "[UserFunction]")
     REQUIRE(result.GetValue(0) == 20);  // index = 0 + 1 = 1, selects setA20
 }
 
-TEST_CASE("Multiple pattern arrays in one script", "[UserFunction]")
+TEST_CASE("Multiple function arrays in one script", "[UserFunction]")
 {
-    std::string file = "a = [0]\nb = [0]\nptn setA1\na[0] = 1\nend\nptn setA2\na[0] = 2\nend\nptn setB1\nb[0] = 10\nend\nptn setB2\nb[0] = 20\nend\npatternA = [setA1, setA2]\npatternB = [setB1, setB2]\npatternA($)\npatternB($)\ntest a[0]";
+    std::string file = "a = [0]\nb = [0]\nfn setA1\na[0] = 1\nend\nfn setA2\na[0] = 2\nend\nfn setB1\nb[0] = 10\nend\nfn setB2\nb[0] = 20\nend\npatternA = [setA1, setA2]\npatternB = [setB1, setB2]\npatternA[$]()\npatternB[$]()\ntest a[0]";
     ErrorReporting errorReporter;
     VM vm(errorReporter);
     REQUIRE(vm.Prepare(file));
@@ -292,7 +292,7 @@ TEST_CASE("Multiple pattern arrays in one script", "[UserFunction]")
     REQUIRE(resultA.GetValue(0) == 1);
 }
 
-TEST_CASE("Pattern: Error - unknown identifier in pattern array fails at runtime", "[UserFunction]")
+TEST_CASE("Function array: unknown identifier in array fails at runtime", "[UserFunction]")
 {
     std::string file = "pattern = [undefinedFunc]";
     ErrorReporting errorReporter;
@@ -311,44 +311,20 @@ TEST_CASE("UserFunction: Non-function identifier in array falls through to norma
     REQUIRE(result.GetValue(0) == 5);
 }
 
-TEST_CASE("Pattern: Error - pattern cannot be called directly", "[UserFunction]")
+TEST_CASE("Function array: function can be called directly and via array", "[UserFunction]")
 {
-    std::string file = "ptn myPat\nprint(1)\nend\nmyPat()";
+    std::string file = "fn myFunc\nprint(1)\nend\nmyFunc()";
     ErrorReporting errorReporter;
     VM vm(errorReporter);
-    REQUIRE(vm.Prepare(file) == false);
+    REQUIRE(vm.Prepare(file));
 }
 
-TEST_CASE("Pattern: Error - nested pattern definition fails", "[UserFunction]")
-{
-    std::string file = "ptn outer\nptn inner\nend\nend\n";
-    ErrorReporting errorReporter;
-    VM vm(errorReporter);
-    REQUIRE(vm.Prepare(file) == false);
-}
-
-TEST_CASE("Pattern: Error - unterminated pattern body", "[UserFunction]")
-{
-    std::string file = "ptn myPat\nprint(1)\n";
-    ErrorReporting errorReporter;
-    VM vm(errorReporter);
-    REQUIRE(vm.Prepare(file) == false);
-}
-
-TEST_CASE("Pattern: Error - name collision with function", "[UserFunction]")
-{
-    std::string file = "fn myFunc\nend\nptn myFunc\nend\n";
-    ErrorReporting errorReporter;
-    VM vm(errorReporter);
-    REQUIRE(vm.Prepare(file) == false);
-}
-
-TEST_CASE("Pattern: Error - fn function cannot be used in pattern array", "[UserFunction]")
+TEST_CASE("Function array: fn functions can be used in function array", "[UserFunction]")
 {
     std::string file = "fn myFunc\nprint(1)\nend\npattern = [myFunc]";
     ErrorReporting errorReporter;
     VM vm(errorReporter);
-    REQUIRE(vm.Prepare(file) == false);
+    REQUIRE(vm.Prepare(file));
 }
 
 TEST_CASE("UserFunction: Function returns value used in assignment", "[UserFunction]")
@@ -430,25 +406,9 @@ TEST_CASE("UserFunction: Error - fn name collision with variable", "[UserFunctio
     REQUIRE(vm.Prepare(file) == false);
 }
 
-TEST_CASE("UserFunction: Error - ptn name collision with variable", "[UserFunction]")
+TEST_CASE("UserFunction: return inside function body works when called via function array", "[UserFunction]")
 {
-    std::string file = "a = 5\nptn a\nend\n";
-    ErrorReporting errorReporter;
-    VM vm(errorReporter);
-    REQUIRE(vm.Prepare(file) == false);
-}
-
-TEST_CASE("UserFunction: Error - fn name collision with pattern", "[UserFunction]")
-{
-    std::string file = "ptn myFunc\nend\nfn myFunc\nend\n";
-    ErrorReporting errorReporter;
-    VM vm(errorReporter);
-    REQUIRE(vm.Prepare(file) == false);
-}
-
-TEST_CASE("UserFunction: return inside pattern body works (ptn uses mInsideFunctionDefinition)", "[UserFunction]")
-{
-    std::string file = "a = 5\nptn myPat\nreturn 99\nend\npat = [myPat]\npat(0)\ntest a";
+    std::string file = "a = 5\nfn myPat\nreturn 99\nend\npat = [myPat]\npat[0]()\ntest a";
     ErrorReporting errorReporter;
     VM vm(errorReporter);
     REQUIRE(vm.Prepare(file));
@@ -456,20 +416,12 @@ TEST_CASE("UserFunction: return inside pattern body works (ptn uses mInsideFunct
     std::vector<SequenceStep> steps;
     REQUIRE(vm.Tick(steps, 0));
     StepData result = vm.GetTopStackValue();
-    REQUIRE(result.GetValue(0) == 5); // a was not modified by return in ptn
+    REQUIRE(result.GetValue(0) == 5); // a was not modified by return in function array
 }
 
 TEST_CASE("UserFunction: Error - duplicate function definition", "[UserFunction]")
 {
     std::string file = "fn myFunc\nend\nfn myFunc\nend\n";
-    ErrorReporting errorReporter;
-    VM vm(errorReporter);
-    REQUIRE(vm.Prepare(file) == false);
-}
-
-TEST_CASE("UserFunction: Error - duplicate pattern definition", "[UserFunction]")
-{
-    std::string file = "ptn myPat\nend\nptn myPat\nend\n";
     ErrorReporting errorReporter;
     VM vm(errorReporter);
     REQUIRE(vm.Prepare(file) == false);
@@ -522,9 +474,9 @@ TEST_CASE("UserFunction: fn with multiple return statements returns last one", "
     REQUIRE(result.GetValue(0) == 7); // last return wins
 }
 
-TEST_CASE("UserFunction: Pattern array with constant index works correctly", "[UserFunction]")
+TEST_CASE("UserFunction: Function array with constant index works correctly", "[UserFunction]")
 {
-    std::string file = "a = [0]\nptn setA\na[0] = 42\nend\nptn setB\na[0] = 99\nend\npat = [setA, setB]\npat(1)\ntest a[0]";
+    std::string file = "a = [0]\nfn setA\na[0] = 42\nend\nfn setB\na[0] = 99\nend\npat = [setA, setB]\npat[1]()\ntest a[0]";
     ErrorReporting errorReporter;
     VM vm(errorReporter);
     REQUIRE(vm.Prepare(file));
@@ -535,25 +487,9 @@ TEST_CASE("UserFunction: Pattern array with constant index works correctly", "[U
     REQUIRE(result.GetValue(0) == 99);
 }
 
-TEST_CASE("UserFunction: Error - cannot define fn inside ptn", "[UserFunction]")
+TEST_CASE("Function: variable declared after function is accessible", "[UserFunction]")
 {
-    std::string file = "ptn outer\nfn inner\nend\nend\n";
-    ErrorReporting errorReporter;
-    VM vm(errorReporter);
-    REQUIRE(vm.Prepare(file) == false);
-}
-
-TEST_CASE("UserFunction: Error - ptn name collision with built-in function", "[UserFunction]")
-{
-    std::string file = "ptn print\nend\n";
-    ErrorReporting errorReporter;
-    VM vm(errorReporter);
-    REQUIRE(vm.Prepare(file) == false);
-}
-
-TEST_CASE("Pattern: variable declared after pattern is accessible", "[UserFunction]")
-{
-    std::string file = "ptn pat1\nt = [1,1]\nend\nb = [1, 1, 1]\ntest b";
+    std::string file = "fn pat1\nt = [1,1]\nend\nb = [1, 1, 1]\ntest b";
     ErrorReporting errorReporter;
     VM vm(errorReporter);
     REQUIRE(vm.Prepare(file));
@@ -564,13 +500,13 @@ TEST_CASE("Pattern: variable declared after pattern is accessible", "[UserFuncti
     REQUIRE(result.GetValue(0) == 1);
 }
 
-TEST_CASE("Pattern: variable declared after pattern with fn before it", "[UserFunction]")
+TEST_CASE("Function: variable declared after function with fn before it", "[UserFunction]")
 {
-    // Reproduces the original bug: fn params + ptn locals create variable ID gaps
+    // Reproduces the original bug: fn params + fn locals create variable ID gaps
     std::string file =
         "a = [0, 2, -1, 0]\n"
         "fn MajChord(trig, toPost)\nnote(trig, toPost, 100, n8)\nend\n"
-        "ptn pat1\nt = [1,1]\nend\n"
+        "fn pat1\nt = [1,1]\nend\n"
         "b = [1, 1, 1]\n"
         "test b";
     ErrorReporting errorReporter;
@@ -583,11 +519,11 @@ TEST_CASE("Pattern: variable declared after pattern with fn before it", "[UserFu
     REQUIRE(result.GetValue(0) == 1);
 }
 
-TEST_CASE("Pattern: multiple patterns with locals don't break later variables", "[UserFunction]")
+TEST_CASE("Function: multiple functions with locals don't break later variables", "[UserFunction]")
 {
     std::string file =
-        "ptn p1\nx = 10\nend\n"
-        "ptn p2\ny = 20\nend\n"
+        "fn p1\nx = 10\nend\n"
+        "fn p2\ny = 20\nend\n"
         "z = 99\n"
         "test z";
     ErrorReporting errorReporter;
@@ -600,15 +536,15 @@ TEST_CASE("Pattern: multiple patterns with locals don't break later variables", 
     REQUIRE(result.GetValue(0) == 99);
 }
 
-TEST_CASE("Pattern: pattern local variable works when pattern is executed", "[UserFunction]")
+TEST_CASE("Function: function local variable works when function is executed via array", "[UserFunction]")
 {
-    // Verify that pattern-local vars are usable inside the pattern body at runtime
+    // Verify that function-local vars are usable inside the function body at runtime
     std::string file =
         "a = [0]\n"
-        "ptn setA\na[0] = 42\nend\n"
+        "fn setA\na[0] = 42\nend\n"
         "b = 5\n"
         "arr = [setA]\n"
-        "arr($)\n"
+        "arr[$]()\n"
         "test a[0]";
     ErrorReporting errorReporter;
     VM vm(errorReporter);
@@ -620,7 +556,7 @@ TEST_CASE("Pattern: pattern local variable works when pattern is executed", "[Us
     REQUIRE(result.GetValue(0) == 42);
 }
 
-TEST_CASE("Pattern: fn with locals before variable declaration", "[UserFunction]")
+TEST_CASE("Function: fn with locals before variable declaration", "[UserFunction]")
 {
     // fn body locals also consume variable IDs from the shared pool
     std::string file =
@@ -635,4 +571,83 @@ TEST_CASE("Pattern: fn with locals before variable declaration", "[UserFunction]
     REQUIRE(vm.Tick(steps, 0));
     StepData result = vm.GetTopStackValue();
     REQUIRE(result.GetValue(0) == 77);
+}
+
+TEST_CASE("Function array: call with one parameter", "[UserFunction]")
+{
+    std::string file = "fn add(x)\nreturn x + 10\nend\nother = [add, add]\nprint(other[$](4))";
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    REQUIRE(vm.Prepare(file));
+}
+
+TEST_CASE("Function array: call inside expression", "[UserFunction]")
+{
+    std::string file = "fn add(x)\nreturn x + 10\nend\nother = [add, add]\na = other[$](4) + 1\ntest a";
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    REQUIRE(vm.Prepare(file));
+
+    std::vector<SequenceStep> steps;
+    REQUIRE(vm.Tick(steps, 0));
+    StepData result = vm.GetTopStackValue();
+    REQUIRE(result.GetValue(0) == 15); // add(4) = 14, + 1 = 15
+}
+
+TEST_CASE("Function array: wrong argument count fails at compile time", "[UserFunction]")
+{
+    std::string file = "fn add(x)\nreturn x + 10\nend\nother = [add, add]\nother[$](4, 5)";
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    REQUIRE(vm.Prepare(file) == false);
+}
+
+TEST_CASE("Function array: mismatched parameter signatures fail at compile time", "[UserFunction]")
+{
+    std::string file = "fn add(x)\nreturn x + 10\nend\nfn sub(x, y)\nreturn x - y\nend\nother = [add, sub]";
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    REQUIRE(vm.Prepare(file) == false);
+}
+
+TEST_CASE("Function array: no-return in expression context fails at compile time", "[UserFunction]")
+{
+    std::string file = "fn sideEffect\nprint(2)\nend\na = [sideEffect, sideEffect]\nprint(a[$]())";
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    REQUIRE(vm.Prepare(file) == false);
+}
+
+TEST_CASE("Function array: no-return at statement level is valid", "[UserFunction]")
+{
+    std::string file = "result = [0]\nfn setResult\nresult[0] = 42\nend\narr = [setResult, setResult]\narr[$]()\ntest result[0]";
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    REQUIRE(vm.Prepare(file));
+
+    std::vector<SequenceStep> steps;
+    REQUIRE(vm.Tick(steps, 0));
+    StepData result = vm.GetTopStackValue();
+    REQUIRE(result.GetValue(0) == 42);
+}
+
+TEST_CASE("UserFunction: no-return fn in expression context fails at compile time", "[UserFunction]")
+{
+    std::string file = "fn some\nprint(2)\nend\nprint(some())";
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    REQUIRE(vm.Prepare(file) == false);
+}
+
+TEST_CASE("UserFunction: no-return fn at statement level is valid", "[UserFunction]")
+{
+    std::string file = "result = [0]\nfn setResult\nresult[0] = 99\nend\nsetResult()\ntest result[0]";
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    REQUIRE(vm.Prepare(file));
+
+    std::vector<SequenceStep> steps;
+    REQUIRE(vm.Tick(steps, 0));
+    StepData result = vm.GetTopStackValue();
+    REQUIRE(result.GetValue(0) == 99);
 }

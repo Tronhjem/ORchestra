@@ -41,7 +41,6 @@ namespace ORchestra {
         STAR,
         PERCENT,
 
-
         // Literals.
         IDENTIFIER,
         STRING,
@@ -63,23 +62,18 @@ namespace ORchestra {
 
         // Keywords.
         PRINT,
-        RANDOM,
         EUCLIDEAN,
         PARSE_ERROR,
         NOTE_IDENTIFIER,
         BEAT_IDENTIFIER,
 
         // Specific
-        //TRACK,
         NOTE,
         CC,
 
         // Function definition
         FN,
         END_FN,
-
-        // Pattern definition
-        PTN,
         RETURN,
 
         // ENDS
@@ -89,22 +83,6 @@ namespace ORchestra {
 #if _TEST
         TEST_KEYWORD,
 #endif
-        // UNUSED STUFF
-        //    SEMICOLON,
-        //    BANG,
-        //    CLASS,
-        //    ELSE,
-        //    FALSE,
-        //    FUN,
-        //    FOR,
-        //    IF,
-        //    NIL,
-        //    RETURN,
-        //    SUPER,
-        //    THIS,
-        //    TRUE,
-        //    VAR,
-        //    WHILE,
     };
 
     class ORchestraToken
