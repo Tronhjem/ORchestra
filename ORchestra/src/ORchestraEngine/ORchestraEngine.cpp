@@ -316,7 +316,7 @@ namespace ORchestra
             }
 
             // Process all Midi.
-            mMidiScheduler.ProcessMidiPosts(midiMessages, bufferLength, endOfBufferInSamples);
+            mMidiScheduler.ProcessMidiPosts(midiMessages, bufferLength);
         }
         else
         {

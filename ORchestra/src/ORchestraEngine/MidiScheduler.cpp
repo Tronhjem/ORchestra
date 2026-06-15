@@ -44,14 +44,12 @@ namespace ORchestra {
             mScheduledMidiMessages.emplace_back(ScheduledMidiMessage { SequenceStepType::NoteOff, 
                                                                        message.mFirstByte, 
                                                                        0, message.mChannel, 
-                                                                       timeStampOff, 0 
-                                                                     });
+                                                                       timeStampOff, 0 });
         }
     }
 
     void MidiScheduler::ProcessMidiPosts(juce::MidiBuffer& midiMessages,
-        const int bufferLength,
-        const int64_t /*endOfBufferPosition*/)
+        const int bufferLength)
     {
         for (int i = (int)mScheduledMidiMessages.size() - 1; i >= 0; --i)
         {
@@ -67,29 +65,34 @@ namespace ORchestra {
                 case SequenceStepType::NoteOn:
                 {
                     const int index = static_cast<int>(message.mFirstByte) * 16 + static_cast<int>(message.mChannel);
+
+                    // Send note off before note on for same note.
                     if (mActiveNoteCounts[index] > 0)
                     {
                         midiMessages.addEvent(juce::MidiMessage::noteOff(static_cast<int>(message.mChannel),
                             static_cast<int>(message.mFirstByte), static_cast<uint8_t>(0)),
                             juce::jmax(0, relativePositionInBuffer - 1));
                     }
+
                     midiMessages.addEvent(juce::MidiMessage::noteOn(static_cast<int>(message.mChannel),
-                        static_cast<int>(message.mFirstByte),
-                        static_cast<unsigned char>(message.mSecondByte)), relativePositionInBuffer);
+                                            static_cast<int>(message.mFirstByte),
+                                            static_cast<unsigned char>(message.mSecondByte)), relativePositionInBuffer);
+
                     mActiveNoteCounts[index] = 1;
+
                     break;
                 }
 
                 case SequenceStepType::NoteOff:
                 {
                     const int index = static_cast<int>(message.mFirstByte) * 16 + static_cast<int>(message.mChannel);
-                    if (mActiveNoteCounts[index] > 0)
-                    {
-                        midiMessages.addEvent(juce::MidiMessage::noteOff(static_cast<int>(message.mChannel),
+
+                    midiMessages.addEvent(juce::MidiMessage::noteOff(static_cast<int>(message.mChannel),
                             static_cast<int>(message.mFirstByte),
                             static_cast<unsigned char>(message.mSecondByte)), relativePositionInBuffer);
-                        mActiveNoteCounts[index] = 0;
-                    }
+
+                    mActiveNoteCounts[index] = 0;
+
                     break;
                 }
 
@@ -98,6 +101,7 @@ namespace ORchestra {
                     midiMessages.addEvent(juce::MidiMessage::controllerEvent(static_cast<int>(message.mChannel),
                         static_cast<int>(message.mFirstByte),
                         static_cast<unsigned char>(message.mSecondByte)), relativePositionInBuffer);
+
                     break;
                 }
 

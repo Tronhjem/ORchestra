@@ -59,7 +59,7 @@ public:
                 mTimelineDirty(false)
     {
         startTimerHz(40);
-        mTimelineTriggerRectangles.reserve(TIMELINE_STEPS_DRAWN * TIMELINE_ROWS_DRAWN);
+        mTimelineRectangles.reserve(TIMELINE_STEPS_DRAWN * TIMELINE_ROWS_DRAWN);
         mBarLines.reserve(8);
     }
 
@@ -84,7 +84,7 @@ private:
     ORchestraAudioProcessor* mAudioProcessor;
     int mLastGlobalStep;
     TriggerRectangleComponent& mTriggerRectangle;
-    std::vector<TriggerRectangle> mTimelineTriggerRectangles;
+    std::vector<TimelineRectangle> mTimelineRectangles;
     std::vector<BarLine> mBarLines;
     std::atomic<bool> mTimelineDirty;
 };

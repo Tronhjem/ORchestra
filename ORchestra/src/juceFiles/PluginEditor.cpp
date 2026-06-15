@@ -595,7 +595,7 @@ void ORchestraAudioProcessorEditor::resized()
 
     // Timeline fills remaining right area
     mTimeline.setBounds(rightPanel);
-    mTriggerRectangle.setBounds(rightPanel.removeFromLeft(100));
+    mTriggerRectangle.setBounds(rightPanel.removeFromLeft(rightPanel.getWidth()));
 
     // Position divider hit areas on top of the lines
     mVerticalDivider.setBounds(mCodePanelWidth - 3, TITLE_BAR_HEIGHT,
