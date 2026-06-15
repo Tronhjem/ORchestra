@@ -62,7 +62,7 @@ namespace ORchestra
 
         std::vector<Instruction> ranInstructions;
         ranInstructions.emplace_back(Instruction{ OpCode::GET_RANDOM_IN_RANGE });
-        mFunctions[ranFunctionName] = StoredFunction(2, std::move(ranInstructions));
+        mFunctions[ranFunctionName] = StoredFunction(2, std::move(ranInstructions), true);
 
         std::vector<Instruction> eucInstructions;
         eucInstructions.emplace_back(Instruction{ OpCode::GENERATE_EUCLID_SEQUENCE });
@@ -572,7 +572,6 @@ namespace ORchestra
             Peek().mTokenType != ORchestraTokenType::NOTE_IDENTIFIER &&
             Peek().mTokenType != ORchestraTokenType::BEAT_IDENTIFIER &&
             Peek().mTokenType != ORchestraTokenType::IDENTIFIER &&
-            Peek().mTokenType != ORchestraTokenType::RANDOM &&
             Peek().mTokenType != ORchestraTokenType::DOLLAR &&
             Peek().mTokenType != ORchestraTokenType::MINUS &&
             Peek().mTokenType != ORchestraTokenType::LEFT_BRACKET)
@@ -656,24 +655,6 @@ namespace ORchestra
                 break;
             }
 
-            case ORchestraTokenType::RANDOM:
-            {
-                if (!expectsValue)
-                {
-                    ThrowUnexpectedTokenError(currentToken);
-                    return false;
-                }
-
-                Consume(); // Consumes the ran function token
-
-                if (!CompileFunctionCall(instructions, ranFunctionName))
-                    return false;
-
-                ++valueCounter;
-                expectsValue = false;
-                break;
-            }
-
             case ORchestraTokenType::EOL:
             case ORchestraTokenType::END:
             {
@@ -735,8 +716,6 @@ namespace ORchestra
             return { &Compiler::ParseBpmDivisionIdentifier, nullptr, Precedence::NONE };
         case ORchestraTokenType::DOLLAR:          
             return { &Compiler::ParseDollar, nullptr, Precedence::NONE };
-        case ORchestraTokenType::RANDOM:          
-            return { &Compiler::ParseRandom, nullptr, Precedence::NONE };
         case ORchestraTokenType::LEFT_PAREN:      
             return { &Compiler::ParseGrouping, nullptr, Precedence::NONE };
 
@@ -899,11 +878,6 @@ namespace ORchestra
         return true;
     }
 
-    bool Compiler::ParseRandom(std::vector<Instruction>& instructions)
-    {
-        return CompileFunctionCall(instructions, ranFunctionName);
-    }
-
     bool Compiler::ParseUnary(std::vector<Instruction>& instructions)
     {
         if (!ParsePrecedence(Precedence::UNARY, instructions))
@@ -1040,7 +1014,6 @@ namespace ORchestra
                     case ORchestraTokenType::BEAT_IDENTIFIER:
                     case ORchestraTokenType::IDENTIFIER:
                     case ORchestraTokenType::LEFT_PAREN:
-                    case ORchestraTokenType::RANDOM:
                     case ORchestraTokenType::DOLLAR:
                     {
                         if (!CompileExpression(instructions))
@@ -1204,7 +1177,7 @@ namespace ORchestra
     {
         Consume(); // consume '['
 
-        std::vector<FunctionArraySlot> funcSlots;
+        std::vector<StoredFunction> funcSlots;
         int expectedParamCount = -1;
         int expectedHasReturn = -1; // -1 = not yet set, 0 = false, 1 = true
 
@@ -1253,7 +1226,7 @@ namespace ORchestra
                 return false;
             }
 
-            funcSlots.push_back(FunctionArraySlot{ func.mNumOfParams, func.mHasReturnValue, func.mParamIds, func.mInstructions });
+            funcSlots.push_back(StoredFunction{ func.mNumOfParams, func.mParamIds, func.mInstructions, func.mHasReturnValue });
 
             if (Peek().mTokenType == ORchestraTokenType::COMMA)
             {

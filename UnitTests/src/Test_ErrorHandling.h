@@ -434,12 +434,13 @@ TEST_CASE("Error: Variable name collision with built-in 'print' fails", "[Error]
     REQUIRE(vm.Prepare(file) == false);
 }
 
-TEST_CASE("Error: Variable name collision with built-in 'ran' fails", "[Error]")
+TEST_CASE("Error: Using 'ran' as a variable name shadows built-in function (allowed)", "[Error]")
 {
     std::string file{"ran = 5 \n test ran"};
     ErrorReporting errorReporter;
     VM vm(errorReporter);
-    REQUIRE(vm.Prepare(file) == false);
+    // ran is now a regular IDENTIFIER like bpm/beat; variable assignment succeeds
+    REQUIRE(vm.Prepare(file));
 }
 
 TEST_CASE("Error: Variable name collision with built-in 'euc' fails", "[Error]")

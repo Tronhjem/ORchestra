@@ -104,12 +104,8 @@ TEST_CASE("ORchestraToken: Constructs comparison operator tokens (==, !=) with c
     REQUIRE(neqToken.GetType() == ORchestraTokenType::BANG_EQUAL);
 }
 
-TEST_CASE("ORchestraToken: Constructs keyword tokens (RANDOM='ran', EUCLIDEAN='euc') with correct types", "[ORchestraToken]")
+TEST_CASE("ORchestraToken: Constructs keyword tokens (EUCLIDEAN='euc') with correct types", "[ORchestraToken]")
 {
-    const char* randomStr = "ran";
-    ORchestraToken randomToken(ORchestraTokenType::RANDOM, randomStr, 3, 1);
-    REQUIRE(randomToken.GetType() == ORchestraTokenType::RANDOM);
-    
     const char* eucStr = "euc";
     ORchestraToken eucToken(ORchestraTokenType::EUCLIDEAN, eucStr, 3, 1);
     REQUIRE(eucToken.GetType() == ORchestraTokenType::EUCLIDEAN);

@@ -63,7 +63,6 @@ namespace ORchestra {
 
         // Keywords.
         PRINT,
-        RANDOM,
         EUCLIDEAN,
         PARSE_ERROR,
         NOTE_IDENTIFIER,

@@ -25,7 +25,6 @@
 #include "ORchestraToken.h"
 #include "Instruction.h"
 #include "StoredFunction.h"
-#include "FunctionArraySlot.h"
 
 
 namespace ORchestra
@@ -48,7 +47,7 @@ namespace ORchestra
         Compiler(const std::vector<ORchestraToken>& tokens, ErrorReporting& log);
         bool Compile(std::vector<Instruction>& runtimeInstructions);
         void Reset();
-        const std::vector<std::vector<FunctionArraySlot>>& GetFunctionArrays() const { return mFunctionArrays; }
+        const std::vector<std::vector<StoredFunction>>& GetFunctionArrays() const { return mFunctionArrays; }
         std::vector<std::string> GetVariableNames() const;
 
     private:
@@ -80,7 +79,6 @@ namespace ORchestra
         bool ParseIdentifier(std::vector<Instruction>& instructions);
         bool ParseGrouping(std::vector<Instruction>& instructions);
         bool ParseDollar(std::vector<Instruction>& instructions);
-        bool ParseRandom(std::vector<Instruction>& instructions);
         bool ParseBinary(std::vector<Instruction>& instructions);
         bool ParseUnary(std::vector<Instruction>& instructions);
 
@@ -113,7 +111,7 @@ namespace ORchestra
         ErrorReporting& mErrorReporting;
         std::unordered_map<std::string, StoredFunction> mFunctions;
         std::unordered_map<std::string, DataUnit> mVariableIDMap;
-        std::vector<std::vector<FunctionArraySlot>> mFunctionArrays;
+        std::vector<std::vector<StoredFunction>> mFunctionArrays;
         std::unordered_map<std::string, DataUnit> mFunctionArrayNames;
     };
 } // namespace ORchestra

@@ -293,9 +293,6 @@ namespace ORchestra
         }
         case 'r':
         {
-            auto result = checkKeyword(1, 2, "an", ORchestraTokenType::RANDOM);
-            if (result != ORchestraTokenType::IDENTIFIER)
-                return result;
             return checkKeyword(1, 5, "eturn", ORchestraTokenType::RETURN);
         }
         case 'e':

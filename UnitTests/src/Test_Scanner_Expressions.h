@@ -26,7 +26,7 @@
 #include "ORchestraToken.h"
 
 using namespace ORchestra;
-TEST_CASE("Scanner: Recognizes 'ran' keyword as RANDOM token", "[Scanner_Expressions]")
+TEST_CASE("Scanner: Recognizes 'ran' keyword as IDENTIFIER token", "[Scanner_Expressions]")
 {
             
             ErrorReporting errorReporting;
@@ -37,7 +37,7 @@ TEST_CASE("Scanner: Recognizes 'ran' keyword as RANDOM token", "[Scanner_Express
             
             auto& tokens = scanner.GetTokens();
             REQUIRE(tokens.size() >= 1);
-            REQUIRE(tokens[0].GetType() == ORchestraTokenType::RANDOM);
+            REQUIRE(tokens[0].GetType() == ORchestraTokenType::IDENTIFIER);
 }
 
 TEST_CASE("Scanner: Recognizes 'euc' keyword as EUCLIDEAN token", "[Scanner_Expressions]")
