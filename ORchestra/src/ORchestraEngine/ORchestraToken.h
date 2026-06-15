@@ -77,9 +77,6 @@ namespace ORchestra {
         // Function definition
         FN,
         END_FN,
-
-        // Pattern definition
-        PTN,
         RETURN,
 
         // ENDS

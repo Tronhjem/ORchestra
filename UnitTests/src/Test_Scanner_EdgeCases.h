@@ -345,17 +345,6 @@ TEST_CASE("Scanner: 'end' keyword recognized", "[Scanner_EdgeCases]")
     REQUIRE(tokens[0].GetType() == ORchestraTokenType::END_FN);
 }
 
-TEST_CASE("Scanner: 'ptn' keyword recognized", "[Scanner_EdgeCases]")
-{
-    ErrorReporting errorReporting;
-    Scanner scanner(errorReporting);
-    std::string input = "ptn";
-
-    REQUIRE(scanner.ScanFile(input.c_str()));
-
-    auto& tokens = scanner.GetTokens();
-    REQUIRE(tokens[0].GetType() == ORchestraTokenType::PTN);
-}
 
 TEST_CASE("Scanner: 'return' keyword recognized", "[Scanner_EdgeCases]")
 {

@@ -64,7 +64,6 @@ namespace ORchestra
         inline void ThrowUnexpectedEnd(const std::string& missingToken);
         inline void ThrowUnknownFunctionOrVariable(const std::string& name);
 
-        bool CompilePatternDefinition();
         inline bool MakeIdentifierGetter(const ORchestraToken& token, std::vector<Instruction>& instructions);
         inline void MakeConstant(const ORchestraToken& token, std::vector<Instruction>& instructions);
         bool MakeNoteIntoConstant(const ORchestraToken& token, std::vector<Instruction>& instructions);
@@ -111,7 +110,6 @@ namespace ORchestra
         const std::vector<ORchestraToken>& mTokens;
         ErrorReporting& mErrorReporting;
         std::unordered_map<std::string, StoredFunction> mFunctions;
-        std::unordered_map<std::string, StoredFunction> mPatterns;
         std::unordered_map<std::string, DataUnit> mVariableIDMap;
         std::vector<std::vector<std::vector<Instruction>>> mFunctionArrays;
         std::unordered_map<std::string, DataUnit> mFunctionArrayNames;

@@ -290,7 +290,6 @@ namespace ORchestra
             auto result = checkKeyword(1, 4, "rint", ORchestraTokenType::PRINT);
             if (result != ORchestraTokenType::IDENTIFIER)
                 return result;
-            return checkKeyword(1, 2, "tn", ORchestraTokenType::PTN);
         }
         case 'r':
         {
