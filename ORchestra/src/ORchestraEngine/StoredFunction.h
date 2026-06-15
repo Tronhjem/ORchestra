@@ -29,21 +29,21 @@ namespace ORchestra
 	{
 	public:
 		StoredFunction() : mNumOfParams(0), mHasReturnValue(false), mParamIds(), mInstructions()
-        {
-        }
+		{
+		}
 
 		StoredFunction(const int numOfParams, std::vector<Instruction> instructions, const bool hasReturn = false) :
-            mNumOfParams(numOfParams),
-            mHasReturnValue(hasReturn),
+			mNumOfParams(numOfParams),
+			mHasReturnValue(hasReturn),
 			mInstructions(std::move(instructions))
 		{
 		}
 
 		StoredFunction(const int numOfParams, std::vector<DataUnit> paramIds, std::vector<Instruction> instructions, const bool hasReturn = false) :
-              mNumOfParams(numOfParams),
-              mHasReturnValue(hasReturn),
-              mParamIds(std::move(paramIds)),
-              mInstructions(std::move(instructions))
+			mNumOfParams(numOfParams),
+			mHasReturnValue(hasReturn),
+			mParamIds(std::move(paramIds)),
+			mInstructions(std::move(instructions))
 		{
 		}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2026 Christian Tronhjem255
+ * Copyright (C) 2026 Christian Tronhjem
  *
  * This file is part of ORchestra.
  *
@@ -101,6 +101,7 @@ namespace ORchestra
         mFunctionArrays.clear();
         mFunctionArrayNames.clear();
         mInsideFunctionDefinition = false;
+        mFunctionHasReturnValue = false;
     }
 
     const ORchestraToken& Compiler::Consume()
@@ -1456,10 +1457,6 @@ namespace ORchestra
             case StatementResult::END_OF_FUNCTION:
             {
                 const int numParams = static_cast<int>(paramIds.size());
-                
-                // for now we push a 0 as a return value if nothing was returned.
-//                if (!mFunctionHasReturnValue)
-//                    bodyInstructions.emplace_back(Instruction{ OpCode::CONSTANT, static_cast<DataUnit>(0) });
                 
                 mFunctions[name] = StoredFunction(numParams, std::move(paramIds), std::move(bodyInstructions), mFunctionHasReturnValue);
                 mInsideFunctionDefinition = false;

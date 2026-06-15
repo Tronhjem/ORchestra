@@ -70,7 +70,7 @@ namespace ORchestra
         return ORchestraToken(ORchestraTokenType::PARSE_ERROR, nullptr, 0, mCurrentLine);
     }
 
-    void Scanner::SkipWhiteSpace() // append char
+    void Scanner::SkipWhiteSpace()
     {
         for (;;)
         {
@@ -336,26 +336,6 @@ namespace ORchestra
 
         default:
             return ORchestraTokenType::IDENTIFIER;
-
-            //    case 'a':
-            //        return checkKeyword(1, 2, "nd", ORchestraTokenType::AND);
-            //    case 'c':
-            //        return checkKeyword(1, 4, "lass", ORchestraTokenType::CLASS);
-            //    case 'e':
-            //        return checkKeyword(1, 3, "lse", ORchestraTokenType::ELSE);
-            //    case 'i':
-            //        return checkKeyword(1, 1, "f", ORchestraTokenType::IF);
-            //    case 'n':
-            //        return checkKeyword(1, 2, "il", ORchestraTokenType::NIL);
-            //    case 'o':
-            //        return checkKeyword(1, 1, "r", ORchestraTokenType::OR);
-            //    case 'r':
-            //    case 's':
-            //        return checkKeyword(1, 4, "uper", ORchestraTokenType::SUPER);
-            //    case 'v':
-            //        return checkKeyword(1, 2, "ar", ORchestraTokenType::VAR);
-            //    case 'w':
-            //        return checkKeyword(1, 4, "hile", ORchestraTokenType::WHILE);
         }
     }
 

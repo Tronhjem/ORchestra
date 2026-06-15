@@ -41,7 +41,6 @@ namespace ORchestra {
         STAR,
         PERCENT,
 
-
         // Literals.
         IDENTIFIER,
         STRING,
@@ -69,7 +68,6 @@ namespace ORchestra {
         BEAT_IDENTIFIER,
 
         // Specific
-        //TRACK,
         NOTE,
         CC,
 
@@ -85,21 +83,6 @@ namespace ORchestra {
 #if _TEST
         TEST_KEYWORD,
 #endif
-        // UNUSED STUFF
-        //    SEMICOLON,
-        //    BANG,
-        //    CLASS,
-        //    ELSE,
-        //    FALSE,
-        //    FUN,
-        //    FOR,
-        //    IF,
-        //    NIL,
-        //    SUPER,
-        //    THIS,
-        //    TRUE,
-        //    VAR,
-        //    WHILE,
     };
 
     class ORchestraToken
