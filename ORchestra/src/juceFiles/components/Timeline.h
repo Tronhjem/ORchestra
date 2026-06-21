@@ -60,6 +60,7 @@ public:
     {
         startTimerHz(40);
         mTimelineRectangles.reserve(TIMELINE_STEPS_DRAWN * TIMELINE_ROWS_DRAWN);
+        mPlayingTimelineRectangles.reserve(8);
         mBarLines.reserve(8);
     }
 
@@ -81,10 +82,13 @@ public:
 private:
     inline int GetBpmDivisionWrapIndex(const float bpmDivision);
     inline juce::Colour GetStepColorFromVelocity(const float value, const SequenceStepType MidiType);
+
     ORchestraAudioProcessor* mAudioProcessor;
     int mLastGlobalStep;
     TriggerRectangleComponent& mTriggerRectangle;
+
     std::vector<TimelineRectangle> mTimelineRectangles;
+    std::vector<TimelineRectangle> mPlayingTimelineRectangles;
     std::vector<BarLine> mBarLines;
     std::atomic<bool> mTimelineDirty;
 };

@@ -537,8 +537,9 @@ void ORchestraAudioProcessorEditor::paint(juce::Graphics& g)
 
 void ORchestraAudioProcessorEditor::paintOverChildren(juce::Graphics& g)
 {
-    // Vertical separator between code editor and timeline/console
     g.setColour(ComponentOutlineColor);
+
+    // Vertical separator between code editor and timeline/console
     g.drawLine(static_cast<float>(mCodePanelWidth),
                static_cast<float>(TITLE_BAR_HEIGHT),
                static_cast<float>(mCodePanelWidth),
@@ -546,18 +547,19 @@ void ORchestraAudioProcessorEditor::paintOverChildren(juce::Graphics& g)
 
     // Horizontal separator between timeline and console
     const int consoleTop = getHeight() - mConsoleHeight;
-    g.setColour(ComponentOutlineColor);
     g.drawLine(static_cast<float>(mCodePanelWidth),
                static_cast<float>(consoleTop),
                static_cast<float>(getWidth()),
                static_cast<float>(consoleTop));
+
+    // Proper seperator beteween header bar and other components
+    g.drawLine(0.f, TITLE_BAR_HEIGHT, static_cast<float>(getWidth()), TITLE_BAR_HEIGHT, OUTLINE_THICKNESS);
 }
 
 void ORchestraAudioProcessorEditor::resized()
 {
     auto localBounds = getLocalBounds();
 
-    // Title bar: single red close dot on left, settings button on right
     localBounds.removeFromTop(TITLE_BAR_HEIGHT);
     const int dotY = (TITLE_BAR_HEIGHT - TRAFFIC_DOT_SIZE) / 2;
     mCloseButton.setBounds(OUTER_MARGIN, dotY, TRAFFIC_DOT_SIZE, TRAFFIC_DOT_SIZE);
@@ -582,7 +584,7 @@ void ORchestraAudioProcessorEditor::resized()
     auto toolbarStrip = leftPanel.removeFromBottom(toolbarH).removeFromLeft(mCodePanelWidth);
     mFileOperationsToolbar.setBounds(toolbarStrip);
 
-    // Move code panel slightly down.
+    // Move code panel slightly down, magic number that fits visially
     leftPanel.removeFromTop(18);
 
     // Vertical split: left = code editor + toolbar, right = timeline + console
@@ -593,11 +595,10 @@ void ORchestraAudioProcessorEditor::resized()
     // Right column: console section at bottom, timeline fills rest
     mConsolePanel.setBounds(rightPanel.removeFromBottom(mConsoleHeight));
 
-    // Timeline fills remaining right area
+    // Timeline 
     mTimeline.setBounds(rightPanel);
     mTriggerRectangle.setBounds(rightPanel.removeFromLeft(rightPanel.getWidth()));
 
-    // Position divider hit areas on top of the lines
     mVerticalDivider.setBounds(mCodePanelWidth - 3, TITLE_BAR_HEIGHT,
                                 6, getHeight() - TITLE_BAR_HEIGHT);
 
