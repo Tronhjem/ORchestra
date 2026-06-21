@@ -54,10 +54,12 @@ namespace ORchestra
         void RequestClearErrors();
 
     private:
+        inline void Initialize();
         void WakeWorker();
         void WorkerThreadLoop();
         bool PreProcessSteps();
-        inline void Initialize();
+        inline void ProcessStepData(TransportData& transportData, const int currentStep, const int nextStepInSamples, const double samplesPerStep);
+        inline void TickInternal(TransportData& transportData, const int bufferLength);
         float ToBpmDivision(DataUnit divValue);
 
         int mLastStep = -1;
@@ -73,7 +75,7 @@ namespace ORchestra
         std::atomic<bool> mShouldExit;
         std::atomic<bool> mHasWork;
         std::atomic<bool> mIsRunning;
-        std::atomic<bool> mShouldResetScriptBpm{false};
+        std::atomic<bool> mShouldResetScriptBpm {false};
 
         std::mutex mCVMutex;
         std::condition_variable mCV;

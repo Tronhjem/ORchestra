@@ -79,6 +79,22 @@ void Timeline::timerCallback()
     const float bpmDivision = mAudioProcessor->GetTransportData().bpmDivision;
     const int barStepCount = GetBpmDivisionWrapIndex(bpmDivision);
 
+    for(int i = static_cast<int>(mPlayingTimelineRectangles.size()) - 1; i >= 0; --i)
+    {
+        TimelineRectangle& rect = mPlayingTimelineRectangles[static_cast<size_t>(i)];
+        rect.durationInSteps -= 1.f;
+        rect.width = std::max(2.f, stepWidth * rect.durationInSteps - stepMargin);
+
+        if (rect.durationInSteps < 0.f)
+        {
+            mPlayingTimelineRectangles[static_cast<size_t>(i)] = mPlayingTimelineRectangles.back();
+            mPlayingTimelineRectangles.pop_back();
+        }
+    }
+    
+    DBG("TICK");
+    DBG(mPlayingTimelineRectangles.size());
+
     int drawTranspose = 0;
     for (int index = 0; index < TIMELINE_STEPS_DRAWN; ++index)
     {
@@ -111,47 +127,49 @@ void Timeline::timerCallback()
 
             const int substepLength = step.mShouldTrigger.GetLength();
             const float subDividedStepWidth = stepWidth / static_cast<float>(substepLength);
-            const float subStepDrawnWidth = drawnStepWidth / static_cast<float>(substepLength);
 
             for (int substepIndex = 0; substepIndex < substepLength; ++substepIndex)
             {
-                if (step.mShouldTrigger.GetValue(substepIndex))
+                if (!step.mShouldTrigger.GetValue(substepIndex))
+                    continue;
+
+                const float triggerReactX = static_cast<float>(substepIndex) * subDividedStepWidth + xOffset;
+                const int rawNote = static_cast<int>(step.mFirst.GetEquivalentValueAtIndex(substepIndex, substepLength));
+                const int transposedNote = std::clamp(rawNote + drawTranspose, 0, 127);
+                const int pitchClass = transposedNote % 12;
+                const int row = 11 - pitchClass; // B=row0 (top), C=row11 (bottom)
+                const float triggerRectY = barHeaderHeight + static_cast<float>(row) * stepHeight + triggerStepMargin;
+                const float velocityFloat = static_cast<float>(step.mSecond.GetEquivalentValueAtIndex(substepIndex, substepLength));
+
+                const float noteDiv = DurationToBpmDivision(step.mDuration);
+                const float durationInSteps = bpmDivision / noteDiv;
+                float noteWidth = std::max(2.f, stepWidth * durationInSteps - stepMargin);
+                const float maxRightEdge = labelColumnWidth + static_cast<float>(TIMELINE_STEPS_DRAWN) * stepWidth;
+                const float rightEdge = triggerReactX + noteWidth;
+
+                if (rightEdge > maxRightEdge)
+                    noteWidth = maxRightEdge - triggerReactX;
+
+
+                if (index == 0)
                 {
-                    const float triggerReactX = static_cast<float>(substepIndex) * subDividedStepWidth + xOffset;
-                    const int rawNote = static_cast<int>(step.mFirst.GetEquivalentValueAtIndex(substepIndex, substepLength));
-                    const int transposedNote = std::clamp(rawNote + drawTranspose, 0, 127);
-                    const int pitchClass = transposedNote % 12;
-                    const int row = 11 - pitchClass; // B=row0 (top), C=row11 (bottom)
-                    const float triggerRectY = barHeaderHeight + static_cast<float>(row) * stepHeight + triggerStepMargin;
-                    const float velocityFloat = static_cast<float>(step.mSecond.GetEquivalentValueAtIndex(substepIndex, substepLength));
+                    mTriggerRectangle.AddRectangle(TimelineRectangle{triggerReactX, triggerRectY,
+                                                                     noteWidth, 1.f, durationInSteps, step.mType});
 
-                    float noteWidth = subStepDrawnWidth;
-
-                    if (step.mType == SequenceStepType::NoteOn && bpmDivision > 0.f)
-                    {
-                        const float noteDiv = DurationToBpmDivision(step.mDuration);
-                        const float durationInSteps = bpmDivision / noteDiv;
-                        noteWidth = std::max(2.f, stepWidth * durationInSteps - stepMargin);
-                        const float maxRightEdge = labelColumnWidth + static_cast<float>(TIMELINE_STEPS_DRAWN) * stepWidth;
-                        const float rightEdge = triggerReactX + noteWidth;
-
-                        if (rightEdge > maxRightEdge)
-                            noteWidth = maxRightEdge - triggerReactX;
-                    }
-
+                    mPlayingTimelineRectangles.emplace_back(TimelineRectangle{triggerReactX, triggerRectY,
+                                                                       noteWidth, velocityFloat, durationInSteps, step.mType});
+                    DBG(noteWidth);
+                }
+                else 
+                {
                     mTimelineRectangles.emplace_back(TimelineRectangle{triggerReactX, triggerRectY,
-                                                                       noteWidth, velocityFloat, step.mType});
-
-                    if (index == 0)
-                    {
-                        mTriggerRectangle.AddRectangle(TimelineRectangle{triggerReactX, triggerRectY,
-                                                                         noteWidth, 1.f, step.mType});
-                    }
+                                                                       noteWidth, velocityFloat, durationInSteps, step.mType});
                 }
             }
         }
     }
-    
+    DBG("------");
+
     repaint(getLocalBounds());
 }
 
@@ -235,6 +253,16 @@ void Timeline::paint(juce::Graphics& g)
 
     // Note rectangles
     for (const auto& rect : mTimelineRectangles)
+    {
+        const juce::Colour colorToSet = GetStepColorFromVelocity(rect.value, rect.midiType);
+        g.setColour(colorToSet);
+        g.fillRoundedRectangle(rect.x, rect.y, rect.width, drawnStepHeight, ROUNDED_CORNER_SIZE);
+
+        g.setColour(GridLineColor);
+        g.drawRoundedRectangle(rect.x, rect.y, rect.width, drawnStepHeight, ROUNDED_CORNER_SIZE, 2.f);
+    }
+
+    for (const auto& rect : mPlayingTimelineRectangles)
     {
         const juce::Colour colorToSet = GetStepColorFromVelocity(rect.value, rect.midiType);
         g.setColour(colorToSet);

@@ -36,6 +36,7 @@ namespace ORchestra
         float y;
         float width;
         float value;
+        float durationInSteps;
         SequenceStepType midiType;
     };
 

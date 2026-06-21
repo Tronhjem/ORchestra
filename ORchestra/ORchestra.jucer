@@ -49,13 +49,6 @@
         <FILE id="N9kQBM" name="DataSequence.cpp" compile="1" resource="0"
               file="src/ORchestraEngine/DataSequence.cpp"/>
         <FILE id="xCJ6UP" name="DataSequence.h" compile="0" resource="0" file="src/ORchestraEngine/DataSequence.h"/>
-        <FILE id="JqveyO" name="LogicSequence.cpp" compile="1" resource="0"
-              file="src/ORchestraEngine/LogicSequence.cpp"/>
-        <FILE id="sqoBjm" name="LogicSequence.h" compile="0" resource="0" file="src/ORchestraEngine/LogicSequence.h"/>
-        <FILE id="ugGmjr" name="LogicSequenceCombiner.cpp" compile="1" resource="0"
-              file="src/ORchestraEngine/LogicSequenceCombiner.cpp"/>
-        <FILE id="hClhfN" name="LogicSequenceCombiner.h" compile="0" resource="0"
-              file="src/ORchestraEngine/LogicSequenceCombiner.h"/>
       </GROUP>
       <FILE id="y49jPa" name="Defines.h" compile="0" resource="0" file="src/ORchestraEngine/Defines.h"/>
       <FILE id="reRkQW" name="MidiScheduler.cpp" compile="1" resource="0"
@@ -113,8 +106,6 @@
               file="src/juceFiles/components/TriggerRectangle.h"/>
       </GROUP>
       <FILE id="ZVN8td" name="Colors.h" compile="0" resource="0" file="src/juceFiles/Colors.h"/>
-      <FILE id="zUx2S7" name="ParamConstants.h" compile="0" resource="0"
-            file="src/juceFiles/ParamConstants.h"/>
       <FILE id="YiB9wD" name="PluginEditor.cpp" compile="1" resource="0"
             file="src/juceFiles/PluginEditor.cpp"/>
       <FILE id="BRc8iu" name="PluginEditor.h" compile="0" resource="0" file="src/juceFiles/PluginEditor.h"/>
