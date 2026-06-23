@@ -69,7 +69,7 @@ namespace ORchestra
     constexpr int DATA_UNIT_MAX_VALUE = std::numeric_limits<DataUnit>::max();
     constexpr int DATA_UNIT_MIN_VALUE = std::numeric_limits<DataUnit>::min();
 
-    constexpr int STEP_BUFFER_SIZE = 32;
+    constexpr int STEP_BUFFER_SIZE = 64;
     constexpr int STEP_BUFFER_SIZE_MASK = STEP_BUFFER_SIZE - 1;
     constexpr int HALF_STEP_BUFFER_SIZE = STEP_BUFFER_SIZE / 2;
 

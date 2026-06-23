@@ -30,14 +30,14 @@ using namespace ORchestra;
 constexpr int TIMELINE_STEPS_DRAWN = 20;
 constexpr int TIMELINE_ROWS_DRAWN = 12;
 
-constexpr float stepHeight = 25.f;
-constexpr float stepWidth = 48.f;
-constexpr float stepMargin = 2.5f;
-constexpr float labelColumnWidth = 32.f;
+constexpr float STEP_HEIGHT = 25.f;
+constexpr float STEP_WIDTH = 48.f;
+constexpr float STEP_MARGIN = 2.5f;
+constexpr float LABEL_COLUMN_WIDTH = 32.f;
 
-constexpr float drawnStepHeight = stepHeight - stepMargin;
-constexpr float drawnStepWidth = stepWidth - stepMargin;
-constexpr float barHeaderHeight = 16.f;
+constexpr float DRAWN_STEP_HEIGHT = STEP_HEIGHT - STEP_MARGIN;
+constexpr float DRAWN_STEP_WIDTH = STEP_WIDTH - STEP_MARGIN;
+constexpr float BAR_HEADER_HEIGHT = 16.f;
 
 struct BarLine
 {

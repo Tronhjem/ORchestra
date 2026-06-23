@@ -52,15 +52,16 @@ namespace ORchestra
         }
         
 
-        void AddRectangle(TimelineRectangle rect) { triggerRectangles.emplace_back(rect); }
-        void ClearRectangles() { triggerRectangles.clear(); }
+        void AddRectangle(TimelineRectangle rect) { mRectangles.emplace_back(rect); }
+        void ClearRectangles() { mRectangles.clear(); }
         void SetProcessor(ORchestraAudioProcessor* audioProcessor) { mAudioProcessor = audioProcessor; }
         void Update();
+        void IncrementStep();
         
     private:
         ORchestraAudioProcessor* mAudioProcessor;
         void paint(juce::Graphics& g) override;
         
-        std::vector<TimelineRectangle> triggerRectangles;
+        std::vector<TimelineRectangle> mRectangles;
     };
 } // namespace ORchestra

@@ -28,7 +28,7 @@
 
 // Used to offset the trigger step so the trigger rect around
 // is shown properly
-constexpr float triggerStepMargin = 2.f;
+constexpr float TRIGGER_STEP_MARGIN = 2.f;
 
 static float DurationToBpmDivision(int divValue)
 {
@@ -69,32 +69,30 @@ void Timeline::timerCallback()
     // want to paint the current step being triggered.
     const int globalStepOffset = mLastGlobalStep - 1 + STEP_BUFFER_SIZE;
  
-    mTriggerRectangle.ClearRectangles();
     mTimelineRectangles.clear();
     mBarLines.clear();
 
     // Draw all steps using fixed chromatic rows (C=bottom/row11, B=top/row0)
-    constexpr float totalGridHeight = static_cast<float>(TIMELINE_ROWS_DRAWN) * stepHeight;
+    constexpr float totalGridHeight = static_cast<float>(TIMELINE_ROWS_DRAWN) * STEP_HEIGHT;
 
     const float bpmDivision = mAudioProcessor->GetTransportData().bpmDivision;
     const int barStepCount = GetBpmDivisionWrapIndex(bpmDivision);
+
+    mTriggerRectangle.IncrementStep();
 
     for(int i = static_cast<int>(mPlayingTimelineRectangles.size()) - 1; i >= 0; --i)
     {
         TimelineRectangle& rect = mPlayingTimelineRectangles[static_cast<size_t>(i)];
         rect.durationInSteps -= 1.f;
-        rect.width = std::max(2.f, stepWidth * rect.durationInSteps - stepMargin);
+        rect.width = std::max(2.f, STEP_WIDTH * rect.durationInSteps - STEP_MARGIN);
 
-        if (rect.durationInSteps < 0.f)
+        if (rect.durationInSteps <= 0.f)
         {
             mPlayingTimelineRectangles[static_cast<size_t>(i)] = mPlayingTimelineRectangles.back();
             mPlayingTimelineRectangles.pop_back();
         }
     }
     
-    DBG("TICK");
-    DBG(mPlayingTimelineRectangles.size());
-
     int drawTranspose = 0;
     for (int index = 0; index < TIMELINE_STEPS_DRAWN; ++index)
     {
@@ -102,15 +100,15 @@ void Timeline::timerCallback()
             static_cast<unsigned long>((globalStepOffset + index) & STEP_BUFFER_SIZE_MASK);
 
         const std::vector<SequenceStep>& sequenceSteps = mAudioProcessor->GetStepData()[stepWrapped];
-        const float xOffset = labelColumnWidth + static_cast<float>(index) * stepWidth + triggerStepMargin;
+        const float xOffset = LABEL_COLUMN_WIDTH + static_cast<float>(index) * STEP_WIDTH + TRIGGER_STEP_MARGIN;
 
         if ((globalStepOffset + index) % barStepCount == 0)
         {
             const int musicalStep = mLastGlobalStep - 1 + index;
             const int barNumber = (musicalStep >= 0 ? musicalStep : 0) / barStepCount + 1;
-            const float barWidth = static_cast<float>(barStepCount) * stepWidth;
+            const float barWidth = static_cast<float>(barStepCount) * STEP_WIDTH;
             mBarLines.emplace_back(BarLine {xOffset - QAURTER_BAR_LINE_THICKNESS,
-                                           0.f, barHeaderHeight + totalGridHeight,
+                                           0.f, BAR_HEADER_HEIGHT + totalGridHeight,
                                            barNumber, barWidth});
         }
 
@@ -126,7 +124,7 @@ void Timeline::timerCallback()
                 continue;
 
             const int substepLength = step.mShouldTrigger.GetLength();
-            const float subDividedStepWidth = stepWidth / static_cast<float>(substepLength);
+            const float subDividedStepWidth = STEP_WIDTH / static_cast<float>(substepLength);
 
             for (int substepIndex = 0; substepIndex < substepLength; ++substepIndex)
             {
@@ -136,39 +134,35 @@ void Timeline::timerCallback()
                 const float triggerReactX = static_cast<float>(substepIndex) * subDividedStepWidth + xOffset;
                 const int rawNote = static_cast<int>(step.mFirst.GetEquivalentValueAtIndex(substepIndex, substepLength));
                 const int transposedNote = std::clamp(rawNote + drawTranspose, 0, 127);
-                const int pitchClass = transposedNote % 12;
-                const int row = 11 - pitchClass; // B=row0 (top), C=row11 (bottom)
-                const float triggerRectY = barHeaderHeight + static_cast<float>(row) * stepHeight + triggerStepMargin;
-                const float velocityFloat = static_cast<float>(step.mSecond.GetEquivalentValueAtIndex(substepIndex, substepLength));
+
+                const int row = 11 - (transposedNote % 12); // B=row0 (top), C=row11 (bottom)
+                const float triggerRectY = BAR_HEADER_HEIGHT + static_cast<float>(row) * STEP_HEIGHT + TRIGGER_STEP_MARGIN;
 
                 const float noteDiv = DurationToBpmDivision(step.mDuration);
                 const float durationInSteps = bpmDivision / noteDiv;
-                float noteWidth = std::max(2.f, stepWidth * durationInSteps - stepMargin);
-                const float maxRightEdge = labelColumnWidth + static_cast<float>(TIMELINE_STEPS_DRAWN) * stepWidth;
+                float noteWidth = std::max(2.f, STEP_WIDTH * durationInSteps - STEP_MARGIN);
+                const float maxRightEdge = LABEL_COLUMN_WIDTH + static_cast<float>(TIMELINE_STEPS_DRAWN) * STEP_WIDTH;
                 const float rightEdge = triggerReactX + noteWidth;
 
                 if (rightEdge > maxRightEdge)
                     noteWidth = maxRightEdge - triggerReactX;
 
+                const float velocityFloat = static_cast<float>(step.mSecond.GetEquivalentValueAtIndex(substepIndex, substepLength));
 
                 if (index == 0)
                 {
                     mTriggerRectangle.AddRectangle(TimelineRectangle{triggerReactX, triggerRectY,
-                                                                     noteWidth, 1.f, durationInSteps, step.mType});
+                                                                     noteWidth, 1.f /*default velcotiy*/, durationInSteps, step.mType});
 
                     mPlayingTimelineRectangles.emplace_back(TimelineRectangle{triggerReactX, triggerRectY,
                                                                        noteWidth, velocityFloat, durationInSteps, step.mType});
-                    DBG(noteWidth);
                 }
                 else 
-                {
                     mTimelineRectangles.emplace_back(TimelineRectangle{triggerReactX, triggerRectY,
                                                                        noteWidth, velocityFloat, durationInSteps, step.mType});
-                }
             }
         }
     }
-    DBG("------");
 
     repaint(getLocalBounds());
 }
@@ -177,17 +171,17 @@ void Timeline::timerCallback()
 void Timeline::paint(juce::Graphics& g)
 {
     static const char* pitchNames[12] = {"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"};
-    constexpr float totalGridWidth = static_cast<float>(TIMELINE_STEPS_DRAWN) * stepWidth;
-    constexpr float totalGridHeight = static_cast<float>(TIMELINE_ROWS_DRAWN) * stepHeight;
-    constexpr float gridTop = barHeaderHeight;
-    constexpr float gridBottom = barHeaderHeight + totalGridHeight;
+    constexpr float totalGridWidth = static_cast<float>(TIMELINE_STEPS_DRAWN) * STEP_WIDTH;
+    constexpr float totalGridHeight = static_cast<float>(TIMELINE_ROWS_DRAWN) * STEP_HEIGHT;
+    constexpr float gridTop = BAR_HEADER_HEIGHT;
+    constexpr float gridBottom = BAR_HEADER_HEIGHT + totalGridHeight;
 
     // Bar header background
     g.setColour(Colour(ColorPalette::Mantle));
-    g.fillRect(0.f, 0.f, labelColumnWidth + totalGridWidth, barHeaderHeight);
+    g.fillRect(0.f, 0.f, LABEL_COLUMN_WIDTH + totalGridWidth, BAR_HEADER_HEIGHT);
 
     // Label column background (grid area only)
-    g.fillRect(0.f, gridTop, labelColumnWidth, totalGridHeight);
+    g.fillRect(0.f, gridTop, LABEL_COLUMN_WIDTH, totalGridHeight);
 
     // Darker background for sharp note rows (black keys)
     g.setColour(SharpRowColor);
@@ -198,8 +192,8 @@ void Timeline::paint(juce::Graphics& g)
                               pitchClass == 6 || pitchClass == 8 || pitchClass == 10);
         if (isSharp)
         {
-            const float y = gridTop + static_cast<float>(row) * stepHeight;
-            g.fillRect(labelColumnWidth, y, totalGridWidth, stepHeight);
+            const float y = gridTop + static_cast<float>(row) * STEP_HEIGHT;
+            g.fillRect(LABEL_COLUMN_WIDTH, y, totalGridWidth, STEP_HEIGHT);
         }
     }
 
@@ -207,19 +201,19 @@ void Timeline::paint(juce::Graphics& g)
     g.setColour(GridLineColor);
     for (int row = 0; row <= TIMELINE_ROWS_DRAWN; ++row)
     {
-        const float y = gridTop + static_cast<float>(row) * stepHeight;
-        g.drawLine(0.f, y, labelColumnWidth + totalGridWidth, y, 1.f);
+        const float y = gridTop + static_cast<float>(row) * STEP_HEIGHT;
+        g.drawLine(0.f, y, LABEL_COLUMN_WIDTH + totalGridWidth, y, 1.f);
     }
 
     g.setFont(juce::Font(BUTTON_FONT_OPTIONS));
     for (int row = 0; row < TIMELINE_ROWS_DRAWN; ++row)
     {
-        const float y = gridTop + static_cast<float>(row) * stepHeight;
+        const float y = gridTop + static_cast<float>(row) * STEP_HEIGHT;
         const int pitchClass = 11 - row;
         g.setColour(TextColor);
         g.drawText(pitchNames[pitchClass],
                    8, static_cast<int>(y),
-                   static_cast<int>(labelColumnWidth) - 4, static_cast<int>(stepHeight),
+                   static_cast<int>(LABEL_COLUMN_WIDTH) - 4, static_cast<int>(STEP_HEIGHT),
                    juce::Justification::centredLeft, false);
     }
 
@@ -227,7 +221,7 @@ void Timeline::paint(juce::Graphics& g)
     g.setColour(GridLineColor);
     for (int col = 0; col <= TIMELINE_STEPS_DRAWN; ++col)
     {
-        const float x = labelColumnWidth + static_cast<float>(col) * stepWidth;
+        const float x = LABEL_COLUMN_WIDTH + static_cast<float>(col) * STEP_WIDTH;
         g.drawLine(x, gridTop, x, gridBottom, 1.f);
     }
 
@@ -239,7 +233,7 @@ void Timeline::paint(juce::Graphics& g)
         g.setColour(juce::Colour(ColorPalette::Subtext1));
         g.drawText(juce::String(barLine.barNumber),
                    static_cast<int>(barLine.x) + 8, 0,
-                   static_cast<int>(barLine.barWidth) - 4, static_cast<int>(barHeaderHeight),
+                   static_cast<int>(barLine.barWidth) - 4, static_cast<int>(BAR_HEADER_HEIGHT),
                    juce::Justification::centredLeft, false);
 
         // Bar line in the grid
@@ -249,32 +243,33 @@ void Timeline::paint(juce::Graphics& g)
 
     // Solid separator between header and grid (closes the bottom of all bar boxes)
     g.setColour(GridLineColor);
-    g.drawLine(labelColumnWidth, gridTop, labelColumnWidth + totalGridWidth, gridTop, OUTLINE_THICKNESS);
+    g.drawLine(LABEL_COLUMN_WIDTH, gridTop, LABEL_COLUMN_WIDTH + totalGridWidth, gridTop, OUTLINE_THICKNESS);
 
     // Note rectangles
     for (const auto& rect : mTimelineRectangles)
     {
         const juce::Colour colorToSet = GetStepColorFromVelocity(rect.value, rect.midiType);
         g.setColour(colorToSet);
-        g.fillRoundedRectangle(rect.x, rect.y, rect.width, drawnStepHeight, ROUNDED_CORNER_SIZE);
+        g.fillRoundedRectangle(rect.x, rect.y, rect.width, DRAWN_STEP_HEIGHT, ROUNDED_CORNER_SIZE);
 
         g.setColour(GridLineColor);
-        g.drawRoundedRectangle(rect.x, rect.y, rect.width, drawnStepHeight, ROUNDED_CORNER_SIZE, 2.f);
+        g.drawRoundedRectangle(rect.x, rect.y, rect.width, DRAWN_STEP_HEIGHT, ROUNDED_CORNER_SIZE, 2.f);
     }
 
+    // Playing rectacngles for keeping them alive while still playing
     for (const auto& rect : mPlayingTimelineRectangles)
     {
         const juce::Colour colorToSet = GetStepColorFromVelocity(rect.value, rect.midiType);
         g.setColour(colorToSet);
-        g.fillRoundedRectangle(rect.x, rect.y, rect.width, drawnStepHeight, ROUNDED_CORNER_SIZE);
+        g.fillRoundedRectangle(rect.x, rect.y, rect.width, DRAWN_STEP_HEIGHT, ROUNDED_CORNER_SIZE);
 
         g.setColour(GridLineColor);
-        g.drawRoundedRectangle(rect.x, rect.y, rect.width, drawnStepHeight, ROUNDED_CORNER_SIZE, 2.f);
+        g.drawRoundedRectangle(rect.x, rect.y, rect.width, DRAWN_STEP_HEIGHT, ROUNDED_CORNER_SIZE, 2.f);
     }
 
     // closing bar header at top.
     g.setColour(ComponentOutlineColor);
-    g.drawLine(labelColumnWidth, 0.f, labelColumnWidth, barHeaderHeight, OUTLINE_THICKNESS);
+    g.drawLine(LABEL_COLUMN_WIDTH, 0.f, LABEL_COLUMN_WIDTH, BAR_HEADER_HEIGHT, OUTLINE_THICKNESS);
 
     // Close space to the code editor with line
     g.drawLine(0.f, 0.f, 0.f, (float)getHeight(), VERTICAL_SEPARATOR_THICKNESS);

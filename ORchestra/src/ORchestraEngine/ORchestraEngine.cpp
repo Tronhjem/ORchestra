@@ -169,6 +169,7 @@ namespace ORchestra
         if (transportData.isPlaying && mIsVMInit)
         {
             TickInternal(transportData, bufferLength);
+
             mMidiScheduler.ProcessMidiPosts(midiMessages, bufferLength);
         }
         else
@@ -236,7 +237,7 @@ namespace ORchestra
             ProcessStepData(transportData, currentStep, nextStepInSamples, samplesPerStep);
 
             mReadySteps.fetch_sub(1, std::memory_order_acq_rel);
-            if (mReadySteps.load() < HALF_STEP_BUFFER_SIZE) /*magic number for processing steps earlier than half*/
+            if (mReadySteps.load() < HALF_STEP_BUFFER_SIZE)
                 WakeWorker();
         }
     }

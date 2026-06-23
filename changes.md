@@ -11,6 +11,7 @@ Bugs:
 - Fixing midi notes being cut if an overlapping note is fired, now we choke the earlier note and then fire the new note.
 - Fixed notes block not appearing when compiling and only when plyaing. 
 - Ensure that functions can only be used in expressions if they return a value.
+- Note duration is properly displayed now when notes are longer or shorter than the beat division. Trigger rectangle reflects the note length too.
 
 ### v0.1.1 
 Official Alpha release.

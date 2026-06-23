@@ -824,7 +824,7 @@ namespace ORchestra
             if (funcArrayIt != mFunctionArrayNames.end())
             {
                 const DataUnit arrayId = funcArrayIt->second;
-                if (!mFunctionArrays[arrayId][0].mHasReturnValue)
+                if (!mFunctionArrays[static_cast<size_t>(arrayId)][0].mHasReturnValue)
                 {
                     std::string message = std::string("function array '") + name +
                         std::string("' has no return value and cannot be used in an expression");
@@ -1282,7 +1282,7 @@ namespace ORchestra
 
         Consume(); // consume '('
 
-        const int expectedParams = mFunctionArrays[arrayId][0].mNumOfParams;
+        const int expectedParams = mFunctionArrays[static_cast<size_t>(arrayId)][0].mNumOfParams;
         int paramCounter = 0;
         bool expectsValue = true;
 
