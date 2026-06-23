@@ -32,27 +32,45 @@ void TriggerRectangleComponent::Update()
     const TransportData& transportData = mAudioProcessor->GetTransportData();
 
     const float stepDurationInMiliSeconds = 60000.f / static_cast<float>(transportData.bpmFromScript * transportData.bpmDivision);
-    const float framesPerStep = stepDurationInMiliSeconds * miliesecondsPerFrameInverse;
-    const float alphaDecrementPerFrame = 1.f / framesPerStep;
     
-    for (auto& rect : triggerRectangles)
+    for (int i = static_cast<int>(mRectangles.size()) - 1; i >= 0; --i)
     {
+        TimelineRectangle& rect = mRectangles[static_cast<size_t>(i)];
+
+        const float framesPerStep = stepDurationInMiliSeconds * rect.durationInSteps * miliesecondsPerFrameInverse;
+        const float alphaDecrementPerFrame = 1.f / framesPerStep;
+
+        rect.width = std::max(2.f, STEP_WIDTH * rect.durationInSteps - STEP_MARGIN);
         rect.value -= alphaDecrementPerFrame;
     
-        if(rect.value < 0.f)
-            rect.value = 0.f;
+        if(rect.value <= 0.f)
+        {
+            mRectangles[static_cast<size_t>(i)] = mRectangles.back();
+            mRectangles.pop_back();
+        }
     }
     
     repaint(getLocalBounds());
 }
 
+void TriggerRectangleComponent::IncrementStep()
+{
+    for (TimelineRectangle& rect : mRectangles)
+        rect.durationInSteps -= 1.f;
+}
+
 void TriggerRectangleComponent::paint(juce::Graphics& g)
 {
-    for (auto& rect : triggerRectangles)
+    for (auto& rect : mRectangles)
     {
-        const auto color = juce::Colour::fromFloatRGBA(1.f, 1.f, 1.f, rect.value);
+        const float v = std::max(0.f, rect.value);
+        // constexpr float k = 10.f;
+        // const float alpha = std::log(v * (k - 1.f) + 1.f) / std::log(k);
+        const float alpha = std::pow(v, 0.5f);
+        const auto color = juce::Colour::fromFloatRGBA(1.f, 1.f, 1.f, alpha);
         g.setColour(color);
+
         constexpr float triggerRectLineThickness = 4.f;
-        g.drawRoundedRectangle(rect.x, rect.y, rect.width, drawnStepHeight, ROUNDED_CORNER_SIZE, triggerRectLineThickness);
+        g.drawRoundedRectangle(rect.x, rect.y, rect.width, DRAWN_STEP_HEIGHT, ROUNDED_CORNER_SIZE, triggerRectLineThickness);
     }
 }

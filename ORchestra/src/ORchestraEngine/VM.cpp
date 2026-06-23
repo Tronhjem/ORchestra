@@ -293,12 +293,12 @@ namespace ORchestra
             // Assign collected args to parameter variable IDs
             for (int i = 0; i < numParams; ++i)
             {
-                const DataUnit paramId = slot.mParamIds[i];
+                const DataUnit paramId = slot.mParamIds[static_cast<size_t>(i)];
 
-                if (paramId >= mVariables.size())
-                    mVariables.resize(paramId + 1);
+                if (static_cast<size_t>(paramId) >= mVariables.size())
+                    mVariables.resize(static_cast<size_t>(paramId) + 1);
 
-                mVariables[paramId] = DataSequence{ args[i] };
+                mVariables[static_cast<size_t>(paramId)] = DataSequence{ args[i] };
             }
 
             for (const Instruction& blockInstr : slot.mInstructions)
