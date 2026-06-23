@@ -1,4 +1,4 @@
-### v0.1.2
+### v0.2.0
 
 - Changing built in function from `bpmDiv()` to `beat()` 
 - Removing ptn entirely and rely on functions only.
@@ -13,7 +13,9 @@ Bugs:
 - Ensure that functions can only be used in expressions if they return a value.
 - Note duration is properly displayed now when notes are longer or shorter than the beat division. Trigger rectangle reflects the note length too.
 
+
 ### v0.1.1 
+
 Official Alpha release.
 A bunch of bug fixing and polishing of features, and finalizing the core functionality.
 ORchestra is at this point in a state where it has all the functionality I envisioned and 
