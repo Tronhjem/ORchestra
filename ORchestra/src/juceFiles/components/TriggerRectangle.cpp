@@ -37,10 +37,10 @@ void TriggerRectangleComponent::Update()
     {
         TimelineRectangle& rect = mRectangles[static_cast<size_t>(i)];
 
-        const float framesPerStep = stepDurationInMiliSeconds * rect.durationInSteps * miliesecondsPerFrameInverse;
+        const float framesPerStep = stepDurationInMiliSeconds * rect.initialDurationInSteps * miliesecondsPerFrameInverse;
         const float alphaDecrementPerFrame = 1.f / framesPerStep;
 
-        rect.width = std::max(2.f, STEP_WIDTH * rect.durationInSteps - STEP_MARGIN);
+        rect.width = std::max(0.f, STEP_WIDTH * rect.durationInSteps - STEP_MARGIN);
         rect.value -= alphaDecrementPerFrame;
     
         if(rect.value <= 0.f)
@@ -64,9 +64,8 @@ void TriggerRectangleComponent::paint(juce::Graphics& g)
     for (auto& rect : mRectangles)
     {
         const float v = std::max(0.f, rect.value);
-        // constexpr float k = 10.f;
-        // const float alpha = std::log(v * (k - 1.f) + 1.f) / std::log(k);
-        const float alpha = std::pow(v, 0.5f);
+        const float alpha = 1.f - (1.f - v) * (1.f - v);
+
         const auto color = juce::Colour::fromFloatRGBA(1.f, 1.f, 1.f, alpha);
         g.setColour(color);
 

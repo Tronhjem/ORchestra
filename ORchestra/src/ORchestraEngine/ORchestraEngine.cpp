@@ -23,6 +23,7 @@
 #include "ORchestraEngine.h"
 #include "Defines.h"
 #include "TransportData.h"
+#include "NoteDivision.h"
 #if defined(_DEBUG)
 #include "ScopedTimer.h"
 #endif
@@ -266,7 +267,7 @@ namespace ORchestra
                     }
                 case ORchestra::SequenceStepType::BEAT:
                     {
-                        transportData.bpmDivision = ToBpmDivision(step.mFirst.GetValue(0));
+                        transportData.bpmDivision = DurationToBpmDivision(step.mFirst.GetValue(0));
 
                         break;
                     }
@@ -291,7 +292,7 @@ namespace ORchestra
                     {
                         const int triggerLength = static_cast<int>(step.mShouldTrigger.GetLength());
                         const float noteDivFloat =
-                            ToBpmDivision(static_cast<DataUnit>(step.mDuration));
+                            DurationToBpmDivision(static_cast<DataUnit>(step.mDuration));
                         const int noteDurationSamples =
                             static_cast<int>(
                                     static_cast<double>(transportData.sampleRate)
@@ -341,37 +342,5 @@ namespace ORchestra
             mErrorReporting.RequestClear();
         else
             mErrorReporting.Clear();
-    }
-
-    float ORchestraEngine::ToBpmDivision(DataUnit divValue)
-    {
-        const int divIndex = std::clamp(static_cast<int>(divValue), 1, 7);
-        float bpmDivision = 1.0f;
-        switch (divIndex)
-        {
-        case 1:
-            bpmDivision = 0.25f;
-            break;
-        case 2:
-            bpmDivision = 0.5f;
-            break;
-        case 3:
-            bpmDivision = 1.0f;
-            break;
-        case 4:
-            bpmDivision = 2.0f;
-            break;
-        case 5:
-            bpmDivision = 4.0f;
-            break;
-        case 6:
-            bpmDivision = 8.0f;
-            break;
-        case 7:
-            bpmDivision = 16.0f;
-            break;
-        }
-        
-        return bpmDivision;
     }
 } // namespace ORchestra

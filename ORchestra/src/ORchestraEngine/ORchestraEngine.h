@@ -60,7 +60,6 @@ namespace ORchestra
         bool PreProcessSteps();
         inline void ProcessStepData(TransportData& transportData, const int currentStep, const int nextStepInSamples, const double samplesPerStep);
         inline void TickInternal(TransportData& transportData, const int bufferLength);
-        float ToBpmDivision(DataUnit divValue);
 
         int mLastStep = -1;
         int64_t mSamplesSinceLastStep = 0;

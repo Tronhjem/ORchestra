@@ -23,27 +23,13 @@
 #include "StepData.h"
 #include "TriggerRectangle.h"
 #include "Utility.h"
+#include "NoteDivision.h"
 #include "Colors.h"
 #include "LookAndFeelConstants.h"
 
 // Used to offset the trigger step so the trigger rect around
 // is shown properly
 constexpr float TRIGGER_STEP_MARGIN = 2.f;
-
-static float DurationToBpmDivision(int divValue)
-{
-    switch (divValue)
-    {
-        case 1: return 0.25f;
-        case 2: return 0.5f;
-        case 3: return 1.0f;
-        case 4: return 2.0f;
-        case 5: return 4.0f;
-        case 6: return 8.0f;
-        case 7: return 16.0f;
-        default: return 1.0f;
-    }
-}
 
 void Timeline::timerCallback()
 {
@@ -84,7 +70,7 @@ void Timeline::timerCallback()
     {
         TimelineRectangle& rect = mPlayingTimelineRectangles[static_cast<size_t>(i)];
         rect.durationInSteps -= 1.f;
-        rect.width = std::max(2.f, STEP_WIDTH * rect.durationInSteps - STEP_MARGIN);
+        rect.width = std::max(0.f, STEP_WIDTH * rect.durationInSteps - STEP_MARGIN);
 
         if (rect.durationInSteps <= 0.f)
         {
@@ -152,18 +138,19 @@ void Timeline::timerCallback()
                 if (index == 0)
                 {
                     mTriggerRectangle.AddRectangle(TimelineRectangle{triggerReactX, triggerRectY,
-                                                                     noteWidth, 1.f /*default velcotiy*/, durationInSteps, step.mType});
+                                                                     noteWidth, 1.f, durationInSteps, durationInSteps, step.mType});
 
                     mPlayingTimelineRectangles.emplace_back(TimelineRectangle{triggerReactX, triggerRectY,
-                                                                       noteWidth, velocityFloat, durationInSteps, step.mType});
+                                                                       noteWidth, velocityFloat, durationInSteps, durationInSteps, step.mType});
                 }
                 else 
                     mTimelineRectangles.emplace_back(TimelineRectangle{triggerReactX, triggerRectY,
-                                                                       noteWidth, velocityFloat, durationInSteps, step.mType});
+                                                                       noteWidth, velocityFloat, durationInSteps, durationInSteps, step.mType});
             }
         }
     }
 
+    mTriggerRectangle.Update(); 
     repaint(getLocalBounds());
 }
 
