@@ -123,11 +123,22 @@ namespace ORchestra
             if (mShouldExit.load(std::memory_order_relaxed))
                 break;
 
+            // Service a pending recompile before any further VM::Tick calls (#2).
             while (mResetRequest.load(std::memory_order_acquire) != mResetRequestSeen)
             {
                 mResetRequestSeen = mResetRequest.load(std::memory_order_acquire);
                 mInstructionData = mPendingInstructionData;
                 Reset();
+            }
+
+            // Service a pending seek before any further ring buffer writes (#1). The
+            // audio thread records a seek instead of mutating state itself; this is the
+            // only place the counters, origin, and ring buffer slots get torn down and
+            // rebuilt, so the worker is never iterating slots the audio thread is reading.
+            while (mSeekRequest.load(std::memory_order_acquire) != mSeekRequestSeen)
+            {
+                mSeekRequestSeen = mSeekRequest.load(std::memory_order_acquire);
+                HandleSeekRequest();
             }
 
             if (PreProcessSteps())
@@ -141,7 +152,11 @@ namespace ORchestra
             return false;
 
         const int readySteps = mReadySteps.load();
-        const int stepsToProcess = STEP_BUFFER_SIZE - 1 - readySteps; // leave the last step unprocessed.
+        int stepsToProcess = STEP_BUFFER_SIZE - 1 - readySteps; // leave the last step unprocessed.
+        if (stepsToProcess < 0)
+            stepsToProcess = 0;
+        if (stepsToProcess > STEP_BUFFER_SIZE - 1)
+            stepsToProcess = STEP_BUFFER_SIZE - 1;
 
 #if defined(_DEBUG)
         ScopedTimer timer{ "PreProcess" };
@@ -153,9 +168,6 @@ namespace ORchestra
 
         for (int i = currentStep; i < endGlobalStep; ++i)
         {
-            // A recompile request from the UI thread means we are about to tear down the
-            // VM. Abort this pass mid-flight rather than risk VM::Tick dereferencing a
-            // vector that Reset() is about to clear().
             if (mResetRequest.load(std::memory_order_acquire) != mResetRequestSeen)
                 return false;
 
@@ -178,6 +190,23 @@ namespace ORchestra
         mCurrentProcessingStep.fetch_add(stepsToProcess, std::memory_order_acq_rel);
 
         return true;
+    }
+
+    void ORchestraEngine::HandleSeekRequest()
+    {
+        const int targetStep = mSeekTargetStep.load(std::memory_order_acquire);
+        
+        for (auto& slot : mStepRingBuffer)
+            slot.clear();
+
+        mStepOriginInSamples = 0;
+        mSamplesPerStep = 0.0;
+
+        mCurrentProcessingStep.store(targetStep, std::memory_order_release);
+        mCurrentGlobalStep.store(targetStep, std::memory_order_release);
+        mReadySteps.store(0, std::memory_order_release);
+
+        mHasWork.store(true, std::memory_order_release);
     }
 
     void ORchestraEngine::Tick(TransportData& transportData,
@@ -241,12 +270,10 @@ namespace ORchestra
 
         if (stepDifference > 1 || stepDifference < 0)
         {
-            // Real time jump (seek or restart) — clear the origin so next tick
-            // recomputes from scratch with the actual time position.
-            mSamplesPerStep = 0.0;
-            mStepOriginInSamples = 0;
-            mReadySteps.store(1, std::memory_order_release);
-            mCurrentProcessingStep.store(currentStep, std::memory_order_release);
+            mSeekTargetStep.store(currentStep, std::memory_order_release);
+            mSeekRequest.fetch_add(1, std::memory_order_acq_rel);
+            WakeWorker();
+            return;
         }
 
         const int nextStepInSamples = static_cast<int>(
@@ -254,9 +281,9 @@ namespace ORchestra
 
         const int endOfBufferInSamples = static_cast<int>(transportData.timeInSamples + bufferLength);
 
-        // if the end of the buffer is longer than the next tick time
-        // Check if we should tick in this buffer.
-        if (endOfBufferInSamples >= nextStepInSamples && currentStep != mLastStep)
+        if (endOfBufferInSamples >= nextStepInSamples
+            && currentStep != mLastStep
+            && mReadySteps.load(std::memory_order_acquire) > 0)
         {
             ProcessStepData(transportData, currentStep, nextStepInSamples, samplesPerStep);
 

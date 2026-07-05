@@ -63,6 +63,7 @@ namespace ORchestra
         void WakeWorker();
         void WorkerThreadLoop();
         bool PreProcessSteps();
+        void HandleSeekRequest();
         inline void ProcessStepData(TransportData& transportData, const int currentStep, const int nextStepInSamples, const double samplesPerStep);
         inline void TickInternal(TransportData& transportData, const int bufferLength);
 
@@ -81,8 +82,20 @@ namespace ORchestra
         std::atomic<bool> mHasWork;
         std::atomic<bool> mIsRunning;
         std::atomic<bool> mShouldResetScriptBpm {false};
+
+        // UI thread bumps mResetRequest to ask the worker to recompile (issue #2).
         std::atomic<int> mResetRequest {0};
         int mResetRequestSeen = 0;
+
+        // Audio thread bumps mSeekRequest to ask the worker to rebase the step origin
+        // and re-clear the ring buffer after a DAW seek/restart (issue #1). Pattern is
+        // the same as mResetRequest: monotonic counter, worker dedups against seen value.
+        // The audio thread does NOT perform the rebase inline; it records the target
+        // step and skips ProcessStepData on the seek callback itself, so the worker
+        // gets exclusive ownership of the ring buffer slots before clearing them.
+        std::atomic<int> mSeekRequest {0};
+        int mSeekRequestSeen = 0;
+        std::atomic<int> mSeekTargetStep {0};
 
         std::mutex mCVMutex;
         std::condition_variable mCV;

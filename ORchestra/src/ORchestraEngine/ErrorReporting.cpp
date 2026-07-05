@@ -65,8 +65,10 @@ namespace ORchestra
 
     inline void ErrorReporting::ForwardToSink(const LogEntry& entry)
     {
+#if defined (_DEBUG)
         if (mSink)
             mSink(entry);
+#endif
     }
 
     void ErrorReporting::LogError(const int line, std::string& message)
