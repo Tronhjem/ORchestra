@@ -35,43 +35,10 @@
 #include "ErrorReporting.h"
 #include "FileOperationsToolbar.h"
 #include "ConsolePanel.h"
+#include "MidiSettingsComponent.h"
 #include "juce_gui_basics/juce_gui_basics.h"
 
 typedef juce::AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
-
-//==============================================================================
-class MidiSettingsComponent : public juce::Component
-{
-public:
-    explicit MidiSettingsComponent(juce::AudioDeviceManager& deviceManager);
-    ~MidiSettingsComponent() override;
-    void resized() override;
-    void setButtonLookAndFeel(juce::LookAndFeel* laf);
-    void setImportCallback(std::function<void()> callback);
-    void setExportCallback(std::function<void()> callback);
-
-private:
-    static constexpr int PADDING     = 12;
-    static constexpr int LABEL_H     = 18;
-    static constexpr int ROW_H       = 26;
-    static constexpr int ROW_GAP     = 4;
-    static constexpr int SECTION_GAP = 12;
-    static constexpr int PANEL_W     = 300;
-
-    juce::AudioDeviceManager& mDeviceManager;
-
-    juce::Label mOutputLabel;
-    juce::ComboBox mOutputCombo;
-    juce::StringArray mOutputIds;
-
-    juce::Label mFileLabel;
-    juce::TextButton mImportButton{ "Import" };
-    juce::TextButton mExportButton{ "Export" };
-    std::function<void()> mImportCallback;
-    std::function<void()> mExportCallback;
-
-    juce::Label mVersionLabel;
-};
 
 //==============================================================================
 /**

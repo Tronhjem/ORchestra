@@ -62,51 +62,51 @@ namespace ORchestra {
 
                 switch (message.mMessageType)
                 {
-                case SequenceStepType::NoteOn:
-                {
-                    const int index = static_cast<int>(message.mFirstByte) * 16 + static_cast<int>(message.mChannel);
-
-                    // Send note off before note on for same note.
-                    if (mActiveNoteCounts[index] > 0)
+                    case SequenceStepType::NoteOn:
                     {
-                        midiMessages.addEvent(juce::MidiMessage::noteOff(static_cast<int>(message.mChannel),
-                            static_cast<int>(message.mFirstByte), static_cast<uint8_t>(0)),
-                            juce::jmax(0, relativePositionInBuffer - 1));
+                        const int index = static_cast<int>(message.mFirstByte) * 16 + static_cast<int>(message.mChannel);
+
+                        // Send note off before note on for same note.
+                        if (mActiveNoteCounts[index])
+                        {
+                            midiMessages.addEvent(juce::MidiMessage::noteOff(static_cast<int>(message.mChannel),
+                                static_cast<int>(message.mFirstByte), static_cast<uint8_t>(0)),
+                                juce::jmax(0, relativePositionInBuffer - 1));
+                        }
+
+                        midiMessages.addEvent(juce::MidiMessage::noteOn(static_cast<int>(message.mChannel),
+                                                static_cast<int>(message.mFirstByte),
+                                                static_cast<unsigned char>(message.mSecondByte)), relativePositionInBuffer);
+
+                        mActiveNoteCounts[index] = true;
+
+                        break;
                     }
 
-                    midiMessages.addEvent(juce::MidiMessage::noteOn(static_cast<int>(message.mChannel),
-                                            static_cast<int>(message.mFirstByte),
-                                            static_cast<unsigned char>(message.mSecondByte)), relativePositionInBuffer);
+                    case SequenceStepType::NoteOff:
+                    {
+                        const int index = static_cast<int>(message.mFirstByte) * 16 + static_cast<int>(message.mChannel);
 
-                    mActiveNoteCounts[index] = 1;
+                        midiMessages.addEvent(juce::MidiMessage::noteOff(static_cast<int>(message.mChannel),
+                                static_cast<int>(message.mFirstByte),
+                                static_cast<unsigned char>(message.mSecondByte)), juce::jmax(0, relativePositionInBuffer - 1));
 
-                    break;
-                }
+                        mActiveNoteCounts[index] = false;
 
-                case SequenceStepType::NoteOff:
-                {
-                    const int index = static_cast<int>(message.mFirstByte) * 16 + static_cast<int>(message.mChannel);
+                        break;
+                    }
 
-                    midiMessages.addEvent(juce::MidiMessage::noteOff(static_cast<int>(message.mChannel),
+                    case SequenceStepType::CC:
+                    {
+                        midiMessages.addEvent(juce::MidiMessage::controllerEvent(static_cast<int>(message.mChannel),
                             static_cast<int>(message.mFirstByte),
                             static_cast<unsigned char>(message.mSecondByte)), relativePositionInBuffer);
 
-                    mActiveNoteCounts[index] = 0;
+                        break;
+                    }
 
-                    break;
-                }
-
-                case SequenceStepType::CC:
-                {
-                    midiMessages.addEvent(juce::MidiMessage::controllerEvent(static_cast<int>(message.mChannel),
-                        static_cast<int>(message.mFirstByte),
-                        static_cast<unsigned char>(message.mSecondByte)), relativePositionInBuffer);
-
-                    break;
-                }
-
-                default:
-                    break;
+                    default:
+                        break;
                 }
 
                 mScheduledMidiMessages[static_cast<unsigned long>(i)] = mScheduledMidiMessages.back();

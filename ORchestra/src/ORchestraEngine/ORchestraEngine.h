@@ -31,6 +31,10 @@
 #include "ErrorReporting.h"
 #include "Defines.h"
 
+#if defined (_DEBUG)
+#include "AssertMutex.h"
+#endif
+
 namespace ORchestra 
 {
     class ORchestraEngine
@@ -51,15 +55,17 @@ namespace ORchestra
         bool IsVMInit() { return mIsVMInit.load(); }
         
         void SetErrorListener(ErrorReportingListener* listener) { mErrorReporting.SetListener(listener); }
+        void SetLogSink(LogSinkFn sink) { mErrorReporting.SetSink(std::move(sink)); }
         void RequestClearErrors();
 
     private:
-        inline void Initialize();
+        inline void Reset();
         void WakeWorker();
         void WorkerThreadLoop();
         bool PreProcessSteps();
         inline void ProcessStepData(TransportData& transportData, const int currentStep, const int nextStepInSamples, const double samplesPerStep);
         inline void TickInternal(TransportData& transportData, const int bufferLength);
+
 
         int mLastStep = -1;
         int64_t mSamplesSinceLastStep = 0;
@@ -75,14 +81,20 @@ namespace ORchestra
         std::atomic<bool> mHasWork;
         std::atomic<bool> mIsRunning;
         std::atomic<bool> mShouldResetScriptBpm {false};
+        std::atomic<int> mResetRequest {0};
+        int mResetRequestSeen = 0;
 
         std::mutex mCVMutex;
         std::condition_variable mCV;
         std::thread mWorkerThread;
         std::unique_ptr<FileLoader> mFileLoader;
         std::array<std::vector<SequenceStep>, STEP_BUFFER_SIZE> mStepRingBuffer;
+#if defined (_DEBUG)
+        std::array<AssertMutex, STEP_BUFFER_SIZE> mRingBufferMutexes;
+#endif
 
         std::string mInstructionData;
+        std::string mPendingInstructionData;
 
         MidiScheduler mMidiScheduler;
         ErrorReporting mErrorReporting;

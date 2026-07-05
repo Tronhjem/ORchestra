@@ -75,6 +75,7 @@ public:
     bool IsORchestraVMInit() { return mORchestraEngine->IsVMInit(); }
     
     void SetErrorListener(ErrorReportingListener* listener) { mORchestraEngine->SetErrorListener(listener); }
+    void SetLogSink(LogSinkFn sink) { mORchestraEngine->SetLogSink(std::move(sink)); }
     void RequestClearErrors() { mORchestraEngine->RequestClearErrors(); }
 
     void SetEditorSize(int w, int h) { mEditorWidth = w; mEditorHeight = h; }
@@ -93,6 +94,9 @@ public:
 private:
     void FillPositionData(TransportData& data);
     TransportData mTransportData;
+#if defined(_DEBUG)
+    std::unique_ptr<juce::FileLogger> mLogFileLogger;
+#endif
     std::unique_ptr<ORchestraEngine> mORchestraEngine;
 
     int mLocalTimeInSamples = 0;

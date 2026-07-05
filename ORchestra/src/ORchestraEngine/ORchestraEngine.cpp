@@ -24,8 +24,10 @@
 #include "Defines.h"
 #include "TransportData.h"
 #include "NoteDivision.h"
+
 #if defined(_DEBUG)
 #include "ScopedTimer.h"
+#include "AssertMutex.h"
 #endif
 
 namespace ORchestra 
@@ -68,12 +70,15 @@ namespace ORchestra
 
     void ORchestraEngine::Compile(const std::string& data)
     {
-        mInstructionData = data;
-        Initialize();
+        mPendingInstructionData = data;
+        mResetRequest.fetch_add(1, std::memory_order_acq_rel);
+        WakeWorker();
     }
 
-    void ORchestraEngine::Initialize()
+    void ORchestraEngine::Reset()
     {
+        // !!! Worker-thread only !!!
+        
         mIsVMInit.store(false, std::memory_order_release);
 
         mReadySteps.store(0, std::memory_order_release);
@@ -88,12 +93,10 @@ namespace ORchestra
 
         const bool innitSuccess = mVM.Prepare(&mInstructionData[0]);
         if (innitSuccess)
-        {
             mErrorReporting.LogMessage("Compiled Successfully!");
-        }
-        
+
         mIsVMInit.store(innitSuccess);
-        
+
         if (innitSuccess)
             WakeWorker();
     }
@@ -111,15 +114,24 @@ namespace ORchestra
             { // Lock scope
                 std::unique_lock<std::mutex> lock(mCVMutex);
                 mCV.wait(lock, [this] {
-                    return mHasWork.load(std::memory_order_acquire) || mShouldExit.load(std::memory_order_acquire);
+                    return mHasWork.load(std::memory_order_acquire)
+                        || mResetRequest.load(std::memory_order_acquire) != mResetRequestSeen
+                        || mShouldExit.load(std::memory_order_acquire);
                 });
             } // end lock scope
-                
-            if (!mShouldExit.load(std::memory_order_relaxed)) 
+
+            if (mShouldExit.load(std::memory_order_relaxed))
+                break;
+
+            while (mResetRequest.load(std::memory_order_acquire) != mResetRequestSeen)
             {
-                if (PreProcessSteps())
-                    mHasWork.store(false, std::memory_order_release);
+                mResetRequestSeen = mResetRequest.load(std::memory_order_acquire);
+                mInstructionData = mPendingInstructionData;
+                Reset();
             }
+
+            if (PreProcessSteps())
+                mHasWork.store(false, std::memory_order_release);
         }
     }
 
@@ -141,10 +153,22 @@ namespace ORchestra
 
         for (int i = currentStep; i < endGlobalStep; ++i)
         {
+            // A recompile request from the UI thread means we are about to tear down the
+            // VM. Abort this pass mid-flight rather than risk VM::Tick dereferencing a
+            // vector that Reset() is about to clear().
+            if (mResetRequest.load(std::memory_order_acquire) != mResetRequestSeen)
+                return false;
+
             const int stepWrapped = i & STEP_BUFFER_SIZE_MASK;
             // tick needs global step and StepData needs it wrapped for ring buffer.
 
             std::vector<SequenceStep>& currentData = mStepRingBuffer[static_cast<unsigned long>(stepWrapped)];
+
+#if defined(_DEBUG)
+            AssertMutex& mutex = mRingBufferMutexes[static_cast<unsigned long>(stepWrapped)];
+            AssertMutexScopedLock lock {mutex};
+#endif
+
             currentData.clear();
 
             mVM.Tick(currentData, i);
@@ -152,7 +176,7 @@ namespace ORchestra
         }
 
         mCurrentProcessingStep.fetch_add(stepsToProcess, std::memory_order_acq_rel);
-        
+
         return true;
     }
 
@@ -185,7 +209,7 @@ namespace ORchestra
         if (transportData.bpmFromScript == 0.0)
             transportData.bpmFromScript = transportData.bpm;
 
-        const double newSamplesPerStep =
+        const double samplesPerStep =
             static_cast<double>(transportData.sampleRate)
             * (60.0 / (transportData.bpmFromScript * transportData.bpmDivision));
 
@@ -201,13 +225,12 @@ namespace ORchestra
         {
             const int lastStep = mCurrentGlobalStep.load();
             mStepOriginInSamples = transportData.timeInSamples
-                - static_cast<int64_t>(std::round(static_cast<double>(lastStep) * newSamplesPerStep));
+                - static_cast<int64_t>(std::round(static_cast<double>(lastStep) * samplesPerStep));
         }
 
         mLastBpm = transportData.bpmFromScript;
         mLastBpmDivision = transportData.bpmDivision;
-        mSamplesPerStep = newSamplesPerStep;
-        const double samplesPerStep = mSamplesPerStep;
+        mSamplesPerStep = samplesPerStep;
 
         const int currentStep = static_cast<int>(ceil(
                     static_cast<double>(transportData.timeInSamples - mStepOriginInSamples) / samplesPerStep));
@@ -252,9 +275,13 @@ namespace ORchestra
 
         mSamplesSinceLastStep = transportData.timeInSamples;
         const int wrappedGlobalStep = currentStep & STEP_BUFFER_SIZE_MASK;
+
         const std::vector<SequenceStep>& currentData = 
             mStepRingBuffer[static_cast<unsigned long>(wrappedGlobalStep)];
 
+        AssertMutex& mutex = mRingBufferMutexes[static_cast<unsigned long>(wrappedGlobalStep)];
+        AssertMutexScopedLock lock {mutex};
+        
         for (const SequenceStep& step : currentData)
         {
             switch (step.mType)

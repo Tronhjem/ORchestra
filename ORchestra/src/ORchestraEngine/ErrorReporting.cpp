@@ -63,6 +63,12 @@ namespace ORchestra
         }
     }
 
+    inline void ErrorReporting::ForwardToSink(const LogEntry& entry)
+    {
+        if (mSink)
+            mSink(entry);
+    }
+
     void ErrorReporting::LogError(const int line, std::string& message)
     {
         std::string stamp = CurrentTimestamp();
@@ -71,6 +77,7 @@ namespace ORchestra
         message += std::to_string(line);
         message += "\n";
         mLogEntries.emplace_back(LogEntry{ EntryType::Error, line, message });
+        ForwardToSink(mLogEntries.back());
         TrimOldEntries();
         NotifyListener();
     }
@@ -83,6 +90,7 @@ namespace ORchestra
         stamped += message;
         stamped += "\n";
         mLogEntries.emplace_back(LogEntry{ EntryType::Error, 0, stamped });
+        ForwardToSink(mLogEntries.back());
         TrimOldEntries();
         NotifyListener();
     }
@@ -95,6 +103,7 @@ namespace ORchestra
         message += std::to_string(line);
         message += "\n";
         mLogEntries.emplace_back(LogEntry{ EntryType::Warning, line, message });
+        ForwardToSink(mLogEntries.back());
         TrimOldEntries();
         NotifyListener();
     }
@@ -107,6 +116,7 @@ namespace ORchestra
         stamped += message;
         stamped += "\n";
         mLogEntries.emplace_back(LogEntry{ EntryType::Warning, 0, stamped });
+        ForwardToSink(mLogEntries.back());
         TrimOldEntries();
         NotifyListener();
     }
@@ -119,6 +129,7 @@ namespace ORchestra
         stamped += message;
         stamped += "\n";
         mLogEntries.emplace_back(LogEntry{ EntryType::Messasge, 0, stamped });
+        ForwardToSink(mLogEntries.back());
         TrimOldEntries();
         NotifyListener();
     }

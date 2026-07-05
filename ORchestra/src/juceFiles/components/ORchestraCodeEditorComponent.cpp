@@ -1595,7 +1595,6 @@ void ORchestraCodeEditorComponent::mouseDown (const MouseEvent& e)
         }
 
         PopupMenu m;
-        m.setLookAndFeel (&getLookAndFeel());
         addPopupMenuItems (m, &e);
 
         m.showMenuAsync (PopupMenu::Options().withTargetComponent (this).withMousePosition(),
