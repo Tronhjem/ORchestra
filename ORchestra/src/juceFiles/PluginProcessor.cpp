@@ -20,7 +20,10 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 #include "juce_audio_processors/juce_audio_processors.h"
-#include "ORchestraAssert.h"
+
+#if defined(_DEBUG)
+    #include "ORchestraAssert.h"
+#endif
 
 
 using namespace ORchestra;

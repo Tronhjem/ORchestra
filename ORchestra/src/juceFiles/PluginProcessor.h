@@ -75,7 +75,9 @@ public:
     bool IsORchestraVMInit() { return mORchestraEngine->IsVMInit(); }
     
     void SetErrorListener(ErrorReportingListener* listener) { mORchestraEngine->SetErrorListener(listener); }
+#if defined(_DEBUG)
     void SetLogSink(LogSinkFn sink) { mORchestraEngine->SetLogSink(std::move(sink)); }
+#endif
     void RequestClearErrors() { mORchestraEngine->RequestClearErrors(); }
 
     void SetEditorSize(int w, int h) { mEditorWidth = w; mEditorHeight = h; }

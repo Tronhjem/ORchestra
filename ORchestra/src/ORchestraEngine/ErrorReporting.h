@@ -22,7 +22,10 @@
 #include <string>
 #include <vector>
 #include <atomic>
-#include <functional>
+
+#if defined(_DEBUG)
+    #include <functional>
+#endif
 
 namespace ORchestra 
 {
@@ -37,11 +40,9 @@ namespace ORchestra
         std::string mMessage;
     };
 
-    // Type of the external sink callback. Set by the plugin wrapper to forward log
-    // entries to juce::Logger (or any other sink). Called under the same thread as
-    // the originating LogError/LogWarning/LogMessage call, so the sink must be
-    // thread-safe. May be nullptr to disable forwarding.
+#if defined(_DEBUG)
     using LogSinkFn = std::function<void(const LogEntry&)>;
+#endif
 
     /// Listener interface for ErrorReporting updates.
     /// Called when log entries are added or cleared.
@@ -67,7 +68,9 @@ namespace ORchestra
         const std::vector<LogEntry>& GetErrors() const { return mLogEntries; }
         
         void SetListener(ErrorReportingListener* listener) { mListener = listener; }
+#if defined(_DEBUG)
         void SetSink(LogSinkFn sink) { mSink = std::move(sink); }
+#endif
         void CheckAndClear();
 
     private:
@@ -77,7 +80,9 @@ namespace ORchestra
 
         std::vector<LogEntry> mLogEntries;
         ErrorReportingListener* mListener = nullptr;
+#if defined(_DEBUG)
         LogSinkFn mSink;
+#endif
         std::atomic<bool> mShouldClear{false};
     };
 } // namespace ORchestra
