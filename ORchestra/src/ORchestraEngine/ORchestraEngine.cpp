@@ -159,8 +159,8 @@ namespace ORchestra
             if (mResetRequest.load(std::memory_order_acquire) != mResetRequestSeen)
                 return false;
 
+            // Tick needs global step and StepData needs it wrapped for ring buffer.
             const int stepWrapped = i & STEP_BUFFER_SIZE_MASK;
-            // tick needs global step and StepData needs it wrapped for ring buffer.
 
             std::vector<SequenceStep>& currentData = mStepRingBuffer[static_cast<unsigned long>(stepWrapped)];
 
@@ -280,10 +280,10 @@ namespace ORchestra
             mStepRingBuffer[static_cast<unsigned long>(wrappedGlobalStep)];
 
 #if defined(_DEBUG)
-            AssertMutex& mutex = mRingBufferMutexes[static_cast<unsigned long>(stepWrapped)];
+            AssertMutex& mutex = mRingBufferMutexes[static_cast<unsigned long>(wrappedGlobalStep)];
             AssertMutexScopedLock lock {mutex};
 #endif
-        
+
         for (const SequenceStep& step : currentData)
         {
             switch (step.mType)
