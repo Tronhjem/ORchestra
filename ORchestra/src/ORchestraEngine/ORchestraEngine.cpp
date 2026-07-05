@@ -279,8 +279,10 @@ namespace ORchestra
         const std::vector<SequenceStep>& currentData = 
             mStepRingBuffer[static_cast<unsigned long>(wrappedGlobalStep)];
 
-        AssertMutex& mutex = mRingBufferMutexes[static_cast<unsigned long>(wrappedGlobalStep)];
-        AssertMutexScopedLock lock {mutex};
+#if defined(_DEBUG)
+            AssertMutex& mutex = mRingBufferMutexes[static_cast<unsigned long>(stepWrapped)];
+            AssertMutexScopedLock lock {mutex};
+#endif
         
         for (const SequenceStep& step : currentData)
         {
