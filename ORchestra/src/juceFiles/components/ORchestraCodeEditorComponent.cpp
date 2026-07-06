@@ -1061,6 +1061,76 @@ void ORchestraCodeEditorComponent::indentSelectedLines (const int spacesToAdd)
     }
 }
 
+void ORchestraCodeEditorComponent::toggleCommentSelection()
+{
+    if (readOnly)
+        return;
+
+    newTransaction();
+
+    CodeDocument::Position oldSelectionStart (selectionStart), oldSelectionEnd (selectionEnd), oldCaret (caretPos);
+    oldSelectionStart.setPositionMaintained (true);
+    oldSelectionEnd.setPositionMaintained (true);
+    oldCaret.setPositionMaintained (true);
+
+    const int lineStart = selectionStart.getLineNumber();
+    int lineEnd = selectionEnd.getLineNumber();
+
+    if (lineEnd > lineStart && selectionEnd.getIndexInLine() == 0)
+        --lineEnd;
+
+    bool allCommented = true;
+
+    for (int line = lineStart; line <= lineEnd; ++line)
+    {
+        auto lineText = document.getLine (line);
+        const int ws = CodeEditorHelpers::findFirstNonWhitespaceChar (lineText);
+        const auto afterWs = lineText.substring (ws);
+
+        if (! afterWs.startsWith ("//"))
+        {
+            allCommented = false;
+            break;
+        }
+    }
+
+    for (int line = lineStart; line <= lineEnd; ++line)
+    {
+        auto lineText = document.getLine (line);
+        const int ws = CodeEditorHelpers::findFirstNonWhitespaceChar (lineText);
+        const auto afterWs = lineText.substring (ws);
+
+        if (allCommented)
+        {
+            jassert (afterWs.startsWith ("//"));
+            int prefixLen = 2;
+
+            if (afterWs.length() > 2 && afterWs[2] == ' ')
+                prefixLen = 3;
+
+            document.deleteSection (CodeDocument::Position (document, line, ws),
+                                    CodeDocument::Position (document, line, ws + prefixLen));
+        }
+        else
+        {
+            if (afterWs.startsWith ("//"))
+                continue;
+
+            document.insertText (CodeDocument::Position (document, line, ws), "// ");
+        }
+    }
+
+    setSelection (oldSelectionStart, oldSelectionEnd);
+
+    if (caretPos != oldCaret)
+    {
+        caretPos = oldCaret;
+
+        if (auto* handler = getAccessibilityHandler())
+            handler->notifyAccessibilityEvent (AccessibilityEvent::textChanged);
+    }
+}
+
 void ORchestraCodeEditorComponent::cut()
 {
     insertText ({});
@@ -1407,6 +1477,8 @@ bool ORchestraCodeEditorComponent::keyPressed (const KeyPress& key)
         else if (key == KeyPress::escapeKey)                                handleEscapeKey();
         else if (key == KeyPress ('[', ModifierKeys::commandModifier, 0))   unindentSelection();
         else if (key == KeyPress (']', ModifierKeys::commandModifier, 0))   indentSelection();
+        else if (key == KeyPress ('/', ModifierKeys::commandModifier, 0))   toggleCommentSelection();
+        else if (key == KeyPress ('/', ModifierKeys::ctrlModifier, 0))       toggleCommentSelection();
         else if (key.getTextCharacter() >= ' ')                             insertTextAtCaret (String::charToString (key.getTextCharacter()));
         else                                                                return false;
     }

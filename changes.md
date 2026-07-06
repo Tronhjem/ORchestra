@@ -2,6 +2,8 @@
 
 Select audio output in the menu, to select the audio driver. This allows the user to get more steady triggering in standalone mode.
 Adding logging for debug builds to be able to find bugs easier when running in the DAW.
+Improving the safety of Worker thread and audio thread handling to minimize race condition bugs.
+Adding comment toggling in the code editor for easier bringing in and out chunks of code.
 
 Bugs:
 - Fix issue where consequtive midi notes triggering on every beat wouldn't work as note off would cause it to fire only very short note. 
