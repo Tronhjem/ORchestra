@@ -33,7 +33,7 @@ The original prototype that sparked the idea can be found here: <https://github.
   - [Substeps / Sub-divisions](#substeps--sub-divisions)
   - [Note Division Literals](#note-division-literals)
   - [Musical Note Names](#musical-note-names)
-  - [Tracks](#tracks)
+  - [Midi Output](#midi-output)
   - [Built-in Functions](#built-in-functions)
   - [User-Defined Functions](#user-defined-functions)
   - [Function Arrays](#function-arrays)
@@ -193,7 +193,7 @@ libFuzzer runs indefinitely by default until stopped or a crash is found.
 The ORchestra scripting language is evaluated from top to bottom.
 You must declare variables before using them later in the script.
 
-**Best Practice:** Define data sequences first, then create tracks that use them.
+**Best Practice:** Define data sequences first, then use these in functions or variable that use them.
 
 ### General Rules
 
@@ -321,19 +321,18 @@ Data sequences are arrays of numeric values used to create musical patterns.
 a = [64, 64, 65]  // Simple 3-step sequence
 ```
 
-### Tracks
+### Midi Output
 
-Tracks output MIDI messages and are created using the `note` or `cc` keywords.
+Midi can be output with the built int functions `note()` or `cc()`.
 These are used to send data from your Data Sequences to midi. 
 
 **Important:**
-- Tracks are not variables - they execute immediately
-- Arguments can be values, expressions, or variables
+- Just like any other functions, arguments can be values, expressions, or variables
 - The trigger argument checks if value > 0 to determine when to send MIDI
 - Even if a step in a Data Sequence has a value, it will only send a value if the trigger of the same step is true.
 - The `channel` parameter is optional in both `note` and `cc` - if omitted it defaults to MIDI channel 1
 
-**Note Track Syntax:**
+**Note Output Syntax:**
 ```cpp
 note(trigger, note, velocity, duration)           // channel defaults to 1
 note(trigger, note, velocity, duration, channel)  // explicit channel
@@ -341,7 +340,7 @@ note(trigger, note, velocity, duration, channel)  // explicit channel
 
 - `duration` sets how long the note is held. Use a note division literal (`n8`, `n16`, etc.) or a raw number (see [Note Division Literals](#note-division-literals)).
 
-**CC Track Syntax:**
+**CC Output Syntax:**
 ```cpp
 cc(trigger, controlNumber, controlValue)           // channel defaults to 1
 cc(trigger, controlNumber, controlValue, channel)  // explicit channel
