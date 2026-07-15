@@ -31,6 +31,10 @@
 #include "ErrorReporting.h"
 #include "Defines.h"
 
+#if defined (_DEBUG)
+#include "AssertMutex.h"
+#endif
+
 namespace ORchestra 
 {
     class ORchestraEngine
@@ -51,15 +55,20 @@ namespace ORchestra
         bool IsVMInit() { return mIsVMInit.load(); }
         
         void SetErrorListener(ErrorReportingListener* listener) { mErrorReporting.SetListener(listener); }
+#if defined(_DEBUG)
+        void SetLogSink(LogSinkFn sink) { mErrorReporting.SetSink(std::move(sink)); }
+#endif
         void RequestClearErrors();
 
     private:
-        inline void Initialize();
+        inline void Reset();
         void WakeWorker();
         void WorkerThreadLoop();
         bool PreProcessSteps();
+        void HandleSeekRequest();
         inline void ProcessStepData(TransportData& transportData, const int currentStep, const int nextStepInSamples, const double samplesPerStep);
         inline void TickInternal(TransportData& transportData, const int bufferLength);
+
 
         int mLastStep = -1;
         int64_t mSamplesSinceLastStep = 0;
@@ -76,13 +85,31 @@ namespace ORchestra
         std::atomic<bool> mIsRunning;
         std::atomic<bool> mShouldResetScriptBpm {false};
 
+        // UI thread bumps mResetRequest to ask the worker to recompile (issue #2).
+        std::atomic<int> mResetRequest {0};
+        int mResetRequestSeen = 0;
+
+        // Audio thread bumps mSeekRequest to ask the worker to rebase the step origin
+        // and re-clear the ring buffer after a DAW seek/restart (issue #1). Pattern is
+        // the same as mResetRequest: monotonic counter, worker dedups against seen value.
+        // The audio thread does NOT perform the rebase inline; it records the target
+        // step and skips ProcessStepData on the seek callback itself, so the worker
+        // gets exclusive ownership of the ring buffer slots before clearing them.
+        std::atomic<int> mSeekRequest {0};
+        int mSeekRequestSeen = 0;
+        std::atomic<int> mSeekTargetStep {0};
+
         std::mutex mCVMutex;
         std::condition_variable mCV;
         std::thread mWorkerThread;
         std::unique_ptr<FileLoader> mFileLoader;
         std::array<std::vector<SequenceStep>, STEP_BUFFER_SIZE> mStepRingBuffer;
+#if defined (_DEBUG)
+        std::array<AssertMutex, STEP_BUFFER_SIZE> mRingBufferMutexes;
+#endif
 
         std::string mInstructionData;
+        std::string mPendingInstructionData;
 
         MidiScheduler mMidiScheduler;
         ErrorReporting mErrorReporting;

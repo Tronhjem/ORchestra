@@ -210,6 +210,10 @@ namespace ORchestra
 
         void indentSelection();
         void unindentSelection();
+        // Toggles "// " at the start of each line in the current selection. If every
+        // selected line starts with "// " (after optional whitespace), the prefix is
+        // removed; otherwise it is added. Bound to cmd+/ and ctrl+/.
+        void toggleCommentSelection();
 
         //==============================================================================
         Range<int> getHighlightedRegion() const override;

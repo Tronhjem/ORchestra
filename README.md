@@ -7,22 +7,12 @@
 
 ## Overview
 
-ORchestra is a powerful MIDI sequencer plugin that generates and combines sequences of notes or midi CC messages. It features a custom scripting language for creating complex rhythmic patterns through logical operations and phasing of different lengths of data. The ORchestra language does not aim to be a complete programming language, and have been created to fit the need and specific vision for ORchestra.
+ORchestra is a MIDI sequencer plugin that generates and combines sequences of notes or midi CC messages. It features a custom scripting language for creating complex rhythmic patterns through logical operations and phasing of different lengths of data. The ORchestra language does not aim to be a complete programming language, and have been created to fit the need and specific vision for ORchestra.
 There's many other live coding tools out there, and it's also not trying to replace these. Rather, this is my brain child and idea of what a fun experimental midi scripting language inside a DAW could be, and invites for experimenting with phasing loops to create semi algorithmic compositions or patterns. 
 
 The original prototype that sparked the idea can be found here: <https://github.com/Tronhjem/EuclidsCombinator>
 
 > **Disclaimer:** AI has been used on this project to try out new features like github copilots agents on git, by implementing simple extensions of the lanugage, and writing unit tests etc. Majority of the code is still written by me and this is by no means a vibe coded project. 
-
-### Key Features
-
-- **Euclidean Rhythm Generation**: Create rhythmic patterns using the euclidean algorithm
-- **Sequence Combination**: Use logic operations (`&`, `^`, `|`) to combine sequences
-- **Phasing Patterns**: Sequences of different lengths phase and evolve over time
-- **Custom Scripting Language**: Powerful yet simple syntax for defining musical patterns
-- **MIDI Output**: Generates MIDI notes and CC messages
-- **Mathematical Operations**: Full arithmetic support with standard precedence
-- **Comparison Operators**: Compare values and create conditional patterns
 
 <img src="./img/ORchestra.gif" width="100%" height="100%"/>
 

@@ -22,7 +22,6 @@
 #include <JuceHeader.h>
 #include <vector>
 #include "Defines.h"
-#include "juce_core/juce_core.h"
 
 namespace ORchestra {
 
@@ -46,7 +45,7 @@ namespace ORchestra {
 
     private:
         std::vector<ScheduledMidiMessage> mScheduledMidiMessages;
-        uint8 mActiveNoteCounts[128 * 16] = {};
+        bool mActiveNoteCounts[128 * 16] = {};
     };
 
 } // namespace ORchestra

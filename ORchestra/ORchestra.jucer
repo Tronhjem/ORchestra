@@ -14,6 +14,9 @@
       <FILE id="Rw7wgc" name="Utility.h" compile="0" resource="0" file="src/utils/Utility.h"/>
     </GROUP>
     <GROUP id="{92E6A7C1-7F62-1518-D988-B6247C4B57B6}" name="ORchestraEngine">
+      <FILE id="J16Uko" name="ORchestraAssert.h" compile="0" resource="0"
+            file="src/utils/ORchestraAssert.h"/>
+      <FILE id="NvD5q0" name="AssertMutex.h" compile="0" resource="0" file="src/utils/AssertMutex.h"/>
       <GROUP id="{C76B99C7-D3C3-EDB3-3B63-A97D0BF04A8E}" name="Compiler">
         <FILE id="u63gCh" name="StoredFunction.h" compile="0" resource="0"
               file="src/ORchestraEngine/StoredFunction.h"/>
@@ -78,6 +81,10 @@
               file="src/juceFiles/components/GeneralLookAndFeel.h"/>
         <FILE id="vkqSFn" name="LookAndFeelConstants.h" compile="0" resource="0"
               file="src/juceFiles/components/LookAndFeelConstants.h"/>
+        <FILE id="Hy3i69" name="MidiSettingsComponent.cpp" compile="1" resource="0"
+              file="src/juceFiles/components/MidiSettingsComponent.cpp"/>
+        <FILE id="qjcG1L" name="MidiSettingsComponent.h" compile="0" resource="0"
+              file="src/juceFiles/components/MidiSettingsComponent.h"/>
         <FILE id="vtdiQ8" name="ORchestraCodeEditorComponent.cpp" compile="1"
               resource="0" file="src/juceFiles/components/ORchestraCodeEditorComponent.cpp"/>
         <FILE id="yPdNL3" name="ORchestraCodeEditorComponent.h" compile="0"
@@ -86,10 +93,6 @@
               resource="0" file="src/juceFiles/components/ORchestraCodeEditorTokenizer.cpp"/>
         <FILE id="Sa88Rv" name="ORchestraCodeEditorTokenizer.h" compile="0"
               resource="0" file="src/juceFiles/components/ORchestraCodeEditorTokenizer.h"/>
-        <FILE id="fk85Nj" name="TempoControlsPanel.cpp" compile="1" resource="0"
-              file="src/juceFiles/components/TempoControlsPanel.cpp"/>
-        <FILE id="Gjpr2k" name="TempoControlsPanel.h" compile="0" resource="0"
-              file="src/juceFiles/components/TempoControlsPanel.h"/>
         <FILE id="ZMhNfE" name="TextEditorLookAndFeel.h" compile="0" resource="0"
               file="src/juceFiles/components/TextEditorLookAndFeel.h"/>
         <FILE id="oIMqY3" name="Timeline.cpp" compile="1" resource="0" file="src/juceFiles/components/Timeline.cpp"/>

@@ -1,4 +1,17 @@
-### v0.2.0
+### v0.2.2
+
+Select audio output in the menu, to select the audio driver. This allows the user to get more steady triggering in standalone mode.
+Adding logging for debug builds to be able to find bugs easier when running in the DAW.
+Improving the safety of Worker thread and audio thread handling to minimize race condition bugs.
+Adding comment toggling in the code editor for easier bringing in and out chunks of code.
+
+Bugs:
+- Fix issue where consequtive midi notes triggering on every beat wouldn't work as note off would cause it to fire only very short note. 
+- Fix crash when skipping around in the DAW timeline. We would reset the VM while recompiling. Worker thread now is the only one to reset the compiler.
+- Right Click menu in code editor was not using same color scheme as the rest. 
+
+
+### v0.2.1
 
 - Changing built in function from `bpmDiv()` to `beat()` 
 - Removing ptn entirely and rely on functions only.

@@ -28,6 +28,15 @@ using namespace ORchestra;
 class GeneralLookAndFeel : public juce::LookAndFeel_V4
 {
 public:
+    GeneralLookAndFeel()
+    {
+        setColour(PopupMenu::backgroundColourId, BackgroundColor);
+        setColour(PopupMenu::textColourId, TextColor);
+        setColour(PopupMenu::highlightedBackgroundColourId, ButtonBackgroundColor);
+        setColour(PopupMenu::highlightedTextColourId, BackgroundColor);
+        setColour(PopupMenu::headerTextColourId, TextColor);
+    }
+
     juce::Typeface::Ptr getTypefaceForFont(const juce::Font&) override
     {
         return juce::Typeface::createSystemTypefaceFor(mFont);
@@ -195,10 +204,11 @@ public:
     {
         juce::Rectangle bounds{ (float)width, (float)height };
 
-        juce::Colour fillColour = ButtonBackgroundColor;
-
-        g.setColour(fillColour);
+        g.setColour(BackgroundColor);
         g.fillRoundedRectangle(bounds, ROUNDED_CORNER_SIZE);
+
+        g.setColour(ComponentOutlineColor);
+        g.drawRoundedRectangle(bounds, ROUNDED_CORNER_SIZE, 1.0f);
     }
 
     void drawLinearSlider(juce::Graphics& g, int x, int y, int width, int height,

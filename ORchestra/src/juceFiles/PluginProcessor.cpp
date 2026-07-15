@@ -21,9 +21,37 @@
 #include "PluginEditor.h"
 #include "juce_audio_processors/juce_audio_processors.h"
 
+#if defined(_DEBUG)
+    #include "ORchestraAssert.h"
+#endif
+
 
 using namespace ORchestra;
 //==============================================================================
+#if defined(_DEBUG)
+namespace
+{
+    // The file lives at ~/Library/Application Support/ORchestra/ORchestra.log on macOS.
+    juce::FileLogger* CreateLogFile()
+    {
+        const auto logDir = juce::File::getSpecialLocation(
+            juce::File::userApplicationDataDirectory)
+            .getChildFile("ORchestra");
+        logDir.createDirectory();
+
+        const auto logFile = logDir.getChildFile("ORchestra.log");
+        if (logFile.exists())
+            logFile.replaceWithText(""); // start each load with a fresh log
+
+        juce::SystemStats::setApplicationCrashHandler([](void*) {
+            juce::Logger::writeToLog("CRASH\n" + juce::SystemStats::getStackBacktrace());
+        });
+
+        return new juce::FileLogger(logFile, "ORchestra session\n", 0);
+    }
+}
+#endif
+
 ORchestraAudioProcessor::ORchestraAudioProcessor() :
 #ifndef JucePlugin_PreferredChannelConfigurations
     AudioProcessor(BusesProperties()
@@ -35,8 +63,38 @@ ORchestraAudioProcessor::ORchestraAudioProcessor() :
     IsRunning(false),
     mValueTree(*this, nullptr, juce::Identifier("ORchestra"), {})
 {
+#if defined(_DEBUG)
+    mLogFileLogger.reset(CreateLogFile());
+    juce::Logger::setCurrentLogger(mLogFileLogger.get());
+
+    // Route ORCHESTRA_ASSERT failures (from AssertMutex and any other ORCHESTRA_ASSERT
+    // use site) to the FileLogger so violations land in ORchestra.log with a backtrace
+    // before the assert fires. Must be installed before any code that can assert.
+    AssertSink::Set([](const std::string& condition, const std::string& message,
+                       const std::string& backtrace) {
+        juce::String line = "[ASSERT] " + juce::String(condition);
+        if (!message.empty())
+            line += " - " + juce::String(message);
+        if (!backtrace.empty())
+            line += "\n" + juce::String(backtrace);
+        juce::Logger::writeToLog(line);
+    });
+#endif
 
     mORchestraEngine = std::make_unique<ORchestraEngine>();
+
+#if defined(_DEBUG)
+    mORchestraEngine->SetLogSink([](const LogEntry& entry) {
+        juce::String prefix;
+        switch (entry.mEntryType)
+        {
+            case EntryType::Error:   prefix = "[ERROR] ";   break;
+            case EntryType::Warning: prefix = "[WARN] ";    break;
+            default:                 prefix = "[INFO] ";    break;
+        }
+        juce::Logger::writeToLog(prefix + juce::String(entry.mMessage));
+    });
+#endif
 
     mTransportData.timeInSamples = 0;
     mTransportData.sampleRate = 44100;
@@ -47,6 +105,11 @@ ORchestraAudioProcessor::ORchestraAudioProcessor() :
 
 ORchestraAudioProcessor::~ORchestraAudioProcessor()
 {
+#if defined(_DEBUG)
+    mORchestraEngine.reset();
+    juce::Logger::setCurrentLogger(nullptr);
+    mLogFileLogger.reset();
+#endif
 }
 
 //==============================================================================
