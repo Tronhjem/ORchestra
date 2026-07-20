@@ -14,7 +14,7 @@ BUILD_DIR="${ROOT_DIR}/build-fuzz"
 
 TARGET="${1:-scanner}"
 SEED="${2:-$(date +%s)}"
-CORPUS_DIR="${3:-${ROOT_DIR}/Fuzzing/corpus}"
+CORPUS_DIR="${3:-${ROOT_DIR}/Tests/Fuzzing/corpus}"
 CRASH_DIR="${4:-}"
 ITERATIONS="${5:-100000}"
 
@@ -46,4 +46,4 @@ if [ -n "$CRASH_DIR" ]; then
     EXTRA_ARGS="$EXTRA_ARGS $CRASH_DIR"
 fi
 EXTRA_ARGS="$EXTRA_ARGS $ITERATIONS"
-"${BUILD_DIR}/Fuzzing/${EXECUTABLE}" ${EXTRA_ARGS}
+"${BUILD_DIR}/Tests/Fuzzing/${EXECUTABLE}" ${EXTRA_ARGS}

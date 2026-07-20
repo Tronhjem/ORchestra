@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.22)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(ORCHESTRA_SOURCE_DIR ../ORchestra/src/)
+set(ORCHESTRA_SOURCE_DIR ../../ORchestra/src/)
 set(ORCHESTRA_ENGINE_DIR ${ORCHESTRA_SOURCE_DIR}/ORchestraEngine/)
 
 option(FUZZING_USE_LIBFUZZER "Build with libFuzzer (requires Clang)" OFF)

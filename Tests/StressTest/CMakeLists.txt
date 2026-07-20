@@ -7,7 +7,7 @@ juce_add_console_app(ORchestraStress
 
 juce_generate_juce_header(ORchestraStress)
 
-set(ORCHESTRA_ENGINE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../ORchestra/src/ORchestraEngine)
+set(ORCHESTRA_ENGINE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../ORchestra/src/ORchestraEngine)
 
 target_sources(ORchestraStress
     PRIVATE
@@ -25,8 +25,8 @@ target_sources(ORchestraStress
 )
 
 target_include_directories(ORchestraStress PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/../ORchestra/src/utils
-    ${CMAKE_CURRENT_SOURCE_DIR}/../ORchestra/src/juceFiles
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../ORchestra/src/utils
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../ORchestra/src/juceFiles
     ${ORCHESTRA_ENGINE_DIR}
 )
 

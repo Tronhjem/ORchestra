@@ -6,7 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 BUILD_FUZZ="${ROOT_DIR}/build-fuzz"
 BUILD_TEST="${ROOT_DIR}/build-test"
-CORPUS_DIR="${ROOT_DIR}/Fuzzing/corpus"
+CORPUS_DIR="${ROOT_DIR}/Tests/Fuzzing/corpus"
 SEED="$(date +%s)"
 ITERATIONS=100000
 
@@ -62,15 +62,15 @@ echo ""
 
 # -- Run --
 echo -e "${BOLD}[3/5] Unit tests${NC}"
-run_step "Unit tests" "${BUILD_TEST}/UnitTests/ORchestraTests"
+run_step "Unit tests" "${BUILD_TEST}/Tests/UnitTests/ORchestraTests"
 
 echo -e "${BOLD}[4/5] Scanner/Compiler fuzzer (${ITERATIONS} iterations)${NC}"
 run_step "Scanner/Compiler fuzzer" \
-    "${BUILD_FUZZ}/Fuzzing/ORchestraFuzz" "${SEED}" "${CORPUS_DIR}" "" "${ITERATIONS}"
+    "${BUILD_FUZZ}/Tests/Fuzzing/ORchestraFuzz" "${SEED}" "${CORPUS_DIR}" "" "${ITERATIONS}"
 
 echo -e "${BOLD}[5/5] VM fuzzer (${ITERATIONS} iterations)${NC}"
 run_step "VM fuzzer" \
-    "${BUILD_FUZZ}/Fuzzing/ORchestraFuzzVM" "${SEED}" "${CORPUS_DIR}" "" "${ITERATIONS}"
+    "${BUILD_FUZZ}/Tests/Fuzzing/ORchestraFuzzVM" "${SEED}" "${CORPUS_DIR}" "" "${ITERATIONS}"
 
 # -- Summary --
 echo ""

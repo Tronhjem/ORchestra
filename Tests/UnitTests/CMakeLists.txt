@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.22)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(ORCHESTRA_SOURCE_DIR ../ORchestra/src/)
+set(ORCHESTRA_SOURCE_DIR ../../ORchestra/src/)
 set(ORCHESTRA_ENGINE_DIR ${ORCHESTRA_SOURCE_DIR}/ORchestraEngine/)
 
 # Create executable for unit tests
@@ -19,20 +19,12 @@ add_executable(ORchestraTests
     ${ORCHESTRA_ENGINE_DIR}/FileLoader.cpp
 )
 
-target_include_directories(ORchestraTests PRIVATE 
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/${ORCHESTRA_SOURCE_DIR}/utils
-    ${CMAKE_CURRENT_SOURCE_DIR}/${ORCHESTRA_SOURCE_DIR}/juceFiles
-    ${CMAKE_CURRENT_SOURCE_DIR}/${ORCHESTRA_SOURCE_DIR}/ORchestraEngine
-    ${CMAKE_CURRENT_SOURCE_DIR}/../UnitTests/include
-)
-
-target_include_directories(ORchestraTests PRIVATE 
+target_include_directories(ORchestraTests PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/${ORCHESTRA_SOURCE_DIR}/utils
     ${CMAKE_CURRENT_SOURCE_DIR}/${ORCHESTRA_SOURCE_DIR}/juceFiles
     ${CMAKE_CURRENT_SOURCE_DIR}/${ORCHESTRA_ENGINE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/../UnitTests/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
 target_compile_definitions(ORchestraTests
