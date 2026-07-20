@@ -17,8 +17,10 @@
  * along with ORchestra. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <chrono>
 #include <cmath>
 #include <string>
+#include <thread>
 
 #include "ORchestraEngine.h"
 #include "Defines.h"
@@ -27,7 +29,7 @@
 
 #if defined(_DEBUG)
 #include "ScopedTimer.h"
-#include "AssertMutex.h"
+#include "ORchestraAssert.h"
 #endif
 
 namespace ORchestra 
@@ -59,18 +61,23 @@ namespace ORchestra
 
     void ORchestraEngine::ExportToFile(const std::string& filePath)
     {
+        std::scoped_lock lock {mInstructionDataMutex};
         mFileLoader->SaveToFile(filePath, mInstructionData);
     }
 
-    const std::string& ORchestraEngine::ImportFromFile(const std::string& filePath)
+    std::string ORchestraEngine::ImportFromFile(const std::string& filePath)
     {
+        std::scoped_lock lock {mInstructionDataMutex};
         mInstructionData = mFileLoader->LoadFile(filePath);
         return mInstructionData;
     }
 
     void ORchestraEngine::Compile(const std::string& data)
     {
-        mPendingInstructionData = data;
+        {
+            std::scoped_lock lock {mInstructionDataMutex};
+            mPendingInstructionData = data;
+        }
         mResetRequest.fetch_add(1, std::memory_order_acq_rel);
         WakeWorker();
     }
@@ -91,7 +98,15 @@ namespace ORchestra
 
         mVM.Reset();
 
-        const bool innitSuccess = mVM.Prepare(&mInstructionData[0]);
+        // Snapshot under the lock: SetInstructionData can write mInstructionData
+        // from the UI thread while Prepare scans it here.
+        std::string instructionDataSnapshot;
+        {
+            std::scoped_lock lock {mInstructionDataMutex};
+            instructionDataSnapshot = mInstructionData;
+        }
+
+        const bool innitSuccess = mVM.Prepare(instructionDataSnapshot);
         if (innitSuccess)
             mErrorReporting.LogMessage("Compiled Successfully!");
 
@@ -127,7 +142,10 @@ namespace ORchestra
             while (mResetRequest.load(std::memory_order_acquire) != mResetRequestSeen)
             {
                 mResetRequestSeen = mResetRequest.load(std::memory_order_acquire);
-                mInstructionData = mPendingInstructionData;
+                {
+                    std::scoped_lock lock {mInstructionDataMutex};
+                    mInstructionData = mPendingInstructionData;
+                }
                 Reset();
             }
 
@@ -152,6 +170,11 @@ namespace ORchestra
             return false;
 
         const int readySteps = mReadySteps.load();
+#if defined(_DEBUG)
+        // The audio thread decrements after a read; a Reset() zeroing in between
+        // can drive this negative and breaks slot ownership. Tripwire for that.
+        ORCHESTRA_ASSERT_SIMPLE(readySteps >= 0);
+#endif
         int stepsToProcess = STEP_BUFFER_SIZE - 1 - readySteps; // leave the last step unprocessed.
         if (stepsToProcess < 0)
             stepsToProcess = 0;
@@ -176,9 +199,10 @@ namespace ORchestra
 
             std::vector<SequenceStep>& currentData = mStepRingBuffer[static_cast<unsigned long>(stepWrapped)];
 
-#if defined(_DEBUG)
-            AssertMutex& mutex = mRingBufferMutexes[static_cast<unsigned long>(stepWrapped)];
-            AssertMutexScopedLock lock {mutex};
+            std::scoped_lock slotLock {mRingBufferMutexes[static_cast<unsigned long>(stepWrapped)]};
+#if defined(_DEBUG) && defined(ORCHESTRA_RACE_WIDEN)
+            // Widen the collision window so stress runs exercise contention.
+            std::this_thread::sleep_for(std::chrono::microseconds(500));
 #endif
 
             currentData.clear();
@@ -195,9 +219,15 @@ namespace ORchestra
     void ORchestraEngine::HandleSeekRequest()
     {
         const int targetStep = mSeekTargetStep.load(std::memory_order_acquire);
-        
-        for (auto& slot : mStepRingBuffer)
-            slot.clear();
+
+        for (size_t i = 0; i < mStepRingBuffer.size(); ++i)
+        {
+            std::scoped_lock slotLock {mRingBufferMutexes[i]};
+#if defined(_DEBUG) && defined(ORCHESTRA_RACE_WIDEN)
+            std::this_thread::sleep_for(std::chrono::microseconds(100));
+#endif
+            mStepRingBuffer[i].clear();
+        }
 
         mStepOriginInSamples = 0;
         mSamplesPerStep = 0.0;
@@ -287,7 +317,18 @@ namespace ORchestra
         {
             ProcessStepData(transportData, currentStep, nextStepInSamples, samplesPerStep);
 
-            mReadySteps.fetch_sub(1, std::memory_order_acq_rel);
+            // Decrement only while still positive: a Reset() or seek on the
+            // worker can zero the count between the check above and here.
+            int ready = mReadySteps.load(std::memory_order_acquire);
+            while (ready > 0
+                   && !mReadySteps.compare_exchange_weak(ready, ready - 1,
+                                                         std::memory_order_acq_rel))
+            {
+            }
+
+#if defined(_DEBUG)
+            ORCHESTRA_ASSERT_SIMPLE(mReadySteps.load(std::memory_order_acquire) >= 0);
+#endif
             if (mReadySteps.load() < HALF_STEP_BUFFER_SIZE)
                 WakeWorker();
         }
@@ -298,18 +339,24 @@ namespace ORchestra
 #if defined(_DEBUG)
         // ScopedTimer timer{ "Process Beat" };
 #endif
-        mLastStep = currentStep;
-
         mSamplesSinceLastStep = transportData.timeInSamples;
         const int wrappedGlobalStep = currentStep & STEP_BUFFER_SIZE_MASK;
 
-        const std::vector<SequenceStep>& currentData = 
-            mStepRingBuffer[static_cast<unsigned long>(wrappedGlobalStep)];
+        // try_lock: the audio callback must never block. Contention means the
+        // worker is clearing/refilling this slot (reset or seek); skip the step.
+        std::unique_lock<std::mutex> slotLock {
+            mRingBufferMutexes[static_cast<unsigned long>(wrappedGlobalStep)], std::try_to_lock};
+        if (!slotLock.owns_lock())
+            return;
 
-#if defined(_DEBUG)
-            AssertMutex& mutex = mRingBufferMutexes[static_cast<unsigned long>(wrappedGlobalStep)];
-            AssertMutexScopedLock lock {mutex};
+        mLastStep = currentStep;
+
+#if defined(_DEBUG) && defined(ORCHESTRA_RACE_WIDEN)
+        std::this_thread::sleep_for(std::chrono::microseconds(500));
 #endif
+
+        const std::vector<SequenceStep>& currentData =
+            mStepRingBuffer[static_cast<unsigned long>(wrappedGlobalStep)];
 
         for (const SequenceStep& step : currentData)
         {
@@ -393,7 +440,7 @@ namespace ORchestra
     }
 
     void ORchestraEngine::RequestClearErrors()
-    { 
+    {
         if (mIsRunning.load())
             mErrorReporting.RequestClear();
         else

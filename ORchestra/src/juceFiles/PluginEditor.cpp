@@ -169,7 +169,7 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     addAndMakeVisible(mVerticalDivider);
     addAndMakeVisible(mHorizontalDivider);
 
-    const std::string& data = audioProcessor.GetInstructionData();
+    const std::string data = audioProcessor.GetInstructionData();
     const juce::String dataAsString = data.empty() ? juce::String(DEFAULT_SCRIPT)
                                                     : juce::String(data);
     mCodeEditorPanel.loadContent(dataAsString);
@@ -285,7 +285,7 @@ void ORchestraAudioProcessorEditor::changeListenerCallback(juce::ChangeBroadcast
 {
     UNUSED(broadCaster);
 
-    const std::string& data = audioProcessor.GetInstructionData();
+    const std::string data = audioProcessor.GetInstructionData();
 
     if (!data.empty())
     {
@@ -347,7 +347,7 @@ void ORchestraAudioProcessorEditor::handleImportFile()
             UNUSED(fc);
             juce::File file = mFileChooser.getResult();
             std::string filePath{ file.getFullPathName().toRawUTF8() };
-            const std::string& data = audioProcessor.ImportFromFile(filePath);
+            const std::string data = audioProcessor.ImportFromFile(filePath);
             juce::String dataAsString{ data };
             mCodeEditorPanel.loadContent(dataAsString);
             
@@ -372,7 +372,7 @@ void ORchestraAudioProcessorEditor::handleExportFile()
 
 void ORchestraAudioProcessorEditor::UpdateErrors()
 {
-    const auto& errors = audioProcessor.GetErrors();
+    const auto errors = audioProcessor.GetErrors();
     juce::String mess;
 
     for (auto it = errors.rbegin(); it != errors.rend(); ++it)

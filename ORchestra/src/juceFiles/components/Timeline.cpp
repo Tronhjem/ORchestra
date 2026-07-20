@@ -85,7 +85,8 @@ void Timeline::timerCallback()
         const unsigned long stepWrapped =
             static_cast<unsigned long>((globalStepOffset + index) & STEP_BUFFER_SIZE_MASK);
 
-        const std::vector<SequenceStep>& sequenceSteps = mAudioProcessor->GetStepData()[stepWrapped];
+        // Copy under the slot's lock: the worker thread clears/refills slots.
+        const std::vector<SequenceStep> sequenceSteps = mAudioProcessor->GetStepDataSlotCopy(stepWrapped);
         const float xOffset = LABEL_COLUMN_WIDTH + static_cast<float>(index) * STEP_WIDTH + TRIGGER_STEP_MARGIN;
 
         if ((globalStepOffset + index) % barStepCount == 0)

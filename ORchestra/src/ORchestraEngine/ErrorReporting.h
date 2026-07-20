@@ -19,6 +19,7 @@
 
 #pragma once
 
+#include <mutex>
 #include <string>
 #include <vector>
 #include <atomic>
@@ -65,7 +66,13 @@ namespace ORchestra
         void LogMessage(const std::string& message);
         void Clear();
         void RequestClear();
-        const std::vector<LogEntry>& GetErrors() const { return mLogEntries; }
+        // Returns a copy: mLogEntries is mutated from the worker and audio
+        // threads, so callers must never iterate it by reference.
+        std::vector<LogEntry> GetErrors() const
+        {
+            std::scoped_lock lock {mEntriesMutex};
+            return mLogEntries;
+        }
         
         void SetListener(ErrorReportingListener* listener) { mListener = listener; }
 #if defined(_DEBUG)
@@ -80,6 +87,7 @@ namespace ORchestra
 
         std::vector<LogEntry> mLogEntries;
         ErrorReportingListener* mListener = nullptr;
+        mutable std::mutex mEntriesMutex;
 #if defined(_DEBUG)
         LogSinkFn mSink;
 #endif

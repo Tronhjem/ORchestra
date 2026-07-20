@@ -64,14 +64,14 @@ public:
     juce::AudioProcessorValueTreeState& GetValueTree() { return mValueTree; }
     const TransportData& GetTransportData() { return mTransportData; }
 
-    const std::string& ImportFromFile(const std::string& filePath) { return mORchestraEngine->ImportFromFile(filePath); }
+    std::string ImportFromFile(const std::string& filePath) { return mORchestraEngine->ImportFromFile(filePath); }
     void ExportToFile(const std::string& data) { mORchestraEngine->ExportToFile(data); }
     void Compile(const std::string& data) { mORchestraEngine->Compile(data); }
     void SetInstructionData(const std::string& data) { mORchestraEngine->SetInstructionData(data); }
-    const std::string& GetInstructionData() { return mORchestraEngine->GetInstructionData(); }
+    std::string GetInstructionData() { return mORchestraEngine->GetInstructionData(); }
     int GetGlobalStepCount() { return mORchestraEngine->GetGlobalStepCount(); }
-    std::array<std::vector<SequenceStep>, STEP_BUFFER_SIZE>& GetStepData() { return mORchestraEngine->GetStepData(); }
-        const std::vector<LogEntry>& GetErrors() { return mORchestraEngine->GetErrors(); }
+    std::vector<SequenceStep> GetStepDataSlotCopy(const size_t slotIndex) { return mORchestraEngine->GetStepDataSlotCopy(slotIndex); }
+        std::vector<LogEntry> GetErrors() { return mORchestraEngine->GetErrors(); }
     bool IsORchestraVMInit() { return mORchestraEngine->IsVMInit(); }
     
     void SetErrorListener(ErrorReportingListener* listener) { mORchestraEngine->SetErrorListener(listener); }
