@@ -1,3 +1,8 @@
+### v0.2.3
+
+General cleanup of some testing code was done. Adding thread sanitizer and stress testing for making sure we have no race conditions and more stability. 
+This fixed a couple of threading issues and one potential crash.
+
 ### v0.2.2
 
 Select audio output in the menu, to select the audio driver. This allows the user to get more steady triggering in standalone mode.
