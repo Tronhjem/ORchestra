@@ -29,9 +29,10 @@ void TriggerRectangleComponent::Update()
     assert(mAudioProcessor != nullptr);
 #endif
 
-    const TransportData& transportData = mAudioProcessor->GetTransportData();
+    const float bpmFromScript = static_cast<float>(mAudioProcessor->GetUiBpmFromScript());
+    const float bpmDivision = mAudioProcessor->GetUiBpmDivision();
 
-    const float stepDurationInMiliSeconds = 60000.f / static_cast<float>(transportData.bpmFromScript * transportData.bpmDivision);
+    const float stepDurationInMiliSeconds = 60000.f / (bpmFromScript * bpmDivision);
     
     for (int i = static_cast<int>(mRectangles.size()) - 1; i >= 0; --i)
     {

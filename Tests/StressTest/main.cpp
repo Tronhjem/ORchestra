@@ -43,6 +43,8 @@ namespace
         "beat(n8)\n\ntrig = euc(3, 8)\n\nnote(trig, C4, 100, n8)\n",
         "beat(n16)\n\na = euc(5, 8)\nb = ran(40, 90)\n\nnote(a, b, 100, n16)\ncc(a, 20, b)\n",
         "bpm(90)\nbeat(n8)\ntranspose(2)\n\nt = euc(3, 8)\n\nnote(t, C3, 110, n4)\n",
+        // Exercises the audio-thread TryLogMessage path under contention.
+        "beat(n8)\n\nt = euc(3, 8)\n\nnote(t, C4, 100, n8)\nprint($)\n",
         "this is not a valid script @@@\n",
     };
 
@@ -53,7 +55,8 @@ int main(int argc, char** argv)
 {
     const int secondsToRun = (argc > 1) ? std::atoi(argv[1]) : 20;
     const bool calmMode = (argc > 2) && (std::string(argv[2]) == "calm");
-    const int scriptCount = calmMode ? kNumScripts - 1 : kNumScripts;
+    // Calm mode excludes the print script (log traffic) and the invalid script.
+    const int scriptCount = calmMode ? kNumScripts - 2 : kNumScripts;
 
 #if defined(_DEBUG)
     ORchestra::AssertSink::Set([](const std::string& condition,
@@ -113,13 +116,16 @@ int main(int argc, char** argv)
         std::string sink;
         sink.reserve(4096);
 
+        std::vector<SequenceStep> slot;
+        slot.reserve(16);
+
         while (!stop.load(std::memory_order_relaxed))
         {
             sink.clear();
 
             for (size_t s = 0; s < STEP_BUFFER_SIZE; ++s)
             {
-                const std::vector<SequenceStep> slot = engine.GetStepDataSlotCopy(s);
+                engine.CopyStepDataSlot(s, slot);
                 for (const auto& step : slot)
                     sink += static_cast<char>(step.mType);
             }

@@ -61,7 +61,7 @@ void Timeline::timerCallback()
     // Draw all steps using fixed chromatic rows (C=bottom/row11, B=top/row0)
     constexpr float totalGridHeight = static_cast<float>(TIMELINE_ROWS_DRAWN) * STEP_HEIGHT;
 
-    const float bpmDivision = mAudioProcessor->GetTransportData().bpmDivision;
+    const float bpmDivision = mAudioProcessor->GetUiBpmDivision();
     const int barStepCount = GetBpmDivisionWrapIndex(bpmDivision);
 
     mTriggerRectangle.IncrementStep();

@@ -1,5 +1,6 @@
 Builds/
 build/
+build-plugin/
 build-fuzz/
 build-test/
 build-stress-assert/

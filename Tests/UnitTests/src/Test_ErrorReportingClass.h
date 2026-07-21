@@ -19,6 +19,9 @@
 
 #pragma once
 
+#include <atomic>
+#include <thread>
+
 #include "catch.hpp"
 #include "ErrorReporting.h"
 
@@ -81,6 +84,45 @@ TEST_CASE("ErrorReporting: LogMessage records message", "[ErrorReporting]")
     REQUIRE_FALSE(entries.empty());
     REQUIRE(entries[0].mEntryType == EntryType::Messasge);
     REQUIRE(entries[0].mMessage.find("Info message") != std::string::npos);
+}
+
+TEST_CASE("ErrorReporting: TryLogMessage records message when uncontended", "[ErrorReporting]")
+{
+    ErrorReporting reporter;
+    REQUIRE(reporter.TryLogMessage("Info message"));
+
+    const auto& entries = reporter.GetErrors();
+    REQUIRE_FALSE(entries.empty());
+    REQUIRE(entries[0].mEntryType == EntryType::Messasge);
+    REQUIRE(entries[0].mMessage.find("Info message") != std::string::npos);
+}
+
+TEST_CASE("ErrorReporting: TryLogMessage drops when the lock is held", "[ErrorReporting]")
+{
+    ErrorReporting reporter;
+
+    std::atomic<bool> lockHeld{ false };
+    std::atomic<bool> releaseLock{ false };
+
+    std::thread holder([&]()
+    {
+        auto guard = reporter.AcquireLockForTest();
+        lockHeld.store(true);
+        while (!releaseLock.load())
+            std::this_thread::yield();
+    });
+
+    while (!lockHeld.load())
+        std::this_thread::yield();
+
+    REQUIRE_FALSE(reporter.TryLogMessage("dropped"));
+
+    releaseLock.store(true);
+    holder.join();
+
+    REQUIRE(reporter.GetErrors().empty());
+    REQUIRE(reporter.TryLogMessage("kept"));
+    REQUIRE(reporter.GetErrors().size() == 1);
 }
 
 TEST_CASE("ErrorReporting: Clear removes all entries", "[ErrorReporting]")

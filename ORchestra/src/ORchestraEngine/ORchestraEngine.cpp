@@ -295,6 +295,9 @@ namespace ORchestra
 
         if (stepDifference > 1 || stepDifference < 0)
         {
+            // Force the first step after the seek to process even if its step
+            // number equals the stale mLastStep. Only written on this thread.
+            mLastStep = -1;
             mSeekTargetStep.store(currentStep, std::memory_order_release);
             mSeekRequest.fetch_add(1, std::memory_order_acq_rel);
             WakeWorker();
@@ -369,10 +372,11 @@ namespace ORchestra
                     }
                 case ORchestra::SequenceStepType::PRINT:
                     {
-                        const std::string mes = 
+                        const std::string mes =
                             std::to_string(static_cast<int>(step.mFirst.GetValue(0)));
 
-                        mErrorReporting.LogMessage(mes);
+                        // Audio thread must not block on the log mutex; drop on contention.
+                        mErrorReporting.TryLogMessage(mes);
 
                         break;
                     }

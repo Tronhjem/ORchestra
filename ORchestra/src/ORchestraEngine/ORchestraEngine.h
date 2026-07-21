@@ -44,17 +44,10 @@ namespace ORchestra
         std::string ImportFromFile(const std::string& filePath);
         void ExportToFile(const std::string& filePath);
 
-        // Returns a copy of one ring buffer slot, taken under that slot's lock.
+        // Copies one ring buffer slot under that slot's shared lock. Copy-assign
+        // reuses out's capacity, so steady-state callers allocate nothing.
         // Readers (Timeline, stress harness) must use this; the ring buffer is
         // rewritten by the worker thread.
-        std::vector<SequenceStep> GetStepDataSlotCopy(const size_t slotIndex)
-        {
-            std::shared_lock lock {mRingBufferMutexes[slotIndex]};
-            return mStepRingBuffer[slotIndex];
-        }
-
-        // Copy-assign reuses out's capacity, so steady-state callers allocate
-        // nothing. The lock is held only for the copy.
         void CopyStepDataSlot(const size_t slotIndex, std::vector<SequenceStep>& out)
         {
             std::shared_lock lock {mRingBufferMutexes[slotIndex]};

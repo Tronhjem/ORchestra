@@ -64,17 +64,21 @@ public:
     juce::AudioProcessorValueTreeState& GetValueTree() { return mValueTree; }
     const TransportData& GetTransportData() { return mTransportData; }
 
+    // UI-facing mirrors published by the audio thread in processBlock. UI
+    // components must read these instead of mTransportData, which the audio
+    // thread mutates.
+    float GetUiBpmDivision() const { return mUiBpmDivision.load(std::memory_order_acquire); }
+    double GetUiBpmFromScript() const { return mUiBpmFromScript.load(std::memory_order_acquire); }
+
     std::string ImportFromFile(const std::string& filePath) { return mORchestraEngine->ImportFromFile(filePath); }
     void ExportToFile(const std::string& data) { mORchestraEngine->ExportToFile(data); }
     void Compile(const std::string& data) { mORchestraEngine->Compile(data); }
     void SetInstructionData(const std::string& data) { mORchestraEngine->SetInstructionData(data); }
     std::string GetInstructionData() { return mORchestraEngine->GetInstructionData(); }
     int GetGlobalStepCount() { return mORchestraEngine->GetGlobalStepCount(); }
-    std::vector<SequenceStep> GetStepDataSlotCopy(const size_t slotIndex) { return mORchestraEngine->GetStepDataSlotCopy(slotIndex); }
-
     void CopyStepDataSlot(const size_t slotIndex, std::vector<SequenceStep>& out) { mORchestraEngine->CopyStepDataSlot(slotIndex, out); }
 
-        std::vector<LogEntry> GetErrors() { return mORchestraEngine->GetErrors(); }
+    std::vector<LogEntry> GetErrors() { return mORchestraEngine->GetErrors(); }
     bool IsORchestraVMInit() { return mORchestraEngine->IsVMInit(); }
     
     void SetErrorListener(ErrorReportingListener* listener) { mORchestraEngine->SetErrorListener(listener); }
@@ -99,6 +103,9 @@ public:
 private:
     void FillPositionData(TransportData& data);
     TransportData mTransportData;
+    // Written only on the audio thread (processBlock), read on the UI thread.
+    std::atomic<float> mUiBpmDivision {1.0f};
+    std::atomic<double> mUiBpmFromScript {0.0};
 #if defined(_DEBUG)
     std::unique_ptr<juce::FileLogger> mLogFileLogger;
 #endif

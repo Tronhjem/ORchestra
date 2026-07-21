@@ -229,6 +229,10 @@ void ORchestraAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juc
 
     mORchestraEngine->Tick(mTransportData, bufferLength, midiMessages);
 
+    // Publish UI-facing mirrors; Timeline/TriggerRectangle read these, not mTransportData.
+    mUiBpmDivision.store(mTransportData.bpmDivision, std::memory_order_release);
+    mUiBpmFromScript.store(mTransportData.bpmFromScript, std::memory_order_release);
+
     // Advance the internal counter only when it is in use.
     // Reset it in all other cases so standalone mode always starts from 0.
     if (!dawIsPlaying && IsRunning)
