@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 
-option(STRESS_ASSERTS "Enable _DEBUG asserts and AssertMutex instrumentation in the stress target" ON)
+option(STRESS_ASSERTS "Enable _DEBUG asserts and race-window widening in the stress target" ON)
 
 juce_add_console_app(ORchestraStress
     PRODUCT_NAME "ORchestraStress")
@@ -48,9 +48,6 @@ target_link_libraries(ORchestraStress PRIVATE
     juce::juce_recommended_config_flags
 )
 
-# Kept target-local (not directory-wide) so juceaide and other build tools stay
-# uninstrumented. JUCE module sources are compiled into this target, so they get
-# instrumented too.
 if(ENABLE_TSAN)
     target_compile_options(ORchestraStress PRIVATE -fsanitize=thread -g)
     target_link_options(ORchestraStress PRIVATE -fsanitize=thread)

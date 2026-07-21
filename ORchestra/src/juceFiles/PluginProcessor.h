@@ -71,6 +71,9 @@ public:
     std::string GetInstructionData() { return mORchestraEngine->GetInstructionData(); }
     int GetGlobalStepCount() { return mORchestraEngine->GetGlobalStepCount(); }
     std::vector<SequenceStep> GetStepDataSlotCopy(const size_t slotIndex) { return mORchestraEngine->GetStepDataSlotCopy(slotIndex); }
+
+    void CopyStepDataSlot(const size_t slotIndex, std::vector<SequenceStep>& out) { mORchestraEngine->CopyStepDataSlot(slotIndex, out); }
+
         std::vector<LogEntry> GetErrors() { return mORchestraEngine->GetErrors(); }
     bool IsORchestraVMInit() { return mORchestraEngine->IsVMInit(); }
     

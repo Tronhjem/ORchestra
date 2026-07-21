@@ -98,8 +98,6 @@ namespace ORchestra
 
         mVM.Reset();
 
-        // Snapshot under the lock: SetInstructionData can write mInstructionData
-        // from the UI thread while Prepare scans it here.
         std::string instructionDataSnapshot;
         {
             std::scoped_lock lock {mInstructionDataMutex};
@@ -171,8 +169,6 @@ namespace ORchestra
 
         const int readySteps = mReadySteps.load();
 #if defined(_DEBUG)
-        // The audio thread decrements after a read; a Reset() zeroing in between
-        // can drive this negative and breaks slot ownership. Tripwire for that.
         ORCHESTRA_ASSERT_SIMPLE(readySteps >= 0);
 #endif
         int stepsToProcess = STEP_BUFFER_SIZE - 1 - readySteps; // leave the last step unprocessed.
@@ -201,7 +197,6 @@ namespace ORchestra
 
             std::scoped_lock slotLock {mRingBufferMutexes[static_cast<unsigned long>(stepWrapped)]};
 #if defined(_DEBUG) && defined(ORCHESTRA_RACE_WIDEN)
-            // Widen the collision window so stress runs exercise contention.
             std::this_thread::sleep_for(std::chrono::microseconds(500));
 #endif
 
@@ -315,26 +310,25 @@ namespace ORchestra
             && currentStep != mLastStep
             && mReadySteps.load(std::memory_order_acquire) > 0)
         {
-            ProcessStepData(transportData, currentStep, nextStepInSamples, samplesPerStep);
-
-            // Decrement only while still positive: a Reset() or seek on the
-            // worker can zero the count between the check above and here.
-            int ready = mReadySteps.load(std::memory_order_acquire);
-            while (ready > 0
-                   && !mReadySteps.compare_exchange_weak(ready, ready - 1,
-                                                         std::memory_order_acq_rel))
+            if (ProcessStepData(transportData, currentStep, nextStepInSamples, samplesPerStep))
             {
-            }
+                int ready = mReadySteps.load(std::memory_order_acquire);
+                while (ready > 0
+                       && !mReadySteps.compare_exchange_weak(ready, ready - 1,
+                                                              std::memory_order_acq_rel))
+                {
+                }
 
 #if defined(_DEBUG)
-            ORCHESTRA_ASSERT_SIMPLE(mReadySteps.load(std::memory_order_acquire) >= 0);
+                ORCHESTRA_ASSERT_SIMPLE(mReadySteps.load(std::memory_order_acquire) >= 0);
 #endif
-            if (mReadySteps.load() < HALF_STEP_BUFFER_SIZE)
-                WakeWorker();
+                if (mReadySteps.load() < HALF_STEP_BUFFER_SIZE)
+                    WakeWorker();
+            }
         }
     }
 
-    void ORchestraEngine::ProcessStepData(TransportData& transportData, const int currentStep, const int nextStepInSamples, const double samplesPerStep)
+    bool ORchestraEngine::ProcessStepData(TransportData& transportData, const int currentStep, const int nextStepInSamples, const double samplesPerStep)
     {
 #if defined(_DEBUG)
         // ScopedTimer timer{ "Process Beat" };
@@ -342,16 +336,15 @@ namespace ORchestra
         mSamplesSinceLastStep = transportData.timeInSamples;
         const int wrappedGlobalStep = currentStep & STEP_BUFFER_SIZE_MASK;
 
-        // try_lock: the audio callback must never block. Contention means the
-        // worker is clearing/refilling this slot (reset or seek); skip the step.
-        std::unique_lock<std::mutex> slotLock {
+        std::shared_lock<std::shared_mutex> slotLock {
             mRingBufferMutexes[static_cast<unsigned long>(wrappedGlobalStep)], std::try_to_lock};
         if (!slotLock.owns_lock())
-            return;
+            return false;
 
         mLastStep = currentStep;
 
 #if defined(_DEBUG) && defined(ORCHESTRA_RACE_WIDEN)
+        // Stress-only window widening.
         std::this_thread::sleep_for(std::chrono::microseconds(500));
 #endif
 
@@ -437,6 +430,8 @@ namespace ORchestra
                     }
             }
         }
+
+        return true;
     }
 
     void ORchestraEngine::RequestClearErrors()

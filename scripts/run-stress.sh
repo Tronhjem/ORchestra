@@ -3,14 +3,8 @@ set -e
 
 # Usage: ./run-stress.sh [seconds] [mode] [harness_mode]
 #   seconds:      length of each stress run (default: 20)
-#   mode:         'assert', 'tsan', or 'both' (default: both)
-#   harness_mode: '' (default, drives error logging + clearing) or 'calm'
-#                 (valid scripts only, so deeper races surface under TSan)
-#
-# assert build: _DEBUG tripwires (AssertMutex contention, invariant asserts,
-#               widened race windows via ORCHESTRA_RACE_WIDEN). Aborts on catch.
-# tsan build:   no _DEBUG, ThreadSanitizer instrumentation. Reports races even
-#               when the harmful interleaving never happens.
+#   mode:         assert | tsan | both (default: both)
+#   harness_mode: '' (default) or 'calm' (valid scripts only)
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
@@ -55,7 +49,6 @@ run_tsan_build() {
 
     echo ""
     echo "Running TSan stress (${DURATION}s${HARNESS_MODE:+, ${HARNESS_MODE}})..."
-    # halt_on_error=0: keep going after reports so one run collects all sites.
     if TSAN_OPTIONS="halt_on_error=0" "$(find_binary "${build_dir}")" "${DURATION}" ${HARNESS_MODE}; then
         echo "=== TSan stress: completed, no races reported ==="
     else

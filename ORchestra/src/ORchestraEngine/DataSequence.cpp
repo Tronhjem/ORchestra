@@ -42,8 +42,6 @@ namespace ORchestra
         if (mData.empty())
             return StepData{ 0 };
 
-        // C++ % keeps the sign, so wrap twice: negative indices (e.g. a[$-8]
-        // right after a loop-back) must stay inside the sequence.
         const int size = static_cast<int>(mData.size());
         const int indexWrapped = ((index % size) + size) % size;
         return mData[static_cast<unsigned long>(indexWrapped)];
@@ -54,8 +52,6 @@ namespace ORchestra
         if (mData.empty())
             return;
 
-        // Same double-wrap as GetValue; a negative raw index would otherwise
-        // become a huge unsigned offset and write out of bounds.
         const int size = static_cast<int>(mData.size());
         const int indexWrapped = ((index % size) + size) % size;
         mData[static_cast<unsigned long>(indexWrapped)] = value;

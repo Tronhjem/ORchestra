@@ -17,15 +17,7 @@
  * along with ORchestra. If not, see <https://www.gnu.org/licenses/>.
  */
 
-// Stress harness for the ORchestra engine's threading model.
-//
-// Simulates the three threads that race in the plugin:
-//   audio thread  -> engine.Tick() at buffer cadence, with periodic loop-back seeks
-//   compile       -> engine.Compile() fired frequently, incl. an invalid script
-//   UI thread     -> GetStepDataSlotCopy()/GetErrors() like Timeline/ConsolePanel do
-//
-// Build with STRESS_ASSERTS=ON (default) for AssertMutex tripwires, or with
-// -DENABLE_TSAN=ON -DSTRESS_ASSERTS=OFF to run under ThreadSanitizer.
+// 3-thread stress harness for the ORchestra engine.
 
 #include <atomic>
 #include <chrono>
@@ -48,14 +40,9 @@ namespace
 {
     constexpr const char* kScripts[] =
     {
-        // valid, matches the plugin default
         "beat(n8)\n\ntrig = euc(3, 8)\n\nnote(trig, C4, 100, n8)\n",
-        // valid, denser
         "beat(n16)\n\na = euc(5, 8)\nb = ran(40, 90)\n\nnote(a, b, 100, n16)\ncc(a, 20, b)\n",
-        // valid, script-set bpm + transpose
         "bpm(90)\nbeat(n8)\ntranspose(2)\n\nt = euc(3, 8)\n\nnote(t, C3, 110, n4)\n",
-        // invalid on purpose: drives worker-side error logging (kept last so
-        // "calm" mode can skip it)
         "this is not a valid script @@@\n",
     };
 
@@ -65,8 +52,6 @@ namespace
 int main(int argc, char** argv)
 {
     const int secondsToRun = (argc > 1) ? std::atoi(argv[1]) : 20;
-    // "calm" mode: no invalid scripts and no error clearing, so the hot
-    // ErrorReporting race doesn't crash the run before deeper races surface.
     const bool calmMode = (argc > 2) && (std::string(argv[2]) == "calm");
     const int scriptCount = calmMode ? kNumScripts - 1 : kNumScripts;
 
@@ -96,14 +81,14 @@ int main(int argc, char** argv)
         transport.bpmDivision = 1.0f;
 
         const int bufferLength = 128;
-        const int64_t loopLengthSamples = 44100 * 2; // seek back every ~2 s
+        const int64_t loopLengthSamples = 44100 * 2;
         juce::MidiBuffer midi;
 
         while (!stop.load(std::memory_order_relaxed))
         {
             transport.timeInSamples += bufferLength;
             if (transport.timeInSamples >= loopLengthSamples)
-                transport.timeInSamples = 0; // exercises the seek path
+                transport.timeInSamples = 0;
 
             engine.Tick(transport, bufferLength, midi);
             midi.clear();

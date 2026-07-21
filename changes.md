@@ -1,7 +1,14 @@
 ### v0.2.3
 
-General cleanup of some testing code was done. Adding thread sanitizer and stress testing for making sure we have no race conditions and more stability. 
-This fixed a couple of threading issues and one potential crash.
+- Reorganized all testing code under `Tests/` (UnitTests, Fuzzing, StressTest).
+- Added a 3-thread stress harness and ThreadSanitizer build for catching race conditions.
+- Replaced debug-only AssertMutex tripwires with real mutexes in `ErrorReporting`, the instruction string copy path, and ring buffer slots.
+
+Bugs:
+- Fix data race on `mLogEntries` that could SEGV when compiling frequently while the console refreshed.
+- Fix data race on `mInstructionData` / `mPendingInstructionData` that could crash state save/restore during a recompile.
+- Fix UI thread reading ring buffer slots while the worker thread rewrote them after a compile.
+- Fix negative array index wrap in `DataSequence` after a DAW loop-back.
 
 ### v0.2.2
 

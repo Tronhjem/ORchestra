@@ -49,8 +49,6 @@ namespace ORchestra
 
     void ErrorReporting::CheckAndClear()
     {
-        // Called on the audio thread: try_lock so the callback never blocks.
-        // If the lock is held, the clear simply happens on a later buffer.
         if (!mShouldClear.load(std::memory_order_relaxed))
             return;
 
@@ -90,9 +88,6 @@ namespace ORchestra
         (void)entry;
 #endif
     }
-
-    // The mutators lock mEntriesMutex for the vector update only; the listener
-    // is always notified outside the lock.
 
     void ErrorReporting::LogError(const int line, std::string& message)
     {

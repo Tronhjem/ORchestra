@@ -62,6 +62,7 @@ public:
         mTimelineRectangles.reserve(TIMELINE_STEPS_DRAWN * TIMELINE_ROWS_DRAWN);
         mPlayingTimelineRectangles.reserve(8);
         mBarLines.reserve(8);
+        mSlotStepsBuffer.reserve(16);
     }
 
     ~Timeline() override
@@ -90,5 +91,6 @@ private:
     std::vector<TimelineRectangle> mTimelineRectangles;
     std::vector<TimelineRectangle> mPlayingTimelineRectangles;
     std::vector<BarLine> mBarLines;
+    std::vector<SequenceStep> mSlotStepsBuffer;
     std::atomic<bool> mTimelineDirty;
 };

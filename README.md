@@ -24,8 +24,7 @@ The original prototype that sparked the idea can be found here: <https://github.
 - [Prerequisites](#prerequisites)
 - [Quick Start](#quick-start)
 - [CMake Build Instructions](#cmake-build-instructions)
-- [Running Tests](#running-tests)
-- [Fuzzing](#fuzzing)
+- [Testing](#testing)
 - [Syntax and Language Reference](#syntax-and-language-reference)
   - [Reserved Keywords](#reserved-keywords)
   - [Operators](#operators)
@@ -107,7 +106,7 @@ The CMake build supports separate compilation of the plugin and tests for faster
 ```bash
 cmake -DBUILD_PLUGIN=OFF -DBUILD_TESTS=ON ..
 cmake --build .
-./UnitTests/ORchestraTests
+./Tests/UnitTests/ORchestraTests
 ```
 
 **Build plugin only (requires JUCE):**
@@ -126,71 +125,9 @@ cmake --build .
 
 ---
 
-## Running Tests
+## Testing
 
-Tests use the Catch2 framework and can be built independently from the JUCE plugin. This allows for quick test iterations without compiling the entire JUCE framework.
-
-```bash
-cd build
-cmake -DBUILD_PLUGIN=OFF -DBUILD_TESTS=ON ..
-cmake --build .
-./UnitTests/ORchestraTests
-```
-
----
-
-## Fuzzing
-
-Fuzzing targets the ORchestra engine with random input to catch crashes, hangs, or assertion failures. The fuzzing suite is completely separate from unit tests and has no JUCE dependency, making it suitable for Windows builds and CI servers.
-
-There are two fuzz targets:
-- **ORchestraFuzz** — Scanner and Compiler only (parser robustness)
-- **ORchestraFuzzVM** — End-to-end: scan, compile, VM::Prepare, and VM::Tick (runtime robustness)
-
-The VM fuzzer includes a corpus of seed scripts (`Fuzzing/corpus/`) that are mutated rather than generating pure random bytes. This finds deeper bugs much faster.
-
-### Quick Start
-
-```bash
-# Scanner/Compiler fuzzer
-./run-fuzzer.sh scanner          # default: 100,000 iterations
-./run-fuzzer.sh scanner 42 500000
-
-# VM end-to-end fuzzer (uses corpus seeds)
-./run-fuzzer.sh vm               # default: 100,000 iterations
-./run-fuzzer.sh vm 42 Fuzzing/corpus
-```
-
-### Manual Build
-
-```bash
-cmake -DBUILD_PLUGIN=OFF -DBUILD_TESTS=OFF -DBUILD_FUZZING=ON -B build
-cmake --build build --target ORchestraFuzz --target ORchestraFuzzVM
-
-# Scanner/Compiler fuzzer
-./build/Fuzzing/ORchestraFuzz 42 500000
-
-# VM fuzzer with corpus
-./build/Fuzzing/ORchestraFuzzVM 42 Fuzzing/corpus
-```
-
-The VM fuzzer saves crash reproducers to `build/Fuzzing/crashes/` and writes the last tested input to `build/Fuzzing/_last_input.txt`.
-
-### libFuzzer (coverage-guided, requires upstream Clang)
-
-For coverage-guided fuzzing with AddressSanitizer, use upstream Clang (not AppleClang) and enable `FUZZING_USE_LIBFUZZER`:
-
-```bash
-cmake -DBUILD_FUZZING=ON -DFUZZING_USE_LIBFUZZER=ON -DCMAKE_CXX_COMPILER=$(brew --prefix llvm)/bin/clang++ -B build
-cmake --build build --target ORchestraFuzz --target ORchestraFuzzVM
-./build/Fuzzing/ORchestraFuzzVM -max_total_time=300 Fuzzing/corpus/
-```
-
-Common libFuzzer flags:
-- `-max_total_time=N` — run for N seconds
-- `-runs=N` — run N total iterations
-
-libFuzzer runs indefinitely by default until stopped or a crash is found.
+All testing tools - unit tests, fuzzers, and the multi-thread stress harness - live in the `Tests/` folder. See `Tests/README.md` for build and run instructions.
 
 ---
 

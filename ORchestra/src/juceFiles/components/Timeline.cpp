@@ -85,8 +85,6 @@ void Timeline::timerCallback()
         const unsigned long stepWrapped =
             static_cast<unsigned long>((globalStepOffset + index) & STEP_BUFFER_SIZE_MASK);
 
-        // Copy under the slot's lock: the worker thread clears/refills slots.
-        const std::vector<SequenceStep> sequenceSteps = mAudioProcessor->GetStepDataSlotCopy(stepWrapped);
         const float xOffset = LABEL_COLUMN_WIDTH + static_cast<float>(index) * STEP_WIDTH + TRIGGER_STEP_MARGIN;
 
         if ((globalStepOffset + index) % barStepCount == 0)
@@ -99,7 +97,9 @@ void Timeline::timerCallback()
                                            barNumber, barWidth});
         }
 
-        for (const auto& step : sequenceSteps)
+        mAudioProcessor->CopyStepDataSlot(stepWrapped, mSlotStepsBuffer);
+
+        for (const auto& step : mSlotStepsBuffer)
         {
             if (step.mType == SequenceStepType::TRANSPOSE)
             {
@@ -122,7 +122,7 @@ void Timeline::timerCallback()
                 const int rawNote = static_cast<int>(step.mFirst.GetEquivalentValueAtIndex(substepIndex, substepLength));
                 const int transposedNote = std::clamp(rawNote + drawTranspose, 0, 127);
 
-                const int row = 11 - (transposedNote % 12); // B=row0 (top), C=row11 (bottom)
+                const int row = 11 - (transposedNote % 12);
                 const float triggerRectY = BAR_HEADER_HEIGHT + static_cast<float>(row) * STEP_HEIGHT + TRIGGER_STEP_MARGIN;
 
                 const float noteDiv = DurationToBpmDivision(step.mDuration);
@@ -144,7 +144,7 @@ void Timeline::timerCallback()
                     mPlayingTimelineRectangles.emplace_back(TimelineRectangle{triggerReactX, triggerRectY,
                                                                        noteWidth, velocityFloat, durationInSteps, durationInSteps, step.mType});
                 }
-                else 
+                else
                     mTimelineRectangles.emplace_back(TimelineRectangle{triggerReactX, triggerRectY,
                                                                        noteWidth, velocityFloat, durationInSteps, durationInSteps, step.mType});
             }

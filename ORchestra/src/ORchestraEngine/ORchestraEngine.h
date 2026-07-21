@@ -22,6 +22,7 @@
 #include <JuceHeader.h>
 #include <memory>
 #include <mutex>
+#include <shared_mutex>
 #include <condition_variable>
 
 #include "TransportData.h"
@@ -48,8 +49,16 @@ namespace ORchestra
         // rewritten by the worker thread.
         std::vector<SequenceStep> GetStepDataSlotCopy(const size_t slotIndex)
         {
-            std::scoped_lock lock {mRingBufferMutexes[slotIndex]};
+            std::shared_lock lock {mRingBufferMutexes[slotIndex]};
             return mStepRingBuffer[slotIndex];
+        }
+
+        // Copy-assign reuses out's capacity, so steady-state callers allocate
+        // nothing. The lock is held only for the copy.
+        void CopyStepDataSlot(const size_t slotIndex, std::vector<SequenceStep>& out)
+        {
+            std::shared_lock lock {mRingBufferMutexes[slotIndex]};
+            out = mStepRingBuffer[slotIndex];
         }
 
         int GetGlobalStepCount() { return mCurrentGlobalStep.load(); }
@@ -80,7 +89,7 @@ namespace ORchestra
         void WorkerThreadLoop();
         bool PreProcessSteps();
         void HandleSeekRequest();
-        inline void ProcessStepData(TransportData& transportData, const int currentStep, const int nextStepInSamples, const double samplesPerStep);
+        inline bool ProcessStepData(TransportData& transportData, const int currentStep, const int nextStepInSamples, const double samplesPerStep);
         inline void TickInternal(TransportData& transportData, const int bufferLength);
 
 
@@ -118,9 +127,10 @@ namespace ORchestra
         std::thread mWorkerThread;
         std::unique_ptr<FileLoader> mFileLoader;
         std::array<std::vector<SequenceStep>, STEP_BUFFER_SIZE> mStepRingBuffer;
-        // One mutex per ring slot: worker locks while clearing/filling, the audio
-        // thread try_locks (skips the step if contended), UI copies under lock.
-        std::array<std::mutex, STEP_BUFFER_SIZE> mRingBufferMutexes;
+        // One shared_mutex per ring slot: worker takes it exclusively while
+        // clearing/filling; audio (try) and UI both take it shared, so readers
+        // never block each other.
+        std::array<std::shared_mutex, STEP_BUFFER_SIZE> mRingBufferMutexes;
         // Guards mInstructionData and mPendingInstructionData (UI vs worker).
         std::mutex mInstructionDataMutex;
 
