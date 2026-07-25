@@ -265,14 +265,14 @@ namespace ORchestra
 
         const double samplesPerStep =
             static_cast<double>(transportData.sampleRate)
-            * (60.0 / (transportData.bpmFromScript * transportData.bpmDivision));
+            * (60.0 / (transportData.bpmFromScript * transportData.beatDivision));
 
         // When BPM or division changes, rebase the step origin so the step counter
         // advances continuously without jumping. A jump causes false resets and retriggering.
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wfloat-equal"
         const bool timingChanged = (transportData.bpmFromScript != mLastBpm)
-            || (transportData.bpmDivision   != mLastBpmDivision);
+            || (transportData.beatDivision   != mLastBpmDivision);
 #pragma clang diagnostic pop
 
         if (timingChanged && mSamplesPerStep > 0.0)
@@ -283,7 +283,7 @@ namespace ORchestra
         }
 
         mLastBpm = transportData.bpmFromScript;
-        mLastBpmDivision = transportData.bpmDivision;
+        mLastBpmDivision = transportData.beatDivision;
         mSamplesPerStep = samplesPerStep;
 
         const int currentStep = static_cast<int>(ceil(
@@ -366,7 +366,7 @@ namespace ORchestra
                     }
                 case ORchestra::SequenceStepType::BEAT:
                     {
-                        transportData.bpmDivision = DurationToBpmDivision(step.mFirst.GetValue(0));
+                        transportData.beatDivision = DurationToBpmDivision(step.mFirst.GetValue(0));
 
                         break;
                     }
@@ -405,26 +405,25 @@ namespace ORchestra
                             if (!shouldTrigger)
                                 continue;
 
-                            const int rawFirstByte =
+                            const int rawFirst =
                                 static_cast<int>(step.mFirst.GetEquivalentValueAtIndex(i, triggerLength));
 
                             const int transposedFirstByte =
                                 (step.mType == ORchestra::SequenceStepType::NoteOn)
-                                ? rawFirstByte + transportData.transposeOffset
-                                : rawFirstByte;
+                                ? rawFirst + transportData.transposeOffset
+                                : rawFirst;
 
-                            const DataUnit firstByte = static_cast<DataUnit>(transposedFirstByte);
-                            const DataUnit secondByte =
+                            const DataUnit firstData = static_cast<DataUnit>(transposedFirstByte);
+                            const DataUnit secondData =
                                 step.mSecond.GetEquivalentValueAtIndex(i, triggerLength);
 
                             const DataUnit channel =
                                 step.mChannel.GetEquivalentValueAtIndex(i, triggerLength);
 
-                            const int timeStamp = nextStepInSamples
-                                + i * (static_cast<int>(samplesPerStep) / triggerLength);
+                            const int timeStamp = nextStepInSamples + i * (static_cast<int>(samplesPerStep) / triggerLength);
                             const int remainingSamples = timeStamp - static_cast<int>(transportData.timeInSamples);
 
-                            ScheduledMidiMessage message{ step.mType, firstByte, secondByte,
+                            ScheduledMidiMessage message{ step.mType, firstData, secondData,
                                 channel, remainingSamples, noteDurationSamples };
 
                             mMidiScheduler.PostMidi(message);

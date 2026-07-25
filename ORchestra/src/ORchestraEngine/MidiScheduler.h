@@ -28,8 +28,8 @@ namespace ORchestra {
     struct ScheduledMidiMessage
     {
         SequenceStepType mMessageType;
-        DataUnit mFirstByte;
-        DataUnit mSecondByte;
+        DataUnit mFirst;
+        DataUnit mSecond;
         DataUnit mChannel;
         int mScheduledTime;
         int mDuration;
@@ -45,7 +45,7 @@ namespace ORchestra {
 
     private:
         std::vector<ScheduledMidiMessage> mScheduledMidiMessages;
-        bool mActiveNoteCounts[128 * 16] = {};
+        int mActiveNoteCounts[128 * 16] = {};
     };
 
 } // namespace ORchestra

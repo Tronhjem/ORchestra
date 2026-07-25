@@ -32,8 +32,8 @@ namespace ORchestra {
 
     void MidiScheduler::PostMidi(ScheduledMidiMessage& message)
     {
-        message.mFirstByte = CLAMP_TO_MIDI(message.mFirstByte, 0, MIDI_MAX_VALUE);
-        message.mSecondByte = CLAMP_TO_MIDI(message.mSecondByte, 0, MIDI_MAX_VALUE);
+        message.mFirst = CLAMP_TO_MIDI(message.mFirst, 0, MIDI_MAX_VALUE);
+        message.mSecond = CLAMP_TO_MIDI(message.mSecond, 0, MIDI_MAX_VALUE);
         message.mChannel = CLAMP_TO_MIDI(message.mChannel, 0, MAX_MIDI_CHANNEL_NUMBER);
         mScheduledMidiMessages.emplace_back(message);
 
@@ -42,7 +42,7 @@ namespace ORchestra {
         {
             const int timeStampOff = message.mScheduledTime + message.mDuration;
             mScheduledMidiMessages.emplace_back(ScheduledMidiMessage { SequenceStepType::NoteOff, 
-                                                                       message.mFirstByte, 
+                                                                       message.mFirst, 
                                                                        0, message.mChannel, 
                                                                        timeStampOff, 0 });
         }
@@ -51,9 +51,14 @@ namespace ORchestra {
     void MidiScheduler::ProcessMidiPosts(juce::MidiBuffer& midiMessages,
         const int bufferLength)
     {
-        for (int i = (int)mScheduledMidiMessages.size() - 1; i >= 0; --i)
+        // Process in insertion order so NoteOn/NoteOff pairs for the same pitch
+        // are handled chronologically. Using a bool count and reverse iteration
+        // left the active flag true after two same-pitch notes fired together.
+        size_t keepCount = 0;
+
+        for (size_t i = 0; i < mScheduledMidiMessages.size(); ++i)
         {
-            ScheduledMidiMessage& message = mScheduledMidiMessages[static_cast<unsigned long>(i)];
+            ScheduledMidiMessage& message = mScheduledMidiMessages[i];
             message.mScheduledTime -= bufferLength;
 
             if (message.mScheduledTime <= 0)
@@ -64,34 +69,33 @@ namespace ORchestra {
                 {
                     case SequenceStepType::NoteOn:
                     {
-                        const int index = static_cast<int>(message.mFirstByte) * 16 + static_cast<int>(message.mChannel);
+                        const int index = static_cast<int>(message.mFirst) * 16 + static_cast<int>(message.mChannel);
 
-                        // Send note off before note on for same note.
-                        if (mActiveNoteCounts[index])
+                        ++mActiveNoteCounts[index];
+                        if (mActiveNoteCounts[index] == 1)
                         {
-                            midiMessages.addEvent(juce::MidiMessage::noteOff(static_cast<int>(message.mChannel),
-                                static_cast<int>(message.mFirstByte), static_cast<uint8_t>(0)),
-                                juce::jmax(0, relativePositionInBuffer - 1));
+                            midiMessages.addEvent(juce::MidiMessage::noteOn(static_cast<int>(message.mChannel),
+                                                    static_cast<int>(message.mFirst),
+                                                    static_cast<unsigned char>(message.mSecond)), relativePositionInBuffer);
                         }
-
-                        midiMessages.addEvent(juce::MidiMessage::noteOn(static_cast<int>(message.mChannel),
-                                                static_cast<int>(message.mFirstByte),
-                                                static_cast<unsigned char>(message.mSecondByte)), relativePositionInBuffer);
-
-                        mActiveNoteCounts[index] = true;
 
                         break;
                     }
 
                     case SequenceStepType::NoteOff:
                     {
-                        const int index = static_cast<int>(message.mFirstByte) * 16 + static_cast<int>(message.mChannel);
+                        const int index = static_cast<int>(message.mFirst) * 16 + static_cast<int>(message.mChannel);
 
-                        midiMessages.addEvent(juce::MidiMessage::noteOff(static_cast<int>(message.mChannel),
-                                static_cast<int>(message.mFirstByte),
-                                static_cast<unsigned char>(message.mSecondByte)), juce::jmax(0, relativePositionInBuffer - 1));
-
-                        mActiveNoteCounts[index] = false;
+                        if (mActiveNoteCounts[index] > 0)
+                        {
+                            --mActiveNoteCounts[index];
+                            if (mActiveNoteCounts[index] == 0)
+                            {
+                                midiMessages.addEvent(juce::MidiMessage::noteOff(static_cast<int>(message.mChannel),
+                                        static_cast<int>(message.mFirst),
+                                        static_cast<unsigned char>(message.mSecond)), juce::jmax(0, relativePositionInBuffer - 1));
+                            }
+                        }
 
                         break;
                     }
@@ -99,8 +103,8 @@ namespace ORchestra {
                     case SequenceStepType::CC:
                     {
                         midiMessages.addEvent(juce::MidiMessage::controllerEvent(static_cast<int>(message.mChannel),
-                            static_cast<int>(message.mFirstByte),
-                            static_cast<unsigned char>(message.mSecondByte)), relativePositionInBuffer);
+                            static_cast<int>(message.mFirst),
+                            static_cast<unsigned char>(message.mSecond)), relativePositionInBuffer);
 
                         break;
                     }
@@ -108,11 +112,15 @@ namespace ORchestra {
                     default:
                         break;
                 }
-
-                mScheduledMidiMessages[static_cast<unsigned long>(i)] = mScheduledMidiMessages.back();
-                mScheduledMidiMessages.pop_back();
+            }
+            else
+            {
+                mScheduledMidiMessages[keepCount] = mScheduledMidiMessages[i];
+                ++keepCount;
             }
         }
+
+        mScheduledMidiMessages.erase(mScheduledMidiMessages.begin() + keepCount, mScheduledMidiMessages.end());
     }
 
     void MidiScheduler::ClearAllData(juce::MidiBuffer& midiMessages)

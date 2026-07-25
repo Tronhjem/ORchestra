@@ -99,7 +99,7 @@ ORchestraAudioProcessor::ORchestraAudioProcessor() :
     mTransportData.timeInSamples = 0;
     mTransportData.sampleRate = 44100;
     mTransportData.bpm = 120.0;
-    mTransportData.bpmDivision = 1.0f;
+    mTransportData.beatDivision = 1.0f;
 
 }
 
@@ -230,7 +230,7 @@ void ORchestraAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juc
     mORchestraEngine->Tick(mTransportData, bufferLength, midiMessages);
 
     // Publish UI-facing mirrors; Timeline/TriggerRectangle read these, not mTransportData.
-    mUiBpmDivision.store(mTransportData.bpmDivision, std::memory_order_release);
+    mUiBpmDivision.store(mTransportData.beatDivision, std::memory_order_release);
     mUiBpmFromScript.store(mTransportData.bpmFromScript, std::memory_order_release);
 
     // Advance the internal counter only when it is in use.

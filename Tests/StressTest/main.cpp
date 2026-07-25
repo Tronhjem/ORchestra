@@ -81,7 +81,7 @@ int main(int argc, char** argv)
         transport.isPlaying = true;
         transport.sampleRate = 44100.0;
         transport.bpm = 120.0;
-        transport.bpmDivision = 1.0f;
+        transport.beatDivision = 1.0f;
 
         const int bufferLength = 128;
         const int64_t loopLengthSamples = 44100 * 2;
