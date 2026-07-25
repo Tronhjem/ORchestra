@@ -1,3 +1,18 @@
+### v0.2.3
+
+- Reorganized all testing code under `Tests/` (UnitTests, Fuzzing, StressTest).
+- Added a 3-thread stress harness and ThreadSanitizer build for catching race conditions.
+- Replaced debug-only AssertMutex tripwires with real mutexes in `ErrorReporting`, the instruction string copy path, and ring buffer slots.
+
+Bugs:
+- Fix data race on `mLogEntries` that could SEGV when compiling frequently while the console refreshed.
+- Fix data race on `mInstructionData` / `mPendingInstructionData` that could crash state save/restore during a recompile.
+- Fix UI thread reading ring buffer slots while the worker thread rewrote them after a compile.
+- Fix negative array index wrap in `DataSequence` after a DAW loop-back.
+- Make audio-thread `print` logging non-blocking (drops on contention) so the audio thread never waits on the log mutex.
+- Publish BPM and beat division to the UI via atomics instead of reading `TransportData` cross-thread.
+- Fix first step after a DAW seek/loop-back being skipped when its step number equaled the last processed step.
+
 ### v0.2.2
 
 Select audio output in the menu, to select the audio driver. This allows the user to get more steady triggering in standalone mode.

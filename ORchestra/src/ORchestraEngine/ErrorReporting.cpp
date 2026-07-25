@@ -17,10 +17,19 @@
  * along with ORchestra. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <chrono>
 #include <ctime>
 #include <cstdio>
+#include <thread>
 
 #include "ErrorReporting.h"
+
+#if defined(_DEBUG) && defined(ORCHESTRA_RACE_WIDEN)
+    #define ORCHESTRA_ERROR_WIDEN_SLEEP() \
+        std::this_thread::sleep_for(std::chrono::microseconds(300))
+#else
+    #define ORCHESTRA_ERROR_WIDEN_SLEEP() do { } while (false)
+#endif
 
 namespace ORchestra
 {
@@ -40,11 +49,18 @@ namespace ORchestra
 
     void ErrorReporting::CheckAndClear()
     {
-        if (mShouldClear.exchange(false))
-        {
-            mLogEntries.clear();
-            NotifyListener();
-        }
+        if (!mShouldClear.load(std::memory_order_relaxed))
+            return;
+
+        std::unique_lock<std::mutex> lock {mEntriesMutex, std::try_to_lock};
+        if (!lock.owns_lock())
+            return;
+
+        mShouldClear.store(false, std::memory_order_relaxed);
+        mLogEntries.clear();
+
+        lock.unlock();
+        NotifyListener();
     }
 
     void ErrorReporting::TrimOldEntries()
@@ -75,72 +91,95 @@ namespace ORchestra
 
     void ErrorReporting::LogError(const int line, std::string& message)
     {
-        std::string stamp = CurrentTimestamp();
-        message.insert(0, stamp);
-        message += ", at line ";
-        message += std::to_string(line);
-        message += "\n";
-        mLogEntries.emplace_back(LogEntry{ EntryType::Error, line, message });
-        ForwardToSink(mLogEntries.back());
-        TrimOldEntries();
+        {
+            std::scoped_lock lock {mEntriesMutex};
+            std::string stamp = CurrentTimestamp();
+            message.insert(0, stamp);
+            message += ", at line ";
+            message += std::to_string(line);
+            message += "\n";
+            mLogEntries.emplace_back(LogEntry{ EntryType::Error, line, message });
+            ForwardToSink(mLogEntries.back());
+            TrimOldEntries();
+        }
         NotifyListener();
     }
 
-    void ErrorReporting::LogError(const std::string& message)
+    void ErrorReporting::AppendPlainLocked(EntryType type, const std::string& message)
     {
+        ORCHESTRA_ERROR_WIDEN_SLEEP();
         std::string stamped;
         stamped.reserve(12 + message.size() + 1);
         stamped = CurrentTimestamp();
         stamped += message;
         stamped += "\n";
-        mLogEntries.emplace_back(LogEntry{ EntryType::Error, 0, stamped });
+        mLogEntries.emplace_back(LogEntry{ type, 0, stamped });
         ForwardToSink(mLogEntries.back());
         TrimOldEntries();
+    }
+
+    void ErrorReporting::LogError(const std::string& message)
+    {
+        {
+            std::scoped_lock lock {mEntriesMutex};
+            AppendPlainLocked(EntryType::Error, message);
+        }
         NotifyListener();
     }
 
     void ErrorReporting::LogWarning(const int line, std::string& message)
     {
-        std::string stamp = CurrentTimestamp();
-        message.insert(0, stamp);
-        message += ", at line ";
-        message += std::to_string(line);
-        message += "\n";
-        mLogEntries.emplace_back(LogEntry{ EntryType::Warning, line, message });
-        ForwardToSink(mLogEntries.back());
-        TrimOldEntries();
+        {
+            std::scoped_lock lock {mEntriesMutex};
+            std::string stamp = CurrentTimestamp();
+            message.insert(0, stamp);
+            message += ", at line ";
+            message += std::to_string(line);
+            message += "\n";
+            mLogEntries.emplace_back(LogEntry{ EntryType::Warning, line, message });
+            ForwardToSink(mLogEntries.back());
+            TrimOldEntries();
+        }
         NotifyListener();
     }
 
     void ErrorReporting::LogWarning(const std::string& message)
     {
-        std::string stamped;
-        stamped.reserve(12 + message.size() + 1);
-        stamped = CurrentTimestamp();
-        stamped += message;
-        stamped += "\n";
-        mLogEntries.emplace_back(LogEntry{ EntryType::Warning, 0, stamped });
-        ForwardToSink(mLogEntries.back());
-        TrimOldEntries();
+        {
+            std::scoped_lock lock {mEntriesMutex};
+            AppendPlainLocked(EntryType::Warning, message);
+        }
         NotifyListener();
     }
 
     void ErrorReporting::LogMessage(const std::string& message)
     {
-        std::string stamped;
-        stamped.reserve(12 + message.size() + 1);
-        stamped = CurrentTimestamp();
-        stamped += message;
-        stamped += "\n";
-        mLogEntries.emplace_back(LogEntry{ EntryType::Messasge, 0, stamped });
-        ForwardToSink(mLogEntries.back());
-        TrimOldEntries();
+        {
+            std::scoped_lock lock {mEntriesMutex};
+            AppendPlainLocked(EntryType::Messasge, message);
+        }
         NotifyListener();
+    }
+
+    bool ErrorReporting::TryLogMessage(const std::string& message)
+    {
+        std::unique_lock<std::mutex> lock {mEntriesMutex, std::try_to_lock};
+        if (!lock.owns_lock())
+            return false;
+
+        AppendPlainLocked(EntryType::Messasge, message);
+
+        lock.unlock();
+        NotifyListener();
+        return true;
     }
 
     void ErrorReporting::Clear()
     {
-        mLogEntries.clear();
+        {
+            std::scoped_lock lock {mEntriesMutex};
+            mLogEntries.clear();
+        }
         NotifyListener();
     }
 

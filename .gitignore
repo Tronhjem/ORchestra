@@ -1,7 +1,11 @@
 Builds/
 build/
+build-plugin/
 build-fuzz/
 build-test/
+build-stress-assert/
+build-stress-tsan/
+
 
 .claude/
 JuceLibraryCode/

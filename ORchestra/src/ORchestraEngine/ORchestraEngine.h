@@ -22,6 +22,7 @@
 #include <JuceHeader.h>
 #include <memory>
 #include <mutex>
+#include <shared_mutex>
 #include <condition_variable>
 
 #include "TransportData.h"
@@ -31,11 +32,7 @@
 #include "ErrorReporting.h"
 #include "Defines.h"
 
-#if defined (_DEBUG)
-#include "AssertMutex.h"
-#endif
-
-namespace ORchestra 
+namespace ORchestra
 {
     class ORchestraEngine
     {
@@ -44,14 +41,33 @@ namespace ORchestra
         ~ORchestraEngine();
         void Tick(TransportData& transportData, const int bufferLength, juce::MidiBuffer& midiMessages);
         void Compile(const std::string& data);
-        const std::string& ImportFromFile(const std::string& filePath);
+        std::string ImportFromFile(const std::string& filePath);
         void ExportToFile(const std::string& filePath);
 
-        std::array<std::vector<SequenceStep>, STEP_BUFFER_SIZE>& GetStepData() { return mStepRingBuffer; }
+        // Copies one ring buffer slot under that slot's shared lock. Copy-assign
+        // reuses out's capacity, so steady-state callers allocate nothing.
+        // Readers (Timeline, stress harness) must use this; the ring buffer is
+        // rewritten by the worker thread.
+        void CopyStepDataSlot(const size_t slotIndex, std::vector<SequenceStep>& out)
+        {
+            std::shared_lock lock {mRingBufferMutexes[slotIndex]};
+            out = mStepRingBuffer[slotIndex];
+        }
+
         int GetGlobalStepCount() { return mCurrentGlobalStep.load(); }
-        const std::vector<LogEntry>& GetErrors() { return mErrorReporting.GetErrors(); }
-        const std::string& GetInstructionData() { return mInstructionData; }
-        void SetInstructionData(const std::string& data) { mInstructionData = data; }
+        std::vector<LogEntry> GetErrors() { return mErrorReporting.GetErrors(); }
+
+        std::string GetInstructionData()
+        {
+            std::scoped_lock lock {mInstructionDataMutex};
+            return mInstructionData;
+        }
+
+        void SetInstructionData(const std::string& data)
+        {
+            std::scoped_lock lock {mInstructionDataMutex};
+            mInstructionData = data;
+        }
         bool IsVMInit() { return mIsVMInit.load(); }
         
         void SetErrorListener(ErrorReportingListener* listener) { mErrorReporting.SetListener(listener); }
@@ -66,7 +82,7 @@ namespace ORchestra
         void WorkerThreadLoop();
         bool PreProcessSteps();
         void HandleSeekRequest();
-        inline void ProcessStepData(TransportData& transportData, const int currentStep, const int nextStepInSamples, const double samplesPerStep);
+        inline bool ProcessStepData(TransportData& transportData, const int currentStep, const int nextStepInSamples, const double samplesPerStep);
         inline void TickInternal(TransportData& transportData, const int bufferLength);
 
 
@@ -104,9 +120,12 @@ namespace ORchestra
         std::thread mWorkerThread;
         std::unique_ptr<FileLoader> mFileLoader;
         std::array<std::vector<SequenceStep>, STEP_BUFFER_SIZE> mStepRingBuffer;
-#if defined (_DEBUG)
-        std::array<AssertMutex, STEP_BUFFER_SIZE> mRingBufferMutexes;
-#endif
+        // One shared_mutex per ring slot: worker takes it exclusively while
+        // clearing/filling; audio (try) and UI both take it shared, so readers
+        // never block each other.
+        std::array<std::shared_mutex, STEP_BUFFER_SIZE> mRingBufferMutexes;
+        // Guards mInstructionData and mPendingInstructionData (UI vs worker).
+        std::mutex mInstructionDataMutex;
 
         std::string mInstructionData;
         std::string mPendingInstructionData;

@@ -42,7 +42,8 @@ namespace ORchestra
         if (mData.empty())
             return StepData{ 0 };
 
-        const int indexWrapped = index % static_cast<int>(mData.size());
+        const int size = static_cast<int>(mData.size());
+        const int indexWrapped = ((index % size) + size) % size;
         return mData[static_cast<unsigned long>(indexWrapped)];
     }
 
@@ -51,7 +52,8 @@ namespace ORchestra
         if (mData.empty())
             return;
 
-        const int indexWrapped = index % static_cast<int>(mData.size());
+        const int size = static_cast<int>(mData.size());
+        const int indexWrapped = ((index % size) + size) % size;
         mData[static_cast<unsigned long>(indexWrapped)] = value;
     }
 } // namespace ORchestra

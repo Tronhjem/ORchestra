@@ -19,6 +19,7 @@
 
 #pragma once
 
+#include <mutex>
 #include <string>
 #include <vector>
 #include <atomic>
@@ -63,11 +64,24 @@ namespace ORchestra
         void LogWarning(const int line, std::string& message);
         void LogWarning(const std::string& message);
         void LogMessage(const std::string& message);
+        // Non-blocking variant for the audio thread: on lock contention the
+        // message is dropped and false is returned (no entry, no notify).
+        bool TryLogMessage(const std::string& message);
         void Clear();
         void RequestClear();
-        const std::vector<LogEntry>& GetErrors() const { return mLogEntries; }
+        // Returns a copy: mLogEntries is mutated from the worker and audio
+        // threads, so callers must never iterate it by reference.
+        std::vector<LogEntry> GetErrors() const
+        {
+            std::scoped_lock lock {mEntriesMutex};
+            return mLogEntries;
+        }
         
         void SetListener(ErrorReportingListener* listener) { mListener = listener; }
+#if defined(_TEST)
+        // Lets tests hold the entries mutex to exercise the TryLogMessage drop path.
+        std::unique_lock<std::mutex> AcquireLockForTest() { return std::unique_lock<std::mutex>{mEntriesMutex}; }
+#endif
 #if defined(_DEBUG)
         void SetSink(LogSinkFn sink) { mSink = std::move(sink); }
 #endif
@@ -77,9 +91,12 @@ namespace ORchestra
         void TrimOldEntries();
         void NotifyListener();
         void ForwardToSink(const LogEntry& entry);
+        // Appends a timestamped plain message. Caller must hold mEntriesMutex.
+        void AppendPlainLocked(EntryType type, const std::string& message);
 
         std::vector<LogEntry> mLogEntries;
         ErrorReportingListener* mListener = nullptr;
+        mutable std::mutex mEntriesMutex;
 #if defined(_DEBUG)
         LogSinkFn mSink;
 #endif

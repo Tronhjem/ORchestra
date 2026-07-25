@@ -17,8 +17,10 @@
  * along with ORchestra. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <chrono>
 #include <cmath>
 #include <string>
+#include <thread>
 
 #include "ORchestraEngine.h"
 #include "Defines.h"
@@ -27,7 +29,7 @@
 
 #if defined(_DEBUG)
 #include "ScopedTimer.h"
-#include "AssertMutex.h"
+#include "ORchestraAssert.h"
 #endif
 
 namespace ORchestra 
@@ -59,18 +61,23 @@ namespace ORchestra
 
     void ORchestraEngine::ExportToFile(const std::string& filePath)
     {
+        std::scoped_lock lock {mInstructionDataMutex};
         mFileLoader->SaveToFile(filePath, mInstructionData);
     }
 
-    const std::string& ORchestraEngine::ImportFromFile(const std::string& filePath)
+    std::string ORchestraEngine::ImportFromFile(const std::string& filePath)
     {
+        std::scoped_lock lock {mInstructionDataMutex};
         mInstructionData = mFileLoader->LoadFile(filePath);
         return mInstructionData;
     }
 
     void ORchestraEngine::Compile(const std::string& data)
     {
-        mPendingInstructionData = data;
+        {
+            std::scoped_lock lock {mInstructionDataMutex};
+            mPendingInstructionData = data;
+        }
         mResetRequest.fetch_add(1, std::memory_order_acq_rel);
         WakeWorker();
     }
@@ -91,7 +98,13 @@ namespace ORchestra
 
         mVM.Reset();
 
-        const bool innitSuccess = mVM.Prepare(&mInstructionData[0]);
+        std::string instructionDataSnapshot;
+        {
+            std::scoped_lock lock {mInstructionDataMutex};
+            instructionDataSnapshot = mInstructionData;
+        }
+
+        const bool innitSuccess = mVM.Prepare(instructionDataSnapshot);
         if (innitSuccess)
             mErrorReporting.LogMessage("Compiled Successfully!");
 
@@ -127,7 +140,10 @@ namespace ORchestra
             while (mResetRequest.load(std::memory_order_acquire) != mResetRequestSeen)
             {
                 mResetRequestSeen = mResetRequest.load(std::memory_order_acquire);
-                mInstructionData = mPendingInstructionData;
+                {
+                    std::scoped_lock lock {mInstructionDataMutex};
+                    mInstructionData = mPendingInstructionData;
+                }
                 Reset();
             }
 
@@ -152,6 +168,9 @@ namespace ORchestra
             return false;
 
         const int readySteps = mReadySteps.load();
+#if defined(_DEBUG)
+        ORCHESTRA_ASSERT_SIMPLE(readySteps >= 0);
+#endif
         int stepsToProcess = STEP_BUFFER_SIZE - 1 - readySteps; // leave the last step unprocessed.
         if (stepsToProcess < 0)
             stepsToProcess = 0;
@@ -176,9 +195,9 @@ namespace ORchestra
 
             std::vector<SequenceStep>& currentData = mStepRingBuffer[static_cast<unsigned long>(stepWrapped)];
 
-#if defined(_DEBUG)
-            AssertMutex& mutex = mRingBufferMutexes[static_cast<unsigned long>(stepWrapped)];
-            AssertMutexScopedLock lock {mutex};
+            std::scoped_lock slotLock {mRingBufferMutexes[static_cast<unsigned long>(stepWrapped)]};
+#if defined(_DEBUG) && defined(ORCHESTRA_RACE_WIDEN)
+            std::this_thread::sleep_for(std::chrono::microseconds(500));
 #endif
 
             currentData.clear();
@@ -195,9 +214,15 @@ namespace ORchestra
     void ORchestraEngine::HandleSeekRequest()
     {
         const int targetStep = mSeekTargetStep.load(std::memory_order_acquire);
-        
-        for (auto& slot : mStepRingBuffer)
-            slot.clear();
+
+        for (size_t i = 0; i < mStepRingBuffer.size(); ++i)
+        {
+            std::scoped_lock slotLock {mRingBufferMutexes[i]};
+#if defined(_DEBUG) && defined(ORCHESTRA_RACE_WIDEN)
+            std::this_thread::sleep_for(std::chrono::microseconds(100));
+#endif
+            mStepRingBuffer[i].clear();
+        }
 
         mStepOriginInSamples = 0;
         mSamplesPerStep = 0.0;
@@ -240,14 +265,14 @@ namespace ORchestra
 
         const double samplesPerStep =
             static_cast<double>(transportData.sampleRate)
-            * (60.0 / (transportData.bpmFromScript * transportData.bpmDivision));
+            * (60.0 / (transportData.bpmFromScript * transportData.beatDivision));
 
         // When BPM or division changes, rebase the step origin so the step counter
         // advances continuously without jumping. A jump causes false resets and retriggering.
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wfloat-equal"
         const bool timingChanged = (transportData.bpmFromScript != mLastBpm)
-            || (transportData.bpmDivision   != mLastBpmDivision);
+            || (transportData.beatDivision   != mLastBpmDivision);
 #pragma clang diagnostic pop
 
         if (timingChanged && mSamplesPerStep > 0.0)
@@ -258,7 +283,7 @@ namespace ORchestra
         }
 
         mLastBpm = transportData.bpmFromScript;
-        mLastBpmDivision = transportData.bpmDivision;
+        mLastBpmDivision = transportData.beatDivision;
         mSamplesPerStep = samplesPerStep;
 
         const int currentStep = static_cast<int>(ceil(
@@ -270,6 +295,9 @@ namespace ORchestra
 
         if (stepDifference > 1 || stepDifference < 0)
         {
+            // Force the first step after the seek to process even if its step
+            // number equals the stale mLastStep. Only written on this thread.
+            mLastStep = -1;
             mSeekTargetStep.store(currentStep, std::memory_order_release);
             mSeekRequest.fetch_add(1, std::memory_order_acq_rel);
             WakeWorker();
@@ -285,31 +313,46 @@ namespace ORchestra
             && currentStep != mLastStep
             && mReadySteps.load(std::memory_order_acquire) > 0)
         {
-            ProcessStepData(transportData, currentStep, nextStepInSamples, samplesPerStep);
+            if (ProcessStepData(transportData, currentStep, nextStepInSamples, samplesPerStep))
+            {
+                int ready = mReadySteps.load(std::memory_order_acquire);
+                while (ready > 0
+                       && !mReadySteps.compare_exchange_weak(ready, ready - 1,
+                                                              std::memory_order_acq_rel))
+                {
+                }
 
-            mReadySteps.fetch_sub(1, std::memory_order_acq_rel);
-            if (mReadySteps.load() < HALF_STEP_BUFFER_SIZE)
-                WakeWorker();
+#if defined(_DEBUG)
+                ORCHESTRA_ASSERT_SIMPLE(mReadySteps.load(std::memory_order_acquire) >= 0);
+#endif
+                if (mReadySteps.load() < HALF_STEP_BUFFER_SIZE)
+                    WakeWorker();
+            }
         }
     }
 
-    void ORchestraEngine::ProcessStepData(TransportData& transportData, const int currentStep, const int nextStepInSamples, const double samplesPerStep)
+    bool ORchestraEngine::ProcessStepData(TransportData& transportData, const int currentStep, const int nextStepInSamples, const double samplesPerStep)
     {
 #if defined(_DEBUG)
         // ScopedTimer timer{ "Process Beat" };
 #endif
-        mLastStep = currentStep;
-
         mSamplesSinceLastStep = transportData.timeInSamples;
         const int wrappedGlobalStep = currentStep & STEP_BUFFER_SIZE_MASK;
 
-        const std::vector<SequenceStep>& currentData = 
-            mStepRingBuffer[static_cast<unsigned long>(wrappedGlobalStep)];
+        std::shared_lock<std::shared_mutex> slotLock {
+            mRingBufferMutexes[static_cast<unsigned long>(wrappedGlobalStep)], std::try_to_lock};
+        if (!slotLock.owns_lock())
+            return false;
 
-#if defined(_DEBUG)
-            AssertMutex& mutex = mRingBufferMutexes[static_cast<unsigned long>(wrappedGlobalStep)];
-            AssertMutexScopedLock lock {mutex};
+        mLastStep = currentStep;
+
+#if defined(_DEBUG) && defined(ORCHESTRA_RACE_WIDEN)
+        // Stress-only window widening.
+        std::this_thread::sleep_for(std::chrono::microseconds(500));
 #endif
+
+        const std::vector<SequenceStep>& currentData =
+            mStepRingBuffer[static_cast<unsigned long>(wrappedGlobalStep)];
 
         for (const SequenceStep& step : currentData)
         {
@@ -323,16 +366,17 @@ namespace ORchestra
                     }
                 case ORchestra::SequenceStepType::BEAT:
                     {
-                        transportData.bpmDivision = DurationToBpmDivision(step.mFirst.GetValue(0));
+                        transportData.beatDivision = DurationToBpmDivision(step.mFirst.GetValue(0));
 
                         break;
                     }
                 case ORchestra::SequenceStepType::PRINT:
                     {
-                        const std::string mes = 
+                        const std::string mes =
                             std::to_string(static_cast<int>(step.mFirst.GetValue(0)));
 
-                        mErrorReporting.LogMessage(mes);
+                        // Audio thread must not block on the log mutex; drop on contention.
+                        mErrorReporting.TryLogMessage(mes);
 
                         break;
                     }
@@ -361,26 +405,25 @@ namespace ORchestra
                             if (!shouldTrigger)
                                 continue;
 
-                            const int rawFirstByte =
+                            const int rawFirst =
                                 static_cast<int>(step.mFirst.GetEquivalentValueAtIndex(i, triggerLength));
 
                             const int transposedFirstByte =
                                 (step.mType == ORchestra::SequenceStepType::NoteOn)
-                                ? rawFirstByte + transportData.transposeOffset
-                                : rawFirstByte;
+                                ? rawFirst + transportData.transposeOffset
+                                : rawFirst;
 
-                            const DataUnit firstByte = static_cast<DataUnit>(transposedFirstByte);
-                            const DataUnit secondByte =
+                            const DataUnit firstData = static_cast<DataUnit>(transposedFirstByte);
+                            const DataUnit secondData =
                                 step.mSecond.GetEquivalentValueAtIndex(i, triggerLength);
 
                             const DataUnit channel =
                                 step.mChannel.GetEquivalentValueAtIndex(i, triggerLength);
 
-                            const int timeStamp = nextStepInSamples
-                                + i * (static_cast<int>(samplesPerStep) / triggerLength);
+                            const int timeStamp = nextStepInSamples + i * (static_cast<int>(samplesPerStep) / triggerLength);
                             const int remainingSamples = timeStamp - static_cast<int>(transportData.timeInSamples);
 
-                            ScheduledMidiMessage message{ step.mType, firstByte, secondByte,
+                            ScheduledMidiMessage message{ step.mType, firstData, secondData,
                                 channel, remainingSamples, noteDurationSamples };
 
                             mMidiScheduler.PostMidi(message);
@@ -390,10 +433,12 @@ namespace ORchestra
                     }
             }
         }
+
+        return true;
     }
 
     void ORchestraEngine::RequestClearErrors()
-    { 
+    {
         if (mIsRunning.load())
             mErrorReporting.RequestClear();
         else
