@@ -1,3 +1,8 @@
+### v0.2.4
+
+- Fixing general building on Linux (ubuntu) and adding checks to run on PRs for ubuntu as well.
+
+
 ### v0.2.3
 
 - Reorganized all testing code under `Tests/` (UnitTests, Fuzzing, StressTest).
@@ -12,6 +17,7 @@ Bugs:
 - Make audio-thread `print` logging non-blocking (drops on contention) so the audio thread never waits on the log mutex.
 - Publish BPM and beat division to the UI via atomics instead of reading `TransportData` cross-thread.
 - Fix first step after a DAW seek/loop-back being skipped when its step number equaled the last processed step.
+
 
 ### v0.2.2
 
