@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, macos-latest, macos-14]
+        os: [windows-latest, macos-latest, macos-14, ubuntu-latest]
         build_type: [Release]
         c_compiler: [gcc, clang, cl]
         include:
@@ -26,6 +26,9 @@ jobs:
           - os: macos-14
             c_compiler: clang
             cpp_compiler: clang++
+          - os: ubuntu-latest
+            c_compiler: gcc
+            cpp_compiler: g++
         exclude:
           - os: windows-latest
             c_compiler: gcc
@@ -39,12 +42,22 @@ jobs:
             c_compiler: gcc
           - os: macos-14
             c_compiler: cl
+          - os: ubuntu-latest
+            c_compiler: clang
+          - os: ubuntu-latest
+            c_compiler: cl
 
     steps:
     - uses: actions/checkout@v4
 
     - name: Update submodule 
       run: git submodule update --init --recursive
+
+    - name: Install Linux dependencies
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libasound2-dev libjack-jackd2-dev ladspa-sdk libfreetype6-dev libfontconfig1-dev libx11-dev libxcomposite-dev libxcursor-dev libxext-dev libxinerama-dev libxrandr-dev libxrender-dev libglu1-mesa-dev mesa-common-dev pkg-config
 
     - name: Set reusable strings
       id: strings
@@ -79,6 +92,13 @@ jobs:
         mkdir artifacts\${{ matrix.os }}
         Copy-Item -Path "${{ steps.strings.outputs.build-output-dir }}\ORchestra\ORchestra_artefacts\Release\VST3\*" -Destination "artifacts\windows-latest\VST3" -Recurse -Force
         Copy-Item -Path "${{ steps.strings.outputs.build-output-dir }}\ORchestra\ORchestra_Standalone_artefacts\Release\Standalone\*" -Destination "artifacts\windows-latest\Standlone" -Recurse -Force
+
+    - name: Prepare artifacts (Linux)
+      if: startsWith(matrix.os, 'ubuntu')
+      run: |
+        mkdir -p artifacts/${{ matrix.os }}
+        cp -R ${{ steps.strings.outputs.build-output-dir }}/ORchestra/ORchestra_artefacts/Release/VST3 artifacts/${{ matrix.os }}/VST3/
+        cp -R ${{ steps.strings.outputs.build-output-dir }}/ORchestra/ORchestra_Standalone_artefacts/Release/Standalone artifacts/${{ matrix.os }}/Standalone
 
     - name: Upload artifacts for ${{ matrix.os }}
       uses: actions/upload-artifact@v4

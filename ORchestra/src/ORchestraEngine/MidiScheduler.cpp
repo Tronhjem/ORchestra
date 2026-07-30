@@ -120,7 +120,7 @@ namespace ORchestra {
             }
         }
 
-        mScheduledMidiMessages.erase(mScheduledMidiMessages.begin() + keepCount, mScheduledMidiMessages.end());
+        mScheduledMidiMessages.erase(mScheduledMidiMessages.begin() + static_cast<long>(keepCount), mScheduledMidiMessages.end());
     }
 
     void MidiScheduler::ClearAllData(juce::MidiBuffer& midiMessages)
