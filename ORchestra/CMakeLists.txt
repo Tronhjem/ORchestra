@@ -61,9 +61,11 @@ endfunction()
 add_orchestra_format(ORchestra_VST "VST3" FALSE)
 
 # ===================================================================================================
-# AU
+# AU (macOS only)
 # ===================================================================================================
-add_orchestra_format(ORchestra_AU "AU" TRUE)
+if(APPLE)
+    add_orchestra_format(ORchestra_AU "AU" TRUE)
+endif()
 
 # ===================================================================================================
 # STANDALONE
