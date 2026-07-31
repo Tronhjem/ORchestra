@@ -5,7 +5,7 @@
               pluginCharacteristicsValue="pluginEditorRequiresKeys,pluginProducesMidiOut"
               pluginManufacturer="SonoTron" pluginFormats="buildAU,buildStandalone,buildVST3"
               headerPath="../../src/utils/&#10;../../src/ORchestraEngine/&#10;../../src/juceFiles/&#10;../../src/juceFiles/components/"
-              version="0.1" companyName="SonoTron" companyWebsite="tronhjem.com"
+              version="0.2.4" companyName="SonoTron" companyWebsite="tronhjem.com"
               companyEmail="ctronhjem@gmail.com" pluginManufacturerCode="SNTN"
               pluginCode="ORCS" pluginAUMainType="'aumi'" pluginVST3Category="Generator">
   <MAINGROUP id="NmvJK8" name="ORchestra">
