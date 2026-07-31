@@ -243,7 +243,7 @@ namespace ORchestra
         mErrorReporting.CheckAndClear();
 
         if (mShouldResetScriptBpm.exchange(false, std::memory_order_acq_rel))
-            transportData.bpmFromScript = 0.0;
+            mScriptBpmActive = false;
 
         if (transportData.isPlaying && mIsVMInit)
         {
@@ -260,7 +260,7 @@ namespace ORchestra
     void ORchestraEngine::TickInternal(TransportData& transportData, const int bufferLength)
     {
         // If the script hasn't set a BPM, use the host BPM as the active value.
-        if (transportData.bpmFromScript == 0.0)
+        if (!mScriptBpmActive)
             transportData.bpmFromScript = transportData.bpm;
 
         const double samplesPerStep =
@@ -361,6 +361,7 @@ namespace ORchestra
                 case ORchestra::SequenceStepType::BPM:
                     {
                         transportData.bpmFromScript = step.mFirst.GetValue(0);
+                        mScriptBpmActive = true;
 
                         break;
                     }

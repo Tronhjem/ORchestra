@@ -1,6 +1,11 @@
 ### v0.2.4
 
 - Fixing general building on Linux (ubuntu) and adding checks to run on PRs for ubuntu as well.
+- Improve Cmake to have separate config for VST and AU to be able to export proper midi effect for AU and normal audio plugin for VST.
+
+Bugs:
+- VST was not working, as audio input was removed, adding it back for vst.
+- Setting bpm from DAW was not working correctly, now properly gets the BPM, if it's not set by the script.
 
 
 ### v0.2.3

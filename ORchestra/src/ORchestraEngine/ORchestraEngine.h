@@ -100,6 +100,7 @@ namespace ORchestra
         std::atomic<bool> mHasWork;
         std::atomic<bool> mIsRunning;
         std::atomic<bool> mShouldResetScriptBpm {false};
+        bool mScriptBpmActive = false;
 
         // UI thread bumps mResetRequest to ask the worker to recompile (issue #2).
         std::atomic<int> mResetRequest {0};

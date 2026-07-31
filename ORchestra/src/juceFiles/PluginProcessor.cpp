@@ -55,6 +55,9 @@ namespace
 ORchestraAudioProcessor::ORchestraAudioProcessor() :
 #ifndef JucePlugin_PreferredChannelConfigurations
     AudioProcessor(BusesProperties()
+#if JucePlugin_Build_VST3
+        .withInput("Input", juce::AudioChannelSet::stereo(), true)
+#endif
 #if !JucePlugin_IsMidiEffect
         .withOutput("Output", juce::AudioChannelSet::stereo(), true)
 #endif
@@ -199,6 +202,11 @@ bool ORchestraAudioProcessor::isBusesLayoutSupported(const BusesLayout& layouts)
     if (layouts.getMainOutputChannelSet() != juce::AudioChannelSet::mono()
         && layouts.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())
         return false;
+
+#if JucePlugin_Build_VST3
+    if (layouts.getMainOutputChannelSet() != layouts.getMainInputChannelSet())
+        return false;
+#endif
 
     return true;
 #endif
