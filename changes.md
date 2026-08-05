@@ -1,3 +1,11 @@
+### v0.2.5
+Note offs messages where kept in the queue eveen if they were killed by a new note causing inconsistent triggering, 
+causing the bug below for the substep. 
+Added unit testing for the midi scheduling and extracting the midi out so we have juce dependency in it's own layer.
+
+Bugs: 
+- Midi retriggering of substeps of same type would kill notes.
+
 ### v0.2.4
 
 - Fixing general building on Linux (ubuntu) and adding checks to run on PRs for ubuntu as well.

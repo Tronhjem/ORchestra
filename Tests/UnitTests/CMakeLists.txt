@@ -17,6 +17,7 @@ add_executable(ORchestraTests
     ${ORCHESTRA_ENGINE_DIR}/Compiler.cpp
     ${ORCHESTRA_ENGINE_DIR}/ORchestraToken.cpp
     ${ORCHESTRA_ENGINE_DIR}/FileLoader.cpp
+    ${ORCHESTRA_ENGINE_DIR}/NoteTracker.cpp
 )
 
 target_include_directories(ORchestraTests PRIVATE

@@ -22,6 +22,7 @@
 #include <JuceHeader.h>
 #include <vector>
 #include "Defines.h"
+#include "NoteTracker.h"
 
 namespace ORchestra {
 
@@ -44,8 +45,8 @@ namespace ORchestra {
         void ClearAllData(juce::MidiBuffer& midiMessages);
 
     private:
-        std::vector<ScheduledMidiMessage> mScheduledMidiMessages;
-        int mActiveNoteCounts[128 * 16] = {};
+        NoteTracker mNoteTracker;
+        std::vector<NoteTracker::Event> mEventBuffer;
     };
 
 } // namespace ORchestra
