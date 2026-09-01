@@ -55,11 +55,10 @@ namespace
 ORchestraAudioProcessor::ORchestraAudioProcessor() :
 #ifndef JucePlugin_PreferredChannelConfigurations
     AudioProcessor(BusesProperties()
-#if JucePlugin_Build_VST3
+#if JucePlugin_Build_VST3 || JucePlugin_Build_Standalone
         .withInput("Input", juce::AudioChannelSet::stereo(), true)
 #endif
 #if !JucePlugin_IsMidiEffect
-        .withInput("Input", juce::AudioChannelSet::stereo(), true)
         .withOutput("Output", juce::AudioChannelSet::stereo(), true)
 #endif
     ),

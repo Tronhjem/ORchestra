@@ -5,6 +5,7 @@ build-fuzz/
 build-test/
 build-stress-assert/
 build-stress-tsan/
+build-release/
 
 
 .claude/

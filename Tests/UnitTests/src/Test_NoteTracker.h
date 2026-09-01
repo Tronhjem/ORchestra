@@ -50,18 +50,20 @@ TEST_CASE("NoteTracker: retrigger before note-on replaces old note", "[NoteTrack
     NoteTracker tracker;
     std::vector<NoteTracker::Event> events;
 
-    tracker.PostNoteOn(60, 1, 0, 100, 100);
-    tracker.PostNoteOn(60, 1, 50, 150, 110);
+    tracker.PostNoteOn(60, 1, 0, 100, 110);
+    tracker.PostNoteOn(60, 1, 50, 150, 100);
 
     tracker.Process(100, events);
-    REQUIRE(events.size() == 1);
+    REQUIRE(events.size() == 3);
     REQUIRE(events[0].type == NoteTracker::Event::NoteOn);
     REQUIRE(events[0].first == 60);
     REQUIRE(events[0].second == 110);
 
-    tracker.Process(100, events);
-    REQUIRE(events.size() == 1);
-    REQUIRE(events[0].type == NoteTracker::Event::NoteOff);
+    REQUIRE(events[1].type == NoteTracker::Event::NoteOff);
+    REQUIRE(events[1].time == -51);
+
+    REQUIRE(events[2].type == NoteTracker::Event::NoteOn);
+    REQUIRE(events[2].time == -50);
 }
 
 TEST_CASE("NoteTracker: retrigger while sounding emits cancellation note-off", "[NoteTracker]")
