@@ -41,20 +41,20 @@ namespace ORchestra {
             case SequenceStepType::NoteOn:
             {
                 const int offTime = message.mScheduledTime + message.mDuration;
-                mNoteTracker.postNoteOn(message.mFirst, message.mChannel,
+                mNoteTracker.PostNoteOn(message.mFirst, message.mChannel,
                     message.mScheduledTime, offTime, message.mSecond);
                 break;
             }
 
             case SequenceStepType::NoteOff:
             {
-                mNoteTracker.postNoteOff(message.mFirst, message.mChannel);
+                mNoteTracker.PostNoteOff(message.mFirst, message.mChannel);
                 break;
             }
 
             case SequenceStepType::CC:
             {
-                mNoteTracker.postCC(message.mFirst, message.mSecond, message.mChannel,
+                mNoteTracker.PostCC(message.mFirst, message.mSecond, message.mChannel,
                     message.mScheduledTime);
                 break;
             }
@@ -67,7 +67,7 @@ namespace ORchestra {
     void MidiScheduler::ProcessMidiPosts(juce::MidiBuffer& midiMessages,
         const int bufferLength)
     {
-        mNoteTracker.process(bufferLength, mEventBuffer);
+        mNoteTracker.Process(bufferLength, mEventBuffer);
 
         for (const auto& event : mEventBuffer)
         {
@@ -107,7 +107,7 @@ namespace ORchestra {
 
     void MidiScheduler::ClearAllData(juce::MidiBuffer& midiMessages)
     {
-        mNoteTracker.clear(mEventBuffer);
+        mNoteTracker.Clear(mEventBuffer);
 
         for (const auto& event : mEventBuffer)
         {

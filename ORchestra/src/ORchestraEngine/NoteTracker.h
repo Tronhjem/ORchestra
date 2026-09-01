@@ -31,9 +31,10 @@ namespace ORchestra {
     public:
         struct Note
         {
-            bool isActive = false;
             bool isOn = false;
             uint32_t id = 0;
+            DataUnit pitch = 0;
+            DataUnit channel = 0;
             int onTime = 0;
             int offTime = 0;
             DataUnit velocity = 0;
@@ -51,21 +52,15 @@ namespace ORchestra {
 
         NoteTracker();
 
-        void postNoteOn(DataUnit pitch, DataUnit channel, int onTime, int offTime, DataUnit velocity);
-        void postNoteOff(DataUnit pitch, DataUnit channel);
-        void postCC(DataUnit first, DataUnit second, DataUnit channel, int time);
+        void PostNoteOn(DataUnit pitch, DataUnit channel, int onTime, int offTime, DataUnit velocity);
+        void PostNoteOff(DataUnit pitch, DataUnit channel);
+        void PostCC(DataUnit first, DataUnit second, DataUnit channel, int time);
 
-        void process(int bufferLength, std::vector<Event>& outEvents);
-        void clear(std::vector<Event>& outEvents);
-
-        const Note& getNote(DataUnit pitch, DataUnit channel) const;
+        void Process(int bufferLength, std::vector<Event>& outEvents);
+        void Clear(std::vector<Event>& outEvents);
 
     private:
-        static int getIndex(DataUnit pitch, DataUnit channel);
-        static void removeActiveIndex(std::vector<int>& indices, int index);
-
-        Note mActiveNotes[128 * 16];
-        std::vector<int> mActiveIndices;
+        std::vector<Note> mActiveNotes;
         std::vector<Event> mPendingEvents;
         uint32_t mNextNoteId;
     };

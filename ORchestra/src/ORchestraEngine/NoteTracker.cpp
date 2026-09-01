@@ -26,161 +26,100 @@ namespace ORchestra {
     {
     }
 
-    void NoteTracker::postNoteOn(DataUnit pitch, DataUnit channel, int onTime, int offTime, DataUnit velocity)
+    void NoteTracker::PostNoteOn(DataUnit pitch, DataUnit channel, int onTime, int offTime, DataUnit velocity)
     {
-        const int index = getIndex(pitch, channel);
-        Note& oldNote = mActiveNotes[index];
-
-        const bool hadOldNote = oldNote.isActive;
-        const bool oldWasOn = oldNote.isOn;
-        const uint32_t oldId = oldNote.id;
-
-        if (oldNote.isActive && oldNote.isOn)
+        for (size_t i = 0; i < mActiveNotes.size(); ++i)
         {
-            const int cancelTime = std::max(0, onTime - 1);
-            mPendingEvents.push_back({ Event::NoteOff, cancelTime, pitch, 0, channel, oldId });
+            Note& oldNote = mActiveNotes[i];
+            if (oldNote.pitch != pitch || oldNote.channel != channel)
+                continue;
+
+            if (onTime <= oldNote.offTime)
+                oldNote.offTime = std::min(oldNote.offTime, onTime - 1);
         }
 
         const uint32_t newId = mNextNoteId++;
         const int safeOffTime = (offTime > onTime) ? offTime : onTime + 1;
-        oldNote = { true, false, newId, onTime, safeOffTime, velocity };
-
-        if (!hadOldNote)
-        {
-            mActiveIndices.push_back(index);
-        }
+        mActiveNotes.push_back({ false, newId, pitch, channel, onTime, safeOffTime, velocity });
     }
 
-    void NoteTracker::postNoteOff(DataUnit pitch, DataUnit channel)
+    void NoteTracker::PostNoteOff(DataUnit pitch, DataUnit channel)
     {
-        const int index = getIndex(pitch, channel);
-        Note& note = mActiveNotes[index];
-
-        if (note.isActive && note.isOn)
+        for (size_t i = 0; i < mActiveNotes.size(); ++i)
         {
-            mPendingEvents.push_back({ Event::NoteOff, 0, pitch, 0, channel, note.id });
-        }
+            Note& note = mActiveNotes[i];
+            if (note.pitch != pitch || note.channel != channel)
+                continue;
 
-        if (note.isActive)
-        {
-            note = {};
-            removeActiveIndex(mActiveIndices, index);
+            if (note.isOn)
+                note.offTime = 0;
+            else
+                mActiveNotes.erase(mActiveNotes.begin() + static_cast<std::ptrdiff_t>(i));
         }
     }
 
-    void NoteTracker::postCC(DataUnit first, DataUnit second, DataUnit channel, int time)
+    void NoteTracker::PostCC(DataUnit first, DataUnit second, DataUnit channel, int time)
     {
         mPendingEvents.push_back({ Event::CC, time, first, second, channel, 0 });
     }
 
-    void NoteTracker::process(int bufferLength, std::vector<Event>& outEvents)
+    void NoteTracker::Process(int bufferLength, std::vector<Event>& outEvents)
     {
         outEvents.clear();
 
-        for (const int index : mActiveIndices)
+        for (auto it = mActiveNotes.begin(); it != mActiveNotes.end();)
         {
-            Note& note = mActiveNotes[index];
-            if (!note.isActive)
-                continue;
-
+            Note& note = *it;
             note.onTime -= bufferLength;
             note.offTime -= bufferLength;
 
-            const int pitch = index / 16;
-            const int channel = (index % 16) + 1;
-
             if (note.onTime <= 0 && !note.isOn)
             {
-                outEvents.push_back({ Event::NoteOn, note.onTime, static_cast<DataUnit>(pitch), note.velocity, static_cast<DataUnit>(channel), note.id });
+                outEvents.push_back({ Event::NoteOn, note.onTime, note.pitch, note.velocity, note.channel, note.id });
+                note.isOn = true;
             }
 
             if (note.offTime <= 0 && note.isOn)
             {
-                outEvents.push_back({ Event::NoteOff, note.offTime, static_cast<DataUnit>(pitch), 0, static_cast<DataUnit>(channel), note.id });
+                outEvents.push_back({ Event::NoteOff, note.offTime, note.pitch, 0, note.channel, note.id });
+                it = mActiveNotes.erase(it);
+            }
+            else
+            {
+                ++it;
             }
         }
 
-        for (auto& event : mPendingEvents)
+        for (auto it = mPendingEvents.begin(); it != mPendingEvents.end();)
         {
-            event.time -= bufferLength;
-            if (event.time <= 0)
+            it->time -= bufferLength;
+            if (it->time <= 0)
             {
-                outEvents.push_back(event);
+                outEvents.push_back(*it);
+                it = mPendingEvents.erase(it);
+            }
+            else
+            {
+                ++it;
             }
         }
-
-        std::stable_sort(outEvents.begin(), outEvents.end(),
-            [](const Event& a, const Event& b) {
-                if (a.time != b.time)
-                    return a.time < b.time;
-
-                const int priorityA = (a.type == Event::NoteOff) ? 0 : (a.type == Event::NoteOn) ? 1 : 2;
-                const int priorityB = (b.type == Event::NoteOff) ? 0 : (b.type == Event::NoteOn) ? 1 : 2;
-                return priorityA < priorityB;
-            });
-
-        for (const auto& event : outEvents)
-        {
-            const int index = getIndex(event.first, event.channel);
-            Note& note = mActiveNotes[index];
-
-            if (event.type == Event::NoteOn)
-            {
-                if (note.isActive && note.id == event.noteId)
-                {
-                    note.isOn = true;
-                }
-            }
-            else if (event.type == Event::NoteOff)
-            {
-                if (note.isActive && note.id == event.noteId)
-                {
-                    note = {};
-                    removeActiveIndex(mActiveIndices, index);
-                }
-            }
-        }
-
-        mPendingEvents.erase(
-            std::remove_if(mPendingEvents.begin(), mPendingEvents.end(),
-                [](const Event& e) { return e.time <= 0; }),
-            mPendingEvents.end());
     }
 
-    void NoteTracker::clear(std::vector<Event>& outEvents)
+    void NoteTracker::Clear(std::vector<Event>& outEvents)
     {
         outEvents.clear();
 
-        for (const int index : mActiveIndices)
+        for (const Note& note : mActiveNotes)
         {
-            Note& note = mActiveNotes[index];
             if (note.isOn)
             {
-                const int pitch = index / 16;
-                const int channel = (index % 16) + 1;
-                outEvents.push_back({ Event::NoteOff, 0, static_cast<DataUnit>(pitch), 0, static_cast<DataUnit>(channel), note.id });
+                outEvents.push_back({ Event::NoteOff, 0, note.pitch, 0, note.channel, note.id });
             }
-            note = {};
         }
 
-        mActiveIndices.clear();
+        mActiveNotes.clear();
         mPendingEvents.clear();
         mNextNoteId = 1;
-    }
-
-    const NoteTracker::Note& NoteTracker::getNote(DataUnit pitch, DataUnit channel) const
-    {
-        return mActiveNotes[getIndex(pitch, channel)];
-    }
-
-    int NoteTracker::getIndex(DataUnit pitch, DataUnit channel)
-    {
-        return static_cast<int>(pitch) * 16 + static_cast<int>(channel) - 1;
-    }
-
-    void NoteTracker::removeActiveIndex(std::vector<int>& indices, int index)
-    {
-        indices.erase(std::remove(indices.begin(), indices.end(), index), indices.end());
     }
 
 } // namespace ORchestra

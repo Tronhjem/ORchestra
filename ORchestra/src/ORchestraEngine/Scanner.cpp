@@ -318,6 +318,8 @@ namespace ORchestra
             if (r != ORchestraTokenType::IDENTIFIER) return r;
             r = checkKeyword(1, 2, "32", ORchestraTokenType::BEAT_IDENTIFIER);
             if (r != ORchestraTokenType::IDENTIFIER) return r;
+            r = checkKeyword(1, 2, "64", ORchestraTokenType::BEAT_IDENTIFIER);
+            if (r != ORchestraTokenType::IDENTIFIER) return r;
             return checkKeyword(1, 3, "ote", ORchestraTokenType::NOTE);
         }
         case 'c':

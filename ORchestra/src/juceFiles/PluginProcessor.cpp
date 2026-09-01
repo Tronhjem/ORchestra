@@ -59,6 +59,7 @@ ORchestraAudioProcessor::ORchestraAudioProcessor() :
         .withInput("Input", juce::AudioChannelSet::stereo(), true)
 #endif
 #if !JucePlugin_IsMidiEffect
+        .withInput("Input", juce::AudioChannelSet::stereo(), true)
         .withOutput("Output", juce::AudioChannelSet::stereo(), true)
 #endif
     ),

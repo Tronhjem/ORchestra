@@ -57,6 +57,8 @@
       <FILE id="reRkQW" name="MidiScheduler.cpp" compile="1" resource="0"
             file="src/ORchestraEngine/MidiScheduler.cpp"/>
       <FILE id="W1Vecr" name="MidiScheduler.h" compile="0" resource="0" file="src/ORchestraEngine/MidiScheduler.h"/>
+      <FILE id="tPS3Ff" name="NoteTracker.cpp" compile="1" resource="0" file="src/ORchestraEngine/NoteTracker.cpp"/>
+      <FILE id="V697fW" name="NoteTracker.h" compile="0" resource="0" file="src/ORchestraEngine/NoteTracker.h"/>
       <FILE id="l68kSa" name="ORchestraEngine.cpp" compile="1" resource="0"
             file="src/ORchestraEngine/ORchestraEngine.cpp"/>
       <FILE id="LcPK4q" name="ORchestraEngine.h" compile="0" resource="0"

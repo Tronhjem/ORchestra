@@ -24,8 +24,8 @@
 namespace ORchestra 
 {
     // DataSequence Operation Lambdas
-#define OPERATION_BINARY_LAMBDA(op) [](const int a, const int b) { return (a > 0) op (b > 0); }
-#define OPERATION_LAMBDA(op) [](const int a, const int b) { return a op b; }
+    #define OPERATION_BINARY_LAMBDA(op) [](const int a, const int b) { return (a > 0) op (b > 0); }
+    #define OPERATION_LAMBDA(op) [](const int a, const int b) { return a op b; }
 
     constexpr auto Greater = OPERATION_LAMBDA(> );
     constexpr auto GreaterEqual = OPERATION_LAMBDA(>= );
@@ -65,6 +65,9 @@ namespace ORchestra
 
     typedef int16_t DataUnit;
     static_assert(sizeof(DataUnit) == 2);
+
+    typedef unsigned char int8;
+    static_assert(sizeof(int8) == 1);
 
     constexpr int DATA_UNIT_MAX_VALUE = std::numeric_limits<DataUnit>::max();
     constexpr int DATA_UNIT_MIN_VALUE = std::numeric_limits<DataUnit>::min();
