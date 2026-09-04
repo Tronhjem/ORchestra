@@ -7,6 +7,7 @@ Removing selection of audio output as it's not needed, keeping only audio device
 Bugs: 
 - Midi retriggering of substeps of same type would kill notes.
 
+
 ### v0.2.4
 
 - Fixing general building on Linux (ubuntu) and adding checks to run on PRs for ubuntu as well.
