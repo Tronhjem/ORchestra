@@ -50,8 +50,11 @@ else
     echo "No existing release for $TAG (ok)"
 fi
 
-# Trigger the release workflow for this tag.
-gh workflow run release.yml --ref "$TAG" -f tag="$TAG"
+# Trigger the release workflow for this tag. Run it from the default branch so
+# the LATEST workflow definition is used; the tag is passed as an input so the
+# build jobs check out the correct tagged source. (Using --ref "$TAG" would run
+# the older workflow definition baked into the tag instead.)
+gh workflow run release.yml -f tag="$TAG"
 
-echo "Triggered release.yml for $TAG."
+echo "Triggered release.yml (latest, from main) for $TAG."
 echo "Watch progress with: gh run watch"
