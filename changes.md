@@ -7,6 +7,7 @@
 Bugs: 
 - Note offs messages where kept in the queue even if they were killed by a new note causing inconsistent triggering, causing the bug below for the substep. 
 - Midi retriggering of substeps of same type would kill notes.
+- Fixing an issue where standalone would have to be compiled twice, if it's the first time starting the app.
 
 
 ### v0.2.4

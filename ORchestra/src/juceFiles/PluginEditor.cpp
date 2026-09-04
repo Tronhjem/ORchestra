@@ -170,16 +170,18 @@ ORchestraAudioProcessorEditor::ORchestraAudioProcessorEditor(ORchestraAudioProce
     addAndMakeVisible(mHorizontalDivider);
 
     const std::string data = audioProcessor.GetInstructionData();
-    const juce::String dataAsString = data.empty() ? juce::String(DEFAULT_SCRIPT)
-                                                    : juce::String(data);
+    const bool hasSavedScript = !data.empty();
+    const juce::String dataAsString = hasSavedScript ? juce::String(data)
+                                                     : juce::String(DEFAULT_SCRIPT);
     mCodeEditorPanel.loadContent(dataAsString);
-    
-    if (audioProcessor.IsORchestraVMInit())
-    {
-        mCodeEditorPanel.markSaved();
-        mFileOperationsToolbar.setCompileButtonEnabled(false);
+
+    if (!hasSavedScript)
+        handleCompile();
+    else
         UpdateErrors();
-    }
+
+    mCodeEditorPanel.markSaved();
+    mFileOperationsToolbar.setCompileButtonEnabled(false);
 
     setWantsKeyboardFocus(true);
 }
