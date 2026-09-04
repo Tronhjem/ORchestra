@@ -22,6 +22,12 @@ set(ORCHESTRA_COMPILE_DEFINITIONS
     JUCE_VST3_CAN_REPLACE_VST2=0
 )
 
+# Beta/pre-release builds: file logging + crash handler without the debug
+# features (asserts, ScopedTimer, AssertMutex stay _DEBUG-only).
+if(ORCHESTRA_ENABLE_LOGGING)
+    list(APPEND ORCHESTRA_COMPILE_DEFINITIONS ORCHESTRA_ENABLE_LOGGING=1)
+endif()
+
 set(ORCHESTRA_LINK_LIBRARIES
     PRIVATE
         juce::juce_audio_utils

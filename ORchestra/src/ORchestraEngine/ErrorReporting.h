@@ -24,7 +24,7 @@
 #include <vector>
 #include <atomic>
 
-#if defined(_DEBUG)
+#if defined(_DEBUG) || defined(ORCHESTRA_ENABLE_LOGGING)
     #include <functional>
 #endif
 
@@ -41,7 +41,7 @@ namespace ORchestra
         std::string mMessage;
     };
 
-#if defined(_DEBUG)
+#if defined(_DEBUG) || defined(ORCHESTRA_ENABLE_LOGGING)
     using LogSinkFn = std::function<void(const LogEntry&)>;
 #endif
 
@@ -82,7 +82,7 @@ namespace ORchestra
         // Lets tests hold the entries mutex to exercise the TryLogMessage drop path.
         std::unique_lock<std::mutex> AcquireLockForTest() { return std::unique_lock<std::mutex>{mEntriesMutex}; }
 #endif
-#if defined(_DEBUG)
+#if defined(_DEBUG) || defined(ORCHESTRA_ENABLE_LOGGING)
         void SetSink(LogSinkFn sink) { mSink = std::move(sink); }
 #endif
         void CheckAndClear();
@@ -97,7 +97,7 @@ namespace ORchestra
         std::vector<LogEntry> mLogEntries;
         ErrorReportingListener* mListener = nullptr;
         mutable std::mutex mEntriesMutex;
-#if defined(_DEBUG)
+#if defined(_DEBUG) || defined(ORCHESTRA_ENABLE_LOGGING)
         LogSinkFn mSink;
 #endif
         std::atomic<bool> mShouldClear{false};

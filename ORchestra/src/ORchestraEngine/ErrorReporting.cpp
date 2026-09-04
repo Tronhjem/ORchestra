@@ -81,7 +81,7 @@ namespace ORchestra
 
     inline void ErrorReporting::ForwardToSink(const LogEntry& entry)
     {
-#if defined(_DEBUG)
+#if defined(_DEBUG) || defined(ORCHESTRA_ENABLE_LOGGING)
         if (mSink)
             mSink(entry);
 #else

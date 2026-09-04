@@ -71,7 +71,7 @@ namespace ORchestra
         bool IsVMInit() { return mIsVMInit.load(); }
         
         void SetErrorListener(ErrorReportingListener* listener) { mErrorReporting.SetListener(listener); }
-#if defined(_DEBUG)
+#if defined(_DEBUG) || defined(ORCHESTRA_ENABLE_LOGGING)
         void SetLogSink(LogSinkFn sink) { mErrorReporting.SetSink(std::move(sink)); }
 #endif
         void RequestClearErrors();

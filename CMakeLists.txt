@@ -9,6 +9,7 @@ option(BUILD_TESTS "Build the unit tests (no JUCE dependency)" ON)
 option(BUILD_FUZZING "Build the fuzzing targets (no JUCE dependency)" OFF)
 option(BUILD_STRESS "Build the engine stress harness (requires JUCE)" OFF)
 option(ENABLE_TSAN "Instrument the stress harness with ThreadSanitizer" OFF)
+option(ORCHESTRA_ENABLE_LOGGING "Enable file logging and crash handler without debug features (beta/pre-release builds)" OFF)
 
 if(BUILD_PLUGIN)
     add_subdirectory(JUCE)

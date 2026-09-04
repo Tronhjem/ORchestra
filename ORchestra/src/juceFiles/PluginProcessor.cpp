@@ -28,7 +28,7 @@
 
 using namespace ORchestra;
 //==============================================================================
-#if defined(_DEBUG)
+#if defined(_DEBUG) || defined(ORCHESTRA_ENABLE_LOGGING)
 namespace
 {
     // The file lives at ~/Library/Application Support/ORchestra/ORchestra.log on macOS.
@@ -66,10 +66,12 @@ ORchestraAudioProcessor::ORchestraAudioProcessor() :
     IsRunning(false),
     mValueTree(*this, nullptr, juce::Identifier("ORchestra"), {})
 {
-#if defined(_DEBUG)
+#if defined(_DEBUG) || defined(ORCHESTRA_ENABLE_LOGGING)
     mLogFileLogger.reset(CreateLogFile());
     juce::Logger::setCurrentLogger(mLogFileLogger.get());
+#endif
 
+#if defined(_DEBUG)
     // Route ORCHESTRA_ASSERT failures (from AssertMutex and any other ORCHESTRA_ASSERT
     // use site) to the FileLogger so violations land in ORchestra.log with a backtrace
     // before the assert fires. Must be installed before any code that can assert.
@@ -86,7 +88,7 @@ ORchestraAudioProcessor::ORchestraAudioProcessor() :
 
     mORchestraEngine = std::make_unique<ORchestraEngine>();
 
-#if defined(_DEBUG)
+#if defined(_DEBUG) || defined(ORCHESTRA_ENABLE_LOGGING)
     mORchestraEngine->SetLogSink([](const LogEntry& entry) {
         juce::String prefix;
         switch (entry.mEntryType)
@@ -108,7 +110,8 @@ ORchestraAudioProcessor::ORchestraAudioProcessor() :
 
 ORchestraAudioProcessor::~ORchestraAudioProcessor()
 {
-#if defined(_DEBUG)
+#if defined(_DEBUG) || defined(ORCHESTRA_ENABLE_LOGGING)
+    // Engine (and its log sink) must be torn down before the logger.
     mORchestraEngine.reset();
     juce::Logger::setCurrentLogger(nullptr);
     mLogFileLogger.reset();

@@ -82,7 +82,7 @@ public:
     bool IsORchestraVMInit() { return mORchestraEngine->IsVMInit(); }
     
     void SetErrorListener(ErrorReportingListener* listener) { mORchestraEngine->SetErrorListener(listener); }
-#if defined(_DEBUG)
+#if defined(_DEBUG) || defined(ORCHESTRA_ENABLE_LOGGING)
     void SetLogSink(LogSinkFn sink) { mORchestraEngine->SetLogSink(std::move(sink)); }
 #endif
     void RequestClearErrors() { mORchestraEngine->RequestClearErrors(); }
@@ -106,7 +106,7 @@ private:
     // Written only on the audio thread (processBlock), read on the UI thread.
     std::atomic<float> mUiBpmDivision {1.0f};
     std::atomic<double> mUiBpmFromScript {0.0};
-#if defined(_DEBUG)
+#if defined(_DEBUG) || defined(ORCHESTRA_ENABLE_LOGGING)
     std::unique_ptr<juce::FileLogger> mLogFileLogger;
 #endif
     std::unique_ptr<ORchestraEngine> mORchestraEngine;
