@@ -1,0 +1,166 @@
+# Creates a draft GitHub Release with signed macOS and Windows builds.
+#
+# Triggered automatically by a `v*` tag push (scripts/bump-version.sh pushes the
+# tag). Note: re-running this workflow on a tag that already has a draft release
+# will fail to attach duplicate assets - delete the draft first and re-run.
+#
+# Required GitHub secrets:
+#   MACOS_CERT_P12_BASE64   Base64-encoded Apple "Developer ID Application" .p12
+#                           (base64 -i DeviceID.p12 | pbcopy)
+#   MACOS_CERT_PASSWORD     Password used to export the .p12 above
+#   MACOS_SIGNING_IDENTITY  e.g. "Developer ID Application: Name (TEAMID)"
+#
+# The macOS build is signed with Developer ID only (no notarization), so
+# first-run Gatekeeper warnings are expected until notarization is added.
+
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify tag matches project version
+        run: |
+          tag_version="${GITHUB_REF_NAME#v}"
+          cmake_version="$(sed -n 's/^project(ORCHESTRA VERSION \([0-9][0-9.]*\)).*/\1/p' CMakeLists.txt)"
+          echo "tag=$tag_version cmake=$cmake_version"
+          [ "$tag_version" = "$cmake_version" ] || { echo "Version mismatch"; exit 1; }
+
+  build-macos:
+    needs: verify
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Update submodule
+        run: git submodule update --init --recursive
+
+      - name: Configure CMake
+        run: >
+          cmake -B build
+          -DBUILD_PLUGIN=ON -DBUILD_TESTS=OFF -DBUILD_FUZZING=OFF
+          -DORCHESTRA_ENABLE_LOGGING=ON
+          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
+          -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0
+          -S ${{ github.workspace }}
+
+      - name: Build
+        run: cmake --build build --config Release --parallel
+
+      - name: Install signing certificate
+        env:
+          MACOS_CERT_P12_BASE64: ${{ secrets.MACOS_CERT_P12_BASE64 }}
+          MACOS_CERT_PASSWORD: ${{ secrets.MACOS_CERT_PASSWORD }}
+        run: |
+          set -euo pipefail
+          CERT_PATH="$RUNNER_TEMP/signing.p12"
+          KEYCHAIN_PATH="$RUNNER_TEMP/signing.keychain-db"
+          echo "$MACOS_CERT_P12_BASE64" | base64 --decode > "$CERT_PATH"
+          security create-keychain -p "" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "" "$KEYCHAIN_PATH"
+          security import "$CERT_PATH" -P "$MACOS_CERT_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+          security list-keychain -d user -s "$KEYCHAIN_PATH" login.keychain-db
+          security default-keychain -d user -s "$KEYCHAIN_PATH"
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "" "$KEYCHAIN_PATH"
+          security find-identity -v -p codesigning "$KEYCHAIN_PATH"
+
+      - name: Sign and verify artifacts
+        env:
+          MACOS_SIGNING_IDENTITY: ${{ secrets.MACOS_SIGNING_IDENTITY }}
+        run: |
+          set -euo pipefail
+          for BUNDLE in \
+            build/ORchestra/ORchestra_AU_artefacts/Release/AU/ORchestra.component \
+            build/ORchestra/ORchestra_VST_artefacts/Release/VST3/ORchestra.vst3 \
+            build/ORchestra/ORchestra_Standalone_artefacts/Release/Standalone/ORchestra.app
+          do
+            codesign --force --timestamp --sign "$MACOS_SIGNING_IDENTITY" "$BUNDLE"
+            codesign --verify --deep --strict --verbose=2 "$BUNDLE"
+          done
+
+      - name: Package
+        run: |
+          set -euo pipefail
+          TAG="${GITHUB_REF_NAME}"
+          mkdir -p staging
+          ditto build/ORchestra/ORchestra_AU_artefacts/Release/AU/ORchestra.component staging/ORchestra.component
+          ditto build/ORchestra/ORchestra_VST_artefacts/Release/VST3/ORchestra.vst3 staging/ORchestra.vst3
+          ditto build/ORchestra/ORchestra_Standalone_artefacts/Release/Standalone/ORchestra.app staging/ORchestra.app
+          ditto -c -k --sequesterRsrc --keepParent staging "ORchestra-${TAG}-macOS.zip"
+
+      - name: Clean up keychain
+        if: always()
+        run: |
+          security delete-keychain "$RUNNER_TEMP/signing.keychain-db" || true
+          rm -f "$RUNNER_TEMP/signing.p12"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos-package
+          path: ORchestra-*-macOS.zip
+          if-no-files-found: error
+
+  build-windows:
+    needs: verify
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Update submodule
+        run: git submodule update --init --recursive
+
+      - name: Configure CMake
+        run: >
+          cmake -B build
+          -DBUILD_PLUGIN=ON -DBUILD_TESTS=OFF -DBUILD_FUZZING=OFF
+          -DORCHESTRA_ENABLE_LOGGING=ON
+          -DCMAKE_BUILD_TYPE=Release
+          -S ${{ github.workspace }}
+
+      - name: Build
+        run: cmake --build build --config Release --parallel
+
+      - name: Package
+        shell: pwsh
+        run: |
+          $tag = $env:GITHUB_REF_NAME
+          New-Item -ItemType Directory -Path staging -Force | Out-Null
+          Copy-Item -Recurse "build/ORchestra/ORchestra_VST_artefacts/Release/VST3/ORchestra.vst3" "staging/ORchestra.vst3"
+          Copy-Item "build/ORchestra/ORchestra_Standalone_artefacts/Release/Standalone/ORchestra.exe" "staging/ORchestra.exe"
+          Compress-Archive -Path "staging/*" -DestinationPath "ORchestra-${tag}-windows.zip"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-package
+          path: ORchestra-*-windows.zip
+          if-no-files-found: error
+
+  release:
+    needs: [build-macos, build-windows]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+
+      - name: Create draft GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          generate_release_notes: true
+          name: "ORchestra ${{ github.ref_name }}"
+          files: |
+            macos-package/*.zip
+            windows-package/*.zip
