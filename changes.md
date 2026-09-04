@@ -3,6 +3,7 @@
 - Added unit testing for the midi scheduling and extracting the midi out so we have juce dependency in it's own layer.
 - Removing selection of audio output as it's not needed, keeping only audio device type.
 - Adding n64 note to note duration for even shorter notes.
+- Adding release script for manual pushing release as well as automatic releases on bumping the version.
 
 Bugs: 
 - Note offs messages where kept in the queue even if they were killed by a new note causing inconsistent triggering, causing the bug below for the substep. 
