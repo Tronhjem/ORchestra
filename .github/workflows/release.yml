@@ -12,6 +12,11 @@
 #
 # The macOS build is signed with Developer ID only (no notarization), so
 # first-run Gatekeeper warnings are expected until notarization is added.
+#
+# macOS is split into separate arm64 and x86_64 jobs (single-arch each) so each
+# runs in parallel instead of one slow universal build. The Intel job is
+# currently disabled while we benchmark arm64-only speed; uncomment it (and
+# re-add it to the `release` job's `needs`/`files`) to re-enable Intel support.
 
 name: Release
 
@@ -67,7 +72,7 @@ jobs:
           echo "tag=$tag_version cmake=$cmake_version"
           [ "$tag_version" = "$cmake_version" ] || { echo "Version mismatch"; exit 1; }
 
-  build-macos:
+  build-macos-arm64:
     needs: prepare
     runs-on: macos-latest
     env:
@@ -86,7 +91,7 @@ jobs:
           -DBUILD_PLUGIN=ON -DBUILD_TESTS=OFF -DBUILD_FUZZING=OFF
           -DORCHESTRA_ENABLE_LOGGING=ON
           -DCMAKE_BUILD_TYPE=Release
-          -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
+          -DCMAKE_OSX_ARCHITECTURES="arm64"
           -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0
           -S ${{ github.workspace }}
 
@@ -132,7 +137,7 @@ jobs:
           ditto build/ORchestra/ORchestra_AU_artefacts/Release/AU/ORchestra.component staging/ORchestra.component
           ditto build/ORchestra/ORchestra_VST_artefacts/Release/VST3/ORchestra.vst3 staging/ORchestra.vst3
           ditto build/ORchestra/ORchestra_Standalone_artefacts/Release/Standalone/ORchestra.app staging/ORchestra.app
-          ditto -c -k --sequesterRsrc --keepParent staging "ORchestra-${TAG}-macOS.zip"
+          ditto -c -k --sequesterRsrc --keepParent staging "ORchestra-${TAG}-macOS-arm64.zip"
 
       - name: Clean up keychain
         if: always()
@@ -142,9 +147,94 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: macos-package
-          path: ORchestra-*-macOS.zip
+          name: macos-arm64-package
+          path: ORchestra-*-macOS-arm64.zip
           if-no-files-found: error
+
+  # ---------------------------------------------------------------------------
+  # Intel (x86_64) build - DISABLED while we benchmark arm64-only speed.
+  # To re-enable: uncomment this job, add it to the `release` job's `needs`, and
+  # add `macos-intel-package/*.zip` to that job's `files` list.
+  # Cross-compiles x86_64 on the arm64 runner (avoids the deprecated macos-13).
+  # ---------------------------------------------------------------------------
+  # build-macos-intel:
+  #   needs: prepare
+  #   runs-on: macos-latest
+  #   env:
+  #     TAG: ${{ needs.prepare.outputs.tag }}
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #       with:
+  #         ref: ${{ needs.prepare.outputs.tag }}
+  #
+  #     - name: Update submodule
+  #       run: git submodule update --init --recursive
+  #
+  #     - name: Configure CMake
+  #       run: >
+  #         cmake -B build
+  #         -DBUILD_PLUGIN=ON -DBUILD_TESTS=OFF -DBUILD_FUZZING=OFF
+  #         -DORCHESTRA_ENABLE_LOGGING=ON
+  #         -DCMAKE_BUILD_TYPE=Release
+  #         -DCMAKE_OSX_ARCHITECTURES="x86_64"
+  #         -DCMAKE_OSX_DEPLOYMENT_TARGET=10.13
+  #         -S ${{ github.workspace }}
+  #
+  #     - name: Build
+  #       run: cmake --build build --config Release --parallel
+  #
+  #     - name: Install signing certificate
+  #       env:
+  #         MACOS_CERT_P12_BASE64: ${{ secrets.MACOS_CERT_P12_BASE64 }}
+  #         MACOS_CERT_PASSWORD: ${{ secrets.MACOS_CERT_PASSWORD }}
+  #       run: |
+  #         set -euo pipefail
+  #         CERT_PATH="$RUNNER_TEMP/signing.p12"
+  #         KEYCHAIN_PATH="$RUNNER_TEMP/signing.keychain-db"
+  #         echo "$MACOS_CERT_P12_BASE64" | base64 --decode > "$CERT_PATH"
+  #         security create-keychain -p "" "$KEYCHAIN_PATH"
+  #         security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+  #         security unlock-keychain -p "" "$KEYCHAIN_PATH"
+  #         security import "$CERT_PATH" -P "$MACOS_CERT_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+  #         security list-keychain -d user -s "$KEYCHAIN_PATH" login.keychain-db
+  #         security default-keychain -d user -s "$KEYCHAIN_PATH"
+  #         security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "" "$KEYCHAIN_PATH"
+  #         security find-identity -v -p codesigning "$KEYCHAIN_PATH"
+  #
+  #     - name: Sign and verify artifacts
+  #       env:
+  #         MACOS_SIGNING_IDENTITY: ${{ secrets.MACOS_SIGNING_IDENTITY }}
+  #       run: |
+  #         set -euo pipefail
+  #         for BUNDLE in \
+  #           build/ORchestra/ORchestra_AU_artefacts/Release/AU/ORchestra.component \
+  #           build/ORchestra/ORchestra_VST_artefacts/Release/VST3/ORchestra.vst3 \
+  #           build/ORchestra/ORchestra_Standalone_artefacts/Release/Standalone/ORchestra.app
+  #         do
+  #           codesign --force --timestamp --sign "$MACOS_SIGNING_IDENTITY" "$BUNDLE"
+  #           codesign --verify --deep --strict --verbose=2 "$BUNDLE"
+  #         done
+  #
+  #     - name: Package
+  #       run: |
+  #         set -euo pipefail
+  #         mkdir -p staging
+  #         ditto build/ORchestra/ORchestra_AU_artefacts/Release/AU/ORchestra.component staging/ORchestra.component
+  #         ditto build/ORchestra/ORchestra_VST_artefacts/Release/VST3/ORchestra.vst3 staging/ORchestra.vst3
+  #         ditto build/ORchestra/ORchestra_Standalone_artefacts/Release/Standalone/ORchestra.app staging/ORchestra.app
+  #         ditto -c -k --sequesterRsrc --keepParent staging "ORchestra-${TAG}-macOS-x86_64.zip"
+  #
+  #     - name: Clean up keychain
+  #       if: always()
+  #       run: |
+  #         security delete-keychain "$RUNNER_TEMP/signing.keychain-db" || true
+  #         rm -f "$RUNNER_TEMP/signing.p12"
+  #
+  #     - uses: actions/upload-artifact@v4
+  #       with:
+  #         name: macos-intel-package
+  #         path: ORchestra-*-macOS-x86_64.zip
+  #         if-no-files-found: error
 
   build-windows:
     needs: prepare
@@ -185,7 +275,7 @@ jobs:
           if-no-files-found: error
 
   release:
-    needs: [prepare, build-macos, build-windows]
+    needs: [prepare, build-macos-arm64, build-windows]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -198,5 +288,5 @@ jobs:
           tag_name: ${{ needs.prepare.outputs.tag }}
           name: "ORchestra ${{ needs.prepare.outputs.tag }}"
           files: |
-            macos-package/*.zip
+            macos-arm64-package/*.zip
             windows-package/*.zip
