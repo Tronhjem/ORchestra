@@ -803,6 +803,7 @@ namespace ORchestra
         else if (text == "n8")  value = 4;
         else if (text == "n16") value = 5;
         else if (text == "n32") value = 6;
+        else if (text == "n64") value = 7;
         else
         {
             mErrorReporting.LogError("Unknown note division literal");

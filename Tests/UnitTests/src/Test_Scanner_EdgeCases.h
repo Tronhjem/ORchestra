@@ -387,7 +387,7 @@ TEST_CASE("Scanner: All note division literals tokenized as BEAT_IDENTIFIER", "[
     ErrorReporting errorReporting;
     Scanner scanner(errorReporting);
 
-    const std::string divisions[] = {"n1", "n2", "n4", "n8", "n16", "n32"};
+    const std::string divisions[] = {"n1", "n2", "n4", "n8", "n16", "n32", "n64"};
     for (const auto& div : divisions)
     {
         Scanner s(errorReporting);

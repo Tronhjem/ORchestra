@@ -77,30 +77,11 @@ MidiSettingsComponent::MidiSettingsComponent(juce::AudioDeviceManager& deviceMan
 
         const juce::String type = mAudioDriverCombo.getItemText(id - 1);
         mDeviceManager.setCurrentAudioDeviceType(type, true);
-        PopulateAudioOutputCombo();
     };
     addAndMakeVisible(mAudioDriverCombo);
 
-    mAudioOutputLabel.setText("Audio Output", juce::dontSendNotification);
-    mAudioOutputLabel.setColour(juce::Label::textColourId, ORchestra::TextColor);
-    addAndMakeVisible(mAudioOutputLabel);
-
-    PopulateAudioOutputCombo();
-    mAudioOutputCombo.onChange = [this]()
-    {
-        const int selectedItem = mAudioOutputCombo.getSelectedId();
-        if (selectedItem <= 0)
-            return;
-
-        const juce::String deviceName = mAudioOutputCombo.getItemText(selectedItem - 1);
-        auto setup = mDeviceManager.getAudioDeviceSetup();
-        if (deviceName == setup.outputDeviceName)
-            return;
-
-        setup.outputDeviceName = deviceName;
-        mDeviceManager.setAudioDeviceSetup(setup, true);
-    };
-    addAndMakeVisible(mAudioOutputCombo);
+    auto audioSetup = mDeviceManager.getAudioDeviceSetup();
+    audioSetup.inputDeviceName = "None";
 
     mFileLabel.setText("File", juce::dontSendNotification);
     mFileLabel.setColour(juce::Label::textColourId, ORchestra::TextColor);
@@ -131,9 +112,6 @@ MidiSettingsComponent::MidiSettingsComponent(juce::AudioDeviceManager& deviceMan
                      + LABEL_H + ROW_GAP
                      + ROW_H
                      + SECTION_GAP
-                     + LABEL_H + ROW_GAP
-                     + ROW_H
-                     + SECTION_GAP
                      + LABEL_H;
 
     setSize(PANEL_W, height);
@@ -143,40 +121,8 @@ MidiSettingsComponent::~MidiSettingsComponent()
 {
     mOutputCombo.setLookAndFeel(nullptr);
     mAudioDriverCombo.setLookAndFeel(nullptr);
-    mAudioOutputCombo.setLookAndFeel(nullptr);
     mImportButton.setLookAndFeel(nullptr);
     mExportButton.setLookAndFeel(nullptr);
-}
-
-void MidiSettingsComponent::PopulateAudioOutputCombo()
-{
-    mAudioOutputCombo.clear();
-    mAudioDeviceNames.clear();
-
-    const juce::String currentType = mDeviceManager.getCurrentAudioDeviceType();
-    for (auto* type : mDeviceManager.getAvailableDeviceTypes())
-    {
-        if (type->getTypeName() != currentType)
-            continue;
-
-        juce::StringArray outDevs = type->getDeviceNames(false);
-        auto currentSetup = mDeviceManager.getAudioDeviceSetup();
-        int itemId = 1;
-        int selectedId = 1;
-
-        for (int i = 0; i < outDevs.size(); ++i)
-        {
-            const juce::String& name = outDevs[i];
-            mAudioOutputCombo.addItem(name, itemId);
-            mAudioDeviceNames.add(name);
-            if (name == currentSetup.outputDeviceName)
-                selectedId = itemId;
-            ++itemId;
-        }
-
-        mAudioOutputCombo.setSelectedId(selectedId, juce::dontSendNotification);
-        return;
-    }
 }
 
 void MidiSettingsComponent::resized()
@@ -191,11 +137,6 @@ void MidiSettingsComponent::resized()
     mAudioDriverLabel.setBounds(bounds.removeFromTop(LABEL_H));
     bounds.removeFromTop(ROW_GAP);
     mAudioDriverCombo.setBounds(bounds.removeFromTop(ROW_H));
-
-    bounds.removeFromTop(SECTION_GAP);
-    mAudioOutputLabel.setBounds(bounds.removeFromTop(LABEL_H));
-    bounds.removeFromTop(ROW_GAP);
-    mAudioOutputCombo.setBounds(bounds.removeFromTop(ROW_H));
 
     bounds.removeFromTop(SECTION_GAP);
     mFileLabel.setBounds(bounds.removeFromTop(LABEL_H));

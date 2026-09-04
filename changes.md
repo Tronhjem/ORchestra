@@ -1,3 +1,14 @@
+### v0.2.5
+
+- Added unit testing for the midi scheduling and extracting the midi out so we have juce dependency in it's own layer.
+- Removing selection of audio output as it's not needed, keeping only audio device type.
+- Adding n64 note to note duration for even shorter notes.
+
+Bugs: 
+- Note offs messages where kept in the queue even if they were killed by a new note causing inconsistent triggering, causing the bug below for the substep. 
+- Midi retriggering of substeps of same type would kill notes.
+
+
 ### v0.2.4
 
 - Fixing general building on Linux (ubuntu) and adding checks to run on PRs for ubuntu as well.

@@ -40,6 +40,7 @@
 #include "Test_UserFunctions.h"
 #include "Test_NoteDivisionLiterals.h"
 #include "Test_NoteAndCC.h"
+#include "Test_NoteTracker.h"
 #include "Test_Scanner_EdgeCases.h"
 #include "Test_BuiltInFunctions.h"
 #include "Test_ErrorReportingClass.h"

@@ -48,8 +48,6 @@ private:
 
     juce::Label mAudioDriverLabel;
     juce::ComboBox mAudioDriverCombo;
-    juce::Label mAudioOutputLabel;
-    juce::ComboBox mAudioOutputCombo;
     juce::StringArray mAudioDeviceNames;
 
     juce::Label mFileLabel;
@@ -59,6 +57,4 @@ private:
     std::function<void()> mExportCallback;
 
     juce::Label mVersionLabel;
-
-    void PopulateAudioOutputCombo();
 };

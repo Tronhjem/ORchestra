@@ -92,6 +92,17 @@ TEST_CASE("NoteDivisionLiterals: n32 compiles to value 6 (32nd note)", "[NoteDiv
     REQUIRE(result.GetValue(0) == 6);
 }
 
+TEST_CASE("NoteDivisionLiterals: n64 compiles to value 7 (64th note)", "[NoteDivisionLiterals]")
+{
+    std::string file{"a = n64 \n test a"};
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    REQUIRE(vm.Prepare(&file[0]));
+
+    StepData result = vm.GetTopStackValue();
+    REQUIRE(result.GetValue(0) == 7);
+}
+
 TEST_CASE("NoteDivisionLiterals: n8 in array '[n8, n4]' first element is 4", "[NoteDivisionLiterals]")
 {
     std::string file{"a = [n8, n4] \n test a[0]"};
