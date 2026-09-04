@@ -90,13 +90,14 @@ jobs:
           cmake -B build
           -DBUILD_PLUGIN=ON -DBUILD_TESTS=OFF -DBUILD_FUZZING=OFF
           -DORCHESTRA_ENABLE_LOGGING=ON
+          -DORCHESTRA_COPY_PLUGIN_AFTER_BUILD=OFF
           -DCMAKE_BUILD_TYPE=Release
           -DCMAKE_OSX_ARCHITECTURES="arm64"
           -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0
           -S ${{ github.workspace }}
 
       - name: Build
-        run: cmake --build build --config Release --parallel
+        run: cmake --build build --config Release
 
       - name: Install signing certificate
         env:
@@ -175,13 +176,14 @@ jobs:
   #         cmake -B build
   #         -DBUILD_PLUGIN=ON -DBUILD_TESTS=OFF -DBUILD_FUZZING=OFF
   #         -DORCHESTRA_ENABLE_LOGGING=ON
+  #         -DORCHESTRA_COPY_PLUGIN_AFTER_BUILD=OFF
   #         -DCMAKE_BUILD_TYPE=Release
   #         -DCMAKE_OSX_ARCHITECTURES="x86_64"
   #         -DCMAKE_OSX_DEPLOYMENT_TARGET=10.13
   #         -S ${{ github.workspace }}
   #
   #     - name: Build
-  #       run: cmake --build build --config Release --parallel
+  #       run: cmake --build build --config Release
   #
   #     - name: Install signing certificate
   #       env:

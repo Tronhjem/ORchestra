@@ -69,6 +69,7 @@ jobs:
       run: >
         cmake -B ${{ steps.strings.outputs.build-output-dir }}
         -DBUILD_PLUGIN=ON -DBUILD_TESTS=OFF
+        -DORCHESTRA_COPY_PLUGIN_AFTER_BUILD=OFF
         -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
         -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}

@@ -37,6 +37,13 @@ set(ORCHESTRA_LINK_LIBRARIES
         juce::juce_recommended_lto_flags
 )
 
+# Copy plugins into the user's system plugin folders after building. This is
+# convenient locally but can hang headless CI runners when macOS validates the
+# freshly-copied AU, so CI should pass -DORCHESTRA_COPY_PLUGIN_AFTER_BUILD=OFF.
+if(NOT DEFINED ORCHESTRA_COPY_PLUGIN_AFTER_BUILD)
+    set(ORCHESTRA_COPY_PLUGIN_AFTER_BUILD ON)
+endif()
+
 function(add_orchestra_format target format is_midi_effect)
     juce_add_plugin(${target}
         VERSION ${CMAKE_PROJECT_VERSION}
@@ -44,7 +51,7 @@ function(add_orchestra_format target format is_midi_effect)
         NEEDS_MIDI_OUTPUT TRUE
         IS_MIDI_EFFECT ${is_midi_effect}
         EDITOR_WANTS_KEYBOARD_FOCUS TRUE
-        COPY_PLUGIN_AFTER_BUILD TRUE
+        COPY_PLUGIN_AFTER_BUILD ${ORCHESTRA_COPY_PLUGIN_AFTER_BUILD}
         PLUGIN_MANUFACTURER_CODE ${ORCHESTRA_MANUFACTURER_CODE}
         PLUGIN_CODE ${ORCHESTRA_PLUGIN_CODE}
         FORMATS ${format}
