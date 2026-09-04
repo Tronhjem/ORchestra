@@ -1,8 +1,8 @@
 # Creates a draft GitHub Release with signed macOS and Windows builds.
 #
 # Triggered automatically by a `v*` tag push (scripts/bump-version.sh pushes the
-# tag). Note: re-running this workflow on a tag that already has a draft release
-# will fail to attach duplicate assets - delete the draft first and re-run.
+# tag), or manually via `workflow_dispatch` to re-publish the current tag without
+# bumping the version (see scripts/release.sh).
 #
 # Required GitHub secrets:
 #   MACOS_CERT_P12_BASE64   Base64-encoded Apple "Developer ID Application" .p12
@@ -18,31 +18,64 @@ name: Release
 on:
   push:
     tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to build (e.g. v0.2.5). Leave empty to use the latest tag.'
+        required: false
+        default: ''
 
 permissions:
   contents: write
 
-concurrency:
-  group: release-${{ github.ref }}
-  cancel-in-progress: false
-
 jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.resolve.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve tag
+        id: resolve
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            TAG="${{ github.ref_name }}"
+          elif [ -n "${{ github.event.inputs.tag }}" ]; then
+            TAG="${{ github.event.inputs.tag }}"
+          else
+            TAG="$(git describe --tags --abbrev=0)"
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "Resolved tag: $TAG"
+
   verify:
+    needs: prepare
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.tag }}
+
       - name: Verify tag matches project version
         run: |
-          tag_version="${GITHUB_REF_NAME#v}"
+          tag="${{ needs.prepare.outputs.tag }}"
+          tag_version="${tag#v}"
           cmake_version="$(sed -n 's/^project(ORCHESTRA VERSION \([0-9][0-9.]*\)).*/\1/p' CMakeLists.txt)"
           echo "tag=$tag_version cmake=$cmake_version"
           [ "$tag_version" = "$cmake_version" ] || { echo "Version mismatch"; exit 1; }
 
   build-macos:
-    needs: verify
+    needs: prepare
     runs-on: macos-latest
+    env:
+      TAG: ${{ needs.prepare.outputs.tag }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.tag }}
 
       - name: Update submodule
         run: git submodule update --init --recursive
@@ -95,7 +128,6 @@ jobs:
       - name: Package
         run: |
           set -euo pipefail
-          TAG="${GITHUB_REF_NAME}"
           mkdir -p staging
           ditto build/ORchestra/ORchestra_AU_artefacts/Release/AU/ORchestra.component staging/ORchestra.component
           ditto build/ORchestra/ORchestra_VST_artefacts/Release/VST3/ORchestra.vst3 staging/ORchestra.vst3
@@ -115,10 +147,14 @@ jobs:
           if-no-files-found: error
 
   build-windows:
-    needs: verify
+    needs: prepare
     runs-on: windows-latest
+    env:
+      TAG: ${{ needs.prepare.outputs.tag }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.tag }}
 
       - name: Update submodule
         run: git submodule update --init --recursive
@@ -137,11 +173,10 @@ jobs:
       - name: Package
         shell: pwsh
         run: |
-          $tag = $env:GITHUB_REF_NAME
           New-Item -ItemType Directory -Path staging -Force | Out-Null
           Copy-Item -Recurse "build/ORchestra/ORchestra_VST_artefacts/Release/VST3/ORchestra.vst3" "staging/ORchestra.vst3"
           Copy-Item "build/ORchestra/ORchestra_Standalone_artefacts/Release/Standalone/ORchestra.exe" "staging/ORchestra.exe"
-          Compress-Archive -Path "staging/*" -DestinationPath "ORchestra-${tag}-windows.zip"
+          Compress-Archive -Path "staging/*" -DestinationPath "ORchestra-$($env:TAG)-windows.zip"
 
       - uses: actions/upload-artifact@v4
         with:
@@ -150,7 +185,7 @@ jobs:
           if-no-files-found: error
 
   release:
-    needs: [build-macos, build-windows]
+    needs: [prepare, build-macos, build-windows]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -160,7 +195,8 @@ jobs:
         with:
           draft: true
           generate_release_notes: true
-          name: "ORchestra ${{ github.ref_name }}"
+          tag_name: ${{ needs.prepare.outputs.tag }}
+          name: "ORchestra ${{ needs.prepare.outputs.tag }}"
           files: |
             macos-package/*.zip
             windows-package/*.zip
