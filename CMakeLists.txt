@@ -4,6 +4,12 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 project(ORCHESTRA VERSION 0.2.5)
 
+execute_process(
+    COMMAND ${CMAKE_COMMAND} -E create_symlink
+        ${CMAKE_BINARY_DIR}/compile_commands.json
+        ${CMAKE_SOURCE_DIR}/compile_commands.json
+)
+
 option(BUILD_PLUGIN "Build the ORchestra plugin (requires JUCE)" ON)
 option(BUILD_TESTS "Build the unit tests (no JUCE dependency)" ON)
 option(BUILD_FUZZING "Build the fuzzing targets (no JUCE dependency)" OFF)

@@ -10,6 +10,7 @@ build-beta/
 
 
 .claude/
+.codegraph/
 JuceLibraryCode/
 .DS_Store
 .vscode/
