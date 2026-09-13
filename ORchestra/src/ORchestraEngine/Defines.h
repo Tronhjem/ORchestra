@@ -92,6 +92,7 @@ namespace ORchestra
         BPM = 3,
         BEAT = 4,
         PRINT = 5,
-        TRANSPOSE = 6
+        TRANSPOSE = 6,
+        SWING = 7
     };
 } // namespace ORchestra

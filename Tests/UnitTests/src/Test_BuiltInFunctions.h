@@ -276,3 +276,51 @@ TEST_CASE("BuiltInFunctions: print($) prints globalCount", "[BuiltInFunctions]")
     REQUIRE(steps[0].mType == SequenceStepType::PRINT);
     REQUIRE(steps[0].mFirst.GetValue(0) == 7);
 }
+
+// --- swing() ---
+
+TEST_CASE("BuiltInFunctions: swing(50) compiles successfully", "[BuiltInFunctions]")
+{
+    std::string file{"swing(50)\n"};
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    REQUIRE(vm.Prepare(file));
+}
+
+TEST_CASE("BuiltInFunctions: swing with variable argument compiles", "[BuiltInFunctions]")
+{
+    std::string file{"amount = 75\nswing(amount)\n"};
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    REQUIRE(vm.Prepare(file));
+}
+
+TEST_CASE("BuiltInFunctions: swing(75) produces SWING SequenceStep at Tick", "[BuiltInFunctions]")
+{
+    std::string file{"swing(75)\n"};
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    REQUIRE(vm.Prepare(file));
+
+    std::vector<SequenceStep> steps;
+    REQUIRE(vm.Tick(steps, 0));
+    REQUIRE_FALSE(steps.empty());
+    REQUIRE(steps[0].mType == SequenceStepType::SWING);
+    REQUIRE(steps[0].mFirst.GetValue(0) == 75);
+}
+
+TEST_CASE("BuiltInFunctions: swing with no params fails", "[BuiltInFunctions]")
+{
+    std::string file{"swing()\n"};
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    REQUIRE(vm.Prepare(file) == false);
+}
+
+TEST_CASE("BuiltInFunctions: swing with too many params fails", "[BuiltInFunctions]")
+{
+    std::string file{"swing(50, 75)\n"};
+    ErrorReporting errorReporter;
+    VM vm(errorReporter);
+    REQUIRE(vm.Prepare(file) == false);
+}

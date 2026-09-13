@@ -17,6 +17,7 @@
  * along with ORchestra. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <algorithm>
 #include <chrono>
 #include <cmath>
 #include <string>
@@ -95,6 +96,8 @@ namespace ORchestra
         mLastBpm = 0.0;
         mLastBpmDivision = 0.0f;
         mShouldResetScriptBpm.store(true, std::memory_order_release);
+        mShouldResetSwing.store(true, std::memory_order_release);
+        mShouldResyncSteps.store(true, std::memory_order_release);
 
         mVM.Reset();
 
@@ -245,6 +248,14 @@ namespace ORchestra
         if (mShouldResetScriptBpm.exchange(false, std::memory_order_acq_rel))
             mScriptBpmActive = false;
 
+        if (mShouldResetSwing.exchange(false, std::memory_order_acq_rel))
+            transportData.swingAmount = 50;
+
+        // After a recompile the ring buffer is rebuilt from mCurrentGlobalStep,
+        // so drop any pending late-swung step and continue from the grid.
+        if (mShouldResyncSteps.exchange(false, std::memory_order_acq_rel))
+            mNextScheduledStep = mCurrentGlobalStep.load();
+
         if (transportData.isPlaying && mIsVMInit)
         {
             TickInternal(transportData, bufferLength);
@@ -298,23 +309,36 @@ namespace ORchestra
             // Force the first step after the seek to process even if its step
             // number equals the stale mLastStep. Only written on this thread.
             mLastStep = -1;
+            mNextScheduledStep = currentStep;
             mSeekTargetStep.store(currentStep, std::memory_order_release);
             mSeekRequest.fetch_add(1, std::memory_order_acq_rel);
             WakeWorker();
             return;
         }
 
-        const int nextStepInSamples = static_cast<int>(
-                static_cast<double>(mStepOriginInSamples) + samplesPerStep * static_cast<double>(currentStep));
-
+        const double swingRatio = (transportData.swingAmount - 50) / 100.0;
         const int endOfBufferInSamples = static_cast<int>(transportData.timeInSamples + bufferLength);
 
-        if (endOfBufferInSamples >= nextStepInSamples
-            && currentStep != mLastStep
+        // Late swing pushes an odd step's trigger time past the next straight
+        // grid boundary, so schedule from mNextScheduledStep (advanced only
+        // after a step is processed) instead of the straight-grid currentStep.
+        // Checking currentStep would skip a late-swung odd step once the grid
+        // moved past it. mNextScheduledStep is resynced on seek and recompile.
+        const int stepToProcess = mNextScheduledStep;
+        const int nextStepInSamples = static_cast<int>(
+                static_cast<double>(mStepOriginInSamples) + samplesPerStep * static_cast<double>(stepToProcess));
+        const int swingOffset = (stepToProcess & 1)
+            ? static_cast<int>(samplesPerStep * swingRatio)
+            : 0;
+        const int stepTriggerTimeInSamples = nextStepInSamples + swingOffset;
+
+        if (endOfBufferInSamples >= stepTriggerTimeInSamples
+            && stepToProcess != mLastStep
             && mReadySteps.load(std::memory_order_acquire) > 0)
         {
-            if (ProcessStepData(transportData, currentStep, nextStepInSamples, samplesPerStep))
+            if (ProcessStepData(transportData, stepToProcess, stepTriggerTimeInSamples, samplesPerStep))
             {
+                mNextScheduledStep++;
                 int ready = mReadySteps.load(std::memory_order_acquire);
                 while (ready > 0
                        && !mReadySteps.compare_exchange_weak(ready, ready - 1,
@@ -384,6 +408,13 @@ namespace ORchestra
                 case ORchestra::SequenceStepType::TRANSPOSE:
                     {
                         transportData.transposeOffset = static_cast<int>(step.mFirst.GetValue(0));
+
+                        break;
+                    }
+                case ORchestra::SequenceStepType::SWING:
+                    {
+                        const int rawSwing = static_cast<int>(step.mFirst.GetValue(0));
+                        transportData.swingAmount = std::clamp(rawSwing, 0, 100);
 
                         break;
                     }

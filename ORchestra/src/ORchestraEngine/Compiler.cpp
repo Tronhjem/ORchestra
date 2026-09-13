@@ -42,6 +42,7 @@ namespace ORchestra
     static const std::string bpmFunctionName = "bpm";
     static const std::string beatFunctionName = "beat";
     static const std::string transposeFunctionName = "transpose";
+    static const std::string swingFunctionName = "swing";
 
     Compiler::Compiler(const std::vector<ORchestraToken>& tokens, ErrorReporting& log) :
             mVariableIdCounter(0),
@@ -79,6 +80,10 @@ namespace ORchestra
         std::vector<Instruction> transposeInstructions;
         transposeInstructions.emplace_back(Instruction{ OpCode::SET_TRANSPOSE });
         mFunctions[transposeFunctionName] = StoredFunction(1, std::move(transposeInstructions));
+
+        std::vector<Instruction> swingInstructions;
+        swingInstructions.emplace_back(Instruction{ OpCode::SET_SWING });
+        mFunctions[swingFunctionName] = StoredFunction(1, std::move(swingInstructions));
     }
 
     std::vector<std::string> Compiler::GetVariableNames() const

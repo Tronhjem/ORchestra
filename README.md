@@ -615,6 +615,25 @@ a = [C4, D4, E4]
 note(1, a, 100, n4)
 ```
 
+#### Swing
+
+There is a built-in function for adding swing to the sequencer timing. `swing(amount)` shifts every odd step early or late relative to the straight grid.
+
+**Parameters:**
+- `amount` - 0 to 100. 50 is no swing (straight timing). Values below 50 shift odd steps earlier; values above 50 shift them later.
+
+**Notes:**
+- Maximum shift is half a step duration in either direction.
+- The value is clamped to the 0-100 range.
+- Removing `swing()` from a script and recompiling resets swing back to 50.
+
+```cpp
+beat(n16)
+swing(65)          // slight late swing on every odd 16th note
+pattern = euc(4, 8)
+note(pattern, C4, 100, n16)
+```
+
 #### Print
 
 There is a built-in function for outputting any value to the console. `print()` takes one value or expression and outputs it. It is a great way to inspect a sequence of notes or a final value if you are not sure why a certain value is the way it is at the end of a script, for example. It only outputs raw values as numbers, so note values will be shown as MIDI numbers.
