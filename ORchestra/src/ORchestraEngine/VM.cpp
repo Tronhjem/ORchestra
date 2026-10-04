@@ -161,6 +161,7 @@ namespace ORchestra
             case (OpCode::SET_BPM):
             case (OpCode::SET_BEAT):
             case (OpCode::SET_TRANSPOSE):
+            case (OpCode::SET_SWING):
             case (OpCode::PRINT):
             {
                 stack.Pop();
@@ -272,6 +273,14 @@ namespace ORchestra
             const StepData printValue = stack.Pop();
             stepQueue.emplace_back(SequenceStep{ SequenceStepType::PRINT, printValue, printValue,
                                    printValue, printValue, DEFAULT_NOTE_DURATION });
+            break;
+        }
+
+        case (OpCode::SET_SWING):
+        {
+            const StepData swingValue = stack.Pop();
+            stepQueue.emplace_back(SequenceStep{ SequenceStepType::SWING, swingValue, swingValue,
+                                   swingValue, swingValue, DEFAULT_NOTE_DURATION });
             break;
         }
 

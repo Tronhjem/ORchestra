@@ -1,3 +1,7 @@
+### Unreleased
+
+- Added `swing()` built-in function for shifting odd steps early or late (0-100, 50 = no swing). Swing is reset to 50 on recompile when the call is removed from a script.
+
 ### v0.2.5
 
 - Added unit testing for the midi scheduling and extracting the midi out so we have juce dependency in it's own layer.

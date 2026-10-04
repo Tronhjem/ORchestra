@@ -69,6 +69,7 @@ namespace ORchestra
         SET_BEAT,
         NEGATE,
         SET_TRANSPOSE,
+        SET_SWING,
 
         UPDATE_IDENTIFIER_VALUE,
         EXEC_FUNC_ARRAY,

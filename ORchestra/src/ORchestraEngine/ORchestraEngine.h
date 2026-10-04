@@ -87,6 +87,10 @@ namespace ORchestra
 
 
         int mLastStep = -1;
+        // Next step the audio thread will schedule. Derived from the straight
+        // grid but only advanced after processing, so a late-swung odd step is
+        // still processed even after currentStep has moved past it.
+        int mNextScheduledStep = 0;
         int64_t mSamplesSinceLastStep = 0;
         double mSamplesPerStep = 0.0;
         int64_t mStepOriginInSamples = 0;
@@ -100,6 +104,8 @@ namespace ORchestra
         std::atomic<bool> mHasWork;
         std::atomic<bool> mIsRunning;
         std::atomic<bool> mShouldResetScriptBpm {false};
+        std::atomic<bool> mShouldResetSwing {false};
+        std::atomic<bool> mShouldResyncSteps {false};
         bool mScriptBpmActive = false;
 
         // UI thread bumps mResetRequest to ask the worker to recompile (issue #2).

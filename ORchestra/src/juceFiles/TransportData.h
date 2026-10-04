@@ -32,5 +32,6 @@ namespace ORchestra
         int64_t timeInSamples = 0;
         bool isPlaying = false;
         int transposeOffset = 0;
+        int swingAmount = 50;  // 50 = no swing; 0..49 early, 51..100 late
     };
 } // namespace ORchestra
