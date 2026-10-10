@@ -1,0 +1,12 @@
+# Custom tmux pane layout (mutually exclusive with 'windows').
+# Default: Two-pane layout with shell and clear command.
+# Note: workmux always keeps one status pane, so the minimum is two panes.
+panes:
+  - command: nvim
+
+# Commands to run in new worktree before tmux window opens.
+# JUCE is a git submodule; initialize it so the worktree can build, then
+# configure a build directory for testing and building.
+post_create:
+  - git submodule update --init JUCE
+  - mkdir -p build && cd build && cmake ../
