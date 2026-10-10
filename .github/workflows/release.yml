@@ -136,6 +136,7 @@ jobs:
           ditto build/ORchestra/ORchestra_AU_artefacts/Release/AU/ORchestra.component staging/ORchestra.component
           ditto build/ORchestra/ORchestra_VST_artefacts/Release/VST3/ORchestra.vst3 staging/ORchestra.vst3
           ditto build/ORchestra/ORchestra_Standalone_artefacts/Release/Standalone/ORchestra.app staging/ORchestra.app
+          ditto docs staging/docs
           ditto -c -k --sequesterRsrc --keepParent staging "ORchestra-${TAG}-macOS-arm64.zip"
 
       - name: Clean up keychain
@@ -216,6 +217,7 @@ jobs:
           ditto build/ORchestra/ORchestra_AU_artefacts/Release/AU/ORchestra.component staging/ORchestra.component
           ditto build/ORchestra/ORchestra_VST_artefacts/Release/VST3/ORchestra.vst3 staging/ORchestra.vst3
           ditto build/ORchestra/ORchestra_Standalone_artefacts/Release/Standalone/ORchestra.app staging/ORchestra.app
+          ditto docs staging/docs
           ditto -c -k --sequesterRsrc --keepParent staging "ORchestra-${TAG}-macOS-x86_64.zip"
 
       - name: Clean up keychain
@@ -260,6 +262,7 @@ jobs:
           New-Item -ItemType Directory -Path staging -Force | Out-Null
           Copy-Item -Recurse "build/ORchestra/ORchestra_VST_artefacts/Release/VST3/ORchestra.vst3" "staging/ORchestra.vst3"
           Copy-Item "build/ORchestra/ORchestra_Standalone_artefacts/Release/Standalone/ORchestra.exe" "staging/ORchestra.exe"
+          Copy-Item -Recurse "docs" "staging/docs"
           Compress-Archive -Path "staging/*" -DestinationPath "ORchestra-$($env:TAG)-windows.zip"
 
       - uses: actions/upload-artifact@v4
