@@ -1,10 +1,10 @@
-# ORchestra Documentation
+# ORchestra
 
-Welcome to the ORchestra documentation. ORchestra is a MIDI sequencer plugin that generates and combines sequences of notes or MIDI CC messages through a custom scripting language.
+ORchestra is a MIDI sequencer plugin that generates notes and MIDI CC messages through a small, purpose-built scripting language.
 
-## Getting Started
+## Getting started
 
-- **[Usage](./usage.md)** — How to set up ORchestra in major DAWs.
-- **[Language Reference](./LanguageReference.md)** — Full syntax, built-in functions, and examples for the ORchestra scripting language.
+- **[Usage](./usage.md)** — Add ORchestra to your DAW and route MIDI.
+- **[Language Reference](./LanguageReference.md)** — Syntax, built-in functions, and examples.
 
-For build instructions and development notes, see the [main README](https://github.com/Tronhjem/ORchestra/blob/main/README.md).
+Build and development instructions are kept in the [main repository README](https://github.com/Tronhjem/ORchestra/blob/main/README.md).
