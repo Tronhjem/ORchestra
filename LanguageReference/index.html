@@ -1,0 +1,2048 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://tronhjem.github.io/ORchestra/LanguageReference/">
+      
+      
+        <link rel="prev" href="../usage/">
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Language Reference - ORchestra Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="deep-purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#orchestra-language-reference" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="ORchestra Documentation" class="md-header__button md-logo" aria-label="ORchestra Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            ORchestra Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Language Reference
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="deep-purple"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="deep-purple"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Tronhjem/ORchestra" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Tronhjem/ORchestra
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="ORchestra Documentation" class="md-nav__button md-logo" aria-label="ORchestra Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    ORchestra Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Tronhjem/ORchestra" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Tronhjem/ORchestra
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Usage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Language Reference
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Language Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Table of Contents
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#general-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        General Rules
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reserved-keywords" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reserved Keywords
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#operators" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Operators
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Variables
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-sequences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data Sequences
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-global-step" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Global Step
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#midi-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MIDI Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#substeps-sub-divisions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Substeps / Sub-divisions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#note-division-literals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Note Division Literals
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#musical-note-names" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Musical Note Names
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#built-in-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Built-in Functions
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Built-in Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#euclidean-sequence-generator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Euclidean Sequence Generator
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#random-number-generator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Random Number Generator
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bpm-tempo-control" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        BPM (Tempo) Control
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#beat-division-control" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Beat Division Control
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#transpose" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Transpose
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#swing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Swing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#print" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Print
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#user-defined-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        User-Defined Functions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#function-arrays" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Function Arrays
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-pattern" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Basic Pattern
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#euclidean-rhythm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Euclidean Rhythm
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#combining-sequences-with-logic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Combining Sequences with Logic
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phasing-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phasing Patterns
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#random-velocity-and-notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Random Velocity and Notes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-cc-messages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using CC Messages
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#setting-tempo-and-division-from-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Setting Tempo and Division from Script
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#modifying-arrays-with-index-assignment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Modifying Arrays with Index Assignment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#complex-rhythm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Complex Rhythm
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-substeps-for-drum-fills" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using Substeps for Drum Fills
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#user-defined-functions_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        User-Defined Functions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#function-arrays_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Function Arrays
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-global-count-for-evolving-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using Global Count ($) for Evolving Patterns
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Table of Contents
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#general-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        General Rules
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reserved-keywords" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reserved Keywords
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#operators" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Operators
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Variables
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-sequences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data Sequences
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-global-step" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Global Step
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#midi-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MIDI Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#substeps-sub-divisions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Substeps / Sub-divisions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#note-division-literals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Note Division Literals
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#musical-note-names" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Musical Note Names
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#built-in-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Built-in Functions
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Built-in Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#euclidean-sequence-generator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Euclidean Sequence Generator
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#random-number-generator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Random Number Generator
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bpm-tempo-control" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        BPM (Tempo) Control
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#beat-division-control" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Beat Division Control
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#transpose" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Transpose
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#swing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Swing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#print" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Print
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#user-defined-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        User-Defined Functions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#function-arrays" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Function Arrays
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-pattern" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Basic Pattern
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#euclidean-rhythm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Euclidean Rhythm
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#combining-sequences-with-logic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Combining Sequences with Logic
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phasing-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phasing Patterns
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#random-velocity-and-notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Random Velocity and Notes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-cc-messages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using CC Messages
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#setting-tempo-and-division-from-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Setting Tempo and Division from Script
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#modifying-arrays-with-index-assignment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Modifying Arrays with Index Assignment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#complex-rhythm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Complex Rhythm
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-substeps-for-drum-fills" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using Substeps for Drum Fills
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#user-defined-functions_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        User-Defined Functions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#function-arrays_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Function Arrays
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-global-count-for-evolving-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using Global Count ($) for Evolving Patterns
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="orchestra-language-reference">ORchestra Language Reference<a class="headerlink" href="#orchestra-language-reference" title="Permanent link">&para;</a></h1>
+<p>This document covers the syntax, built-in functions, and usage patterns of the ORchestra scripting language. It is meant to be read once you have ORchestra <a href="https://github.com/Tronhjem/ORchestra/blob/main/README.md#quick-start">built</a> or installed as a plugin.</p>
+<hr />
+<h2 id="table-of-contents">Table of Contents<a class="headerlink" href="#table-of-contents" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="#overview">Overview</a></li>
+<li><a href="#reserved-keywords">Reserved Keywords</a></li>
+<li><a href="#operators">Operators</a></li>
+<li><a href="#variables">Variables</a></li>
+<li><a href="#data-sequences">Data Sequences</a></li>
+<li><a href="#the-global-step">The Global Step</a></li>
+<li><a href="#midi-output">MIDI Output</a></li>
+<li><a href="#note-division-literals">Note Division Literals</a></li>
+<li><a href="#substeps-sub-divisions">Substeps / Sub-divisions</a></li>
+<li><a href="#musical-note-names">Musical Note Names</a></li>
+<li><a href="#built-in-functions">Built-in Functions</a></li>
+<li><a href="#user-defined-functions">User-Defined Functions</a></li>
+<li><a href="#function-arrays">Function Arrays</a></li>
+<li><a href="#examples">Examples</a></li>
+</ul>
+<hr />
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>I know text-based programming can seem a bit daunting at first if you are not a programmer, but it provides the most compact way of expressing data and functionality instead of using nodes. I will provide a bunch of examples to get you started.</p>
+<p>The ORchestra scripting language is evaluated from top to bottom. This means you have to declare variables before using them later in the script.</p>
+<p><strong>Best Practice:</strong> Define functions first, then data, then use these and finish off with <code>note</code> or <code>cc</code> functions.</p>
+<p>The only functionality we care about in the language for ORchestra is functions, integer values, variables, and arrays of constants, variables, or functions. There are no <code>for</code> or <code>while</code> loops, no classes or structs, and no <code>if</code>/<code>else</code> control flow.</p>
+<p>All values are integers; there are no floating-point values. Values are represented between -255 and 255, and anything outside this range is clamped. When sending MIDI out, only values between 0 and 127 are allowed, as traditional MIDI dictates.</p>
+<h2 id="general-rules">General Rules<a class="headerlink" href="#general-rules" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Each new line is a new instruction (uses <code>\n</code> as delimiter)</li>
+<li>All whitespace within a line is ignored</li>
+<li>Use <code>//</code> for single-line comments</li>
+<li>Only integers between -255 and 255 are allowed; MIDI output is clamped between 0 and 127</li>
+</ul>
+<h2 id="reserved-keywords">Reserved Keywords<a class="headerlink" href="#reserved-keywords" title="Permanent link">&para;</a></h2>
+<p>The following words are reserved and cannot be used as variable names:</p>
+<ul>
+<li><code>note</code> - Creates a MIDI note track</li>
+<li><code>cc</code> - Creates a MIDI control change track</li>
+<li><code>ran</code> - Random number generator function</li>
+<li><code>euc</code> - Euclidean sequence generator function</li>
+<li><code>bpm</code> - Sets the BPM (tempo) for the sequencer</li>
+<li><code>beat</code> - Sets the note division (timing resolution)</li>
+<li><code>fn</code> - Defines a user function</li>
+<li><code>end</code> - Ends a function definition</li>
+<li><code>return</code> - Returns a value from a function</li>
+<li><code>$</code> - The global internal count; see <a href="#the-global-step">The Global Step</a></li>
+</ul>
+<p><strong>Note:</strong> The keywords <code>print</code> and <code>test</code> are reserved for debugging purposes but are only available in debug builds.</p>
+<h2 id="operators">Operators<a class="headerlink" href="#operators" title="Permanent link">&para;</a></h2>
+<p><strong>Arithmetic Operators</strong></p>
+<p><code>+</code> <code>-</code> <code>*</code> <code>/</code> <code>%</code> operate on numbers with standard mathematical precedence. Parentheses can be used to override precedence, just like in regular programming. All arithmetic operators take precedence over logical and comparison operators.</p>
+<p><strong>Logical Operators</strong></p>
+<p><code>|</code> <code>^</code> <code>&amp;</code> evaluate logic operations on triggers (values greater than 0 are treated as true). These operators always return 0 (false) or 1 (true). You can look these up if you are unsure what they do in traditional programming.</p>
+<p><strong>Comparison Operators</strong></p>
+<p><code>&gt;</code> <code>&lt;</code> <code>&gt;=</code> <code>&lt;=</code> <code>==</code> <code>!=</code> compare two values and return 0 (false) or 1 (true).</p>
+<h2 id="variables">Variables<a class="headerlink" href="#variables" title="Permanent link">&para;</a></h2>
+<p>The <code>=</code> operator declares and assigns a variable. We use variables to set values once and reference them in other places, or to give them names for easier use.</p>
+<p><strong>Declaration Syntax:</strong>
+- Variable names can be any length
+- Must start with an alphabetic character or <code>_</code>, which means it cannot start with a number</p>
+<p><strong>Assignment Examples:</strong></p>
+<p><strong>Simple value:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">64</span>
+</code></pre></div></p>
+<p><strong>Expressions:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">64</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">2</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="mi">1</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">z</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="mi">2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">4</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>Variable reference:</strong></p>
+<p>References another variable.
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">35</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="w">  </span><span class="c1">// c is now the same value as a</span>
+</code></pre></div></p>
+<p><strong>Data sequence:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mi">127</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">64</span><span class="p">]</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="c1">// here c is now the same as a</span>
+</code></pre></div>
+See <a href="#data-sequences">Data Sequences</a> for more details.</p>
+<p>If you are not sure what a variable is at a given point, you can always output the variable or any value using <code>print()</code>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">42</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="n">print</span><span class="p">(</span><span class="n">a</span><span class="p">)</span><span class="w"> </span><span class="c1">// will log 42 to the console</span>
+</code></pre></div>
+<h2 id="data-sequences">Data Sequences<a class="headerlink" href="#data-sequences" title="Permanent link">&para;</a></h2>
+<p>Data sequences are like arrays in traditional programming: a series of values of the same type, such as numbers or functions.</p>
+<p><strong>Key Points:</strong>
+- Values can be used anywhere; they are always just numbers.
+- Sequences are defined using C-style array syntax with <code>[]</code> and comma separators
+- Each index represents a value to be used in a step</p>
+<p><strong>Example:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mi">64</span><span class="p">,</span><span class="w"> </span><span class="mi">64</span><span class="p">,</span><span class="w"> </span><span class="mi">65</span><span class="p">]</span><span class="w">  </span><span class="c1">// Simple 3-step sequence</span>
+</code></pre></div></p>
+<p>You can access a specific index of a data sequence by specifying the variable name followed by <code>[]</code> to indicate that you want to access the value at a specific position in the sequence. The first index of a data sequence is 0, then 1 for the second, and so on. We borrow this idea from how most programming languages represent array access.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mi">64</span><span class="p">,</span><span class="w"> </span><span class="mi">65</span><span class="p">,</span><span class="w"> </span><span class="mi">66</span><span class="p">]</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="c1">// c is now the same as the 1st element of a, which is 64</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="n">d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="c1">// d is here now the same as the 2nd element of a, which is 65</span>
+</code></pre></div>
+<p>You can likewise change a specific element of an array by setting the index.
+Like below, we first define a data sequence <code>a</code> and then we change the 1st element of a to 100 instead of 64.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mi">64</span><span class="p">,</span><span class="w"> </span><span class="mi">65</span><span class="p">,</span><span class="w"> </span><span class="mi">66</span><span class="p">]</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">100</span>
+</code></pre></div>
+<p>If you would like to access an element of an array with a variable, you can do this too. Simply put the variable in place of the constant number from the examples above.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="n">index</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mi">64</span><span class="p">,</span><span class="w"> </span><span class="mi">65</span><span class="p">,</span><span class="w"> </span><span class="mi">66</span><span class="p">]</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="w"> </span><span class="c1">// c is now being set to the 2nd element of a because we use index, which is 1</span>
+</code></pre></div>
+<p>You do not need to worry about selecting a value that is out of the range of a data sequence. If you pass a value that is bigger than the length, it will wrap around. If you are familiar with modulo <code>%</code>, this is exactly what is happening.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mi">64</span><span class="p">,</span><span class="w"> </span><span class="mi">65</span><span class="p">,</span><span class="w"> </span><span class="mi">66</span><span class="p">]</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="w"> </span><span class="c1">// c is 64 here, since the length is 3 and we specify 3, we go to the front again (3 % 3 = 0)</span>
+</code></pre></div>
+<p>With these basics in mind, we need to go over one concept that is key to understanding how to use values in ORchestra before we can send some MIDI out.</p>
+<h2 id="the-global-step">The Global Step<a class="headerlink" href="#the-global-step" title="Permanent link">&para;</a></h2>
+<p>ORchestra has a global count which is received from either a DAW or the internal clock when running in standalone. This is based on tempo and beat division. So effectively this is the beat of ORchestra and how far we are in the sequence. The global step changes on every tick at which the script is evaluated.</p>
+<p>Just using a sequence variable without any index will use the global step. This is how we use our data sequences as sequences for MIDI. Everything is wrapped around the length of the sequence, meaning that even if the global count is at 5 and your sequence is 4 long, it will wrap around and be at position 0.</p>
+<p><strong>Example:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="w">  </span><span class="mi">0</span><span class="p">,</span><span class="w">  </span><span class="mi">1</span><span class="p">,</span><span class="w">  </span><span class="mi">0</span><span class="p">]</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mi">64</span><span class="p">,</span><span class="w"> </span><span class="mi">65</span><span class="p">,</span><span class="w"> </span><span class="mi">66</span><span class="p">,</span><span class="w"> </span><span class="mi">67</span><span class="p">]</span>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="n">note</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">)</span><span class="w"> </span><span class="c1">// We will explain note() shortly</span>
+</code></pre></div></p>
+<p>For Global Step <strong>0</strong> we have a trigger which is 1, and a note of 64 with a velocity of 100 and MIDI channel 1 (default).
+For Global Step <strong>1</strong> we have a trigger that is 0, so this will not output any note.
+For Global Step <strong>2</strong> we have a trigger again, and a note value of 65, with the same velocity. Global Step <strong>3</strong> will result in nothing played again, as we do not have a trigger.</p>
+<p>Now when the Global Step becomes 4, the length of the trigger and note data sequences is only 4 and we will wrap around, effectively repeating the pattern again.
+This is part of the power of ORchestra, as we can define triggers and note data sequences of different lengths, having triggers on different notes as we loop around.</p>
+<p><strong>Example:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="w">  </span><span class="mi">0</span><span class="p">,</span><span class="w">  </span><span class="mi">1</span><span class="p">]</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mi">64</span><span class="p">,</span><span class="w"> </span><span class="mi">65</span><span class="p">,</span><span class="w"> </span><span class="mi">66</span><span class="p">,</span><span class="w"> </span><span class="mi">67</span><span class="p">]</span>
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="n">note</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">)</span>
+</code></pre></div></p>
+<p>Here our note sequence would be as follows for each global step:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>Step   Trigger    Note result
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a> 0        1           64
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a> 1        0           --
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a> 2        1           66
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a> 3        1           67
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a> 4        0           --
+<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a> 5        1           65
+<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a> 6        1           66
+</code></pre></div></p>
+<p>The possibilities get quite complex when combining trigger sequences of different lengths with logical operators, because this phasing functionality of the global step access can create quite long variations from simple patterns.</p>
+<p><strong>Global count variable (<code>$</code>):</strong></p>
+<p>The special variable <code>$</code> provides access to the global count (tick number):
+- During <code>Prepare</code> (preprocessing), <code>$</code> evaluates to <code>0</code>
+- During <code>Tick</code> (runtime), <code>$</code> evaluates to the current <code>globalCount</code></p>
+<p>This is useful for creating evolving patterns and time-based logic:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="c1">// Simple counter that increments with each tick</span>
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="n">counter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">$</span>
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="c1">// Create a cycling pattern (0, 1, 2, 3, 0, 1, 2, 3...)</span>
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="n">pattern</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">$</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">4</span>
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>
+<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a><span class="c1">// Conditional trigger based on tick count</span>
+<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a><span class="n">trigger</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">$</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">10</span><span class="w">  </span><span class="c1">// Becomes 1 after 10 ticks</span>
+<a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a>
+<a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a><span class="c1">// Velocity that increases over time</span>
+<a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a><span class="n">velocity</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">$</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">64</span>
+<a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a>
+<a id="__codelineno-13-13" name="__codelineno-13-13" href="#__codelineno-13-13"></a><span class="c1">// Use in array indexing for sequential access</span>
+<a id="__codelineno-13-14" name="__codelineno-13-14" href="#__codelineno-13-14"></a><span class="n">notes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mi">60</span><span class="p">,</span><span class="w"> </span><span class="mi">62</span><span class="p">,</span><span class="w"> </span><span class="mi">64</span><span class="p">,</span><span class="w"> </span><span class="mi">65</span><span class="p">]</span>
+<a id="__codelineno-13-15" name="__codelineno-13-15" href="#__codelineno-13-15"></a><span class="n">note_value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">notes</span><span class="p">[</span><span class="n">$</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">4</span><span class="p">]</span>
+</code></pre></div></p>
+<p>Now that you have a grasp of the basic ways of representing data in ORchestra, let us use it to send some MIDI.</p>
+<h2 id="midi-output">MIDI Output<a class="headerlink" href="#midi-output" title="Permanent link">&para;</a></h2>
+<p>MIDI can be output with the built-in functions <code>note()</code> or <code>cc()</code>.</p>
+<p><strong>Important:</strong>
+- Just like any other functions, arguments can be values, expressions, or variables
+- The trigger argument checks whether the value is greater than 0 to determine when to send MIDI. So a 2 is the same as a 127 in this case; only 0 does not output anything
+- Even if a step in a data sequence has a value, it will only send a value if the trigger for the same step is non-zero
+- The <code>channel</code> parameter is optional in both <code>note</code> and <code>cc</code>; if omitted it defaults to MIDI channel 1</p>
+<p><strong>Note Output Syntax:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="n">note</span><span class="p">(</span><span class="n">trigger</span><span class="p">,</span><span class="w"> </span><span class="n">note</span><span class="p">,</span><span class="w"> </span><span class="n">velocity</span><span class="p">,</span><span class="w"> </span><span class="n">duration</span><span class="p">)</span><span class="w">           </span><span class="c1">// channel defaults to 1</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="n">note</span><span class="p">(</span><span class="n">trigger</span><span class="p">,</span><span class="w"> </span><span class="n">note</span><span class="p">,</span><span class="w"> </span><span class="n">velocity</span><span class="p">,</span><span class="w"> </span><span class="n">duration</span><span class="p">,</span><span class="w"> </span><span class="n">channel</span><span class="p">)</span><span class="w">  </span><span class="c1">// explicit channel</span>
+</code></pre></div></p>
+<ul>
+<li><code>duration</code> sets how long the note is held. Use a note division literal (<code>n8</code>, <code>n16</code>, etc.) or a raw number (see <a href="#note-division-literals">Note Division Literals</a>).</li>
+</ul>
+<p><strong>CC Output Syntax:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="n">cc</span><span class="p">(</span><span class="n">trigger</span><span class="p">,</span><span class="w"> </span><span class="n">controlNumber</span><span class="p">,</span><span class="w"> </span><span class="n">controlValue</span><span class="p">)</span><span class="w">           </span><span class="c1">// channel defaults to 1</span>
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="n">cc</span><span class="p">(</span><span class="n">trigger</span><span class="p">,</span><span class="w"> </span><span class="n">controlNumber</span><span class="p">,</span><span class="w"> </span><span class="n">controlValue</span><span class="p">,</span><span class="w"> </span><span class="n">channel</span><span class="p">)</span><span class="w">  </span><span class="c1">// explicit channel</span>
+</code></pre></div></p>
+<p><strong>Example:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">]</span><span class="w">      </span><span class="c1">// Trigger pattern</span>
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mi">64</span><span class="p">,</span><span class="w"> </span><span class="mi">64</span><span class="p">,</span><span class="w"> </span><span class="mi">65</span><span class="p">,</span><span class="w"> </span><span class="mi">67</span><span class="p">]</span><span class="w">  </span><span class="c1">// Note sequence</span>
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>
+<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="n">note</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">)</span><span class="w">        </span><span class="c1">// Trigger: a, Notes: b, Velocity: 100, Duration: 8th note, Channel: 1 (default)</span>
+<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a><span class="n">note</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w">     </span><span class="c1">// Same but on MIDI channel 2</span>
+</code></pre></div></p>
+<h2 id="substeps-sub-divisions">Substeps / Sub-divisions<a class="headerlink" href="#substeps-sub-divisions" title="Permanent link">&para;</a></h2>
+<p>Substeps allow you to subdivide individual steps in a sequence, creating more complex rhythmic patterns within a single step. This is achieved using nested arrays. The length of the substep divides the step into equal-length portions.
+Substeps work for all parameters of <code>note()</code> or <code>cc()</code>. However, just like normally, if a track is not triggered, it will not play subdivisions for notes or velocities.</p>
+<p><strong>Syntax:</strong></p>
+<p>A substep is defined by placing an array within the main sequence array:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[[</span><span class="n">value1</span><span class="p">,</span><span class="w"> </span><span class="n">value2</span><span class="p">,</span><span class="w"> </span><span class="p">...],</span><span class="w"> </span><span class="n">normalValue</span><span class="p">,</span><span class="w"> </span><span class="p">...]</span>
+</code></pre></div></p>
+<p><strong>Key Points:</strong>
+- Each step in a data sequence can be either a single value or a substep array
+- Substep arrays can contain up to 6 values / subdivisions (<code>MAX_SUB_DIVISION_LENGTH</code>)
+- When a substep is encountered, each value within it is played in sequence before moving to the next step
+- Substeps are useful for creating fills, rolls, or varying note patterns within a single beat
+- When using substeps with <code>note()</code> or <code>cc()</code>, the trigger must also use a substep to activate individual sub-divisions
+- If a trigger substep has more divisions than the note/velocity/CC value substeps, the system will map to the nearest equivalent value proportionally</p>
+<p><strong>Examples:</strong></p>
+<p><strong>Basic substep:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="c1">// First step has 4 subdivisions, second and third are single values</span>
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="c1">// If the overall beat division is set to quarter notes, the first step plays 2 16th notes with a 16th note pause in between.</span>
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[[</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">]</span>
+<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a><span class="n">note</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="mi">60</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>Mixed substeps with different lengths:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="c1">// First step subdivided into 3 notes, others are single values.</span>
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="c1">// Note that here it will only play the first note, as the trigger is not a subdivided one.</span>
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a><span class="n">notes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[[</span><span class="mi">60</span><span class="p">,</span><span class="w"> </span><span class="mi">65</span><span class="p">,</span><span class="w"> </span><span class="mi">70</span><span class="p">],</span><span class="w"> </span><span class="mi">64</span><span class="p">,</span><span class="w"> </span><span class="mi">67</span><span class="p">]</span>
+<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a><span class="n">note</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">notes</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">)</span>
+<a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a>
+<a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a><span class="c1">// If we instead define it like this we have triplets playing for the triggers</span>
+<a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a><span class="c1">// and each note in the subdivisions has a trigger for it.</span>
+<a id="__codelineno-19-8" name="__codelineno-19-8" href="#__codelineno-19-8"></a><span class="n">trigger</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[[</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">],</span><span class="w">     </span><span class="mi">1</span><span class="p">,</span><span class="w">  </span><span class="mi">1</span><span class="p">]</span>
+<a id="__codelineno-19-9" name="__codelineno-19-9" href="#__codelineno-19-9"></a><span class="n">notes</span><span class="w"> </span><span class="o">=</span><span class="w">    </span><span class="p">[[</span><span class="mi">60</span><span class="p">,</span><span class="w"> </span><span class="mi">65</span><span class="p">,</span><span class="w"> </span><span class="mi">70</span><span class="p">],</span><span class="w"> </span><span class="mi">64</span><span class="p">,</span><span class="w"> </span><span class="mi">67</span><span class="p">]</span>
+<a id="__codelineno-19-10" name="__codelineno-19-10" href="#__codelineno-19-10"></a><span class="n">note</span><span class="p">(</span><span class="n">trigger</span><span class="p">,</span><span class="w"> </span><span class="n">notes</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>Substep operations:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="c1">// Substeps can be used in operations</span>
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[[</span><span class="mi">60</span><span class="p">,</span><span class="w"> </span><span class="mi">65</span><span class="p">,</span><span class="w"> </span><span class="mi">70</span><span class="p">],</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">]</span>
+<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">10</span><span class="w">  </span><span class="c1">// Adds 10 to each value in the substep</span>
+<a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a><span class="n">note</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">)</span><span class="w">  </span><span class="c1">// Plays [70, 75, 80] in the first step</span>
+</code></pre></div></p>
+<p><strong>Accessing substep elements:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="c1">// You can access individual substeps using array indexing</span>
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a><span class="n">pattern</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[[</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">]</span>
+<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a><span class="n">firstStep</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pattern</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w">  </span><span class="c1">// Gets the entire substep [1, 1, 0]</span>
+</code></pre></div></p>
+<p><strong>Mapping substeps with different lengths:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="c1">// Trigger has 4 subdivisions, notes only has 2</span>
+<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a><span class="n">trigger</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[[</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">]</span>
+<a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a><span class="n">notes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[[</span><span class="mi">60</span><span class="p">,</span><span class="w"> </span><span class="mi">64</span><span class="p">],</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">]</span><span class="w">  </span><span class="c1">// Maps: 60, 60, 64, 64 (nearest value)</span>
+<a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a><span class="n">note</span><span class="p">(</span><span class="n">trigger</span><span class="p">,</span><span class="w"> </span><span class="n">notes</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">)</span>
+<a id="__codelineno-22-5" name="__codelineno-22-5" href="#__codelineno-22-5"></a>
+<a id="__codelineno-22-6" name="__codelineno-22-6" href="#__codelineno-22-6"></a><span class="c1">// This allows fewer note values to span more trigger divisions</span>
+</code></pre></div></p>
+<h2 id="note-division-literals">Note Division Literals<a class="headerlink" href="#note-division-literals" title="Permanent link">&para;</a></h2>
+<p>ORchestra provides note division literals as a convenient way to specify durations and beat divisions. These compile to their underlying numeric values and can be used anywhere a number is expected.</p>
+<p><strong>Literal to value mapping:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Literal</th>
+<th>Underlying value</th>
+<th>Note type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>n1</code></td>
+<td>1</td>
+<td>Whole note</td>
+</tr>
+<tr>
+<td><code>n2</code></td>
+<td>2</td>
+<td>Half note</td>
+</tr>
+<tr>
+<td><code>n4</code></td>
+<td>3</td>
+<td>Quarter note</td>
+</tr>
+<tr>
+<td><code>n8</code></td>
+<td>4</td>
+<td>8th note</td>
+</tr>
+<tr>
+<td><code>n16</code></td>
+<td>5</td>
+<td>16th note</td>
+</tr>
+<tr>
+<td><code>n32</code></td>
+<td>6</td>
+<td>32nd note</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Usage:</strong></p>
+<p>As the <code>duration</code> argument in <code>note()</code>:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="n">note</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">64</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">)</span><span class="w">   </span><span class="c1">// 8th note duration</span>
+<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a><span class="n">note</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">64</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="n">n16</span><span class="p">)</span><span class="w">  </span><span class="c1">// 16th note duration</span>
+</code></pre></div></p>
+<p>As the <code>division</code> argument in <code>beat()</code>:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="n">beat</span><span class="p">(</span><span class="n">n8</span><span class="p">)</span><span class="w">   </span><span class="c1">// 8th note division</span>
+<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a><span class="n">beat</span><span class="p">(</span><span class="n">n16</span><span class="p">)</span><span class="w">  </span><span class="c1">// 16th note division</span>
+</code></pre></div></p>
+<p>These are not special types — they are simply integer constants. You can use the raw numbers directly if you prefer (<code>beat(4)</code> is identical to <code>beat(n8)</code>). Because they compile to plain numbers, you can also use them in expressions: <code>n8 + 1</code> evaluates to <code>5</code>.</p>
+<p><strong>Note:</strong> <code>7</code> (64th note) is also valid for <code>beat()</code>, but there is no <code>n64</code> literal — use the raw number <code>7</code>.</p>
+<h2 id="musical-note-names">Musical Note Names<a class="headerlink" href="#musical-note-names" title="Permanent link">&para;</a></h2>
+<p>Note pitches can be represented in two ways:</p>
+<p><strong>1. Raw MIDI values (0-127):</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mi">60</span><span class="p">,</span><span class="w"> </span><span class="mi">62</span><span class="p">,</span><span class="w"> </span><span class="mi">64</span><span class="p">]</span><span class="w">  </span><span class="c1">// C4, D4, E4</span>
+</code></pre></div></p>
+<p><strong>2. Musical notation:</strong>
+- Capital letter for the note (C, D, E, F, G, A, B)
+- Optional <code>#</code> (sharp) or <code>b</code> (flat)
+- Octave number (0-10)</p>
+<p><strong>Example:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="n">C4</span><span class="p">,</span><span class="w"> </span><span class="n">C</span><span class="err">#</span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="n">Db2</span><span class="p">]</span>
+</code></pre></div></p>
+<p>When compiled, note names are converted to MIDI values, allowing them to be combined with other values and used in expressions. This means we can easily transpose or do other math with them:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="n">C4</span><span class="p">,</span><span class="w"> </span><span class="n">C4</span><span class="p">,</span><span class="w"> </span><span class="n">D4</span><span class="p">,</span><span class="w"> </span><span class="n">E4</span><span class="p">]</span>
+<a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">7</span><span class="w"> </span><span class="c1">// we now have a transposed version of a, a fifth above</span>
+</code></pre></div>
+<h2 id="built-in-functions">Built-in Functions<a class="headerlink" href="#built-in-functions" title="Permanent link">&para;</a></h2>
+<h3 id="euclidean-sequence-generator">Euclidean Sequence Generator<a class="headerlink" href="#euclidean-sequence-generator" title="Permanent link">&para;</a></h3>
+<p>The <code>euc(hits, length, shift)</code> function generates Euclidean rhythm patterns.</p>
+<p><strong>Parameters:</strong>
+- <code>hits</code> - Number of beats to distribute
+- <code>length</code> - Total length of the sequence
+- <code>shift</code> - (Optional) Number of steps to rotate the pattern. Positive values shift right, negative values shift left.</p>
+<p><strong>Returns:</strong> A data sequence containing 0s and 1s (designed for triggers)</p>
+<p><strong>Note:</strong> Can only be used for variable assignment, not as a direct parameter.</p>
+<p><strong>Example:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a><span class="c1">// Euclidean sequence with 4 hits divided across 8 steps</span>
+<a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">euc</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">)</span>
+<a id="__codelineno-28-3" name="__codelineno-28-3" href="#__codelineno-28-3"></a><span class="n">note</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="mi">64</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">)</span><span class="w">  </span><span class="c1">// Use the euclidean pattern as a trigger</span>
+<a id="__codelineno-28-4" name="__codelineno-28-4" href="#__codelineno-28-4"></a>
+<a id="__codelineno-28-5" name="__codelineno-28-5" href="#__codelineno-28-5"></a><span class="c1">// Shifted Euclidean sequence</span>
+<a id="__codelineno-28-6" name="__codelineno-28-6" href="#__codelineno-28-6"></a><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">euc</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w">      </span><span class="c1">// 5 hits across 8 steps, shifted by 2</span>
+</code></pre></div></p>
+<h3 id="random-number-generator">Random Number Generator<a class="headerlink" href="#random-number-generator" title="Permanent link">&para;</a></h3>
+<p>The <code>ran(low, high)</code> function generates random values at runtime.</p>
+<p><strong>Parameters:</strong>
+- <code>low</code> - Minimum value (inclusive)
+- <code>high</code> - Maximum value (inclusive)</p>
+<p><strong>Returns:</strong> A random integer between low and high</p>
+<p><strong>Note:</strong> Evaluated at every tick, providing new random values each time.</p>
+<p><strong>Example:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a><span class="n">vel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ran</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">)</span><span class="w">   </span><span class="c1">// Random velocity between 50-100</span>
+<a id="__codelineno-29-2" name="__codelineno-29-2" href="#__codelineno-29-2"></a><span class="n">note</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">64</span><span class="p">,</span><span class="w"> </span><span class="n">vel</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">)</span><span class="w">  </span><span class="c1">// Play C4 with random velocity</span>
+</code></pre></div></p>
+<h3 id="bpm-tempo-control">BPM (Tempo) Control<a class="headerlink" href="#bpm-tempo-control" title="Permanent link">&para;</a></h3>
+<p>The <code>bpm()</code> function sets the tempo for the sequencer.</p>
+<p><strong>Note:</strong>
+- Sets the internal tempo instead of using the value from the DAW or UI
+- Limited to 0-255 range due to language constraints
+- Called during initialization, not every tick
+- Any variable or expression can be used to set this as well</p>
+<p>When running in standalone this is the only way to set the tempo. When running in a DAW, if <code>bpm()</code> is used, it overrides the tempo information received from the DAW.</p>
+<p><strong>Example:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a><span class="n">tempo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">120</span>
+<a id="__codelineno-30-2" name="__codelineno-30-2" href="#__codelineno-30-2"></a><span class="n">bpm</span><span class="p">(</span><span class="n">tempo</span><span class="p">)</span><span class="w">             </span><span class="c1">// Set tempo to 120 BPM</span>
+<a id="__codelineno-30-3" name="__codelineno-30-3" href="#__codelineno-30-3"></a><span class="n">pattern</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">euc</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">)</span>
+<a id="__codelineno-30-4" name="__codelineno-30-4" href="#__codelineno-30-4"></a><span class="n">note</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span><span class="w"> </span><span class="n">C4</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">)</span>
+</code></pre></div></p>
+<p>You can change tempo at runtime if you wish. It can behave unpredictably, but it is fun.
+<div class="highlight"><pre><span></span><code><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a><span class="n">tempo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mi">120</span><span class="p">,</span><span class="w"> </span><span class="mi">120</span><span class="p">,</span><span class="w"> </span><span class="mi">140</span><span class="p">,</span><span class="w"> </span><span class="mi">120</span><span class="p">]</span>
+<a id="__codelineno-31-2" name="__codelineno-31-2" href="#__codelineno-31-2"></a><span class="n">bpm</span><span class="p">(</span><span class="n">tempo</span><span class="p">)</span><span class="w"> </span><span class="c1">// will set the bpm to 120 or 140 depending on the global count</span>
+</code></pre></div></p>
+<h3 id="beat-division-control">Beat Division Control<a class="headerlink" href="#beat-division-control" title="Permanent link">&para;</a></h3>
+<p>The <code>beat()</code> function sets the note division (timing resolution) for the sequencer.</p>
+<p><strong>Parameters:</strong>
+- <code>division</code> - Note division value. Use either a <a href="#note-division-literals">Note Division Literal</a> or the underlying number.</p>
+<p><strong>Note:</strong>
+- Sets the internal note division instead of using the value from the DAW or UI
+- Determines how often the sequencer steps forward
+- Called during initialization, not every tick
+- The <code>nX</code> literals compile to the numbers shown above; either form can be used</p>
+<p><strong>Example:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a><span class="n">beat</span><span class="p">(</span><span class="n">n8</span><span class="p">)</span><span class="w">          </span><span class="c1">// Set to 8th notes (same as beat(4))</span>
+<a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a><span class="n">bpm</span><span class="p">(</span><span class="mi">120</span><span class="p">)</span>
+<a id="__codelineno-32-3" name="__codelineno-32-3" href="#__codelineno-32-3"></a><span class="n">pattern</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">euc</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">)</span>
+<a id="__codelineno-32-4" name="__codelineno-32-4" href="#__codelineno-32-4"></a><span class="n">note</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span><span class="w"> </span><span class="n">C4</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">)</span><span class="w">  </span><span class="c1">// Triggers on 8th notes at 120 BPM</span>
+</code></pre></div></p>
+<h3 id="transpose">Transpose<a class="headerlink" href="#transpose" title="Permanent link">&para;</a></h3>
+<p>There is a built-in function for transposing all notes going to the MIDI out. Obviously you can define your own transposing function, but sometimes you want to be able to transpose globally for everything that is output.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a><span class="n">masterTranspose</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">7</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">]</span>
+<a id="__codelineno-33-2" name="__codelineno-33-2" href="#__codelineno-33-2"></a><span class="n">transpose</span><span class="p">(</span><span class="n">masterTranspose</span><span class="p">)</span>
+<a id="__codelineno-33-3" name="__codelineno-33-3" href="#__codelineno-33-3"></a>
+<a id="__codelineno-33-4" name="__codelineno-33-4" href="#__codelineno-33-4"></a><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="n">C4</span><span class="p">,</span><span class="w"> </span><span class="n">D4</span><span class="p">,</span><span class="w"> </span><span class="n">E4</span><span class="p">]</span>
+<a id="__codelineno-33-5" name="__codelineno-33-5" href="#__codelineno-33-5"></a><span class="n">note</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="n">n4</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="swing">Swing<a class="headerlink" href="#swing" title="Permanent link">&para;</a></h3>
+<p>There is a built-in function for adding swing to the sequencer timing. <code>swing(amount)</code> shifts every odd step early or late relative to the straight grid.</p>
+<p><strong>Parameters:</strong>
+- <code>amount</code> - 0 to 100. 50 is no swing (straight timing). Values below 50 shift odd steps earlier; values above 50 shift them later.</p>
+<p><strong>Notes:</strong>
+- Maximum shift is half a step duration in either direction.
+- The value is clamped to the 0-100 range.
+- Removing <code>swing()</code> from a script and recompiling resets swing back to 50.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a><span class="n">beat</span><span class="p">(</span><span class="n">n16</span><span class="p">)</span>
+<a id="__codelineno-34-2" name="__codelineno-34-2" href="#__codelineno-34-2"></a><span class="n">swing</span><span class="p">(</span><span class="mi">65</span><span class="p">)</span><span class="w">          </span><span class="c1">// slight late swing on every odd 16th note</span>
+<a id="__codelineno-34-3" name="__codelineno-34-3" href="#__codelineno-34-3"></a><span class="n">pattern</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">euc</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">)</span>
+<a id="__codelineno-34-4" name="__codelineno-34-4" href="#__codelineno-34-4"></a><span class="n">note</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span><span class="w"> </span><span class="n">C4</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="n">n16</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="print">Print<a class="headerlink" href="#print" title="Permanent link">&para;</a></h3>
+<p>There is a built-in function for outputting any value to the console. <code>print()</code> takes one value or expression and outputs it. It is a great way to inspect a sequence of notes or a final value if you are not sure why a certain value is the way it is at the end of a script, for example. It only outputs raw values as numbers, so note values will be shown as MIDI numbers.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">]</span>
+<a id="__codelineno-35-2" name="__codelineno-35-2" href="#__codelineno-35-2"></a><span class="n">print</span><span class="p">(</span><span class="n">a</span><span class="p">)</span><span class="w"> </span><span class="c1">// will alternate between 0 and 100 depending on the global count</span>
+<a id="__codelineno-35-3" name="__codelineno-35-3" href="#__codelineno-35-3"></a>
+<a id="__codelineno-35-4" name="__codelineno-35-4" href="#__codelineno-35-4"></a><span class="c1">// `print($)` is a great way to inspect what the global count is</span>
+</code></pre></div>
+<h2 id="user-defined-functions">User-Defined Functions<a class="headerlink" href="#user-defined-functions" title="Permanent link">&para;</a></h2>
+<p>You can define reusable functions with the <code>fn</code> keyword. Functions are inlined at the call site (their body is copied into the instruction stream).</p>
+<p><strong>Syntax:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a><span class="n">fn</span><span class="w"> </span><span class="n">functionName</span>
+<a id="__codelineno-36-2" name="__codelineno-36-2" href="#__codelineno-36-2"></a><span class="w">  </span><span class="c1">// body</span>
+<a id="__codelineno-36-3" name="__codelineno-36-3" href="#__codelineno-36-3"></a><span class="n">end</span>
+<a id="__codelineno-36-4" name="__codelineno-36-4" href="#__codelineno-36-4"></a>
+<a id="__codelineno-36-5" name="__codelineno-36-5" href="#__codelineno-36-5"></a><span class="n">fn</span><span class="w"> </span><span class="n">functionName</span><span class="p">(</span><span class="n">param1</span><span class="p">,</span><span class="w"> </span><span class="n">param2</span><span class="p">)</span>
+<a id="__codelineno-36-6" name="__codelineno-36-6" href="#__codelineno-36-6"></a><span class="w">  </span><span class="c1">// body using param1, param2</span>
+<a id="__codelineno-36-7" name="__codelineno-36-7" href="#__codelineno-36-7"></a><span class="n">end</span>
+</code></pre></div></p>
+<p><strong>Calling functions:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a><span class="n">functionName</span><span class="p">()</span>
+<a id="__codelineno-37-2" name="__codelineno-37-2" href="#__codelineno-37-2"></a><span class="n">functionName</span><span class="p">(</span><span class="n">arg1</span><span class="p">,</span><span class="w"> </span><span class="n">arg2</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>Returning values:</strong></p>
+<p>Use the <code>return</code> keyword to leave a value on the stack so the function can be used inside expressions:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-38-1" name="__codelineno-38-1" href="#__codelineno-38-1"></a><span class="n">fn</span><span class="w"> </span><span class="n">functionName</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
+<a id="__codelineno-38-2" name="__codelineno-38-2" href="#__codelineno-38-2"></a><span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="n">param</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">2</span>
+<a id="__codelineno-38-3" name="__codelineno-38-3" href="#__codelineno-38-3"></a><span class="n">end</span>
+<a id="__codelineno-38-4" name="__codelineno-38-4" href="#__codelineno-38-4"></a>
+<a id="__codelineno-38-5" name="__codelineno-38-5" href="#__codelineno-38-5"></a><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">functionName</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span><span class="w">        </span><span class="c1">// a == 10</span>
+<a id="__codelineno-38-6" name="__codelineno-38-6" href="#__codelineno-38-6"></a><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">functionName</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="w">    </span><span class="c1">// b == 7</span>
+</code></pre></div></p>
+<p><strong>Key Points:</strong>
+- Functions must be defined before they are called
+- Parameters become global variables; they persist after the call
+- Functions can call other previously defined functions and built-in functions
+- Nested function definitions are not allowed
+- Function names cannot collide with built-in function names or variable names
+- <code>return</code> leaves the result on the stack. Calling a returning function as a statement (not in an expression) will leak one stack value — prefer using the return value when a function has <code>return</code></p>
+<p><strong>Using functions in expressions:</strong></p>
+<p>Functions that use <code>return</code> can appear anywhere an expression is valid — assignments, arrays, and as arguments to other functions:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-39-1" name="__codelineno-39-1" href="#__codelineno-39-1"></a><span class="n">fn</span><span class="w"> </span><span class="n">scale</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<a id="__codelineno-39-2" name="__codelineno-39-2" href="#__codelineno-39-2"></a><span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">2</span>
+<a id="__codelineno-39-3" name="__codelineno-39-3" href="#__codelineno-39-3"></a><span class="n">end</span>
+<a id="__codelineno-39-4" name="__codelineno-39-4" href="#__codelineno-39-4"></a>
+<a id="__codelineno-39-5" name="__codelineno-39-5" href="#__codelineno-39-5"></a><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">scale</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="w">              </span><span class="c1">// a == 20</span>
+<a id="__codelineno-39-6" name="__codelineno-39-6" href="#__codelineno-39-6"></a><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">scale</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">scale</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="w">   </span><span class="c1">// b == 16</span>
+<a id="__codelineno-39-7" name="__codelineno-39-7" href="#__codelineno-39-7"></a><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="n">scale</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span><span class="w"> </span><span class="n">scale</span><span class="p">(</span><span class="mi">2</span><span class="p">)]</span><span class="w">   </span><span class="c1">// c == [2, 4]</span>
+<a id="__codelineno-39-8" name="__codelineno-39-8" href="#__codelineno-39-8"></a><span class="n">note</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">scale</span><span class="p">(</span><span class="n">C4</span><span class="p">),</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">)</span><span class="w"> </span><span class="c1">// use return value as note pitch</span>
+</code></pre></div></p>
+<p><strong>Examples:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-40-1" name="__codelineno-40-1" href="#__codelineno-40-1"></a><span class="c1">// Simple function with no parameters</span>
+<a id="__codelineno-40-2" name="__codelineno-40-2" href="#__codelineno-40-2"></a><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<a id="__codelineno-40-3" name="__codelineno-40-3" href="#__codelineno-40-3"></a><span class="n">fn</span><span class="w"> </span><span class="n">setA</span><span class="p">()</span>
+<a id="__codelineno-40-4" name="__codelineno-40-4" href="#__codelineno-40-4"></a><span class="w">  </span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">99</span>
+<a id="__codelineno-40-5" name="__codelineno-40-5" href="#__codelineno-40-5"></a><span class="n">end</span>
+<a id="__codelineno-40-6" name="__codelineno-40-6" href="#__codelineno-40-6"></a>
+<a id="__codelineno-40-7" name="__codelineno-40-7" href="#__codelineno-40-7"></a><span class="n">setA</span><span class="p">()</span>
+<a id="__codelineno-40-8" name="__codelineno-40-8" href="#__codelineno-40-8"></a>
+<a id="__codelineno-40-9" name="__codelineno-40-9" href="#__codelineno-40-9"></a><span class="c1">// Function with parameters</span>
+<a id="__codelineno-40-10" name="__codelineno-40-10" href="#__codelineno-40-10"></a><span class="n">fn</span><span class="w"> </span><span class="n">playChord</span><span class="p">(</span><span class="n">root</span><span class="p">,</span><span class="w"> </span><span class="n">vel</span><span class="p">)</span>
+<a id="__codelineno-40-11" name="__codelineno-40-11" href="#__codelineno-40-11"></a><span class="w">  </span><span class="n">note</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">root</span><span class="p">,</span><span class="w"> </span><span class="n">vel</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">)</span>
+<a id="__codelineno-40-12" name="__codelineno-40-12" href="#__codelineno-40-12"></a><span class="w">  </span><span class="n">note</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">root</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="n">vel</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">)</span>
+<a id="__codelineno-40-13" name="__codelineno-40-13" href="#__codelineno-40-13"></a><span class="w">  </span><span class="n">note</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">root</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">7</span><span class="p">,</span><span class="w"> </span><span class="n">vel</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">)</span>
+<a id="__codelineno-40-14" name="__codelineno-40-14" href="#__codelineno-40-14"></a><span class="n">end</span>
+<a id="__codelineno-40-15" name="__codelineno-40-15" href="#__codelineno-40-15"></a>
+<a id="__codelineno-40-16" name="__codelineno-40-16" href="#__codelineno-40-16"></a><span class="n">playChord</span><span class="p">(</span><span class="n">C4</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">)</span>
+<a id="__codelineno-40-17" name="__codelineno-40-17" href="#__codelineno-40-17"></a><span class="n">playChord</span><span class="p">(</span><span class="n">E4</span><span class="p">,</span><span class="w"> </span><span class="mi">80</span><span class="p">)</span>
+<a id="__codelineno-40-18" name="__codelineno-40-18" href="#__codelineno-40-18"></a>
+<a id="__codelineno-40-19" name="__codelineno-40-19" href="#__codelineno-40-19"></a><span class="c1">// Function that returns a value</span>
+<a id="__codelineno-40-20" name="__codelineno-40-20" href="#__codelineno-40-20"></a><span class="n">fn</span><span class="w"> </span><span class="n">trans</span><span class="p">(</span><span class="n">note</span><span class="p">,</span><span class="w"> </span><span class="n">semitones</span><span class="p">)</span>
+<a id="__codelineno-40-21" name="__codelineno-40-21" href="#__codelineno-40-21"></a><span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="n">note</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">semitones</span>
+<a id="__codelineno-40-22" name="__codelineno-40-22" href="#__codelineno-40-22"></a><span class="n">end</span>
+<a id="__codelineno-40-23" name="__codelineno-40-23" href="#__codelineno-40-23"></a>
+<a id="__codelineno-40-24" name="__codelineno-40-24" href="#__codelineno-40-24"></a><span class="n">melody</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="n">trans</span><span class="p">(</span><span class="n">C4</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">),</span><span class="w"> </span><span class="n">trans</span><span class="p">(</span><span class="n">C4</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">),</span><span class="w"> </span><span class="n">trans</span><span class="p">(</span><span class="n">C4</span><span class="p">,</span><span class="w"> </span><span class="mi">7</span><span class="p">)]</span>
+<a id="__codelineno-40-25" name="__codelineno-40-25" href="#__codelineno-40-25"></a><span class="n">note</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">melody</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">)</span><span class="w">  </span><span class="c1">// plays C4, E4, G4 in sequence</span>
+</code></pre></div></p>
+<h2 id="function-arrays">Function Arrays<a class="headerlink" href="#function-arrays" title="Permanent link">&para;</a></h2>
+<p>Function arrays let you group named functions and dispatch to one at runtime based on an index. This is useful for creating song sections, alternating grooves, or any scenario where you want to switch between predefined blocks of behavior.</p>
+<p><strong>How they differ from value arrays:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Value Array</th>
+<th>Function Array</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Syntax</td>
+<td><code>a = [1, 2, 3]</code></td>
+<td><code>a = [func1, func2]</code></td>
+</tr>
+<tr>
+<td>Elements</td>
+<td>Numbers, expressions, variables</td>
+<td>Function names only</td>
+</tr>
+<tr>
+<td>Access</td>
+<td><code>a[$]</code> reads a value</td>
+<td><code>a[$]</code> executes a function</td>
+</tr>
+<tr>
+<td>Return value</td>
+<td>The stored value</td>
+<td>Ignored (function runs for side effects)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Creating a function array:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-41-1" name="__codelineno-41-1" href="#__codelineno-41-1"></a><span class="n">arrayName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="n">function1</span><span class="p">,</span><span class="w"> </span><span class="n">function2</span><span class="p">,</span><span class="w"> </span><span class="n">function3</span><span class="p">]</span>
+<a id="__codelineno-41-2" name="__codelineno-41-2" href="#__codelineno-41-2"></a><span class="n">arrayName</span><span class="p">[</span><span class="n">index</span><span class="p">]()</span><span class="w"> </span><span class="c1">// executes the function at the index</span>
+</code></pre></div></p>
+<p>The compiler detects a function array by checking whether the first element is the name of a previously defined function. If so, every element must be a valid function name.</p>
+<p><strong>Dispatching with an index:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-42-1" name="__codelineno-42-1" href="#__codelineno-42-1"></a><span class="n">arrayName</span><span class="p">[</span><span class="n">$</span><span class="p">]()</span><span class="w">           </span><span class="c1">// use global count as index</span>
+<a id="__codelineno-42-2" name="__codelineno-42-2" href="#__codelineno-42-2"></a><span class="n">arrayName</span><span class="p">[</span><span class="n">$</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">4</span><span class="p">]()</span><span class="w">       </span><span class="c1">// any expression works</span>
+<a id="__codelineno-42-3" name="__codelineno-42-3" href="#__codelineno-42-3"></a><span class="n">arrayName</span><span class="p">[</span><span class="n">someVar</span><span class="p">]()</span><span class="w">     </span><span class="c1">// variables work too</span>
+</code></pre></div></p>
+<p>The index is wrapped using modulo, so <code>arrayName[5]</code> on a 2-element array executes <code>function2</code> (index 1).</p>
+<p><strong>Key Points:</strong>
+- Functions in a function array are executed for their side effects; any <code>return</code> value is discarded
+- Functions must be defined before they are used in a function array
+- Function arrays select which function to execute using <code>index % array_length</code>
+- Normal value arrays and function arrays cannot be mixed in the same declaration</p>
+<p><strong>Example:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-43-1" name="__codelineno-43-1" href="#__codelineno-43-1"></a><span class="c1">// Define two functions with different note sequences</span>
+<a id="__codelineno-43-2" name="__codelineno-43-2" href="#__codelineno-43-2"></a><span class="n">fn</span><span class="w"> </span><span class="n">verse</span><span class="p">()</span>
+<a id="__codelineno-43-3" name="__codelineno-43-3" href="#__codelineno-43-3"></a><span class="w">  </span><span class="n">note</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">C4</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">)</span>
+<a id="__codelineno-43-4" name="__codelineno-43-4" href="#__codelineno-43-4"></a><span class="w">  </span><span class="n">note</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">E4</span><span class="p">,</span><span class="w"> </span><span class="mi">80</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">)</span>
+<a id="__codelineno-43-5" name="__codelineno-43-5" href="#__codelineno-43-5"></a><span class="n">end</span>
+<a id="__codelineno-43-6" name="__codelineno-43-6" href="#__codelineno-43-6"></a>
+<a id="__codelineno-43-7" name="__codelineno-43-7" href="#__codelineno-43-7"></a><span class="n">fn</span><span class="w"> </span><span class="n">chorus</span><span class="p">()</span>
+<a id="__codelineno-43-8" name="__codelineno-43-8" href="#__codelineno-43-8"></a><span class="w">  </span><span class="n">note</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">G4</span><span class="p">,</span><span class="w"> </span><span class="mi">127</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">)</span>
+<a id="__codelineno-43-9" name="__codelineno-43-9" href="#__codelineno-43-9"></a><span class="w">  </span><span class="n">note</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">C5</span><span class="p">,</span><span class="w"> </span><span class="mi">127</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">)</span>
+<a id="__codelineno-43-10" name="__codelineno-43-10" href="#__codelineno-43-10"></a><span class="n">end</span>
+<a id="__codelineno-43-11" name="__codelineno-43-11" href="#__codelineno-43-11"></a>
+<a id="__codelineno-43-12" name="__codelineno-43-12" href="#__codelineno-43-12"></a><span class="c1">// Create function array -- alternates between verse and chorus</span>
+<a id="__codelineno-43-13" name="__codelineno-43-13" href="#__codelineno-43-13"></a><span class="n">song</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="n">verse</span><span class="p">,</span><span class="w"> </span><span class="n">chorus</span><span class="p">]</span>
+<a id="__codelineno-43-14" name="__codelineno-43-14" href="#__codelineno-43-14"></a><span class="n">song</span><span class="p">[</span><span class="n">$</span><span class="p">]()</span><span class="w">  </span><span class="c1">// verse on even ticks, chorus on odd ticks</span>
+</code></pre></div></p>
+<hr />
+<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
+<h3 id="basic-pattern">Basic Pattern<a class="headerlink" href="#basic-pattern" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-44-1" name="__codelineno-44-1" href="#__codelineno-44-1"></a><span class="c1">// Simple kick drum pattern</span>
+<a id="__codelineno-44-2" name="__codelineno-44-2" href="#__codelineno-44-2"></a><span class="n">kick</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">]</span>
+<a id="__codelineno-44-3" name="__codelineno-44-3" href="#__codelineno-44-3"></a><span class="n">note</span><span class="p">(</span><span class="n">kick</span><span class="p">,</span><span class="w"> </span><span class="mi">36</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">)</span><span class="w">  </span><span class="c1">// C1 on MIDI channel 1</span>
+</code></pre></div>
+<h3 id="euclidean-rhythm">Euclidean Rhythm<a class="headerlink" href="#euclidean-rhythm" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-45-1" name="__codelineno-45-1" href="#__codelineno-45-1"></a><span class="c1">// Create a euclidean pattern</span>
+<a id="__codelineno-45-2" name="__codelineno-45-2" href="#__codelineno-45-2"></a><span class="n">pattern</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">euc</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">)</span>
+<a id="__codelineno-45-3" name="__codelineno-45-3" href="#__codelineno-45-3"></a><span class="n">note</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span><span class="w"> </span><span class="n">C4</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="combining-sequences-with-logic">Combining Sequences with Logic<a class="headerlink" href="#combining-sequences-with-logic" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-46-1" name="__codelineno-46-1" href="#__codelineno-46-1"></a><span class="c1">// Create two patterns</span>
+<a id="__codelineno-46-2" name="__codelineno-46-2" href="#__codelineno-46-2"></a><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">euc</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">)</span>
+<a id="__codelineno-46-3" name="__codelineno-46-3" href="#__codelineno-46-3"></a><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">euc</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">)</span>
+<a id="__codelineno-46-4" name="__codelineno-46-4" href="#__codelineno-46-4"></a>
+<a id="__codelineno-46-5" name="__codelineno-46-5" href="#__codelineno-46-5"></a><span class="c1">// Combine with XOR - triggers when only one is active</span>
+<a id="__codelineno-46-6" name="__codelineno-46-6" href="#__codelineno-46-6"></a><span class="n">combined</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">^</span><span class="w"> </span><span class="n">b</span>
+<a id="__codelineno-46-7" name="__codelineno-46-7" href="#__codelineno-46-7"></a><span class="n">note</span><span class="p">(</span><span class="n">combined</span><span class="p">,</span><span class="w"> </span><span class="n">D4</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="phasing-patterns">Phasing Patterns<a class="headerlink" href="#phasing-patterns" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-47-1" name="__codelineno-47-1" href="#__codelineno-47-1"></a><span class="c1">// Different length sequences phase over time</span>
+<a id="__codelineno-47-2" name="__codelineno-47-2" href="#__codelineno-47-2"></a><span class="n">pattern1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">euc</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">)</span>
+<a id="__codelineno-47-3" name="__codelineno-47-3" href="#__codelineno-47-3"></a><span class="n">pattern2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">euc</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">13</span><span class="p">)</span>
+<a id="__codelineno-47-4" name="__codelineno-47-4" href="#__codelineno-47-4"></a>
+<a id="__codelineno-47-5" name="__codelineno-47-5" href="#__codelineno-47-5"></a><span class="c1">// Combine with AND - both must be active</span>
+<a id="__codelineno-47-6" name="__codelineno-47-6" href="#__codelineno-47-6"></a><span class="n">both</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pattern1</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">pattern2</span>
+<a id="__codelineno-47-7" name="__codelineno-47-7" href="#__codelineno-47-7"></a><span class="n">note</span><span class="p">(</span><span class="n">both</span><span class="p">,</span><span class="w"> </span><span class="n">E4</span><span class="p">,</span><span class="w"> </span><span class="mi">120</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="random-velocity-and-notes">Random Velocity and Notes<a class="headerlink" href="#random-velocity-and-notes" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-48-1" name="__codelineno-48-1" href="#__codelineno-48-1"></a><span class="c1">// Random velocity for each triggered note</span>
+<a id="__codelineno-48-2" name="__codelineno-48-2" href="#__codelineno-48-2"></a><span class="n">trigger</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">euc</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">)</span>
+<a id="__codelineno-48-3" name="__codelineno-48-3" href="#__codelineno-48-3"></a><span class="n">velocity</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ran</span><span class="p">(</span><span class="mi">80</span><span class="p">,</span><span class="w"> </span><span class="mi">127</span><span class="p">)</span>
+<a id="__codelineno-48-4" name="__codelineno-48-4" href="#__codelineno-48-4"></a><span class="n">note</span><span class="p">(</span><span class="n">trigger</span><span class="p">,</span><span class="w"> </span><span class="n">C4</span><span class="p">,</span><span class="w"> </span><span class="n">velocity</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">)</span>
+<a id="__codelineno-48-5" name="__codelineno-48-5" href="#__codelineno-48-5"></a>
+<a id="__codelineno-48-6" name="__codelineno-48-6" href="#__codelineno-48-6"></a><span class="c1">// Random note selection</span>
+<a id="__codelineno-48-7" name="__codelineno-48-7" href="#__codelineno-48-7"></a><span class="n">notes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="n">C4</span><span class="p">,</span><span class="w"> </span><span class="n">D4</span><span class="p">,</span><span class="w"> </span><span class="n">E4</span><span class="p">,</span><span class="w"> </span><span class="n">G4</span><span class="p">,</span><span class="w"> </span><span class="n">A4</span><span class="p">]</span>
+<a id="__codelineno-48-8" name="__codelineno-48-8" href="#__codelineno-48-8"></a><span class="n">randomNote</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">notes</span><span class="p">[</span><span class="n">ran</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">)]</span>
+<a id="__codelineno-48-9" name="__codelineno-48-9" href="#__codelineno-48-9"></a><span class="n">note</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">randomNote</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="using-cc-messages">Using CC Messages<a class="headerlink" href="#using-cc-messages" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-49-1" name="__codelineno-49-1" href="#__codelineno-49-1"></a><span class="c1">// Control filter cutoff with sequence</span>
+<a id="__codelineno-49-2" name="__codelineno-49-2" href="#__codelineno-49-2"></a><span class="n">cutoff</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mi">64</span><span class="p">,</span><span class="w"> </span><span class="mi">80</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="mi">120</span><span class="p">]</span>
+<a id="__codelineno-49-3" name="__codelineno-49-3" href="#__codelineno-49-3"></a><span class="n">cc</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">74</span><span class="p">,</span><span class="w"> </span><span class="n">cutoff</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w">  </span><span class="c1">// Always trigger, CC#74 (filter cutoff)</span>
+</code></pre></div>
+<h3 id="setting-tempo-and-division-from-script">Setting Tempo and Division from Script<a class="headerlink" href="#setting-tempo-and-division-from-script" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-50-1" name="__codelineno-50-1" href="#__codelineno-50-1"></a><span class="c1">// Override DAW tempo and use fast 16th notes</span>
+<a id="__codelineno-50-2" name="__codelineno-50-2" href="#__codelineno-50-2"></a><span class="n">bpm</span><span class="p">(</span><span class="mi">120</span><span class="p">)</span>
+<a id="__codelineno-50-3" name="__codelineno-50-3" href="#__codelineno-50-3"></a><span class="n">beat</span><span class="p">(</span><span class="n">n16</span><span class="p">)</span><span class="w">  </span><span class="c1">// 16th notes</span>
+<a id="__codelineno-50-4" name="__codelineno-50-4" href="#__codelineno-50-4"></a>
+<a id="__codelineno-50-5" name="__codelineno-50-5" href="#__codelineno-50-5"></a><span class="c1">// Create rapid hi-hat pattern</span>
+<a id="__codelineno-50-6" name="__codelineno-50-6" href="#__codelineno-50-6"></a><span class="n">hihat</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">euc</span><span class="p">(</span><span class="mi">11</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="p">)</span>
+<a id="__codelineno-50-7" name="__codelineno-50-7" href="#__codelineno-50-7"></a><span class="n">note</span><span class="p">(</span><span class="n">hihat</span><span class="p">,</span><span class="w"> </span><span class="mi">42</span><span class="p">,</span><span class="w"> </span><span class="mi">80</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">)</span>
+<a id="__codelineno-50-8" name="__codelineno-50-8" href="#__codelineno-50-8"></a>
+<a id="__codelineno-50-9" name="__codelineno-50-9" href="#__codelineno-50-9"></a><span class="c1">// Kick and snare on quarter notes</span>
+<a id="__codelineno-50-10" name="__codelineno-50-10" href="#__codelineno-50-10"></a><span class="n">kick</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">]</span>
+<a id="__codelineno-50-11" name="__codelineno-50-11" href="#__codelineno-50-11"></a><span class="n">snare</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">]</span>
+<a id="__codelineno-50-12" name="__codelineno-50-12" href="#__codelineno-50-12"></a><span class="n">note</span><span class="p">(</span><span class="n">kick</span><span class="p">,</span><span class="w"> </span><span class="mi">36</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">)</span>
+<a id="__codelineno-50-13" name="__codelineno-50-13" href="#__codelineno-50-13"></a><span class="n">note</span><span class="p">(</span><span class="n">snare</span><span class="p">,</span><span class="w"> </span><span class="mi">38</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="modifying-arrays-with-index-assignment">Modifying Arrays with Index Assignment<a class="headerlink" href="#modifying-arrays-with-index-assignment" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-51-1" name="__codelineno-51-1" href="#__codelineno-51-1"></a><span class="c1">// Create a melody and modify specific notes</span>
+<a id="__codelineno-51-2" name="__codelineno-51-2" href="#__codelineno-51-2"></a><span class="n">melody</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="n">C4</span><span class="p">,</span><span class="w"> </span><span class="n">D4</span><span class="p">,</span><span class="w"> </span><span class="n">E4</span><span class="p">,</span><span class="w"> </span><span class="n">F4</span><span class="p">]</span>
+<a id="__codelineno-51-3" name="__codelineno-51-3" href="#__codelineno-51-3"></a><span class="n">melody</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">G4</span><span class="w">  </span><span class="c1">// Change second note to G4</span>
+<a id="__codelineno-51-4" name="__codelineno-51-4" href="#__codelineno-51-4"></a><span class="n">melody</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">A4</span><span class="w">  </span><span class="c1">// Change fourth note to A4</span>
+<a id="__codelineno-51-5" name="__codelineno-51-5" href="#__codelineno-51-5"></a>
+<a id="__codelineno-51-6" name="__codelineno-51-6" href="#__codelineno-51-6"></a><span class="c1">// Create dynamic patterns</span>
+<a id="__codelineno-51-7" name="__codelineno-51-7" href="#__codelineno-51-7"></a><span class="n">kick</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">]</span>
+<a id="__codelineno-51-8" name="__codelineno-51-8" href="#__codelineno-51-8"></a><span class="n">kick</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="w">  </span><span class="c1">// Add extra kick on third beat</span>
+<a id="__codelineno-51-9" name="__codelineno-51-9" href="#__codelineno-51-9"></a>
+<a id="__codelineno-51-10" name="__codelineno-51-10" href="#__codelineno-51-10"></a><span class="n">note</span><span class="p">(</span><span class="n">kick</span><span class="p">,</span><span class="w"> </span><span class="mi">36</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">)</span><span class="w">    </span><span class="c1">// Modified kick pattern</span>
+<a id="__codelineno-51-11" name="__codelineno-51-11" href="#__codelineno-51-11"></a><span class="n">note</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">melody</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">)</span><span class="w">    </span><span class="c1">// Modified melody</span>
+</code></pre></div>
+<h3 id="complex-rhythm">Complex Rhythm<a class="headerlink" href="#complex-rhythm" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-52-1" name="__codelineno-52-1" href="#__codelineno-52-1"></a><span class="c1">// Kick on 1 and 3</span>
+<a id="__codelineno-52-2" name="__codelineno-52-2" href="#__codelineno-52-2"></a><span class="n">kick</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">]</span>
+<a id="__codelineno-52-3" name="__codelineno-52-3" href="#__codelineno-52-3"></a><span class="c1">// Snare on 2 and 4</span>
+<a id="__codelineno-52-4" name="__codelineno-52-4" href="#__codelineno-52-4"></a><span class="n">snare</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">]</span>
+<a id="__codelineno-52-5" name="__codelineno-52-5" href="#__codelineno-52-5"></a><span class="c1">// Hi-hat euclidean pattern</span>
+<a id="__codelineno-52-6" name="__codelineno-52-6" href="#__codelineno-52-6"></a><span class="n">hihat</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">euc</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">)</span>
+<a id="__codelineno-52-7" name="__codelineno-52-7" href="#__codelineno-52-7"></a>
+<a id="__codelineno-52-8" name="__codelineno-52-8" href="#__codelineno-52-8"></a><span class="n">note</span><span class="p">(</span><span class="n">kick</span><span class="p">,</span><span class="w"> </span><span class="mi">36</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">)</span><span class="w">   </span><span class="c1">// Kick on channel 10</span>
+<a id="__codelineno-52-9" name="__codelineno-52-9" href="#__codelineno-52-9"></a><span class="n">note</span><span class="p">(</span><span class="n">snare</span><span class="p">,</span><span class="w"> </span><span class="mi">38</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">)</span><span class="w">  </span><span class="c1">// Snare on channel 10</span>
+<a id="__codelineno-52-10" name="__codelineno-52-10" href="#__codelineno-52-10"></a><span class="n">note</span><span class="p">(</span><span class="n">hihat</span><span class="p">,</span><span class="w"> </span><span class="mi">42</span><span class="p">,</span><span class="w"> </span><span class="mi">80</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">)</span><span class="w">   </span><span class="c1">// Hi-hat on channel 10</span>
+</code></pre></div>
+<h3 id="using-substeps-for-drum-fills">Using Substeps for Drum Fills<a class="headerlink" href="#using-substeps-for-drum-fills" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-53-1" name="__codelineno-53-1" href="#__codelineno-53-1"></a><span class="c1">// Create a pattern with a drum fill on the 4th step</span>
+<a id="__codelineno-53-2" name="__codelineno-53-2" href="#__codelineno-53-2"></a><span class="n">trigger</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">]]</span><span class="w">  </span><span class="c1">// Fourth step has rapid hits</span>
+<a id="__codelineno-53-3" name="__codelineno-53-3" href="#__codelineno-53-3"></a><span class="n">note</span><span class="p">(</span><span class="n">trigger</span><span class="p">,</span><span class="w"> </span><span class="mi">38</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">)</span><span class="w">  </span><span class="c1">// Snare drum</span>
+<a id="__codelineno-53-4" name="__codelineno-53-4" href="#__codelineno-53-4"></a>
+<a id="__codelineno-53-5" name="__codelineno-53-5" href="#__codelineno-53-5"></a><span class="c1">// Alternating note pattern with substep variation</span>
+<a id="__codelineno-53-6" name="__codelineno-53-6" href="#__codelineno-53-6"></a><span class="n">notes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[[</span><span class="mi">60</span><span class="p">,</span><span class="w"> </span><span class="mi">64</span><span class="p">,</span><span class="w"> </span><span class="mi">67</span><span class="p">],</span><span class="w"> </span><span class="mi">60</span><span class="p">,</span><span class="w"> </span><span class="mi">62</span><span class="p">,</span><span class="w"> </span><span class="mi">64</span><span class="p">]</span><span class="w">  </span><span class="c1">// First step plays notes in rapid sequence</span>
+<a id="__codelineno-53-7" name="__codelineno-53-7" href="#__codelineno-53-7"></a><span class="n">note</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">notes</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">)</span>
+<a id="__codelineno-53-8" name="__codelineno-53-8" href="#__codelineno-53-8"></a>
+<a id="__codelineno-53-9" name="__codelineno-53-9" href="#__codelineno-53-9"></a><span class="c1">// Modulo operation example with substeps</span>
+<a id="__codelineno-53-10" name="__codelineno-53-10" href="#__codelineno-53-10"></a><span class="n">counter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">],</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">6</span><span class="p">]</span>
+<a id="__codelineno-53-11" name="__codelineno-53-11" href="#__codelineno-53-11"></a><span class="n">everyOther</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">counter</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">2</span><span class="w">  </span><span class="c1">// Creates pattern: [[0,1,0,1], 0, 1, 0]</span>
+<a id="__codelineno-53-12" name="__codelineno-53-12" href="#__codelineno-53-12"></a><span class="n">note</span><span class="p">(</span><span class="n">everyOther</span><span class="p">,</span><span class="w"> </span><span class="n">C4</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="user-defined-functions_1">User-Defined Functions<a class="headerlink" href="#user-defined-functions_1" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-54-1" name="__codelineno-54-1" href="#__codelineno-54-1"></a><span class="c1">// Helper that builds a chord from a root note</span>
+<a id="__codelineno-54-2" name="__codelineno-54-2" href="#__codelineno-54-2"></a><span class="n">fn</span><span class="w"> </span><span class="n">chord</span><span class="p">(</span><span class="n">root</span><span class="p">,</span><span class="w"> </span><span class="n">vel</span><span class="p">)</span>
+<a id="__codelineno-54-3" name="__codelineno-54-3" href="#__codelineno-54-3"></a><span class="w">  </span><span class="n">note</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">root</span><span class="p">,</span><span class="w"> </span><span class="n">vel</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">)</span>
+<a id="__codelineno-54-4" name="__codelineno-54-4" href="#__codelineno-54-4"></a><span class="w">  </span><span class="n">note</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">root</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="n">vel</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">)</span>
+<a id="__codelineno-54-5" name="__codelineno-54-5" href="#__codelineno-54-5"></a><span class="w">  </span><span class="n">note</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">root</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">7</span><span class="p">,</span><span class="w"> </span><span class="n">vel</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">)</span>
+<a id="__codelineno-54-6" name="__codelineno-54-6" href="#__codelineno-54-6"></a><span class="n">end</span>
+<a id="__codelineno-54-7" name="__codelineno-54-7" href="#__codelineno-54-7"></a>
+<a id="__codelineno-54-8" name="__codelineno-54-8" href="#__codelineno-54-8"></a><span class="n">chord</span><span class="p">(</span><span class="n">C4</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">)</span><span class="w">   </span><span class="c1">// C major chord</span>
+<a id="__codelineno-54-9" name="__codelineno-54-9" href="#__codelineno-54-9"></a><span class="n">chord</span><span class="p">(</span><span class="n">F4</span><span class="p">,</span><span class="w"> </span><span class="mi">80</span><span class="p">)</span><span class="w">    </span><span class="c1">// F major chord</span>
+<a id="__codelineno-54-10" name="__codelineno-54-10" href="#__codelineno-54-10"></a><span class="n">chord</span><span class="p">(</span><span class="n">G4</span><span class="p">,</span><span class="w"> </span><span class="mi">90</span><span class="p">)</span><span class="w">    </span><span class="c1">// G major chord</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-55-1" name="__codelineno-55-1" href="#__codelineno-55-1"></a><span class="c1">// Function that computes a value used in an expression</span>
+<a id="__codelineno-55-2" name="__codelineno-55-2" href="#__codelineno-55-2"></a><span class="n">fn</span><span class="w"> </span><span class="n">clampedVelocity</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+<a id="__codelineno-55-3" name="__codelineno-55-3" href="#__codelineno-55-3"></a><span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">64</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">64</span><span class="w">   </span><span class="c1">// keep velocity between 64-127</span>
+<a id="__codelineno-55-4" name="__codelineno-55-4" href="#__codelineno-55-4"></a><span class="n">end</span>
+<a id="__codelineno-55-5" name="__codelineno-55-5" href="#__codelineno-55-5"></a>
+<a id="__codelineno-55-6" name="__codelineno-55-6" href="#__codelineno-55-6"></a><span class="n">trigger</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">euc</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">)</span>
+<a id="__codelineno-55-7" name="__codelineno-55-7" href="#__codelineno-55-7"></a><span class="n">note</span><span class="p">(</span><span class="n">trigger</span><span class="p">,</span><span class="w"> </span><span class="n">C4</span><span class="p">,</span><span class="w"> </span><span class="n">clampedVelocity</span><span class="p">(</span><span class="n">$</span><span class="p">),</span><span class="w"> </span><span class="n">n8</span><span class="p">)</span><span class="w">  </span><span class="c1">// velocity changes each tick</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-56-1" name="__codelineno-56-1" href="#__codelineno-56-1"></a><span class="c1">// Reusable melody transposer</span>
+<a id="__codelineno-56-2" name="__codelineno-56-2" href="#__codelineno-56-2"></a><span class="n">fn</span><span class="w"> </span><span class="n">up</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+<a id="__codelineno-56-3" name="__codelineno-56-3" href="#__codelineno-56-3"></a><span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">12</span>
+<a id="__codelineno-56-4" name="__codelineno-56-4" href="#__codelineno-56-4"></a><span class="n">end</span>
+<a id="__codelineno-56-5" name="__codelineno-56-5" href="#__codelineno-56-5"></a>
+<a id="__codelineno-56-6" name="__codelineno-56-6" href="#__codelineno-56-6"></a><span class="n">base</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="n">C4</span><span class="p">,</span><span class="w"> </span><span class="n">D4</span><span class="p">,</span><span class="w"> </span><span class="n">E4</span><span class="p">,</span><span class="w"> </span><span class="n">G4</span><span class="p">]</span>
+<a id="__codelineno-56-7" name="__codelineno-56-7" href="#__codelineno-56-7"></a><span class="n">high</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="n">up</span><span class="p">(</span><span class="n">C4</span><span class="p">),</span><span class="w"> </span><span class="n">up</span><span class="p">(</span><span class="n">D4</span><span class="p">),</span><span class="w"> </span><span class="n">up</span><span class="p">(</span><span class="n">E4</span><span class="p">),</span><span class="w"> </span><span class="n">up</span><span class="p">(</span><span class="n">G4</span><span class="p">)]</span><span class="w">  </span><span class="c1">// one octave up</span>
+<a id="__codelineno-56-8" name="__codelineno-56-8" href="#__codelineno-56-8"></a>
+<a id="__codelineno-56-9" name="__codelineno-56-9" href="#__codelineno-56-9"></a><span class="n">trigger</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">euc</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">)</span>
+<a id="__codelineno-56-10" name="__codelineno-56-10" href="#__codelineno-56-10"></a><span class="n">note</span><span class="p">(</span><span class="n">trigger</span><span class="p">,</span><span class="w"> </span><span class="n">base</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">)</span>
+<a id="__codelineno-56-11" name="__codelineno-56-11" href="#__codelineno-56-11"></a><span class="n">note</span><span class="p">(</span><span class="n">trigger</span><span class="p">,</span><span class="w"> </span><span class="n">high</span><span class="p">,</span><span class="w"> </span><span class="mi">70</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w">   </span><span class="c1">// doubled an octave up on channel 2</span>
+</code></pre></div>
+<h3 id="function-arrays_1">Function Arrays<a class="headerlink" href="#function-arrays_1" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-57-1" name="__codelineno-57-1" href="#__codelineno-57-1"></a><span class="c1">// Two functions that alternate each tick</span>
+<a id="__codelineno-57-2" name="__codelineno-57-2" href="#__codelineno-57-2"></a><span class="n">fn</span><span class="w"> </span><span class="n">verse</span><span class="p">()</span>
+<a id="__codelineno-57-3" name="__codelineno-57-3" href="#__codelineno-57-3"></a><span class="w">  </span><span class="n">note</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">C4</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">)</span>
+<a id="__codelineno-57-4" name="__codelineno-57-4" href="#__codelineno-57-4"></a><span class="w">  </span><span class="n">note</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">E4</span><span class="p">,</span><span class="w"> </span><span class="mi">80</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">)</span>
+<a id="__codelineno-57-5" name="__codelineno-57-5" href="#__codelineno-57-5"></a><span class="n">end</span>
+<a id="__codelineno-57-6" name="__codelineno-57-6" href="#__codelineno-57-6"></a>
+<a id="__codelineno-57-7" name="__codelineno-57-7" href="#__codelineno-57-7"></a><span class="n">fn</span><span class="w"> </span><span class="n">chorus</span><span class="p">()</span>
+<a id="__codelineno-57-8" name="__codelineno-57-8" href="#__codelineno-57-8"></a><span class="w">  </span><span class="n">note</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">G4</span><span class="p">,</span><span class="w"> </span><span class="mi">127</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">)</span>
+<a id="__codelineno-57-9" name="__codelineno-57-9" href="#__codelineno-57-9"></a><span class="w">  </span><span class="n">note</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">C5</span><span class="p">,</span><span class="w"> </span><span class="mi">127</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">)</span>
+<a id="__codelineno-57-10" name="__codelineno-57-10" href="#__codelineno-57-10"></a><span class="n">end</span>
+<a id="__codelineno-57-11" name="__codelineno-57-11" href="#__codelineno-57-11"></a>
+<a id="__codelineno-57-12" name="__codelineno-57-12" href="#__codelineno-57-12"></a><span class="n">song</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="n">verse</span><span class="p">,</span><span class="w"> </span><span class="n">chorus</span><span class="p">]</span>
+<a id="__codelineno-57-13" name="__codelineno-57-13" href="#__codelineno-57-13"></a><span class="n">song</span><span class="p">[</span><span class="n">$</span><span class="p">]()</span><span class="w">   </span><span class="c1">// verse on even ticks, chorus on odd ticks</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-58-1" name="__codelineno-58-1" href="#__codelineno-58-1"></a><span class="c1">// Four functions cycling every 4 ticks</span>
+<a id="__codelineno-58-2" name="__codelineno-58-2" href="#__codelineno-58-2"></a><span class="n">fn</span><span class="w"> </span><span class="n">intro</span><span class="p">()</span>
+<a id="__codelineno-58-3" name="__codelineno-58-3" href="#__codelineno-58-3"></a><span class="w">  </span><span class="n">note</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">C4</span><span class="p">,</span><span class="w"> </span><span class="mi">80</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">)</span>
+<a id="__codelineno-58-4" name="__codelineno-58-4" href="#__codelineno-58-4"></a><span class="n">end</span>
+<a id="__codelineno-58-5" name="__codelineno-58-5" href="#__codelineno-58-5"></a>
+<a id="__codelineno-58-6" name="__codelineno-58-6" href="#__codelineno-58-6"></a><span class="n">fn</span><span class="w"> </span><span class="n">build</span><span class="p">()</span>
+<a id="__codelineno-58-7" name="__codelineno-58-7" href="#__codelineno-58-7"></a><span class="w">  </span><span class="n">note</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">C4</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">)</span>
+<a id="__codelineno-58-8" name="__codelineno-58-8" href="#__codelineno-58-8"></a><span class="w">  </span><span class="n">note</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">G4</span><span class="p">,</span><span class="w"> </span><span class="mi">90</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">)</span>
+<a id="__codelineno-58-9" name="__codelineno-58-9" href="#__codelineno-58-9"></a><span class="n">end</span>
+<a id="__codelineno-58-10" name="__codelineno-58-10" href="#__codelineno-58-10"></a>
+<a id="__codelineno-58-11" name="__codelineno-58-11" href="#__codelineno-58-11"></a><span class="n">fn</span><span class="w"> </span><span class="n">drop</span><span class="p">()</span>
+<a id="__codelineno-58-12" name="__codelineno-58-12" href="#__codelineno-58-12"></a><span class="w">  </span><span class="n">note</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">C4</span><span class="p">,</span><span class="w"> </span><span class="mi">127</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">)</span>
+<a id="__codelineno-58-13" name="__codelineno-58-13" href="#__codelineno-58-13"></a><span class="w">  </span><span class="n">note</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">E4</span><span class="p">,</span><span class="w"> </span><span class="mi">127</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">)</span>
+<a id="__codelineno-58-14" name="__codelineno-58-14" href="#__codelineno-58-14"></a><span class="w">  </span><span class="n">note</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">G4</span><span class="p">,</span><span class="w"> </span><span class="mi">127</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">)</span>
+<a id="__codelineno-58-15" name="__codelineno-58-15" href="#__codelineno-58-15"></a><span class="n">end</span>
+<a id="__codelineno-58-16" name="__codelineno-58-16" href="#__codelineno-58-16"></a>
+<a id="__codelineno-58-17" name="__codelineno-58-17" href="#__codelineno-58-17"></a><span class="n">fn</span><span class="w"> </span><span class="n">breakSection</span><span class="p">()</span>
+<a id="__codelineno-58-18" name="__codelineno-58-18" href="#__codelineno-58-18"></a><span class="w">  </span><span class="n">note</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">C4</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">)</span><span class="w">  </span><span class="c1">// silence</span>
+<a id="__codelineno-58-19" name="__codelineno-58-19" href="#__codelineno-58-19"></a><span class="n">end</span>
+<a id="__codelineno-58-20" name="__codelineno-58-20" href="#__codelineno-58-20"></a>
+<a id="__codelineno-58-21" name="__codelineno-58-21" href="#__codelineno-58-21"></a><span class="n">arrangement</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="n">intro</span><span class="p">,</span><span class="w"> </span><span class="n">build</span><span class="p">,</span><span class="w"> </span><span class="n">drop</span><span class="p">,</span><span class="w"> </span><span class="n">breakSection</span><span class="p">]</span>
+<a id="__codelineno-58-22" name="__codelineno-58-22" href="#__codelineno-58-22"></a><span class="n">arrangement</span><span class="p">[</span><span class="n">$</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">4</span><span class="p">]()</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-59-1" name="__codelineno-59-1" href="#__codelineno-59-1"></a><span class="c1">// Functions using euclidean rhythms, switched by section</span>
+<a id="__codelineno-59-2" name="__codelineno-59-2" href="#__codelineno-59-2"></a><span class="n">fn</span><span class="w"> </span><span class="n">sparse</span><span class="p">()</span>
+<a id="__codelineno-59-3" name="__codelineno-59-3" href="#__codelineno-59-3"></a><span class="w">  </span><span class="n">trigger</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">euc</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">)</span>
+<a id="__codelineno-59-4" name="__codelineno-59-4" href="#__codelineno-59-4"></a><span class="w">  </span><span class="n">note</span><span class="p">(</span><span class="n">trigger</span><span class="p">,</span><span class="w"> </span><span class="n">C4</span><span class="p">,</span><span class="w"> </span><span class="mi">90</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">)</span>
+<a id="__codelineno-59-5" name="__codelineno-59-5" href="#__codelineno-59-5"></a><span class="n">end</span>
+<a id="__codelineno-59-6" name="__codelineno-59-6" href="#__codelineno-59-6"></a>
+<a id="__codelineno-59-7" name="__codelineno-59-7" href="#__codelineno-59-7"></a><span class="n">fn</span><span class="w"> </span><span class="n">dense</span><span class="p">()</span>
+<a id="__codelineno-59-8" name="__codelineno-59-8" href="#__codelineno-59-8"></a><span class="w">  </span><span class="n">trigger</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">euc</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">)</span>
+<a id="__codelineno-59-9" name="__codelineno-59-9" href="#__codelineno-59-9"></a><span class="w">  </span><span class="n">note</span><span class="p">(</span><span class="n">trigger</span><span class="p">,</span><span class="w"> </span><span class="n">C4</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">)</span>
+<a id="__codelineno-59-10" name="__codelineno-59-10" href="#__codelineno-59-10"></a><span class="n">end</span>
+<a id="__codelineno-59-11" name="__codelineno-59-11" href="#__codelineno-59-11"></a>
+<a id="__codelineno-59-12" name="__codelineno-59-12" href="#__codelineno-59-12"></a><span class="n">groove</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="n">sparse</span><span class="p">,</span><span class="w"> </span><span class="n">dense</span><span class="p">]</span>
+<a id="__codelineno-59-13" name="__codelineno-59-13" href="#__codelineno-59-13"></a><span class="n">groove</span><span class="p">[</span><span class="n">$</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">8</span><span class="p">]()</span><span class="w">  </span><span class="c1">// switch function every 8 ticks</span>
+</code></pre></div>
+<h3 id="using-global-count-for-evolving-patterns">Using Global Count (<code>$</code>) for Evolving Patterns<a class="headerlink" href="#using-global-count-for-evolving-patterns" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-60-1" name="__codelineno-60-1" href="#__codelineno-60-1"></a><span class="c1">// Create a cycling pattern that repeats every 4 ticks</span>
+<a id="__codelineno-60-2" name="__codelineno-60-2" href="#__codelineno-60-2"></a><span class="n">phase</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">$</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">4</span>
+<a id="__codelineno-60-3" name="__codelineno-60-3" href="#__codelineno-60-3"></a><span class="n">pattern</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">]</span>
+<a id="__codelineno-60-4" name="__codelineno-60-4" href="#__codelineno-60-4"></a><span class="n">trigger</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pattern</span><span class="p">[</span><span class="n">phase</span><span class="p">]</span>
+<a id="__codelineno-60-5" name="__codelineno-60-5" href="#__codelineno-60-5"></a><span class="n">note</span><span class="p">(</span><span class="n">trigger</span><span class="p">,</span><span class="w"> </span><span class="n">C4</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">)</span>
+<a id="__codelineno-60-6" name="__codelineno-60-6" href="#__codelineno-60-6"></a>
+<a id="__codelineno-60-7" name="__codelineno-60-7" href="#__codelineno-60-7"></a><span class="c1">// Gradually increase velocity over time</span>
+<a id="__codelineno-60-8" name="__codelineno-60-8" href="#__codelineno-60-8"></a><span class="n">velocity</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">$</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">127</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">20</span><span class="w">  </span><span class="c1">// Starts at 20, increases by 2 each tick</span>
+<a id="__codelineno-60-9" name="__codelineno-60-9" href="#__codelineno-60-9"></a><span class="n">kick</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">]</span>
+<a id="__codelineno-60-10" name="__codelineno-60-10" href="#__codelineno-60-10"></a><span class="n">note</span><span class="p">(</span><span class="n">kick</span><span class="p">,</span><span class="w"> </span><span class="mi">36</span><span class="p">,</span><span class="w"> </span><span class="n">velocity</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">)</span>
+<a id="__codelineno-60-11" name="__codelineno-60-11" href="#__codelineno-60-11"></a>
+<a id="__codelineno-60-12" name="__codelineno-60-12" href="#__codelineno-60-12"></a><span class="c1">// Change MIDI CC value based on global count</span>
+<a id="__codelineno-60-13" name="__codelineno-60-13" href="#__codelineno-60-13"></a><span class="n">filterValue</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">$</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">4</span><span class="p">)</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">127</span><span class="w">  </span><span class="c1">// Sweeps filter from 0 to 127</span>
+<a id="__codelineno-60-14" name="__codelineno-60-14" href="#__codelineno-60-14"></a><span class="n">cc</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">74</span><span class="p">,</span><span class="w"> </span><span class="n">filterValue</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w">  </span><span class="c1">// CC#74 (filter cutoff)</span>
+<a id="__codelineno-60-15" name="__codelineno-60-15" href="#__codelineno-60-15"></a>
+<a id="__codelineno-60-16" name="__codelineno-60-16" href="#__codelineno-60-16"></a><span class="c1">// Conditional pattern that activates after tick 16</span>
+<a id="__codelineno-60-17" name="__codelineno-60-17" href="#__codelineno-60-17"></a><span class="n">lateEntry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">$</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">16</span>
+<a id="__codelineno-60-18" name="__codelineno-60-18" href="#__codelineno-60-18"></a><span class="n">snare</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">]</span>
+<a id="__codelineno-60-19" name="__codelineno-60-19" href="#__codelineno-60-19"></a><span class="n">trigger</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">snare</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">lateEntry</span><span class="w">  </span><span class="c1">// Only plays after tick 16</span>
+<a id="__codelineno-60-20" name="__codelineno-60-20" href="#__codelineno-60-20"></a><span class="n">note</span><span class="p">(</span><span class="n">trigger</span><span class="p">,</span><span class="w"> </span><span class="mi">38</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">)</span>
+<a id="__codelineno-60-21" name="__codelineno-60-21" href="#__codelineno-60-21"></a>
+<a id="__codelineno-60-22" name="__codelineno-60-22" href="#__codelineno-60-22"></a><span class="c1">// Create a sequence that changes every 8 ticks</span>
+<a id="__codelineno-60-23" name="__codelineno-60-23" href="#__codelineno-60-23"></a><span class="n">octave</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">$</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">8</span><span class="p">)</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">3</span><span class="w">  </span><span class="c1">// Switches between 0, 1, 2</span>
+<a id="__codelineno-60-24" name="__codelineno-60-24" href="#__codelineno-60-24"></a><span class="n">baseNote</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">60</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="n">octave</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">12</span><span class="p">)</span><span class="w">  </span><span class="c1">// C4, C5, C6</span>
+<a id="__codelineno-60-25" name="__codelineno-60-25" href="#__codelineno-60-25"></a><span class="n">note</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">baseNote</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="n">n8</span><span class="p">)</span>
+</code></pre></div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.instant", "navigation.tracking", "navigation.sections", "navigation.expand", "search.suggest", "search.highlight"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>
