@@ -10,6 +10,7 @@ There are many other live coding tools out there, and ORchestra is not trying to
 
 ## Getting started
 
+- **[Installation](./Installation.md)** — Install ORchestra as a plugin or standalone app.
 - **[Usage](./Usage.md)** — Add ORchestra to your DAW and route MIDI.
 - **[Language Reference](./LanguageReference.md)** — Syntax, built-in functions, and examples.
 

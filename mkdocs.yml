@@ -43,5 +43,6 @@ markdown_extensions:
 
 nav:
   - Home: index.md
+  - Installation: Installation.md
   - Usage: Usage.md
   - Language Reference: LanguageReference.md
