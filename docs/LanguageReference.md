@@ -19,6 +19,7 @@ This document covers the syntax, built-in functions, and usage patterns of the O
 - [Built-in Functions](#built-in-functions)
 - [User-Defined Functions](#user-defined-functions)
 - [Function Arrays](#function-arrays)
+- [Compile Error Reference](#compile-error-reference)
 - [Examples](#examples)
 
 ---
@@ -33,7 +34,7 @@ The ORchestra scripting language is evaluated from top to bottom. This means you
 
 The only functionality we care about in the language for ORchestra is functions, integer values, variables, and arrays of constants, variables, or functions. There are no `for` or `while` loops, no classes or structs, and no `if`/`else` control flow.
 
-All values are integers; there are no floating-point values. Values are represented between -255 and 255, and anything outside this range is clamped. When sending MIDI out, only values between 0 and 127 are allowed, as traditional MIDI dictates.
+All values are integers; there are no floating-point values. Numeric literals are clamped to 0-255, but expressions can produce negative values at runtime (e.g. via `-` or unary minus). When sending MIDI out, only values between 0 and 127 are allowed, as traditional MIDI dictates.
 
 
 ## General Rules
@@ -41,25 +42,28 @@ All values are integers; there are no floating-point values. Values are represen
 - Each new line is a new instruction (uses `\n` as delimiter)
 - All whitespace within a line is ignored
 - Use `//` for single-line comments
-- Only integers between -255 and 255 are allowed; MIDI output is clamped between 0 and 127
+- Numeric literals must be between 0 and 255; MIDI output is clamped between 0 and 127
 
 
 ## Reserved Keywords
 
-The following words are reserved and cannot be used as variable names:
+The following words are true language keywords and cannot be used as variable names:
 
 - `note` - Creates a MIDI note track
 - `cc` - Creates a MIDI control change track
-- `ran` - Random number generator function
 - `euc` - Euclidean sequence generator function
-- `bpm` - Sets the BPM (tempo) for the sequencer
-- `beat` - Sets the note division (timing resolution)
 - `fn` - Defines a user function
 - `end` - Ends a function definition
 - `return` - Returns a value from a function
-- `$` - The global internal count; see [The Global Step](#the-global-step)
+- `print` - Outputs a value to the console
+- `n1` `n2` `n4` `n8` `n16` `n32` `n64` - Note division literals
+- `C` `D` `E` `F` `G` `A` `B` - Musical note letters (when followed by `#`, `b`, or an octave)
 
-**Note:** The keywords `print` and `test` are reserved for debugging purposes but are only available in debug builds.
+The symbol `$` is also reserved for the global count; see [The Global Step](#the-global-step).
+
+**Built-in function names:** `ran`, `bpm`, `beat`, `transpose`, `swing` are built-in functions, not keywords. They can be shadowed by variable names, but doing so is confusing and not recommended.
+
+**Note:** The `test` keyword is only available in debug builds.
 
 
 ## Operators
@@ -358,6 +362,7 @@ ORchestra provides note division literals as a convenient way to specify duratio
 | `n8`    | 4                | 8th note     |
 | `n16`   | 5                | 16th note    |
 | `n32`   | 6                | 32nd note    |
+| `n64`   | 7                | 64th note    |
 
 **Usage:**
 
@@ -371,11 +376,10 @@ As the `division` argument in `beat()`:
 ```cpp
 beat(n8)   // 8th note division
 beat(n16)  // 16th note division
+beat(n64)  // 64th note division
 ```
 
 These are not special types — they are simply integer constants. You can use the raw numbers directly if you prefer (`beat(4)` is identical to `beat(n8)`). Because they compile to plain numbers, you can also use them in expressions: `n8 + 1` evaluates to `5`.
-
-**Note:** `7` (64th note) is also valid for `beat()`, but there is no `n64` literal — use the raw number `7`.
 
 
 ## Musical Note Names
@@ -678,6 +682,226 @@ song[$]()  // verse on even ticks, chorus on odd ticks
 
 ---
 
+## Compile Error Reference
+
+This section lists the error and warning messages ORchestra can produce while compiling a script, along with what causes them and how to fix them.
+
+### Scanner errors
+
+These errors happen while the script is being turned into tokens, before compilation proper begins.
+
+#### `Unexpected Character '<char>'`
+
+The scanner found a character it does not recognize as part of the ORchestra language.
+
+**What to check:**
+- Make sure operators use the correct characters: `+ - * / % | ^ & = > < !`.
+- Ensure parentheses `(` `)` and square brackets `[` `]` are plain ASCII, not typographic equivalents.
+- Note: `{` and `}` are not used in ORchestra scripts.
+
+### Syntax and expression errors
+
+These errors happen when the compiler sees a token in a place it does not expect.
+
+#### `Unexpected Character '<char>'`
+
+The compiler encountered a token it did not expect while parsing an expression or statement.
+
+**What to check:**
+- Verify the order of tokens, e.g. `note(1, 64, 100, n8)` not `note 1, 64, 100, n8`.
+- Make sure every opening bracket has a matching closing bracket.
+- Check that operators have values on both sides, e.g. `a + b` not `a +`.
+
+#### `Unexpected Character '<char>'. Start a line with an variable identifier, or note() or cc()`
+
+A line began with something that is not a valid statement start.
+
+**What to check:**
+- Each line should start with a variable assignment (`a = ...`), a function call (`myFn()`), `note(...)`, `cc(...)`, `fn ...`, `return ...`, or `end`.
+- Comments must start with `//`.
+
+#### `Missing a <token>`
+
+A required closing token was not found where expected.
+
+**What to check:**
+- Add the missing bracket, parenthesis, or similar token reported in the message.
+- Common cases: missing `]` for array access, missing `)` for function calls, missing `]` at the end of an array literal.
+
+#### `Unexpected end, you're missing a <token>`
+
+The compiler reached the end of a line or the end of the script while still expecting a closing token.
+
+**What to check:**
+- Close all open parentheses and brackets before the end of the line.
+- Make sure multi-line function calls or arrays are not split incorrectly.
+
+### Function errors
+
+#### `Unexpected function or variable '<name>'`
+
+The compiler does not recognize the given name as a defined function or variable.
+
+**What to check:**
+- Define variables before using them.
+- Define functions before calling them.
+- Check for typos in the name.
+- Make sure the name is not a reserved keyword.
+
+#### `Expected '<expected>' function parameters, but received <received>`
+
+A function call was given the wrong number of arguments.
+
+**What to check:**
+- Count the arguments in the call and compare them to the function definition.
+- Remember that `note()` takes 4 or 5 arguments, `cc()` takes 3 or 4, `euc()` takes 2 or 3, etc.
+- Do not use extra or missing commas.
+
+#### `Function '<name>' is already defined`
+
+A function with this name has already been declared.
+
+**What to check:**
+- Use a unique name for each function.
+- Function names cannot shadow built-in functions either.
+
+#### `'<name>' is already used as a variable name`
+
+You are trying to define a function with a name that is already used as a variable.
+
+**What to check:**
+- Choose a different function name, or rename the existing variable first.
+
+#### `Cannot define a function inside another function`
+
+A `fn ... end` block was found inside another `fn ... end` block.
+
+**What to check:**
+- Move the nested function definition out to the top level.
+- ORchestra does not support nested functions.
+
+#### `return can only be used inside a function body`
+
+A `return` statement appeared outside of any function definition.
+
+**What to check:**
+- Only use `return` between `fn` and `end`.
+
+#### `function '<name>' has no return value and cannot be used in an expression`
+
+A function that does not use `return` was called inside an expression or assignment.
+
+**What to check:**
+- Only use returning functions inside expressions.
+- Call non-returning functions as standalone statements.
+
+### Function array errors
+
+#### `function arrays can only contain functions`
+
+A function array contained something that is not a previously defined function name.
+
+**What to check:**
+- Function arrays must contain only function names, e.g. `[verse, chorus]`.
+- Do not put numbers, variables, or expressions in a function array.
+
+#### `'<name>' is not a defined function`
+
+A name in a function array does not match any defined function.
+
+**What to check:**
+- Define the function before creating the function array.
+- Check for typos.
+
+#### `function '<name>' has <n> parameters, expected <expected>`
+
+All functions in a function array must accept the same number of parameters.
+
+**What to check:**
+- Make every function in the array use the same parameter count.
+
+#### `function '<name>' must agree on return value with other functions in the array`
+
+All functions in a function array must either all return a value or all return nothing.
+
+**What to check:**
+- Make sure every function in the array uses `return`, or none of them do.
+
+#### `function array '<name>' has no return value and cannot be used in an expression`
+
+A function array whose functions do not return values was used inside an expression.
+
+**What to check:**
+- Use function arrays that return values only inside expressions.
+- Otherwise call them as standalone statements, e.g. `song[$ % 4]()`.
+
+### Array and data-sequence errors
+
+#### `Max Length for array exceeded. Can't be longer than <maxLength>`
+
+An array literal has more elements than allowed.
+
+**What to check:**
+- Top-level data sequences are limited to `MAX_DATASEQUENCE_LENGTH` (32) elements.
+- Substep arrays are limited to `MAX_SUB_DIVISION_LENGTH` (6) elements.
+
+### Note and division errors
+
+#### `Notes need at least a capital letter for the note name, and an octave from 0-10. Optional is # or b`
+
+A note identifier could not be parsed because it is missing required parts.
+
+**What to check:**
+- Use the form `C4`, `F#5`, `Db3`, etc.
+- The note letter must be uppercase `A`–`G`.
+- The octave must be a number from 0 to 10.
+
+#### `Note Letters are reserved for notes, couldn't convert this to note`
+
+A token started with a note letter but the rest could not be parsed as a valid note.
+
+**What to check:**
+- Verify the format: uppercase letter, optional `#` or `b`, then octave number.
+- Avoid using note names as variable names.
+
+#### `Unknown note division literal`
+
+A note division literal was not recognized.
+
+**What to check:**
+- Use only `n1`, `n2`, `n4`, `n8`, `n16`, `n32`, or `n64`.
+
+### Function-definition errors
+
+#### `Unexpected end, you're missing a end`
+
+A function definition reached the end of the script without finding `end`.
+
+**What to check:**
+- Add `end` at the end of every `fn` block.
+- Make sure `end` is on its own line.
+
+### Warnings
+
+Warnings do not stop compilation, but they indicate that a value was clamped or limited.
+
+#### `Constant value <value> exceeds 255, capping to 255`
+A numeric constant was larger than 255 and was capped.
+
+#### `Constant value <value> is negative, capping to 0`
+A numeric constant was negative and was capped to 0.
+
+#### `Note value can't be greater than 127, capping value`
+A note name resolved to a MIDI value above 127 and was capped.
+
+#### `Note value can't be smaller than 0, capping value`
+A note name resolved to a MIDI value below 0 and was capped.
+
+#### `Only 255 unique variables are supported`
+The script uses more than 255 unique variable/function-parameter names.
+
+---
+
 ## Examples
 
 ### Basic Pattern
@@ -798,49 +1022,22 @@ everyOther = counter % 2  // Creates pattern: [[0,1,0,1], 0, 1, 0]
 note(everyOther, C4, 100, n8)
 ```
 
-### User-Defined Functions
-
+### User-Defined Function Example
 ```cpp
-// Helper that builds a chord from a root note
+// Build a major chord from a root note
 fn chord(root, vel)
   note(1, root, vel, n8)
   note(1, root + 4, vel, n8)
   note(1, root + 7, vel, n8)
 end
 
-chord(C4, 100)   // C major chord
-chord(F4, 80)    // F major chord
-chord(G4, 90)    // G major chord
+chord(C4, 100)
+chord(F4, 80)
 ```
 
+### Function Array Example
 ```cpp
-// Function that computes a value used in an expression
-fn clampedVelocity(v)
-  return v % 64 + 64   // keep velocity between 64-127
-end
-
-trigger = euc(4, 8)
-note(trigger, C4, clampedVelocity($), n8)  // velocity changes each tick
-```
-
-```cpp
-// Reusable melody transposer
-fn up(n)
-  return n + 12
-end
-
-base = [C4, D4, E4, G4]
-high = [up(C4), up(D4), up(E4), up(G4)]  // one octave up
-
-trigger = euc(4, 8)
-note(trigger, base, 100, n8)
-note(trigger, high, 70, n8, 2)   // doubled an octave up on channel 2
-```
-
-### Function Arrays
-
-```cpp
-// Two functions that alternate each tick
+// Alternate between two sections every tick
 fn verse()
   note(1, C4, 100, n8)
   note(1, E4, 80, n8)
@@ -852,48 +1049,7 @@ fn chorus()
 end
 
 song = [verse, chorus]
-song[$]()   // verse on even ticks, chorus on odd ticks
-```
-
-```cpp
-// Four functions cycling every 4 ticks
-fn intro()
-  note(1, C4, 80, n8)
-end
-
-fn build()
-  note(1, C4, 100, n8)
-  note(1, G4, 90, n8)
-end
-
-fn drop()
-  note(1, C4, 127, n8)
-  note(1, E4, 127, n8)
-  note(1, G4, 127, n8)
-end
-
-fn breakSection()
-  note(0, C4, 0, n8)  // silence
-end
-
-arrangement = [intro, build, drop, breakSection]
-arrangement[$ % 4]()
-```
-
-```cpp
-// Functions using euclidean rhythms, switched by section
-fn sparse()
-  trigger = euc(3, 8)
-  note(trigger, C4, 90, n8)
-end
-
-fn dense()
-  trigger = euc(7, 8)
-  note(trigger, C4, 100, n8)
-end
-
-groove = [sparse, dense]
-groove[$ / 8]()  // switch function every 8 ticks
+song[$]()
 ```
 
 ### Using Global Count (`$`) for Evolving Patterns

@@ -244,7 +244,7 @@ namespace ORchestra
 
         if (ec != std::errc{})
         {
-            std::string message = std::string("Note Letters are rerved for notes, couldn't convert this to note");
+            std::string message = std::string("Note Letters are reserved for notes, couldn't convert this to note");
             mErrorReporting.LogError(message);
             return false;
         }

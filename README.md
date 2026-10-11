@@ -3,17 +3,15 @@
 [![Build](https://github.com/Tronhjem/ORchestra/actions/workflows/Build.yml/badge.svg)](https://github.com/Tronhjem/ORchestra/actions/workflows/Build.yml)
 [![Run Tests](https://github.com/Tronhjem/ORchestra/actions/workflows/RunTests.yml/badge.svg)](https://github.com/Tronhjem/ORchestra/actions/workflows/RunTests.yml)
 
-> ORchestra is currently in alpha. It is pretty much feature complete, but I am still working on small fixes and bugs.
-
 ## Overview
 
-ORchestra is a MIDI sequencer plugin that generates and combines sequences of notes or MIDI CC messages. It features a custom scripting language for creating complex rhythmic patterns through logical operations and phasing of different lengths of data. The ORchestra language does not aim to be a complete programming language; it has been created to fit the specific needs and vision for ORchestra.
+ORchestra is a MIDI sequencer plugin that generates and combines sequences of notes or MIDI CC messages. It features a custom scripting language for creating complex rhythmic patterns through logical operations and phasing of different lengths of data. The ORchestra language does not aim to be a complete programming language. It has been created to fit the specific needs and vision for ORchestra.
 
 There are many other live coding tools out there, and ORchestra is not trying to replace them. Rather, this is my brainchild and idea of what a fun experimental MIDI scripting language inside a DAW could be. It invites experimentation with phasing loops to create semi-algorithmic compositions or patterns.
 
 The original prototype that sparked the idea can be found here: <https://github.com/Tronhjem/EuclidsCombinator>
 
-> **Disclaimer:** AI has been used on this project to try out new features, such as GitHub Copilot agents, by implementing simple extensions of the language and writing unit tests, etc. The majority of the code is still written by me, and this is by no means a vibe-coded project.
+> **Disclaimer:** AI has been used on this project to try out GitHub Copilot agents and similar tools forimplementing simple extensions of the language and writing unit tests, build scripts and github pipelines. The majority of the code is still written by me, and this is by no means a vibe-coded project.
 
 <img src="./img/ORchestra.gif" width="100%" height="100%"/>
 
@@ -21,18 +19,38 @@ The original prototype that sparked the idea can be found here: <https://github.
 
 ## Table of Contents
 
-- [Prerequisites](#prerequisites)
 - [Quick Start](#quick-start)
-- [Quick Usage in Major DAWs](#quick-usage-in-major-daws)
-- [CMake Build Instructions](#cmake-build-instructions)
-- [Testing](#testing)
+- [Usage](#quick-usage-in-major-daws)
 - [Language Reference](#language-reference)
+- [Build Instructions](#cmake-build-instructions)
+- [Testing](#testing)
 - [Troubleshooting](#troubleshooting)
 - [License](#license)
 
 ---
 
-## Prerequisites
+## Quick Start
+
+Use the latest release for your platform to just get started quickly. Refer to the Usage documentation for how to use it. 
+If you prefer to build yourself find details in the section [Build Instructions](#cmake-build-instructions)
+
+---
+
+## Usage
+
+Step-by-step notes for adding ORchestra to common DAWs and routing MIDI and getting started can be found in [docs/Usage.md](docs/Usage.md).
+
+---
+
+## Language Reference
+
+ORchestra's scripting language, syntax, built-in functions, and examples are documented in detail in [docs/LanguageReference.md](docs/LanguageReference.md).
+
+A web version of the documentation is also published at [https://tronhjem.github.io/ORchestra](https://tronhjem.github.io/ORchestra)
+
+---
+
+## Build Instructions
 
 Before building ORchestra, ensure you have the following installed:
 
@@ -41,11 +59,9 @@ Before building ORchestra, ensure you have the following installed:
 - **Git** (for cloning and managing submodules)
 - **JUCE Framework** (automatically fetched as a git submodule)
 
----
+### Getting a build quickly 
 
-## Quick Start
-
-You can run ORchestra with the Projucer. Open the `ORChestra.jucer` file in `/ORchestra/ORChestra.jucer` and generate and build the project. This is by far the easiest approach if you do not want to deal with CMake. Follow the JUCE documentation if you get stuck on how to run the project with the Projucer.
+For building, you can run ORchestra with the Projucer. Open the `ORChestra.jucer` file in `/ORchestra/ORChestra.jucer` and generate and build the project. This is by far the easiest approach if you do not want to deal with CMake. Follow the JUCE documentation if you get stuck on how to run the project with the Projucer.
 
 Alternatively, you can get started using the provided setup script:
 
@@ -64,17 +80,6 @@ Then build the project:
 cd build
 cmake --build .
 ```
-
----
-
-## Quick Usage in Major DAWs
-
-Step-by-step notes for adding ORchestra to common DAWs and routing MIDI are in [docs/usage.md](docs/usage.md).
-
----
-
-## CMake Build Instructions
-
 ### Manual Build Process
 
 **Step 1: Clone and Initialize Submodules**
@@ -123,14 +128,6 @@ cmake --build .
 ## Testing
 
 All testing tools - unit tests, fuzzers, and the multi-thread stress harness - live in the `Tests/` folder. See `Tests/README.md` for build and run instructions.
-
----
-
-## Language Reference
-
-ORchestra's scripting language, syntax, built-in functions, and examples are documented in detail in [docs/LanguageReference.md](docs/LanguageReference.md).
-
-A browsable version of the documentation is also published at [https://tronhjem.github.io/ORchestra](https://tronhjem.github.io/ORchestra) (after GitHub Pages is enabled).
 
 ---
 

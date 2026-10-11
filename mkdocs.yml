@@ -43,5 +43,5 @@ markdown_extensions:
 
 nav:
   - Home: index.md
-  - Usage: usage.md
+  - Usage: Usage.md
   - Language Reference: LanguageReference.md
