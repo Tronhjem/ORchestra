@@ -46,7 +46,7 @@ Once ORchestra is built or installed as a plugin, adding it to a project and rou
 
 Logic Pro and Audio Units (AU) supports midi plugins. Simply put ORchestra as a midi plugin at the top of a instrument track.
 Make sure to enable the midi recording after ORchestra, by left-clicking under ORchestra in the midi effect plugin list and set "Record MIDI to Track Here"  
-<img src="https://raw.githubusercontent.com/Tronhjem/ORchestra/main/img/AU-MIDI-Effect-Set-Record.png" width="50%" height="50%"/>
+<img src="https://raw.githubusercontent.com/Tronhjem/ORchestra/main/img/AU-Midi-Effect-Set-Record.png" width="50%" height="50%"/>
 
 ### Reaper 
 ### Cubase
