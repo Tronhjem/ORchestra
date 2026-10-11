@@ -6,20 +6,7 @@ repo_name: Tronhjem/ORchestra
 theme:
   name: material
   palette:
-    - media: "(prefers-color-scheme: light)"
-      scheme: default
-      primary: deep purple
-      accent: deep purple
-      toggle:
-        icon: material/brightness-7
-        name: Switch to dark mode
-    - media: "(prefers-color-scheme: dark)"
-      scheme: slate
-      primary: deep purple
-      accent: deep purple
-      toggle:
-        icon: material/brightness-4
-        name: Switch to light mode
+    scheme: slate
   features:
     - navigation.instant
     - navigation.tracking
@@ -27,6 +14,9 @@ theme:
     - navigation.expand
     - search.suggest
     - search.highlight
+
+extra_css:
+  - stylesheets/extra.css
 
 plugins:
   - search

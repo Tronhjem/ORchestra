@@ -1,0 +1,24 @@
+/* ORchestra color scheme based on the app's Catppuccin Mocha palette. */
+
+[data-md-color-scheme="slate"] {
+  --md-primary-fg-color: #cdd6f4;
+  --md-primary-fg-color--light: #cdd6f4;
+  --md-primary-fg-color--dark: #11111b;
+  --md-primary-bg-color: #181825;
+  --md-primary-bg-color--light: #313244;
+  --md-primary-bg-color--dark: #11111b;
+
+  --md-accent-fg-color: #89b4fa;
+  --md-accent-fg-color--transparent: #89b4fa1a;
+  --md-accent-bg-color: #89b4fa;
+
+  --md-typeset-a-color: #89b4fa;
+
+  --md-default-fg-color: #cdd6f4;
+  --md-default-bg-color: #1e1e2e;
+}
+
+::selection {
+  background-color: #89b4fa;
+  color: #11111b;
+}
