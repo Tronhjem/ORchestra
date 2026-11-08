@@ -10,6 +10,7 @@ The DAWs below are the ones I have managed to test for myself. If you experience
 
 Because of the missing options for midi plugins in Ableton Live, you'd have to do one of two work arounds to get it to work.
 Option one is to place ORchestra on a audio track as an audio effect. Then on your instrument track, choose midi in from the Audio Track where you have the instance of ORchestra runnning. This will take the midi out from ORchestra and route it to your instrument track. 
+
 <img src="https://raw.githubusercontent.com/Tronhjem/ORchestra/main/img/VST-Ableton-Effect-Setup.gif" width="80%" height="80%"/>
 
 Option two is to create a Max4Live device with midi out, you can use the instrument template. use the VST~ object and load ORchestra inside it, and route the midi out from VST~ to the output of the max patch. This should allow you to place the Max4Live patch before an instrument in Live, and have ORchestra be on the same track as your instrument. There will be a packaged Max4Live patch later when I get around to add it. 
@@ -19,6 +20,8 @@ Option two is to create a Max4Live device with midi out, you can use the instrum
 ### Reaper 
 
 In order to have ORchestra send midi to a plug-in and also be able to record the midi, click the *in FX* button on a track, and click *Add, and search for ORchestra. Then add a synth of your choice in the *FX* section and it should receive midi from ORchestra. You can also add it in the *FX* section but then it will not record the midi to the track.
+
+<img src="https://raw.githubusercontent.com/Tronhjem/ORchestra/main/img/Reaper-Add-InFx.gif" width="80%" height="80%"/>
 
 An important not in order to be allowed to use the space bar in the code editor is to send all keyboard commands to ORchestra. You enable this by clicking the *+* icon in the top next to Params, then select *"Send all keyboard input to plug-in"*. 
 
