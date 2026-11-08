@@ -83,7 +83,7 @@ endif()
 # ===================================================================================================
 # STANDALONE
 # ===================================================================================================
-add_orchestra_format(ORchestra_Standalone "Standalone" FALSE)
+add_orchestra_format(ORchestra_Standalone "Standalone" TRUE)
 
 # Disable -Wswitch-enum: this warning requires exhaustive case handling for all
 # enum values even when a default case is present, which is unnecessary for us.
