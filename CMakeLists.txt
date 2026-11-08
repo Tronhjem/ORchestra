@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.22)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-project(ORCHESTRA VERSION 0.2.5)
+project(ORCHESTRA VERSION 0.2.6)
 
 execute_process(
     COMMAND ${CMAKE_COMMAND} -E create_symlink
