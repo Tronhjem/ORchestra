@@ -1,6 +1,9 @@
-### Unreleased
+### v0.2.6
 
 - Added `swing()` built-in function for shifting odd steps early or late (0-100, 50 = no swing). Swing is reset to 50 on recompile when the call is removed from a script.
+
+Bugs:
+- wrong config for standalone version was causing the audio thread to not be called and then not progress, as no input or output was configured.
 
 ### v0.2.5
 
