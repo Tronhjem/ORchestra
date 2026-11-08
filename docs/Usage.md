@@ -36,4 +36,10 @@ Make sure to enable the midi recording after ORchestra, by left-clicking under O
 ## Getting Started
 
 Once you have ORchestra setup and you can open the window, there will already be a default patch ready for you. All you need to do is play in your DAW. You can use the *Play/Stop* button to run ORchestra without running the whole DAW sessions, but it will always sync to the DAWs playhead. Every time you edit the script inside you will need to press the *Compile* button in order to update the running script. To get you started quickly you can try editing the line with `trig = euc(3,8)` to `trig = euc(5,8)` and hear the rhytm change. Or edit the note function to send a different note like `note(trig, F#4, 100, n8)` instead to send a F# instead of a C.
+
+All code in ORchestra is saved as part of the track in your DAW, so for each instance it will be saved with your project. If you would like to save some code for later use, you can use your DAWs method for saving a preset for a plug-in. There's no internal preset handling or saving in ORchestra as of now. 
+
+In the standalone version there's a small settings menu, accessed by clicking the 3 dots in the top right corner. Here you can choose your midi output. You can choose your *Audio Driver*, which audio driver should be used, on some systems the precision of the triggering might vary with different drivers, so if you experience sluggish triggering, try a different one. Even though ORchestra does not output any audio, it's driven by an audio loop for ensuring precise triggering.
+The import and export is used to either export what is in the code editor as a .txt file, or you can important previously saved files.
+
 Next step is to have a look at the **[Language Reference](./LanguageReference.md)** page to learn on how the scripting language works and how to get started writing your own scrips or for more examples.

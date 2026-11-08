@@ -11,7 +11,7 @@ There are many other live coding tools out there, and ORchestra is not trying to
 
 The original prototype that sparked the idea can be found here: <https://github.com/Tronhjem/EuclidsCombinator>
 
-> **Disclaimer:** AI has been used on this project to try out GitHub Copilot agents and similar tools forimplementing simple extensions of the language and writing unit tests, build scripts and github pipelines. The majority of the code is still written by me, and this is by no means a vibe-coded project.
+> **Disclaimer:** AI has been used on this project to try out GitHub Copilot agents and similar tools to generate simple extensions of the language and writing unit tests, fuzzing, build scripts and github pipelines. The majority of the core code is still written by me, and this is by no means a vibe-coded project.
 
 <img src="./img/ORchestra.gif" width="100%" height="100%"/>
 
